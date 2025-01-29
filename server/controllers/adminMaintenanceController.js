@@ -1,96 +1,121 @@
+// controllers/adminMaintenanceController.js
 const MaintenanceRequest = require('../models/MaintenanceRequest');
 const Property = require('../models/property');
 const Tenant = require('../models/tenant');
 const Owner = require('../models/owner');
+const Worker = require('../models/worker'); // ← Important: import Worker model
 
-exports.getAllMaintenanceRequests = async (req, res) => {
-  try {
-    // Get all maintenance requests
-    const maintenanceRequests = await MaintenanceRequest.find()
-      .populate('propertyId', 'name location address')
-      .populate('tenantId', 'firstName lastName');
-      
-    // Get all properties (needed for owner lookup in the template)
-    const properties = await Property.find().populate('ownerId', 'firstName lastName');
-    
-    // Enhance maintenance requests with additional data
-    const enhancedRequests = maintenanceRequests.map(request => {
-      const property = properties.find(p => p._id.equals(request.propertyId?._id));
-      
-      // Create a plain object that we can add properties to
-      const enhancedRequest = request.toObject();
-      
-      // Add property name if available
-      enhancedRequest.propertyName = request.propertyId?.name || 'N/A';
-      
-      // Add tenant name if available
-      enhancedRequest.tenantName = request.tenantId ? 
-        `${request.tenantId.firstName} ${request.tenantId.lastName}` : 'N/A';
-      
-      // Add owner name if available
-      if (property && property.ownerId) {
-        enhancedRequest.ownerName = `${property.ownerId.firstName} ${property.ownerId.lastName}`;
-      } else {
-        enhancedRequest.ownerName = null;
-      }
-      
-      return enhancedRequest;
-    });
-    
-    res.render('admin/maintenance-list', {
-      maintenanceRequests: enhancedRequests,
-      properties: properties
-    });
-  } catch (error) {
-    console.error('Error fetching maintenance requests:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
+// GET /api/admin/maintenance/:id
 exports.getMaintenanceDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
+    // Validate ID
+    if (!id || id.length < 10) {
+      return res.status(400).json({ error: 'Invalid request ID' });
+    }
+
+    // Find the maintenance request + populate known valid fields
     const request = await MaintenanceRequest.findById(id)
-      .populate('propertyId', 'name location address')
-      .populate('tenantId', 'firstName lastName email phone');
-    
+      .populate({
+        path: 'propertyId',
+        select: 'name location address ownerId',
+        populate: {
+          path: 'ownerId',
+          select: 'firstName lastName email phone'
+        }
+      })
+      .populate('tenantId', 'firstName lastName email phone')
+      .lean(); // ← Use .lean() for easier manipulation
+
     if (!request) {
       return res.status(404).json({ error: 'Maintenance request not found' });
     }
-    
-    // Get property details
-    const property = await Property.findById(request.propertyId);
-    if (!property) {
-      return res.status(404).json({ error: 'Property not found' });
+
+    // Manually populate assignedWorker if it exists (your real field name)
+    let assignedWorker = null;
+    if (request.assignedWorker) {
+      try {
+        assignedWorker = await Worker.findById(request.assignedWorker)
+          .select('firstName lastName serviceType')
+          .lean();
+      } catch (err) {
+        console.log('Assigned worker not found:', request.assignedWorker);
+      }
     }
-    
-    // Get owner details using property's ownerId
-    const owner = await Owner.findById(property.ownerId);
-    
-    res.render('admin/maintenance-view', { 
-      request,
-      owner: owner
-    });
+
+    // Build clean, React-friendly response
+    const response = {
+      id: request._id.toString(),
+      issueType: request.issueType || 'General',
+      status: request.status || 'Pending',
+      description: request.description || 'No description provided',
+      location: request.location || null,
+      dateReported: request.dateReported || request.createdAt,
+      scheduledDate: request.scheduledDate || null,
+      completionDate: request.completionDate || null,
+
+      // Property + Owner (nested)
+      propertyId: request.propertyId ? {
+        _id: request.propertyId._id.toString(),
+        name: request.propertyId.name || 'Unknown Property',
+        location: request.propertyId.location || 'N/A',
+        address: request.propertyId.address || 'N/A',
+        owner: request.propertyId.ownerId ? {
+          _id: request.propertyId.ownerId._id.toString(),
+          firstName: request.propertyId.ownerId.firstName,
+          lastName: request.propertyId.ownerId.lastName,
+          email: request.propertyId.ownerId.email || 'N/A',
+          phone: request.propertyId.ownerId.phone || 'N/A'
+        } : null
+      } : null,
+
+      // Tenant
+      tenantId: request.tenantId ? {
+        _id: request.tenantId._id.toString(),
+        firstName: request.tenantId.firstName,
+        lastName: request.tenantId.lastName,
+        email: request.tenantId.email || 'N/A',
+        phone: request.tenantId.phone || 'N/A'
+      } : null,
+
+      // Assigned Worker (only if exists)
+      assignedWorkerId: assignedWorker ? {
+        _id: assignedWorker._id.toString(),
+        firstName: assignedWorker.firstName,
+        lastName: assignedWorker.lastName,
+        serviceType: assignedWorker.serviceType || 'General Service'
+      } : null
+    };
+
+    res.json(response);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('getMaintenanceDetails error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
+// POST /api/admin/maintenance/:id/complete
 exports.completeMaintenance = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    await MaintenanceRequest.findByIdAndUpdate(
+
+    const updated = await MaintenanceRequest.findByIdAndUpdate(
       id,
       { 
         status: 'Completed',
-        completionDate: new Date() 
-      }
+        completionDate: new Date()
+      },
+      { new: true }
     );
-    
-    res.sendStatus(200);
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    res.json({ success: true, message: 'Maintenance completed' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('completeMaintenance error:', error);
+    res.status(500).json({ error: 'Failed to complete' });
   }
 };

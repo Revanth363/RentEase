@@ -1,0 +1,286 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+.header {
+  font-family: "Poppins", sans-serif;
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  width: 100vw;
+  padding: 5px 0;
+  height: 10vh;
+  z-index: 1000;
+  margin-left: 0;
+  top: 0;
+  
+}
+
+.header .brandid {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffc107;
+  padding-left: 10px;
+}
+
+.header .tagline {
+  font-size: 12px;
+  font-style: italic;
+  color: #ddd;
+  padding-left: 10px;
+}
+
+.header nav {
+  display: flex;
+  gap: 15px;
+}
+
+.header nav a {
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  transition: color 0.3s;
+  position: relative;
+  padding: 0.5rem 0.25rem;
+}
+
+.header nav a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #ffc107;
+  transition: width 0.3s ease;
+}
+
+.header nav a:hover::after,
+.header nav a.active::after {
+  width: 100%;
+}
+
+.header .cta {
+  display: flex;
+  gap: 10px;
+  margin-right: 2%;
+}
+
+.header .cta a {
+  padding: 8px 12px;
+  background-color: #ffc107;
+  color: black;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.header .cta a:hover {
+  background-color: #e0a800;
+}
+
+.header .dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.header .dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #333;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  right: 0;
+  border-radius: 5px;
+}
+
+.header .dropdown-content a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+  border-bottom: 1px solid #444;
+}
+
+.header .dropdown-content a:last-child {
+  border-bottom: none;
+}
+
+.header .dropdown-content a:hover {
+  background-color: #444;
+}
+
+.header .user-greeting {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header .user-greeting span {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header .user-greeting i {
+  font-size: 12px;
+}
+
+.header .nav-toggle {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-right: 15px;
+  z-index: 2000;
+}
+
+.header .overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 500;
+}
+
+.header .nav-toggle:hover {
+  color: #ff6f00;
+}
+
+.header .cta a:hover {
+  background-color: #ff6f00;
+}
+
+@media (max-width: 768px) {
+  .header .nav-toggle {
+    display: block;
+    position: absolute;
+    right: 0px;
+    color: #ffc107;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 1000;
+  }
+
+  .header .nav-menu {
+    visibility: hidden;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    flex-direction: column;
+    position: absolute;
+    top: 10vh;
+    left: 60%;
+    width: 40%;
+    background-color: #333;
+    text-align: center;
+    transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+    padding: 0;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    height: fit-content;
+    display: flex;
+  }
+
+  .header .nav-menu a {
+    width: 70%;
+    display: block;
+    padding: 10px;
+    font-size: 16px;
+    color: white;
+    text-decoration: none;
+    border-bottom: 1px solid gray;
+  }
+
+  .header .nav-menu a:hover {
+    background-color: #444;
+  }
+
+  .header .nav-menu.active {
+    visibility: visible;
+    opacity: 1;
+    max-height: 500px;
+    padding: 10px 5px 0px 5px;
+  }
+
+  .header .cta {
+    position: absolute;
+    right: 50px;
+    margin-right: 50px;
+  }
+
+  .header .cta a {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .header .nav-toggle:hover {
+    color: #ff6f00;
+  }
+
+  .header .cta a:hover {
+    background-color: #ff6f00;
+  }
+
+  .header .nav-toggle {
+    font-size: 35px;
+  }
+
+  .header .dropdown-content {
+    position: absolute;
+    width: 100%;
+    box-shadow: none;
+    margin-top: 5px;
+  }
+
+  .header .dropdown-content a {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header .overlay.active {
+    display: block;
+  }
+
+  .header .tagline {
+    font-size: 9px;
+  }
+
+  .header .nav-toggle {
+    margin-right: 0px;
+    font-size: 30px;
+  }
+
+  .header .cta a {
+    margin-right: -10px;
+    font-size: 14px;
+  }
+
+  .header .cta a:hover {
+    padding: 4px;
+    margin-left: 4px;
+  }
+
+  .header .nav-toggle:hover {
+    color: #ff6f00;
+  }
+
+  .header .cta {
+    position: absolute;
+    right: 50px;
+    margin-right: 10px;
+  }
+}

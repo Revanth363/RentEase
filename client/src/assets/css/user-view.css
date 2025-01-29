@@ -1,0 +1,172 @@
+/* Import Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* User view container */
+.user-view {
+  max-width: 900px;
+  margin: 30px auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.user-view h2 {
+  background-color: #ffc107;
+  color: #333;
+  padding: 20px 30px;
+  font-weight: 600;
+  margin-bottom: 0;
+  letter-spacing: 0.5px;
+}
+
+.user-details {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+/* Detail groups */
+.detail-group {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f0f0f0;
+}
+
+.detail-group h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ffc107;
+}
+
+.detail-group p {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.detail-group strong {
+  font-weight: 600;
+  color: #555;
+  display: inline-block;
+  width: 120px;
+}
+
+/* Links */
+a {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #e5ac00;
+  text-decoration: underline;
+}
+
+/* Account action buttons */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+button, .btn {
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffc107;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button:hover, .btn:hover {
+  background-color: #ffca2c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+  text-decoration: none;
+}
+
+button.danger {
+  background-color: #fff;
+  color: #f44336;
+  border: 1px solid #f44336;
+}
+
+button.danger:hover {
+  background-color: #f44336;
+  color: white;
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+/* Status indicators */
+p strong + span.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-suspended {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .detail-group {
+    padding: 15px;
+  }
+  
+  .user-view h2 {
+    padding: 15px 20px;
+    font-size: 20px;
+  }
+}
+
+/* Add subtle animations */
+.detail-group {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.detail-group:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}

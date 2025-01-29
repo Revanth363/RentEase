@@ -1,3 +1,4 @@
+// controllers/adminPropertyController.js
 const Property = require('../models/property');
 const Owner = require('../models/owner');
 const Tenant = require('../models/tenant');
@@ -10,14 +11,50 @@ exports.getPropertyManagement = async (req, res) => {
       .lean();
 
     const enhancedProperties = properties.map(prop => ({
-      ...prop,
-      owner: prop.ownerId ? `${prop.ownerId.firstName} ${prop.ownerId.lastName} (${prop.ownerId.email})` : 'N/A',
-      tenant: prop.tenantId ? `${prop.tenantId.firstName} ${prop.tenantId.lastName} (${prop.tenantId.email})` : 'N/A',
-      ownerId: prop.ownerId?._id,
-      tenantId: prop.tenantId?._id
+      id: prop._id.toString(),
+      name: prop.name,
+      owner: prop.ownerId
+        ? {
+            _id: prop.ownerId._id.toString(),
+            firstName: prop.ownerId.firstName,
+            lastName: prop.ownerId.lastName,
+            email: prop.ownerId.email,
+          }
+        : null,
+      tenant: prop.tenantId
+        ? {
+            _id: prop.tenantId._id.toString(),
+            firstName: prop.tenantId.firstName,
+            lastName: prop.tenantId.lastName,
+            email: prop.tenantId.email,
+          }
+        : null,
+      location: prop.location,
+      address: prop.address,
+      type: prop.type,
+      subtype: prop.subtype,
+      status: prop.status,
+      isRented: prop.isRented,
+      isVerified: prop.isVerified,
+      price: prop.price,
+      securityDeposit: prop.securityDeposit,
+      maintenance: prop.maintenance,
+      availableFrom: prop.availableFrom,
+      leaseDuration: prop.leaseDuration,
+      beds: prop.beds,
+      baths: prop.baths,
+      furnished: prop.furnished,
+      amenities: prop.amenities,
+      description: prop.description,
+      contactNumber: prop.contactNumber,
+      alternativeNumber: prop.alternativeNumber,
+      contactEmail: prop.contactEmail,
+      images: prop.images,
+      createdAt: prop.createdAt,
+      updatedAt: prop.updatedAt,
     }));
 
-    res.render('admin/property-management', { properties: enhancedProperties });
+    res.json({ properties: enhancedProperties });
   } catch (error) {
     console.error('getPropertyManagement error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -35,13 +72,51 @@ exports.getPropertyView = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' });
     }
 
-    res.render('admin/property-view', {
-      property: {
-        ...property,
-        owner: property.ownerId || null,
-        tenant: property.ownerId || null
-      }
-    });
+    const propertyData = {
+      id: property._id.toString(),
+      name: property.name,
+      owner: property.ownerId
+        ? {
+            _id: property.ownerId._id.toString(),
+            firstName: property.ownerId.firstName,
+            lastName: property.ownerId.lastName,
+            email: property.ownerId.email,
+          }
+        : null,
+      tenant: property.tenantId
+        ? {
+            _id: property.tenantId._id.toString(),
+            firstName: property.tenantId.firstName,
+            lastName: property.tenantId.lastName,
+            email: property.tenantId.email,
+          }
+        : null,
+      location: property.location,
+      address: property.address,
+      type: property.type,
+      subtype: property.subtype,
+      status: property.status,
+      isRented: property.isRented,
+      isVerified: property.isVerified,
+      price: property.price,
+      securityDeposit: property.securityDeposit,
+      maintenance: property.maintenance,
+      availableFrom: property.availableFrom,
+      leaseDuration: property.leaseDuration,
+      beds: property.beds,
+      baths: property.baths,
+      furnished: property.furnished,
+      amenities: property.amenities,
+      description: property.description,
+      contactNumber: property.contactNumber,
+      alternativeNumber: property.alternativeNumber,
+      contactEmail: property.contactEmail,
+      images: property.images,
+      createdAt: property.createdAt,
+      updatedAt: property.updatedAt,
+    };
+
+    res.json(propertyData);
   } catch (error) {
     console.error('getPropertyView error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });

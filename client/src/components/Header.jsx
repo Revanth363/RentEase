@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import '../assets/css/Header.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleChevronDown } from '@fortawesome/free-solid-svg-icons';
+import styles from '../assets/css/Header.module.css';
 
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -49,46 +51,73 @@ const Header = () => {
   };
 
   return (
-    <div id="header">
-      <div id="logo">
-        <div id="brandid">RentEase</div>
-        <div id="tagline">Your One-Stop Rental Solution</div>
+    <div className={styles.header}>
+      <div className={styles.logo}>
+        <div className={styles.brandid}>RentEase</div>
+        <div className={styles.tagline}>Your One-Stop Rental Solution</div>
       </div>
 
-      <button className="nav-toggle" onClick={toggleNav}>
+      <button className={styles['nav-toggle']} onClick={toggleNav}>
         ☰
       </button>
-      <div id="overlay" className={isNavOpen ? 'active' : ''} onClick={closeNav}></div>
+      <div className={`${styles.overlay} ${isNavOpen ? styles.active : ''}`} onClick={closeNav}></div>
 
-      <nav id="nav-menu" className={isNavOpen ? 'active' : ''}>
-        <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`} onClick={closeNav}>
+      <nav className={`${styles['nav-menu']} ${isNavOpen ? styles.active : ''}`}>
+        <Link
+          to="/"
+          className={`${styles['nav-link']} ${isActive('/') ? styles.active : ''}`}
+          onClick={closeNav}
+        >
           Home
         </Link>
-        <Link to="/search" className={`nav-link ${isActive('/search') ? 'active' : ''}`} onClick={closeNav}>
+        <Link
+          to="/search"
+          className={`${styles['nav-link']} ${isActive('/search') ? styles.active : ''}`}
+          onClick={closeNav}
+        >
           Properties
         </Link>
-        <Link to="/workerDetails" className={`nav-link ${isActive('/workerDetails') ? 'active' : ''}`} onClick={closeNav}>
+        <Link
+          to="/workerDetails"
+          className={`${styles['nav-link']} ${isActive('/workerDetails') ? styles.active : ''}`}
+          onClick={closeNav}
+        >
           Services
         </Link>
-        <Link to="/about_us" className={`nav-link ${isActive('/about_us') ? 'active' : ''}`} onClick={closeNav}>
+        <Link
+          to="/about_us"
+          className={`${styles['nav-link']} ${isActive('/about_us') ? styles.active : ''}`}
+          onClick={closeNav}
+        >
           About Us
         </Link>
-        <Link to="/contact_us" className={`nav-link ${isActive('/contact_us') ? 'active' : ''}`} onClick={closeNav}>
+        <Link
+          to="/contact_us"
+          className={`${styles['nav-link']} ${isActive('/contact_us') ? styles.active : ''}`}
+          onClick={closeNav}
+        >
           Contact Us
         </Link>
-        <Link to="/faq" className={`nav-link ${isActive('/faq') ? 'active' : ''}`} onClick={closeNav}>
+        <Link
+          to="/faq"
+          className={`${styles['nav-link']} ${isActive('/faq') ? styles.active : ''}`}
+          onClick={closeNav}
+        >
           FAQs
         </Link>
       </nav>
 
-      <div className="cta">
+      <div className={styles.cta}>
         {user ? (
-          <div className="dropdown" id="dropdown">
-            <a href="#" className="user-greeting" onClick={toggleDropdown}>
+          <div className={styles.dropdown}>
+            <a href="#" className={styles['user-greeting']} onClick={toggleDropdown}>
               <span>Hi, {user.firstName}</span>
-              <i className="fa-solid fa-circle-chevron-down"></i>
+              <FontAwesomeIcon icon={faCircleChevronDown} />
             </a>
-            <div className="dropdown-content" style={{ display: isDropdownOpen ? 'block' : 'none' }}>
+            <div
+              className={styles['dropdown-content']}
+              style={{ display: isDropdownOpen ? 'block' : 'none' }}
+            >
               {user.userType === 'tenant' && (
                 <Link to="/tenant/tenant_dashboard" onClick={closeNav}>
                   Dashboard
@@ -110,7 +139,7 @@ const Header = () => {
             </div>
           </div>
         ) : (
-          <Link to="/login">Login/SignUp</Link>
+          <Link to="/login" className={styles['login-signup']}>Login/SignUp</Link>
         )}
       </div>
     </div>

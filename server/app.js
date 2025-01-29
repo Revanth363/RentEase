@@ -13,11 +13,8 @@ const Owner = require("./models/owner");
 const Booking = require("./models/booking");
 const Payment = require("./models/payment");
 const Notification = require("./models/notification");
-const Setting = require("./models/setting");
 const Contact = require("./models/contactus");
-const Complaint = require("./models/complaint");
 const Rating = require("./models/rating");
-const RentalHistory = require("./models/rentalhistory");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
@@ -28,7 +25,7 @@ const TenantRoutes = require("./routes/tenant");
 const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/admin");
-const adminContactUsController = require("./controllers/adminContactUsController");
+
 
 require("dns").setDefaultResultOrder("ipv4first");
 
@@ -625,33 +622,33 @@ app.get("/about_us", (req, res) => {
   res.redirect("http://localhost:5173/about_us");
 });
 
-function isAuthenticate(req, res, next) {
-  if (req.session.adminId) {
-    return next();
-  }
-  res.redirect("http://localhost:5173/admin/login");
-}
+// function isAuthenticate(req, res, next) {
+//   if (req.session.adminId) {
+//     return next();
+//   }
+//   res.redirect("http://localhost:5173/admin/login");
+// }
 
-app.get("/api/admin/login", (req, res) => {
-  res.redirect("http://localhost:5173/admin/login");
-});
+// app.get("/api/admin/login", (req, res) => {
+//   res.redirect("http://localhost:5173/admin/login");
+// });
 
-app.post("/api/admin/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const admin = await Admin.findOne({ username });
-    if (!admin || admin.password !== password) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
-    req.session.adminId = admin._id.toString();
-    res.json({ success: true, redirectUrl: "/api/admin" });
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+// app.post("/api/admin/login", async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const admin = await Admin.findOne({ username });
+//     if (!admin || admin.password !== password) {
+//       return res.status(401).json({ error: "Invalid username or password" });
+//     }
+//     req.session.adminId = admin._id.toString();
+//     res.json({ success: true, redirectUrl: "/api/admin" });
+//   } catch (err) {
+//     console.error("Login error:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
 
-app.get("/api/admin", isAuthenticate, async (req, res) => {
+app.get("/api/admin", async (req, res) => {
   try {
     const totalProperties = await Property.countDocuments();
     const totalRenters = await Tenant.countDocuments();
@@ -925,17 +922,34 @@ app.get("/api/admin", isAuthenticate, async (req, res) => {
   }
 });
 
-app.get("/api/admin/message/:id", isAuthenticate, async (req, res) => {
+// FIXED & FINAL VERSION — Keep this in app.js
+app.get("/api/admin/message/:id", async (req, res) => {
   try {
     const submission = await Contact.findById(req.params.id).lean();
     if (!submission) {
       return res.status(404).json({ error: "Message not found" });
     }
-    submission.id = submission._id.toString();
-    submission.submittedAt = submission.submittedAt
-      ? new Date(submission.submittedAt).toLocaleString()
-      : "N/A";
-    res.json({ submission });
+
+    res.json({
+      id: submission._id.toString(),
+      name: submission.name || 'Anonymous',
+      email: submission.email || 'N/A',
+      phone: submission.phone || 'N/A',
+      subject: submission.subject || '(No subject)',
+      message: submission.message || 'No message',
+      submittedAt: submission.submittedAt, // raw ISO string
+      submittedAtFormatted: submission.submittedAt
+        ? new Date(submission.submittedAt).toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
+          })
+        : 'Date not available'
+    });
   } catch (err) {
     console.error("Error fetching message details:", err);
     res.status(500).json({ error: "Server Error" });

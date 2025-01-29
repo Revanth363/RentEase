@@ -1,3 +1,4 @@
+// controllers/adminBookingController.js
 const Booking = require('../models/booking');
 const Payment = require('../models/payment');
 const Property = require('../models/property');
@@ -11,7 +12,8 @@ exports.getBookingDetails = async (req, res) => {
     const booking = await Booking.findById(id)
       .populate('tenantId', 'firstName lastName email phone')
       .populate('propertyId', 'name location address price')
-      .populate('assignedWorker', 'firstName lastName serviceType');
+      .populate('assignedWorker', 'firstName lastName serviceType')
+      .lean();
 
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
@@ -22,13 +24,42 @@ exports.getBookingDetails = async (req, res) => {
       return res.status(404).json({ error: 'Associated property not found' });
     }
 
-    res.render('admin/booking-view', {
-      booking: {
-        ...booking.toObject(),
-        user: booking.tenantId, // Alias tenantId as user
-        property: booking.propertyId // Alias propertyId as property
-      }
-    });
+    const bookingData = {
+      id: booking._id.toString(),
+      status: booking.status,
+      bookingDate: booking.createdAt,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      amount: booking.amount,
+      user: booking.tenantId
+        ? {
+            _id: booking.tenantId._id.toString(),
+            firstName: booking.tenantId.firstName,
+            lastName: booking.tenantId.lastName,
+            email: booking.tenantId.email,
+            phone: booking.tenantId.phone,
+          }
+        : null,
+      property: booking.propertyId
+        ? {
+            _id: booking.propertyId._id.toString(),
+            name: booking.propertyId.name,
+            location: booking.propertyId.location,
+            address: booking.propertyId.address,
+            price: booking.propertyId.price,
+          }
+        : null,
+      assignedWorker: booking.assignedWorker
+        ? {
+            _id: booking.assignedWorker._id.toString(),
+            firstName: booking.assignedWorker.firstName,
+            lastName: booking.assignedWorker.lastName,
+            serviceType: booking.assignedWorker.serviceType,
+          }
+        : null,
+    };
+
+    res.json(bookingData);
   } catch (error) {
     console.error('getBookingDetails error:', error);
     res.status(500).json({ error: error.message });
@@ -56,7 +87,7 @@ exports.approveBooking = async (req, res) => {
       property: booking.propertyId._id,
       amount: booking.propertyId.price,
       status: 'Pending',
-      paymentMethod: 'Online'
+      paymentMethod: 'Online',
     });
 
     await payment.save();

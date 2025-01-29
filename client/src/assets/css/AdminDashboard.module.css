@@ -1,0 +1,280 @@
+/* AdminDashboard.module.css */
+
+/* Scope global reset to .container */
+.container {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', Arial, sans-serif;
+  background: #f4f4f4;
+  padding: 20px;
+}
+
+/* Scope headings */
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container h5,
+.container h6 {
+  font-family: 'Poppins', Arial, sans-serif;
+  color: #333;
+}
+
+.container h1 {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.container h2 {
+  color: #ffc107;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.container h3 {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* Navigation */
+.container .navbar {
+  position: sticky;
+  top: 0;
+  background: #333;
+  padding: 28px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.container .navbar a {
+  color: #ffc107;
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+.container .navbar a:hover {
+  color: #ffc107;
+  transform: translateY(-2px);
+}
+
+/* Section styles */
+.container section {
+  margin: 25px 0;
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* Stats grid */
+.container .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.container .stat-card {
+  padding: 18px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container .stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.container .stat-card p {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 8px;
+  color: #ff6f00;
+}
+
+/* Table styles */
+.container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-family: 'Poppins', Arial, sans-serif;
+  table-layout: fixed;
+}
+
+.container th,
+.container td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.container th {
+  background: #333;
+  color: white;
+  font-weight: 500;
+}
+
+.container tr:hover {
+  background: #f5f5f5;
+}
+
+/* Action buttons */
+.container .action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.container .action-buttons a,
+.container .action-buttons button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 12px;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.container .action-buttons a {
+  background: #ff6f00;
+  color: white;
+}
+
+.container .action-buttons a:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+
+.container .action-buttons button {
+  background: #6c757d;
+  color: white;
+}
+
+.container .action-buttons button:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.container .action-buttons .danger {
+  background: #dc3545;
+}
+
+.container .action-buttons .danger:hover {
+  background: #c82333;
+}
+
+.container .action-buttons .success {
+  background: #28a745;
+}
+
+.container .action-buttons .success:hover {
+  background: #218838;
+}
+
+/* Charts section */
+.container .charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+.container .chart-container {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* No data message */
+.container .no-data {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Modal styles */
+.container .modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.container .modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.container .modal-content h3 {
+  margin-bottom: 15px;
+}
+
+.container .modal-content p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.container .close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+/* Chart fixes */
+.container .chart-container canvas {
+  max-height: 250px !important;
+  height: 250px !important;
+}
+
+.container .charts {
+  max-height: 1200px !important;
+  overflow: visible !important;
+}
+
+.container .chart-container {
+  position: relative !important;
+  height: 300px !important;
+}
+
+/* Error message */
+.container .error {
+  text-align: center;
+  padding: 50px;
+  color: #ef4444;
+}

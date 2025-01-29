@@ -1,0 +1,167 @@
+/* Import Poppins font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Main booking view container */
+.booking-view {
+  font-family: 'Poppins', sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading */
+.booking-view h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #343a40;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #ffc107;
+  padding-bottom: 0.5rem;
+}
+
+/* Booking details container */
+.booking-details {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Detail group sections */
+.detail-group {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 6px;
+  border-left: 4px solid #ffc107;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Subheading in detail group */
+.detail-group h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #343a40;
+  margin-bottom: 1rem;
+}
+
+/* Paragraphs in detail group */
+.detail-group p {
+  font-size: 1rem;
+  color: #495057;
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+/* Strong tags for labels */
+.detail-group p strong {
+  font-weight: 500;
+  color: #212529;
+}
+
+/* Links for user, property, and worker names */
+.detail-group a {
+  color: #ffc107;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.detail-group a:hover {
+  color: #e0a800;
+  text-decoration: underline;
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Success button */
+button.success {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.success:hover {
+  background-color: #e0a800;
+}
+
+/* Danger button */
+button.danger {
+  background-color: #dc3545;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.danger:hover {
+  background-color: #c82333;
+}
+
+/* Back to list button/link */
+a.btn {
+  background-color: #6c757d;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+a.btn:hover {
+  background-color: #5a6268;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .booking-view {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .booking-view h2 {
+    font-size: 1.5rem;
+  }
+
+  .detail-group {
+    padding: 1rem;
+  }
+
+  .detail-group h3 {
+    font-size: 1.1rem;
+  }
+
+  .detail-group p {
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button.success,
+  button.danger,
+  a.btn {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+}
