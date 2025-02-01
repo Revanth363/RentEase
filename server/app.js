@@ -539,7 +539,8 @@ app.get("/register", (req, res) => {
   res.redirect("http://localhost:5173/register");
 });
 
-app.get("/search", async (req, res) => {
+// GET /api/search - Fully Fixed & Working
+app.get("/api/search", async (req, res) => {
   try {
     const {
       location,
@@ -551,6 +552,7 @@ app.get("/search", async (req, res) => {
       amenities,
     } = req.query;
 
+    // Base query: only verified & not rented properties
     let query = {
       $and: [
         { $or: [{ isRented: false }, { isRented: { $exists: false } }] },
@@ -558,39 +560,55 @@ app.get("/search", async (req, res) => {
       ],
     };
 
+    // Apply filters
     if (location) {
-      query.location = { $regex: location, $options: "i" };
+      query.location = { $regex: location.trim(), $options: "i" };
     }
+
     if (propertyType) {
-      query.type = propertyType;
+      query.$or = [
+        { type: { $regex: propertyType.trim(), $options: "i" } },
+        { subtype: { $regex: propertyType.trim(), $options: "i" } }
+      ];
     }
+
     if (price) {
       query.price = { $lte: Number(price) };
     }
+
     if (bedrooms) {
-      query.beds = Number(bedrooms);
+      query.beds = { $gte: Number(bedrooms) };
     }
+
     if (bathrooms) {
-      query.baths = Number(bathrooms);
+      query.baths = { $gte: Number(bathrooms) };
     }
-    if (furnishing) {
-      query.furnished = furnishing;
-    }
+
+   if (furnishing) {
+  query.furnished = { $regex: furnishing.trim(), $options: "i" };
+}
+
     if (amenities) {
-      const amenitiesArray = amenities.split(",").map((item) => item.trim());
+      const amenitiesArray = amenities
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean);
+
       if (amenitiesArray.length > 0) {
-        query.amenities = { $all: amenitiesArray };
+        query.amenities = { $all: amenitiesArray }; // Exact match (recommended)
       }
     }
 
-    const properties = await Property.find(query).lean();
+    const properties = await Property.find(query)
+      .select("-__v")
+      .lean();
+
     res.json(properties);
   } catch (err) {
-    console.error("Error fetching properties for search:", err);
-    res.status(500).json({ error: "Server Error" });
+    console.error("Error in /api/search:", err);
+    res.status(500).json({ error: "Failed to fetch properties" });
   }
 });
-
 app.get("/property_listing_page", isAuthenticated, (req, res) => {
   if (req.session.user.userType !== "owner") {
     return res.json({ redirectUrl: getDashboardUrl(req.session.user.userType) });

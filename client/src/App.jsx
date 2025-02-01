@@ -2,6 +2,8 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { LoadingProvider } from './LoadingContext';
 import Header from './components/Header';
 import HomePage from './pages/Homepage';
+import PropertySearch from './pages/PropertySearch';
+import PropertyDetails from './pages/PropertyDetails';
 import AdminDashboard from './admin/AdminDashboard';
 import PropertyManagement from './admin/PropertyManagement';
 import UserManagement from './admin/UserManagement';
@@ -32,7 +34,7 @@ const App = () => {
         
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/search" element={<div>Search Page</div>} />
+          <Route path="/search" element={<PropertySearch />} />
           <Route path="/workerDetails" element={<div>Worker Details</div>} />
           <Route path="/about_us" element={<div>About Us</div>} />
           <Route path="/contact_us" element={<div>Contact Us</div>} />
@@ -46,7 +48,7 @@ const App = () => {
           <Route path="/tenant/tenant_dashboard" element={<div>Tenant Dashboard</div>} />
           <Route path="/owner_dashboard" element={<div>Owner Dashboard</div>} />
           <Route path="/worker_dashboard" element={<div>Worker Dashboard</div>} />
-          <Route path="/property" element={<div>Property Details Page</div>} />
+          <Route path="/property" element={<PropertyDetails />} />
 
           {/* Admin Routes without Authentication */}
           <Route path="/admin" element={<AdminDashboard />} />

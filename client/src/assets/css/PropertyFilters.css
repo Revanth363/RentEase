@@ -1,0 +1,216 @@
+/* src/assets/css/PropertyFilters.css */
+/* ONLY FILTER SIDEBAR + MOBILE TOGGLE — EXACTLY LIKE YOUR ORIGINAL EJS */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+.property-search-page {
+  font-family: "Poppins", sans-serif;
+  background-color: #f4f4f4;
+  min-height: 100vh;
+  padding-top: 70px;
+  position: relative;
+}
+
+/* Desktop Sidebar */
+.filter-sidebar {
+  width: 320px;
+  background: #333;
+  padding: 20px;
+  box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+
+  /* FIX: sidebar height below fixed header */
+  height: calc(100vh - 70px);
+
+  color: white;
+  
+  position: fixed;
+  left: 0;
+
+  /* FIX: This replaces margin-top: 65px */
+  top: 70px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.5s ease-in-out;
+
+  /* hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Mobile: Hidden by default */
+@media (max-width: 768px) {
+  .filter-sidebar {
+    transform: translateX(-100%);
+    width: 100vw;
+    height: 100vh;
+    padding: 90px 20px 40px;
+    z-index: 1500;
+    overflow: hidden;
+  }
+}
+
+/* Show when active */
+.filter-sidebar.active {
+  transform: translateX(0);
+}
+
+/* Mobile Filter Icon */
+.filter-icon {
+  display: none;
+  position: fixed;
+  top: 90px;
+  left: 10px;
+  background: #ffc109;
+  color: black;
+  padding: 10px 8px 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 2000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+@media (max-width: 768px) {
+  .filter-icon { display: block; }
+}
+
+/* Overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.overlay.active { display: block; }
+
+/* Close Button (Mobile Only) */
+.close-sidebar {
+  display: none;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #ffc109;
+  color: black;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+}
+@media (max-width: 768px) {
+  .close-sidebar { display: block; }
+}
+.close-sidebar:hover { background: #ff6f00; }
+
+/* Sidebar Heading */
+.filter-sidebar h2 {
+  color: #ffc107;
+  text-align: center;
+  margin: 0 0 20px 0;
+  font-size: 1.6rem;
+}
+
+/* Filters Form */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+select, #priceValue {
+  background-color: #f2e2b2;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  color: #333;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin: 10px 0;
+}
+
+#priceValue {
+  text-align: center;
+  font-size: 16px;
+}
+
+fieldset {
+  border: 1.5px solid #555;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 10px 0;
+}
+
+legend {
+  color: #ffc107;
+  font-weight: bold;
+  padding: 0 10px;
+}
+
+.amenities-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.amenities-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.filters button {
+  background: #ffc109;
+  color: black;
+  border: none;
+  padding: 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+.filters button:hover {
+  background: #ff6f00;
+}
+
+/* Hide scrollbar but allow scroll inside form */
+.filters::-webkit-scrollbar { display: none; }
+.filters { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ADD THESE 4 LINES AT THE VERY END OF PropertyFilters.css */
+
+/* This is the MAGIC from your original EJS — pushes content right on desktop */
+.content {
+  margin-left: 270px;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+  }
+}

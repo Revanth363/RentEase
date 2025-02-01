@@ -3,17 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      connect-src 'self' http://localhost:5000 http://localhost:5173;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
-      font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-      script-src 'self' 'unsafe-inline';
-      img-src 'self' http://localhost:5000 http://localhost:5173 data: https://www.homebazaar.com https://unitedsettlement.com https://encrypted-tbn0.gstatic.com;
-    ">
+
+    <!-- FIXED & OPTIMIZED CSP -->
+    <meta
+  http-equiv="Content-Security-Policy"
+  content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+    img-src 'self' data: blob: 
+      http://localhost:5000 
+      http://localhost:5173 
+      https://cdn-icons-png.flaticon.com 
+      https://*.flaticon.com 
+      https://www.homebazaar.com 
+      https://unitedsettlement.com 
+      https://encrypted-tbn0.gstatic.com 
+      https://*.googleusercontent.com 
+      https://maps.gstatic.com;
+    connect-src 'self' 
+      http://localhost:5000 
+      http://localhost:5173 
+      ws://localhost:5173;
+    frame-src 
+      https://maps.app.goo.gl 
+      https://www.google.com/maps 
+      https://maps.google.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  "
+/>
+
     <title>RentEase</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    <!-- External CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

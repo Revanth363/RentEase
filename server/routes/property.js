@@ -64,4 +64,39 @@ router.post('/:propertyId/contact', async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id).lean();
+
+    if (!property) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Property not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      property: {
+        ...property,
+        _id: property._id.toString(), // String for React
+        images: property.images || [],
+        map: property.map || "",
+        amenities: property.amenities || [],
+        price: Number(property.price || 0),
+        beds: Number(property.beds || 0),
+        baths: Number(property.baths || 0),
+        rating: Number(property.rating || 0),
+        reviews: Number(property.reviews || 0),
+      }
+    });
+  } catch (err) {
+    console.error("Error fetching property:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error" 
+    });
+  }
+});
+
 module.exports = router;
