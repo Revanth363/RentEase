@@ -1,9 +1,17 @@
-/* Import Poppins font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+/* === SCOPED ONLY TO NotificationView (System Notifications) === */
+.notification-view-page,
+.notification-view-page * {
+  box-sizing: border-box;
+}
 
-/* Main notification view container */
-.notification-view {
+.notification-view-page {
   font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.notification-view-page .notification-view {
   max-width: 800px;
   margin: 2rem auto;
   padding: 1.5rem;
@@ -12,8 +20,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Heading */
-.notification-view h2 {
+.notification-view-page .notification-view h2 {
   font-size: 1.8rem;
   font-weight: 600;
   color: #343a40;
@@ -23,14 +30,12 @@
   padding-bottom: 0.5rem;
 }
 
-/* Notification details container */
-.notification-details {
+.notification-view-page .notification-details {
   display: grid;
   gap: 1.5rem;
 }
 
-/* Detail group sections */
-.detail-group {
+.notification-view-page .detail-group {
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 6px;
@@ -38,112 +43,106 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Subheading in detail group */
-.detail-group h3 {
+.notification-view-page .detail-group h3 {
   font-size: 1.2rem;
   font-weight: 500;
   color: #343a40;
   margin-bottom: 1rem;
 }
 
-/* Paragraphs in detail group */
-.detail-group p {
+.notification-view-page .detail-group p {
   font-size: 1rem;
   color: #495057;
   margin: 0.5rem 0;
   line-height: 1.5;
 }
 
-/* Strong tags for labels */
-.detail-group p strong {
+.notification-view-page .detail-group strong {
   font-weight: 500;
   color: #212529;
 }
 
-/* Links for recipient and worker names */
-.detail-group a {
+.notification-view-page .detail-group a {
   color: #ffc107;
   text-decoration: none;
-  transition: color 0.3s ease;
+  font-weight: 500;
 }
 
-.detail-group a:hover {
+.notification-view-page .detail-group a:hover {
   color: #e0a800;
   text-decoration: underline;
 }
 
-/* Action buttons container */
-.action-buttons {
+.notification-view-page .action-buttons {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
   margin-top: 1rem;
 }
 
-/* Success button */
-button.success {
+.notification-view-page button.success {
   background-color: #ffc107;
   color: #212529;
   border: none;
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
   border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-button.success:hover {
-  background-color: #e0a800;
-}
-
-/* Back to list button/link */
-a.btn {
-  background-color: #6c757d;
-  color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.notification-view-page button.success:hover {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+}
+
+.notification-view-page a.btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
   text-decoration: none;
-  text-align: center;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-a.btn:hover {
+.notification-view-page a.btn:hover {
   background-color: #5a6268;
 }
 
-/* Responsive design */
+/* Status badges */
+.notification-view-page .status-completed {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #d4edda;
+  color: #155724;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.notification-view-page .status-pending,
+.notification-view-page .status-sent,
+.notification-view-page .status-unread {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #fff3cd;
+  color: #856404;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 @media (max-width: 600px) {
-  .notification-view {
+  .notification-view-page .notification-view {
     margin: 1rem;
     padding: 1rem;
   }
-
-  .notification-view h2 {
-    font-size: 1.5rem;
-  }
-
-  .detail-group {
-    padding: 1rem;
-  }
-
-  .detail-group h3 {
-    font-size: 1.1rem;
-  }
-
-  .detail-group p {
-    font-size: 0.9rem;
-  }
-
-  .action-buttons {
+  .notification-view-page .action-buttons {
     flex-direction: column;
-    align-items: stretch;
   }
-
-  button.success,
-  a.btn {
-    padding: 0.6rem;
-    font-size: 0.9rem;
+  .notification-view-page button.success,
+  .notification-view-page a.btn {
+    width: 100%;
   }
 }

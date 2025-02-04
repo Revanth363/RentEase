@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleChevronDown } from '@fortawesome/free-solid-svg-icons';
@@ -9,127 +9,184 @@ const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const location = useLocation();
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Fetch logged-in user
   useEffect(() => {
-    const fetchUser = async () => {
+    const checkSession = async () => {
       try {
-        const response = await axios.get('/api/check-session', { withCredentials: true });
-        setUser(response.data.user);
-      } catch (error) {
-        console.error('Error fetching user session:', error);
+        const res = await axios.get('/api/check-session', { withCredentials: true });
+        setUser(res.data.user);
+      } catch (err) {
         setUser(null);
       }
     };
-    fetchUser();
+    checkSession();
   }, []);
 
+  // Toggle mobile menu
   const toggleNav = () => {
-    setIsNavOpen(!isNavOpen);
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+    setIsNavOpen(prev => !prev);
   };
 
   const closeNav = () => {
     setIsNavOpen(false);
   };
 
-  const handleLogout = async () => {
+  // Toggle user dropdown
+  const toggleDropdown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDropdownOpen(prev => !prev);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const handleClickOutside = () => setIsDropdownOpen(false);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isDropdownOpen]);
+
+  // Logout
+  const handleLogout = async (e) => {
+    e.preventDefault();
     try {
       await axios.get('/api/logout', { withCredentials: true });
       setUser(null);
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Error logging out:', error);
+      setIsDropdownOpen(false);
+      navigate('/');
+      window.location.reload(); // Optional: force refresh
+    } catch (err) {
+      console.error('Logout failed', err);
     }
   };
 
+  // Check active link
   const isActive = (path) => {
-    return path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
   };
 
   return (
-    <div className={styles.header}>
+    <header className={styles.header}>
+      {/* Logo */}
       <div className={styles.logo}>
         <div className={styles.brandid}>RentEase</div>
         <div className={styles.tagline}>Your One-Stop Rental Solution</div>
       </div>
 
-      <button className={styles['nav-toggle']} onClick={toggleNav}>
+      {/* Hamburger Button (Mobile) */}
+      <button
+        className={styles.navToggle}
+        onClick={toggleNav}
+        aria-label="Toggle navigation"
+      >
         ☰
-      </button>
-      <div className={`${styles.overlay} ${isNavOpen ? styles.active : ''}`} onClick={closeNav}></div>
 
-      <nav className={`${styles['nav-menu']} ${isNavOpen ? styles.active : ''}`}>
+      </button>
+
+      {/* Overlay (Mobile) */}
+      <div
+        className={`${styles.overlay} ${isNavOpen ? styles.active : ''}`}
+        onClick={closeNav}
+      />
+
+      {/* Navigation Menu */}
+      <nav className={`${styles.navMenu} ${isNavOpen ? styles.active : ''}`}>
         <Link
           to="/"
-          className={`${styles['nav-link']} ${isActive('/') ? styles.active : ''}`}
+          className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}
           onClick={closeNav}
         >
           Home
         </Link>
         <Link
           to="/search"
-          className={`${styles['nav-link']} ${isActive('/search') ? styles.active : ''}`}
+          className={`${styles.navLink} ${isActive('/search') ? styles.active : ''}`}
           onClick={closeNav}
         >
           Properties
         </Link>
         <Link
           to="/workerDetails"
-          className={`${styles['nav-link']} ${isActive('/workerDetails') ? styles.active : ''}`}
+          className={`${styles.navLink} ${isActive('/workerDetails') ? styles.active : ''}`}
           onClick={closeNav}
         >
           Services
         </Link>
         <Link
           to="/about_us"
-          className={`${styles['nav-link']} ${isActive('/about_us') ? styles.active : ''}`}
+          className={`${styles.navLink} ${isActive('/about_us') ? styles.active : ''}`}
           onClick={closeNav}
         >
           About Us
         </Link>
         <Link
           to="/contact_us"
-          className={`${styles['nav-link']} ${isActive('/contact_us') ? styles.active : ''}`}
+          className={`${styles.navLink} ${isActive('/contact_us') ? styles.active : ''}`}
           onClick={closeNav}
         >
           Contact Us
         </Link>
         <Link
           to="/faq"
-          className={`${styles['nav-link']} ${isActive('/faq') ? styles.active : ''}`}
+          className={`${styles.navLink} ${isActive('/faq') ? styles.active : ''}`}
           onClick={closeNav}
         >
           FAQs
         </Link>
       </nav>
 
+      {/* CTA: Login or User Dropdown */}
       <div className={styles.cta}>
         {user ? (
           <div className={styles.dropdown}>
-            <a href="#" className={styles['user-greeting']} onClick={toggleDropdown}>
+            <a
+              href="#"
+              className={styles.userGreeting}
+              onClick={toggleDropdown}
+            >
               <span>Hi, {user.firstName}</span>
-              <FontAwesomeIcon icon={faCircleChevronDown} />
+              <FontAwesomeIcon icon={faCircleChevronDown} className={styles.icon} />
             </a>
+
             <div
-              className={styles['dropdown-content']}
+              className={styles.dropdownContent}
               style={{ display: isDropdownOpen ? 'block' : 'none' }}
             >
               {user.userType === 'tenant' && (
-                <Link to="/tenant/tenant_dashboard" onClick={closeNav}>
+                <Link
+                  to="/tenant/tenant_dashboard"
+                  onClick={() => {
+                    closeNav();
+                    setIsDropdownOpen(false);
+                  }}
+                >
                   Dashboard
                 </Link>
               )}
               {user.userType === 'owner' && (
-                <Link to="/owner_dashboard" onClick={closeNav}>
+                <Link
+                  to="/owner_dashboard"
+                  onClick={() => {
+                    closeNav();
+                    setIsDropdownOpen(false);
+                  }}
+                >
                   Dashboard
                 </Link>
               )}
               {user.userType === 'worker' && (
-                <Link to="/worker_dashboard" onClick={closeNav}>
+                <Link
+                  to="/worker_dashboard"
+                  onClick={() => {
+                    closeNav();
+                    setIsDropdownOpen(false);
+                  }}
+                >
                   Dashboard
                 </Link>
               )}
@@ -139,10 +196,12 @@ const Header = () => {
             </div>
           </div>
         ) : (
-          <Link to="/login" className={styles['login-signup']}>Login/SignUp</Link>
+          <Link to="/login" className={styles.loginBtn}>
+            Login/SignUp
+          </Link>
         )}
       </div>
-    </div>
+    </header>
   );
 };
 

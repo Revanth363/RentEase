@@ -71,6 +71,7 @@ const BookingView = () => {
   if (!booking) return null;
 
   return (
+    <div className="booking-view-page">
     <div className="booking-view" style={{ maxWidth: '100%', overflowX: 'hidden' }}>
       <h2>Booking Details - {booking._id}</h2>
       <div className="booking-details">
@@ -134,6 +135,7 @@ const BookingView = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

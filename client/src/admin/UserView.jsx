@@ -60,6 +60,7 @@ const UserView = () => {
 
   // Rest of your JSX stays 100% the same — it will work perfectly now
   return (
+    <div className="user-view-page">
     <div className="user-view">
       <h2>
         {userType.charAt(0).toUpperCase() + userType.slice(1)} Details - {user.firstName} {user.lastName}
@@ -131,6 +132,7 @@ const UserView = () => {
           <a href="/admin" className="btn">← Back to Admin Dashboard</a>
         </div>
       </div>
+    </div>
     </div>
   );
 };

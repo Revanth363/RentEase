@@ -1,9 +1,21 @@
-/* Import Poppins font from Google Fonts */
+/* Import Poppins font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-/* Main booking view container */
-.booking-view {
+/* === SCOPED ONLY TO BookingView COMPONENT === */
+.booking-view-page,
+.booking-view-page * {
+  box-sizing: border-box;
+}
+
+.booking-view-page {
   font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Main container */
+.booking-view-page .booking-view {
   max-width: 800px;
   margin: 2rem auto;
   padding: 1.5rem;
@@ -12,8 +24,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Heading */
-.booking-view h2 {
+.booking-view-page .booking-view h2 {
   font-size: 1.8rem;
   font-weight: 600;
   color: #343a40;
@@ -23,14 +34,13 @@
   padding-bottom: 0.5rem;
 }
 
-/* Booking details container */
-.booking-details {
+.booking-view-page .booking-details {
   display: grid;
   gap: 1.5rem;
 }
 
-/* Detail group sections */
-.detail-group {
+/* Detail groups */
+.booking-view-page .detail-group {
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 6px;
@@ -38,49 +48,48 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Subheading in detail group */
-.detail-group h3 {
+.booking-view-page .detail-group h3 {
   font-size: 1.2rem;
   font-weight: 500;
   color: #343a40;
   margin-bottom: 1rem;
 }
 
-/* Paragraphs in detail group */
-.detail-group p {
+.booking-view-page .detail-group p {
   font-size: 1rem;
   color: #495057;
   margin: 0.5rem 0;
   line-height: 1.5;
 }
 
-/* Strong tags for labels */
-.detail-group p strong {
+.booking-view-page .detail-group strong {
   font-weight: 500;
   color: #212529;
 }
 
-/* Links for user, property, and worker names */
-.detail-group a {
+/* Links */
+.booking-view-page .detail-group a {
   color: #ffc107;
   text-decoration: none;
+  font-weight: 500;
   transition: color 0.3s ease;
 }
 
-.detail-group a:hover {
+.booking-view-page .detail-group a:hover {
   color: #e0a800;
   text-decoration: underline;
 }
 
-/* Action buttons container */
-.action-buttons {
+/* Action buttons */
+.booking-view-page .action-buttons {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-/* Success button */
-button.success {
+/* Approve button */
+.booking-view-page button.success {
   background-color: #ffc107;
   color: #212529;
   border: none;
@@ -89,15 +98,17 @@ button.success {
   font-weight: 500;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-button.success:hover {
+.booking-view-page button.success:hover {
   background-color: #e0a800;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
 }
 
-/* Danger button */
-button.danger {
+/* Reject button */
+.booking-view-page button.danger {
   background-color: #dc3545;
   color: #ffffff;
   border: none;
@@ -106,15 +117,17 @@ button.danger {
   font-weight: 500;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-button.danger:hover {
+.booking-view-page button.danger:hover {
   background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
 }
 
-/* Back to list button/link */
-a.btn {
+/* Back button */
+.booking-view-page a.btn {
   background-color: #6c757d;
   color: #ffffff;
   padding: 0.75rem 1.5rem;
@@ -123,45 +136,49 @@ a.btn {
   border-radius: 4px;
   text-decoration: none;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.3s ease;
 }
 
-a.btn:hover {
+.booking-view-page a.btn:hover {
   background-color: #5a6268;
 }
 
-/* Responsive design */
+/* Responsive */
 @media (max-width: 600px) {
-  .booking-view {
+  .booking-view-page .booking-view {
     margin: 1rem;
     padding: 1rem;
   }
 
-  .booking-view h2 {
+  .booking-view-page .booking-view h2 {
     font-size: 1.5rem;
   }
 
-  .detail-group {
+  .booking-view-page .detail-group {
     padding: 1rem;
   }
 
-  .detail-group h3 {
+  .booking-view-page .detail-group h3 {
     font-size: 1.1rem;
   }
 
-  .detail-group p {
+  .booking-view-page .detail-group p {
     font-size: 0.9rem;
   }
 
-  .action-buttons {
+  .booking-view-page .action-buttons {
     flex-direction: column;
     align-items: stretch;
   }
 
-  button.success,
-  button.danger,
-  a.btn {
-    padding: 0.6rem;
-    font-size: 0.9rem;
+  .booking-view-page button.success,
+  .booking-view-page button.danger,
+  .booking-view-page a.btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.95rem;
   }
 }

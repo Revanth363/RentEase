@@ -61,6 +61,7 @@ const MaintenanceView = () => {
   const displayId = request.id.slice(-8).toUpperCase();
 
   return (
+    <div className="maintenance-view-page">
     <div className="maintenance-view">
       <h2>Maintenance Request #{displayId}</h2>
 
@@ -131,6 +132,7 @@ const MaintenanceView = () => {
         </div>
 
       </div>
+    </div>
     </div>
   );
 };

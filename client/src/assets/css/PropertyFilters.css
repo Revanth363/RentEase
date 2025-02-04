@@ -13,15 +13,15 @@
 
 /* Desktop Sidebar */
 .filter-sidebar {
-  width: 320px;
-  background: #333;
+  width: 270px;
+  background: white;
   padding: 20px;
   box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
 
   /* FIX: sidebar height below fixed header */
-  height: calc(100vh - 70px);
+  height: calc(95vh - 70px);
 
-  color: white;
+  color: #333;
   
   position: fixed;
   left: 0;
@@ -51,9 +51,11 @@
     height: 100vh;
     padding: 90px 20px 40px;
     z-index: 1500;
-    overflow: hidden;
+    overflow-y: auto;     /* ✔ scroll allowed */
+    overflow-x: hidden;   /* ✔ horizontal hidden */
   }
 }
+
 
 /* Show when active */
 .filter-sidebar.active {

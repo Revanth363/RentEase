@@ -1,22 +1,21 @@
 /* Import Poppins font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* Reset and base styles */
-* {
+/* === SCOPED TO USER VIEW ONLY === */
+.user-view-page * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-body {
+.user-view-page body {
+  /* These base styles are only needed if this page is rendered alone */
   font-family: 'Poppins', sans-serif;
   background-color: #f9f9f9;
   color: #333;
   line-height: 1.6;
 }
 
-/* User view container */
-.user-view {
+/* Main container */
+.user-view-page .user-view {
   max-width: 900px;
   margin: 30px auto;
   background: white;
@@ -25,7 +24,7 @@ body {
   overflow: hidden;
 }
 
-.user-view h2 {
+.user-view-page .user-view h2 {
   background-color: #ffc107;
   color: #333;
   padding: 20px 30px;
@@ -34,7 +33,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-.user-details {
+.user-view-page .user-details {
   padding: 30px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -42,15 +41,21 @@ body {
 }
 
 /* Detail groups */
-.detail-group {
+.user-view-page .detail-group {
   background-color: #fff;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid #f0f0f0;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.detail-group h3 {
+.user-view-page .detail-group:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.user-view-page .detail-group h3 {
   font-size: 18px;
   font-weight: 600;
   color: #555;
@@ -59,40 +64,34 @@ body {
   border-bottom: 2px solid #ffc107;
 }
 
-.detail-group p {
+.user-view-page .detail-group p {
   margin: 10px 0;
   font-size: 14px;
 }
 
-.detail-group strong {
+.user-view-page .detail-group strong {
   font-weight: 600;
   color: #555;
   display: inline-block;
   width: 120px;
 }
 
-/* Links */
-a {
+/* Links inside this page only */
+.user-view-page a {
   color: #ffc107;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
 }
 
-a:hover {
+.user-view-page a:hover {
   color: #e5ac00;
   text-decoration: underline;
 }
 
-/* Account action buttons */
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 15px;
-}
-
-button, .btn {
+/* Buttons & .btn inside this page only */
+.user-view-page button,
+.user-view-page .btn {
   font-family: 'Poppins', sans-serif;
   background-color: #ffc107;
   color: #333;
@@ -106,67 +105,58 @@ button, .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-button:hover, .btn:hover {
-  background-color: #ffca2c;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
   text-decoration: none;
 }
 
-button.danger {
+.user-view-page button:hover,
+.user-view-page .btn:hover {
+  background-color: #ffca2c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+.user-view-page button.danger {
   background-color: #fff;
   color: #f44336;
   border: 1px solid #f44336;
 }
 
-button.danger:hover {
+.user-view-page button.danger:hover {
   background-color: #f44336;
   color: white;
   box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
 }
 
-/* Status indicators */
-p strong + span.status {
+/* Status badges */
+.user-view-page p strong + span.status {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
 }
 
-.status-active {
+.user-view-page .status-active {
   background-color: #e8f5e9;
   color: #2e7d32;
 }
 
-.status-suspended {
+.user-view-page .status-suspended {
   background-color: #ffebee;
   color: #c62828;
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 768px) {
-  .user-details {
+  .user-view-page .user-details {
     grid-template-columns: 1fr;
   }
   
-  .detail-group {
+  .user-view-page .detail-group {
     padding: 15px;
   }
   
-  .user-view h2 {
+  .user-view-page .user-view h2 {
     padding: 15px 20px;
     font-size: 20px;
   }
-}
-
-/* Add subtle animations */
-.detail-group {
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.detail-group:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }

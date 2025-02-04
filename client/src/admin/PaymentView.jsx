@@ -92,6 +92,7 @@ const PaymentView = () => {
   if (!payment) return null;
 
   return (
+    <div className="payment-view-page">
     <div className="payment-view">
       <h2>Payment Details - #{payment.id}</h2>
       <div className="payment-details">
@@ -162,6 +163,7 @@ const PaymentView = () => {
         </div>
 
       </div>
+    </div>
     </div>
   );
 };
