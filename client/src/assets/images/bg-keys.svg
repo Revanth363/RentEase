@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset="1" stop-color="#1c1c1c"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb300"/>
+      <stop offset="1" stop-color="#ff8f00"/>
+    </linearGradient>
+    <pattern id="keys" patternUnits="userSpaceOnUse" width="140" height="140">
+      <rect width="140" height="140" fill="none"/>
+      <!-- Key ring -->
+      <circle cx="40" cy="40" r="16" fill="none" stroke="#3a3a3a" stroke-width="3"/>
+      <circle cx="40" cy="40" r="10" fill="none" stroke="#2f2f2f" stroke-width="2"/>
+      <!-- Key body -->
+      <rect x="48" y="36" width="58" height="10" rx="3" ry="3" fill="url(#accent2)"/>
+      <!-- Teeth -->
+      <path d="M106 36 v10 m6 -10 v10 m6 -10 v10" stroke="#d17200" stroke-width="4"/>
+      <!-- Secondary key -->
+      <circle cx="26" cy="80" r="12" fill="none" stroke="#3a3a3a" stroke-width="2"/>
+      <rect x="36" y="76" width="44" height="8" rx="2" ry="2" fill="#2c2c2c"/>
+      <path d="M80 76 v8 m5 -8 v8" stroke="#444" stroke-width="3"/>
+      <!-- Subtle diagonal line -->
+      <path d="M0 139 L139 0" stroke="#FFC107" stroke-opacity="0.12"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g2)"/>
+  <rect width="1600" height="900" fill="url(#keys)" opacity="0.55"/>
+</svg>

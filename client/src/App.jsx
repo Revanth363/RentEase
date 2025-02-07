@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { LoadingProvider } from './LoadingContext';
 import Header from './components/Header';
 import HomePage from './pages/Homepage';
+import Auth from './pages/Auth';
 
 const App = () => {
   return (
@@ -15,8 +16,8 @@ const App = () => {
           <Route path="/about_us" element={<div>About Us</div>} />
           <Route path="/contact_us" element={<div>Contact Us</div>} />
           <Route path="/faq" element={<div>FAQs</div>} />
-          <Route path="/register" element={<div>Register Page</div>} />
-          <Route path="/forgot-password" element={<div>Forgot Password Page</div>} />
+          <Route path="/register" element={<Auth initial="register" />} />
+          <Route path="/login" element={<Auth initial="login" />} />
           <Route path="/worker_register" element={<div>Worker Register Page</div>} />
           <Route path="/privacy_policy" element={<div>Privacy Policy Page</div>} />
           <Route path="/termsofservice" element={<div>Terms of Service Page</div>} />

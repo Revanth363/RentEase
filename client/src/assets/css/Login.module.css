@@ -1,0 +1,236 @@
+/* Login.module.css - Scoped styles for Login component */
+
+.loginPageRoot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.loginContainer {
+  background-color: rgba(18, 18, 18, 0.75);
+  border: 1px solid rgba(42, 42, 42, 0.5);
+  border-radius: 18px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  width: 330px;
+  max-width: 100%;
+  min-height: 300px;
+  padding: 30px 28px;
+  margin: 10px 0;
+}
+
+.loginContainer h2 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #FFC107;
+  text-align: center;
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+.loginContainer label {
+  font-size: 13px;
+  color: white;
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 3px;
+}
+
+.loginContainer form {
+  display: flex;
+  flex-direction: column;
+}
+
+.loginPageRoot input,
+.loginPageRoot select {
+  background: #1d1d1d;
+  color: #fff;
+  border: 2px solid #2a2a2a;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.loginPageRoot input {
+  width: 95%;
+}
+
+.loginPageRoot select {
+  width: 100%;
+}
+
+.loginPageRoot input:focus,
+.loginPageRoot select:focus {
+  outline: none;
+  border-color: #FFC107;
+}
+
+.forgotWrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgotPassword {
+  color: #FFC107;
+  text-decoration: underline;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: right;
+  margin-top: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.loginPageRoot button[type='submit'] {
+  background: linear-gradient(135deg, #FFC107, #ff9800);
+  color: #111;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 12px;
+  transition: background 0.3s, transform 0.25s;
+  transform: none;
+}
+
+.loginPageRoot button[type='submit']:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff6f00, #f57c00);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.loginPageRoot button[type='submit']:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.loginPageRoot button[type='submit']:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.loginContainer p {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 10px;
+  color: white;
+}
+
+.errorText {
+  color: #ff4444;
+  font-size: 14px;
+  margin-top: 3px;
+  display: none;
+}
+
+.passwordContainer {
+  position: relative;
+  width: 100%;
+}
+
+.passwordContainer input {
+  width: 100%;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.togglePassword:hover {
+  color: #FFC107;
+}
+
+.togglePassword i {
+  font-size: 16px;
+}
+
+.modalBg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  width: 300px;
+  position: relative;
+}
+
+.modalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modalBtn {
+  background-color: #FFC107;
+  color: black;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.modalBtn:hover {
+  background-color: #ff6f00;
+}
+
+.passwordContainer {
+  position: relative;
+  width: 100%;
+}
+
+.passwordContainer input {
+  width: 100%;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 12px;
+  top: 52%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 16px;
+  color: #999;
+  transition: color 0.2s ease;
+}
+
+.togglePassword:hover i {
+  color: #FFC107;
+}
+

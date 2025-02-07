@@ -1,0 +1,53 @@
+.inputWrapper {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.inputLabel {
+  display: block;
+  font-size: 13px;
+  color: white;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff5252;
+  margin-left: 2px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 10px 12px;
+  background: #1d1d1d;
+  color: #fff;
+  border: 2px solid #2a2a2a;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: border-color 0.25s ease, background 0.25s ease;
+  box-sizing: border-box;
+}
+
+.inputField:focus {
+  border-color: #FFC107;
+  background: #222;
+}
+
+.inputField:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: #ff5252;
+}
+
+.inputErrorText {
+  display: block;
+  color: #ff5252;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
