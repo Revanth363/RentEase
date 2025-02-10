@@ -103,7 +103,6 @@ function generateOtp() {
 }
 
 // OTP will be returned in response for development (no email service needed)
-console.warn('Running in dev mode: OTP will be returned in API response (no email service).');
 
 // Routes
 app.use("/api/property", propertyRoutes);
@@ -148,10 +147,10 @@ app.get("/api/slider-properties", async (req, res) => {
 });
 
 app.get("/api/check-session", (req, res) => {
-  if (req.session.user) {
-    return res.json({ user: req.session.user });
-  }
-  return res.json({ user: null });
+  // Return both regular user session and admin session info
+  const user = req.session.user || null;
+  const isAdmin = !!req.session.adminId;
+  return res.json({ user, admin: isAdmin });
 });
 
 app.get("/api/logout", (req, res) => {
@@ -301,8 +300,29 @@ app.post("/login", async (req, res) => {
   const { userType, email, password } = req.body;
 
   try {
-    if (!userType || !email || !password) {
+  // Request logging removed for production
+    // Basic required fields: email and password must be present
+    if (!email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // If userType is not provided, allow an admin login attempt first.
+    // This lets admins sign in from the same login form without selecting a role.
+    if (!userType) {
+      try {
+  const admin = await Admin.findOne({ username: email }).select('+password');
+        if (admin) {
+          if (!admin.password) return res.status(401).json({ error: 'Password not set for this account' });
+          if (admin.password !== password) return res.status(401).json({ error: 'Incorrect password' });
+          req.session.adminId = admin._id.toString();
+          return res.json({ success: true, redirectUrl: '/admin/dashboard' });
+        }
+      } catch (e) {
+        console.error('Admin lookup error:', e);
+        // fallthrough to require userType for non-admin users
+      }
+      // No admin found and no userType provided — ask client to select a role for non-admin accounts
+      return res.status(400).json({ error: 'Please select a role' });
     }
 
     let user;
@@ -602,8 +622,8 @@ app.post("/api/admin/login", async (req, res) => {
     if (!admin || admin.password !== password) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-    req.session.adminId = admin._id.toString();
-    res.json({ success: true, redirectUrl: "/api/admin" });
+  req.session.adminId = admin._id.toString();
+  res.json({ success: true, redirectUrl: "/admin/dashboard" });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Server error" });

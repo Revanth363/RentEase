@@ -9,10 +9,8 @@
   padding: 20px 15px;
   overflow-y: auto;
   position: relative;
-  background: 
-    url('https://images.pexels.com/photos/1906795/pexels-photo-1906795.jpeg?cs=srgb&dl=pexels-alessio-cesario-975080-1906795.jpg&fm=jpg')
-      center/cover no-repeat fixed;
-  backdrop-filter: blur(2px);
+  /* background image removed to avoid page-level hero image */
+  background: none;
 }
 
 .container {

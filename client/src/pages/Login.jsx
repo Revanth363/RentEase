@@ -15,11 +15,12 @@ export default function Login({ onForgot }) {
 
 	const validateLogin = () => {
 		const e = { ...initialErrors };
-		if (!userType) e.role = 'Please select a userType';
+		// Role is optional now so admins can login using the normal form.
 		if (!email) e.email = 'Email is required';
 		if (!password) e.password = 'Password is required';
 		setErrors(e);
-		return !e.role && !e.email && !e.password;
+		// don't require role (e.role will be empty string)
+		return !e.email && !e.password;
 	};
 
 	const handleSubmit = async (ev) => {
@@ -56,13 +57,12 @@ export default function Login({ onForgot }) {
 			<div className={styles.loginContainer}>
 				<h2>Login</h2>
 				<form id="loginForm" onSubmit={handleSubmit}>
-					<label htmlFor="userType">Select Role:</label>
+					<label htmlFor="loginUserType">Select Role:</label>
 					<select
-						id="userType"
+						id="loginUserType"
 						name="userType"
 						value={userType}
 						onChange={e => setUserType(e.target.value)}
-						required
 					>
 						<option value="" disabled>-- Select Role --</option>
 						<option value="tenant">Tenant</option>
@@ -71,23 +71,23 @@ export default function Login({ onForgot }) {
 					</select>
 					{errors.role && <div id="roleError" className={styles.errorText} style={{ display: 'block' }}>{errors.role}</div>}
 
-					<label htmlFor="email">Email:</label>
+					<label htmlFor="loginEmail">Email or username:</label>
 					<input
-						type="email"
-						id="email"
+						type="text"
+						id="loginEmail"
 						name="email"
-						placeholder="Enter your email"
+						placeholder="Email or username"
 						value={email}
 						onChange={e => setEmail(e.target.value)}
 						required
 					/>
 					{errors.email && <div id="emailError" className={styles.errorText} style={{ display: 'block' }}>{errors.email}</div>}
 
-					<label htmlFor="password">Password:</label>
+					<label htmlFor="loginPassword">Password:</label>
 					<div className={styles.passwordContainer}>
 						<input
 							type={showPassword ? 'text' : 'password'}
-							id="password"
+							id="loginPassword"
 							name="password"
 							placeholder="Enter your password"
 							value={password}
