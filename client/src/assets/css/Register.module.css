@@ -1,0 +1,205 @@
+/* Register.module.css - Scoped styles for Register component */
+
+.registerPageRoot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 0;
+  min-height: 100vh;
+  padding: 20px 15px;
+  overflow-y: auto;
+  position: relative;
+  /* background image removed to avoid page-level hero image */
+  background: none;
+}
+
+.container {
+  background-color: rgba(18, 18, 18, 0.85);
+  border: 1px solid rgba(42, 42, 42, 0.6);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  width: 360px;
+  max-width: 100%;
+  padding: 16px 28px;
+  margin: 10px 0;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.header h1 {
+  color: #FFC107;
+  font-size: 20px;
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+.header p {
+  color: white;
+  font-size: 12px;
+  margin: 0;
+}
+
+.formGroup {
+  margin-bottom: 8px;
+}
+
+.formGroup label {
+  font-size: 12px;
+  color: white;
+  display: block;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.registerPageRoot input,
+.registerPageRoot select {
+  background: #1d1d1d;
+  color: #fff;
+  border: 2px solid #2a2a2a;
+  padding: 7px;
+  border-radius: 8px;
+  font-size: 12px;
+  width: 95%;
+}
+
+.registerPageRoot select {
+  width: 100%;
+}
+
+.registerPageRoot input:focus,
+.registerPageRoot select:focus {
+  outline: none;
+  border-color: #FFC107;
+}
+
+.divider {
+  text-align: center;
+  margin: 12px 0;
+  color: #888;
+  font-size: 12px;
+}
+
+.registerBtn {
+  background: linear-gradient(135deg, #FFC107, #ff9800);
+  color: #111;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 8px;
+  transition: background 0.3s, transform 0.25s;
+}
+
+.registerBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff6f00, #f57c00);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.registerBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.registerBtn:disabled {
+  background: #555;
+  color: #aaa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+.footer a {
+  color: #FFC107;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.error {
+  color: #ff4444;
+  font-size: 11px;
+  margin-top: 3px;
+  display: block;
+}
+
+.visible {
+  display: block;
+}
+
+.errorText {
+  color: #ff4444;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.successText {
+  color: #4caf50;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.formRow {
+  display: flex;
+  gap: 10px;
+}
+
+.formRow .formGroup {
+  flex: 1;
+}
+
+.locationFields {
+  display: block;
+}
+
+.passwordContainer {
+  position: relative;
+  width: 100%;
+}
+
+.passwordContainer input {
+  width: 100%;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.togglePassword:hover {
+  color: #FFC107;
+}
+
+.togglePassword i {
+  font-size: 16px;
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 16px 24px;
+  }
+  .header h1 {
+    font-size: 20px;
+  }
+}

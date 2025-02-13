@@ -41,12 +41,21 @@ mongoose
   .catch((err) => console.error("MongoDB Atlas connection error:", err));
 
 // Middleware
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+// CORS: allow common localhost dev ports or configured CLIENT_URL
+const allowedOrigins = new Set([
+  process.env.CLIENT_URL || '',
+  'http://localhost:5173', 'http://127.0.0.1:5173',
+  'http://localhost:5174', 'http://127.0.0.1:5174'
+].filter(Boolean));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    if (/^http:\/\/(localhost|127\.0\.0\.1):51\d{2}$/.test(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -74,17 +83,23 @@ app.use((req, res, next) => {
 // In-memory OTP store
 const otpStore = new Map();
 
-// Rate limiter for /forgot-password
+// Rate limiter for OTP requests with JSON response
 const forgotPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: "Too many OTP requests, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    return res.status(429).json({ success: false, error: "Too many OTP requests, please try again later." });
+  }
 });
 
 // Generate a 6-digit OTP
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+// OTP will be returned in response for development (no email service needed)
 
 // Routes
 app.use("/api/property", propertyRoutes);
@@ -129,10 +144,10 @@ app.get("/api/slider-properties", async (req, res) => {
 });
 
 app.get("/api/check-session", (req, res) => {
-  if (req.session.user) {
-    return res.json({ user: req.session.user });
-  }
-  return res.json({ user: null });
+  // Return both regular user session and admin session info
+  const user = req.session.user || null;
+  const isAdmin = !!req.session.adminId;
+  return res.json({ user, admin: isAdmin });
 });
 
 app.get("/api/logout", (req, res) => {
@@ -208,125 +223,68 @@ app.get("/forgot-password", (req, res) => {
   res.redirect("http://localhost:5173/forgot-password");
 });
 
-app.post("/forgot-password", forgotPasswordLimiter, async (req, res) => {
+async function handleForgotPassword(req, res) {
   const { email } = req.body;
-
   try {
-    let user = null;
-    let userModel = null;
-
     const tenant = await Tenant.findOne({ email });
     const owner = await Owner.findOne({ email });
     const worker = await Worker.findOne({ email });
-
-    if (tenant) {
-      user = tenant;
-      userModel = "tenant";
-    } else if (owner) {
-      user = owner;
-      userModel = "owner";
-    } else if (worker) {
-      user = worker;
-      userModel = "worker";
-    }
-
-    if (!user) {
-      return res.json({ success: false, error: "Email not found" });
-    }
+    const user = tenant || owner || worker;
+    if (!user) return res.json({ success: false, error: 'Email not found' });
 
     const otp = generateOtp();
     const otpExpires = Date.now() + 10 * 60 * 1000;
-
     otpStore.set(email, { otp, expires: otpExpires });
+    setTimeout(() => { const entry = otpStore.get(email); if (entry && entry.expires <= Date.now()) otpStore.delete(email); }, 11 * 60 * 1000);
 
-    setTimeout(() => {
-      const entry = otpStore.get(email);
-      if (entry && entry.expires <= Date.now()) otpStore.delete(email);
-    }, 11 * 60 * 1000);
-
-    return res.json({ success: true, message: "OTP generated", otp });
+    // Dev mode: return OTP in response (no email service)
+    return res.json({ success: true, message: 'OTP generated (dev mode - check console)', otp });
   } catch (err) {
-    console.error("Error in forgot password flow:", err);
-    return res.json({
-      success: false,
-      error: "Server error. Please try again later.",
-    });
+    console.error('Error in forgot password flow:', err);
+    return res.json({ success: false, error: 'Server error. Please try again later.' });
   }
-});
+}
 
-app.post("/verify-otp", async (req, res) => {
+app.post('/forgot-password', forgotPasswordLimiter, handleForgotPassword);
+app.post('/api/forgot-password', forgotPasswordLimiter, handleForgotPassword);
+
+function handleVerifyOtp(req, res) {
   const { email, otp } = req.body;
   try {
     const entry = otpStore.get(email);
-    if (!entry) return res.json({ success: false, error: "No OTP requested" });
-    if (Date.now() > entry.expires) {
-      otpStore.delete(email);
-      return res.json({ success: false, error: "OTP has expired" });
-    }
-    if (entry.otp !== String(otp))
-      return res.json({ success: false, error: "Invalid OTP" });
-    return res.json({ success: true, message: "OTP verified" });
+    if (!entry) return res.json({ success: false, error: 'No OTP requested' });
+    if (Date.now() > entry.expires) { otpStore.delete(email); return res.json({ success: false, error: 'OTP has expired' }); }
+    if (entry.otp !== String(otp)) return res.json({ success: false, error: 'Invalid OTP' });
+    return res.json({ success: true, message: 'OTP verified' });
   } catch (err) {
-    console.error("Error verifying OTP:", err);
-    return res.json({ success: false, error: "Server error" });
+    console.error('Error verifying OTP:', err);
+    return res.json({ success: false, error: 'Server error' });
   }
-});
+}
+app.post('/verify-otp', handleVerifyOtp);
+app.post('/api/verify-otp', handleVerifyOtp);
 
-app.post("/reset-password", async (req, res) => {
+async function handleResetPassword(req, res) {
   const { email, password } = req.body;
-
   try {
-    if (!password || password.length < 8) {
-      return res.json({
-        success: false,
-        error: "Password must be at least 8 characters long",
-      });
-    }
-
-    let user = null;
-    let userModel = null;
-
-    const tenant = await Tenant.findOne({ email }).select("+password");
-    const owner = await Owner.findOne({ email }).select("+password");
-    const worker = await Worker.findOne({ email }).select("+password");
-
-    if (tenant) {
-      user = tenant;
-      userModel = "tenant";
-    } else if (owner) {
-      user = owner;
-      userModel = "owner";
-    } else if (worker) {
-      user = worker;
-      userModel = "worker";
-    }
-
-    if (!user) {
-      return res.json({ success: false, error: "User not found" });
-    }
-
+    if (!password || password.length < 8) return res.json({ success: false, error: 'Password must be at least 8 characters long' });
+    const tenant = await Tenant.findOne({ email }).select('+password');
+    const owner = await Owner.findOne({ email }).select('+password');
+    const worker = await Worker.findOne({ email }).select('+password');
+    const user = tenant || owner || worker;
+    if (!user) return res.json({ success: false, error: 'User not found' });
     const entry = otpStore.get(email);
-    if (!entry) {
-      return res.json({ success: false, error: "Please verify OTP first" });
-    }
-    if (Date.now() > entry.expires) {
-      otpStore.delete(email);
-      return res.json({
-        success: false,
-        error: "OTP has expired, please request a new one",
-      });
-    }
-
-    user.password = password;
-    await user.save();
-    otpStore.delete(email);
-
-    return res.json({ success: true, message: "Password reset successful" });
+    if (!entry) return res.json({ success: false, error: 'Please verify OTP first' });
+    if (Date.now() > entry.expires) { otpStore.delete(email); return res.json({ success: false, error: 'OTP has expired, please request a new one' }); }
+    user.password = password; await user.save(); otpStore.delete(email);
+    return res.json({ success: true, message: 'Password reset successful' });
   } catch (err) {
-    console.error("Error resetting password:", err);
-    return res.json({ success: false, error: "Server error" });
+    console.error('Error resetting password:', err);
+    return res.json({ success: false, error: 'Server error' });
   }
-});
+}
+app.post('/reset-password', handleResetPassword);
+app.post('/api/reset-password', handleResetPassword);
 
 app.get("/login", (req, res) => {
   if (req.session.user) {
@@ -339,8 +297,29 @@ app.post("/login", async (req, res) => {
   const { userType, email, password } = req.body;
 
   try {
-    if (!userType || !email || !password) {
+  // Request logging removed for production
+    // Basic required fields: email and password must be present
+    if (!email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // If userType is not provided, allow an admin login attempt first.
+    // This lets admins sign in from the same login form without selecting a role.
+    if (!userType) {
+      try {
+  const admin = await Admin.findOne({ username: email }).select('+password');
+        if (admin) {
+          if (!admin.password) return res.status(401).json({ error: 'Password not set for this account' });
+          if (admin.password !== password) return res.status(401).json({ error: 'Incorrect password' });
+          req.session.adminId = admin._id.toString();
+          return res.json({ success: true, redirectUrl: '/admin/dashboard' });
+        }
+      } catch (e) {
+        console.error('Admin lookup error:', e);
+        // fallthrough to require userType for non-admin users
+      }
+      // No admin found and no userType provided — ask client to select a role for non-admin accounts
+      return res.status(400).json({ error: 'Please select a role' });
     }
 
     let user;
@@ -651,20 +630,20 @@ app.get("/about_us", (req, res) => {
 //   res.redirect("http://localhost:5173/admin/login");
 // });
 
-// app.post("/api/admin/login", async (req, res) => {
-//   const { username, password } = req.body;
-//   try {
-//     const admin = await Admin.findOne({ username });
-//     if (!admin || admin.password !== password) {
-//       return res.status(401).json({ error: "Invalid username or password" });
-//     }
-//     req.session.adminId = admin._id.toString();
-//     res.json({ success: true, redirectUrl: "/api/admin" });
-//   } catch (err) {
-//     console.error("Login error:", err);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// });
+app.post("/api/admin/login", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const admin = await Admin.findOne({ username });
+    if (!admin || admin.password !== password) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+  req.session.adminId = admin._id.toString();
+  res.json({ success: true, redirectUrl: "/admin/dashboard" });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.get("/api/admin", async (req, res) => {
   try {

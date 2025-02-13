@@ -21,6 +21,7 @@ const Header = () => {
         setUser(res.data.user);
       } catch (err) {
         setUser(null);
+        setIsAdmin(false);
       }
     };
     checkSession();
@@ -190,9 +191,7 @@ const Header = () => {
                   Dashboard
                 </Link>
               )}
-              <a href="#" onClick={handleLogout}>
-                Logout
-              </a>
+              <a href="#" onClick={handleLogout}>Logout</a>
             </div>
           </div>
         ) : (

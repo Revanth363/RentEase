@@ -1,0 +1,73 @@
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btnFull {
+  width: 100%;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #FFC107, #ff9800);
+  color: #111;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff6f00, #f57c00);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.btnPrimary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btnSecondary {
+  background: transparent;
+  color: #FFC107;
+  border: 2px solid #FFC107;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: #FFC107;
+  color: #111;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #555;
+  color: #aaa;
+}
+
+.btnLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

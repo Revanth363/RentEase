@@ -1,0 +1,59 @@
+.selectWrapper {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.selectLabel {
+  display: block;
+  font-size: 13px;
+  color: white;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff5252;
+  margin-left: 2px;
+}
+
+.selectField {
+  width: 100%;
+  padding: 10px 12px;
+  background: #1d1d1d;
+  color: #fff;
+  border: 2px solid #2a2a2a;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: border-color 0.25s ease, background 0.25s ease;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.selectField:focus {
+  border-color: #FFC107;
+  background: #222;
+}
+
+.selectField:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.selectError {
+  border-color: #ff5252;
+}
+
+.selectErrorText {
+  display: block;
+  color: #ff5252;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.selectField option {
+  background: #1d1d1d;
+  color: #fff;
+}

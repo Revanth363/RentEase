@@ -21,6 +21,8 @@ import PaymentView from './admin/PaymentView';
 import PropertyView from './admin/PropertyView';
 import UserView from './admin/UserView';
 import WorkerPaymentView from './admin/WorkerPaymentView';
+import Auth from './pages/Auth';
+import AdminDashboard from './pages/AdminDashboard';
 
 const App = () => {
   const location = useLocation();
@@ -39,8 +41,8 @@ const App = () => {
           <Route path="/about_us" element={<div>About Us</div>} />
           <Route path="/contact_us" element={<div>Contact Us</div>} />
           <Route path="/faq" element={<div>FAQs</div>} />
-          <Route path="/register" element={<div>Register Page</div>} />
-          <Route path="/forgot-password" element={<div>Forgot Password Page</div>} />
+          <Route path="/register" element={<Auth initial="register" />} />
+          <Route path="/login" element={<Auth initial="login" />} />
           <Route path="/worker_register" element={<div>Worker Register Page</div>} />
           <Route path="/privacy_policy" element={<div>Privacy Policy Page</div>} />
           <Route path="/termsofservice" element={<div>Terms of Service Page</div>} />
