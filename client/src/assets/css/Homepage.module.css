@@ -1499,19 +1499,4 @@
     max-width: 280px;
     margin: 0 auto;
   }
-<<<<<<< HEAD:client/src/assets/css/Homepage.module.css
 }
-=======
-}
-/* 
-.hidden-section {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 2s, transform 1.5s ease-out;
-}
-
-.hidden-section.show {
-  opacity: 1;
-  transform: translateY(0);
-} */
->>>>>>> origin/Satish:client/src/assets/css/index.css
