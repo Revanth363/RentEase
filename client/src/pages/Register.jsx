@@ -191,35 +191,7 @@ export default function Register() {
             {show('location') && <div id="locationError" className={`${styles.error} ${styles.visible}`}>{validate.location}</div>}
           </div>
 
-          {userType === 'worker' && (
-            <div id="workerFields" className={styles.locationFields} style={{ display: 'block' }}>
-              <div className={styles.formGroup}>
-                <label htmlFor="serviceType">Service Type</label>
-                <select id="serviceType" name="serviceType" value={serviceType}
-                  onChange={(e) => { setServiceType(e.target.value); setFieldTouched('serviceType'); }} 
-                  onBlur={() => setFieldTouched('serviceType')}>
-                  <option value="" disabled>Select service type</option>
-                  <option value="cooking">Cooking</option>
-                  <option value="cleaning">Cleaning</option>
-                  <option value="laundry">Laundry</option>
-                  <option value="childcare">Childcare</option>
-                  <option value="eldercare">Elder Care</option>
-                  <option value="gardening">Gardening</option>
-                  <option value="other">Other</option>
-                </select>
-                {show('serviceType') && <div id="serviceTypeError" className={`${styles.error} ${styles.visible}`}>{validate.serviceType}</div>}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="experience">Experience (years)</label>
-                <input type="number" id="experience" name="experience" min="0" placeholder="Years of experience"
-                  value={experience} 
-                  onChange={(e) => { setExperience(e.target.value); setFieldTouched('experience'); }} 
-                  onBlur={() => setFieldTouched('experience')} />
-                {show('experience') && <div id="experienceError" className={`${styles.error} ${styles.visible}`}>{validate.experience}</div>}
-              </div>
-            </div>
-          )}
+          
 
           {userType === 'owner' && (
             <div id="homeownerFields" className={styles.locationFields} style={{ display: 'block' }}>

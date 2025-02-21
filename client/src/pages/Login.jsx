@@ -59,7 +59,7 @@ export default function Login({ onForgot }) {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        alert('Login successful!');
+        
         window.location.replace(data.redirectUrl); // Cleaner redirect, no history back
       } else {
         alert('Login failed: ' + (data.error || 'Unknown error'));

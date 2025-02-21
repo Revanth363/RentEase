@@ -1,4 +1,4 @@
-// src/App.jsx — FINAL VERSION (Protected Admin Panel)
+// src/App.jsx — FINAL & CLEAN VERSION
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { LoadingProvider } from './LoadingContext';
@@ -9,8 +9,11 @@ import HomePage from './pages/Homepage';
 import PropertySearch from './pages/PropertySearch';
 import PropertyDetails from './pages/PropertyDetails';
 import Auth from './pages/Auth';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import FAQ from './pages/FAQ';
 
-// Admin Pages
+// Admin Pages & Views (same as before)
 import AdminDashboard from './admin/AdminDashboard';
 import PropertyManagement from './admin/PropertyManagement';
 import UserManagement from './admin/UserManagement';
@@ -20,8 +23,6 @@ import WorkerPayments from './admin/WorkerPayments';
 import Notifications from './admin/Notifications';
 import MaintenanceRequests from './admin/MaintenanceRequests';
 import Messages from './admin/Messages';
-
-// Admin View Pages
 import BookingView from './admin/BookingView';
 import MaintenanceView from './admin/MaintenanceView';
 import NotificationView from './admin/NotificationView';
@@ -31,42 +32,49 @@ import PropertyView from './admin/PropertyView';
 import UserView from './admin/UserView';
 import WorkerPaymentView from './admin/WorkerPaymentView';
 
-// Admin Protection Component
 import AdminRoute from './components/AdminRoute';
 
 const App = () => {
   const location = useLocation();
+
+  // Hide Header on: Admin routes, Login, Register
+  const hideHeaderPaths = [
+    '/login',
+    '/register',
+  ];
+
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const shouldHideHeader = isAdminRoute || hideHeaderPaths.includes(location.pathname);
 
   return (
     <LoadingProvider>
       <div>
-        {/* Hide normal header on admin routes */}
-        {!isAdminRoute && <Header />}
+        {/* Only show Header on public pages */}
+        {!shouldHideHeader && <Header />}
 
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<PropertySearch />} />
           <Route path="/property" element={<PropertyDetails />} />
-          <Route path="/about_us" element={<div>About Us</div>} />
-          <Route path="/contact_us" element={<div>Contact Us</div>} />
-          <Route path="/faq" element={<div>FAQs</div>} />
+          <Route path="/about_us" element={<AboutUs />} />
+          <Route path="/contact_us" element={<ContactUs />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy_policy" element={<div>Privacy Policy</div>} />
           <Route path="/termsofservice" element={<div>Terms of Service</div>} />
 
-          {/* Auth */}
+          {/* Auth Routes — NO HEADER */}
           <Route path="/login" element={<Auth initial="login" />} />
           <Route path="/register" element={<Auth initial="register" />} />
 
-          {/* User Dashboards (you can protect later) */}
+          {/* User Dashboards */}
           <Route path="/tenant/tenant_dashboard" element={<div>Tenant Dashboard</div>} />
           <Route path="/owner_dashboard" element={<div>Owner Dashboard</div>} />
           <Route path="/worker_dashboard" element={<div>Worker Dashboard</div>} />
           <Route path="/worker_register" element={<div>Worker Register</div>} />
           <Route path="/property-management" element={<div>Property Management</div>} />
 
-          {/* ADMIN ROUTES — ALL PROTECTED */}
+          {/* ADMIN ROUTES — PROTECTED & NO HEADER */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/property-management" element={<AdminRoute><PropertyManagement /></AdminRoute>} />
           <Route path="/admin/user-management" element={<AdminRoute><UserManagement /></AdminRoute>} />
@@ -77,7 +85,7 @@ const App = () => {
           <Route path="/admin/maintenance-requests" element={<AdminRoute><MaintenanceRequests /></AdminRoute>} />
           <Route path="/admin/messages" element={<AdminRoute><Messages /></AdminRoute>} />
 
-          {/* Admin Detail Views — Protected */}
+          {/* Admin Detail Views */}
           <Route path="/admin/booking/:id" element={<AdminRoute><BookingView /></AdminRoute>} />
           <Route path="/admin/maintenance/:id" element={<AdminRoute><MaintenanceView /></AdminRoute>} />
           <Route path="/admin/notification/:id" element={<AdminRoute><NotificationView /></AdminRoute>} />

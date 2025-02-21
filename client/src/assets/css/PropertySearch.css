@@ -33,15 +33,16 @@
   gap: 2rem;
   margin-bottom: 2rem;
   padding: 0 20px;
+  margin-left:70px;
 }
 
 .property-search-page .property-card {
   background: white;
-  border-radius: 0;
+  border-radius: 5px;
   overflow: hidden;
   box-shadow: var(--shadow);
   transition: transform 0.3s, box-shadow 0.3s;
-  width: 300px;
+  width: 340px;
   margin: 0 auto;
 }
 
@@ -134,7 +135,7 @@
 }
 
 .property-search-page .btn {
-  padding: 0.5rem 1rem;
+  padding: 15px 20px ;
   background: var(--secondary);
   color: white;
   border: none;
@@ -146,16 +147,17 @@
 }
 
 .property-search-page .btn:hover {
-  color: black;
+  color: white;
 }
 
 .property-search-page .wishlist-btn {
   background: #ffc109;
   color: #777;
   border: 1px solid #ddd;
-  width: 90px;
+  width: 100px;
   height: 40px;
-  margin-top: 14px;
+  margin-top: 8px;
+  border-radius:4px;
 }
 
 .property-search-page .wishlist-btn:hover {

@@ -98,28 +98,43 @@ exports.retryPayment = async (req, res) => {
   }
 };
 
+// controllers/adminPaymentController.js
+
 exports.getAllPayments = async (req, res) => {
   try {
     const payments = await Payment.find()
       .populate('tenantId', 'firstName lastName')
-      .populate('bookingId', 'propertyId startDate endDate')
-      .sort({ createdAt: -1 })
+      .populate({
+        path: 'bookingId',
+        populate: { path: 'propertyId', select: 'name' }
+      })
+      .sort({ createdAt: -1 })   // newest first
+      .limit(10)                  // Only latest 10
       .lean();
 
     const formattedPayments = payments.map(p => ({
-      id: p._id.toString(),
+      _id: p._id.toString(),
+      id: p._id.toString(), // for frontend compatibility
       userName: p.tenantId
-        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
-        : p.userName || 'N/A',
+        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`.trim()
+        : p.userName || 'Unknown',
+      tenantId: p.tenantId?._id?.toString(),
       amount: p.amount,
-      status: p.status,
+      status: p.status || 'Pending',
+      paymentMethod: p.paymentMethod || 'N/A',
+      transactionId: p.transactionId || null,
       paymentDate: p.paymentDate,
-      bookingId: p.bookingId?._id.toString(),
-      paymentMethod: p.paymentMethod,
-      transactionId: p.transactionId,
+      dueDate: p.dueDate,
+      receiptUrl: p.receiptUrl,
+      propertyName: p.bookingId?.propertyId?.name || '—',
+      createdAt: p.createdAt,
     }));
 
-    res.json({ payments: formattedPayments });
+    res.json({ 
+      payments: formattedPayments,
+      total: formattedPayments.length  // will be 10 (or less if not enough)
+    });
+
   } catch (error) {
     console.error('getAllPayments error:', error);
     res.status(500).json({ error: error.message });

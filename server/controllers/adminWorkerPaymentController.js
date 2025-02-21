@@ -52,32 +52,40 @@ exports.getWorkerPaymentDetails = async (req, res) => {
   }
 };
 
+// controllers/adminWorkerPaymentController.js
+
 exports.getAllWorkerPayments = async (req, res) => {
   try {
     const workerPayments = await WorkerPayment.find()
       .populate('tenantId', 'firstName lastName')
       .populate('workerId', 'firstName lastName')
       .sort({ createdAt: -1 })
+      .limit(10)  // Only latest 10 payments
       .lean();
 
     const formattedPayments = workerPayments.map(p => ({
+      _id: p._id.toString(),
       id: p._id.toString(),
       paidByName: p.tenantId
-        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
-        : p.userName || 'N/A',
-      paidById: p.tenantId?._id.toString(),
+        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`.trim()
+        : p.userName || 'Unknown Tenant',
+      paidById: p.tenantId?._id?.toString(),
       receivedByName: p.workerId
-        ? `${p.workerId.firstName} ${p.workerId.lastName}`
-        : 'N/A',
-      receivedById: p.workerId?._id.toString(),
-      amount: p.amount,
-      status: p.status,
+        ? `${p.workerId.firstName} ${p.workerId.lastName}`.trim()
+        : 'Unknown Worker',
+      receivedById: p.workerId?._id?.toString(),
+      status: p.status || 'Paid',
       paymentDate: p.paymentDate,
-      paymentMethod: p.paymentMethod,
-      transactionId: p.transactionId,
+      paymentMethod: p.paymentMethod || 'N/A',
+      transactionId: p.transactionId || '—',
+      createdAt: p.createdAt,
     }));
 
-    res.json({ workerPayments: formattedPayments });
+    res.json({
+      workerPayments: formattedPayments,
+      total: formattedPayments.length  // will be ≤10
+    });
+
   } catch (error) {
     console.error('getAllWorkerPayments error:', error);
     res.status(500).json({ error: error.message });

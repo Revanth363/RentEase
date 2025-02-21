@@ -1,0 +1,112 @@
+/* src/pages/FAQ.css */
+/* Fully isolated + Poppins applied to EVERYTHING including answers */
+
+.faq-page {
+  font-family: "Poppins", sans-serif;     /* ← This forces Poppins on ALL text */
+   background-color: rgba(226, 194, 187, 0.445);
+  color: #333;
+  min-height: 100vh;
+}
+
+.faq-page .container {
+  position: relative;
+  top: 10vh;
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.faq-page h1 {
+  text-align: center;
+  font-size: 32px;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.faq-page .subheading {
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+  margin-bottom: 30px;
+  font-weight: 400;
+}
+
+.faq-page .faq-item {
+  border-bottom: 1px solid #eee;
+}
+
+.faq-page .faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 18px;
+  font-weight: 500;           /* ← Question weight */
+  color: #1a1a1a;
+  border: none;
+  width: 100%;
+  text-align: left;
+  outline: none;
+}
+
+.faq-page .faq-question:hover {
+  background-color: #f9f9f9;
+}
+
+.faq-page .faq-question i {
+  color: #ffcc00;
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.faq-page .toggle-icon {
+  color: #ffcc00;
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.faq-page .faq-answer {
+  padding: 0 20px;
+  background-color: #fafafa;
+  color: #555;
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;           /* ← Answer uses normal Poppins */
+  display: none;
+  overflow: hidden;
+}
+
+.faq-page .faq-answer.active {
+  display: block;
+  padding-bottom: 16px;
+}
+
+.faq-page .rotate {
+  transform: rotate(180deg);
+}
+
+.faq-page .contact {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 16px;
+  color: #777;
+  font-weight: 400;
+}
+
+.faq-page .contact a {
+  color: #ffcc00;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.faq-page .contact a:hover {
+  color: #e6b800;
+}

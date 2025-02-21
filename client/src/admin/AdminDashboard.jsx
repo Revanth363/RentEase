@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css'; // Updated import
 import Chart from 'chart.js/auto';
 import { fetchAdminDashboard } from '../services/api';
+import AdminNavbar from '../components/AdminNavbar';
 
 const AdminDashboard = () => {
   const { setIsLoading } = useLoading();
@@ -229,18 +230,7 @@ const AdminDashboard = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>Admin Dashboard</h1>
-      <nav className={styles.navbar}>
-        <Link to="#overview">Overview</Link>
-        <Link to="/admin/property-management">Properties</Link>
-        <Link to="/admin/user-management">Users</Link>
-        <Link to="/admin/service-bookings">Bookings</Link>
-        <Link to="/admin/payments">Payments</Link>
-        <Link to="/admin/worker-payments">Worker Payments</Link>
-        <Link to="/admin/notifications">Notifications</Link>
-        <Link to="/admin/maintenance-requests">Maintenance Requests</Link>
-        <Link to="/admin/messages">Messages</Link>
-        <Link to="#reports">Reports</Link>
-      </nav>
+      <AdminNavbar />
       <section id="overview" className={styles.section}>
         <h2 className={styles.h2}>Dashboard Overview</h2>
         <div className={styles['stats-grid']}>

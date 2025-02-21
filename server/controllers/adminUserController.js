@@ -204,3 +204,123 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
+// controllers/adminUserController.js
+exports.getAllUsers = async (req, res) => {
+  try {
+    const {
+      name = '', email = '', phone = '', role = '', status = '',
+      fromDate = '', toDate = '', address = '',
+      page = 1, limit = 25
+    } = req.query;
+
+    const currentPage = parseInt(page);
+    const currentLimit = parseInt(limit);
+    const skip = (currentPage - 1) * currentLimit;
+
+    const hasFilter = name || email || phone || role || status || fromDate || toDate || address;
+
+    // Build MongoDB regex filter
+    const buildFilter = () => {
+      const filter = {};
+
+      if (role) filter.userType = role;
+      if (status) filter.status = status;
+
+      if (name) {
+        const regex = new RegExp(name.trim(), 'i');
+        filter.$or = [
+          { firstName: regex },
+          { lastName: regex },
+          { $expr: { $regexMatch: { input: { $concat: ["$firstName", " ", "$lastName"] }, regex } } }
+        ];
+      }
+
+      if (email) filter.email = { $regex: email.trim(), $options: 'i' };
+      if (phone) filter.phone = { $regex: phone.trim(), $options: 'i' };
+      if (address) filter.location = { $regex: address.trim(), $options: 'i' };
+
+      if (fromDate || toDate) {
+        filter.createdAt = {};
+        if (fromDate) filter.createdAt.$gte = new Date(fromDate);
+        if (toDate) {
+          const end = new Date(toDate);
+          end.setHours(23, 59, 59, 999);
+          filter.createdAt.$lte = end;
+        }
+      }
+
+      return filter;
+    };
+
+    const filter = buildFilter();
+
+    // NO FILTER → Show only 5 latest users
+    if (!hasFilter) {
+      const latest = await Promise.all([
+        Tenant.find().sort({ createdAt: -1 }).limit(5).lean(),
+        Owner.find().sort({ createdAt: -1 }).limit(5).lean(),
+        Worker.find().sort({ createdAt: -1 }).limit(5).lean(),
+      ]);
+
+      let users = [...latest[0], ...latest[1], ...latest[2]]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+
+      const formatted = users.map(u => ({
+        id: u._id.toString(),
+        firstName: u.firstName,
+        lastName: u.lastName,
+        userType: u.userType || 'tenant',
+        email: u.email,
+        phone: u.phone || 'N/A',
+        address: u.location || 'N/A',
+        status: u.status || 'Active',
+        createdAt: u.createdAt,
+      }));
+
+      return res.json({ users: formatted, total: formatted.length });
+    }
+
+    // WITH FILTER → Full search + correct pagination
+    const collections = [
+      { model: Tenant, type: 'tenant' },
+      { model: Owner, type: 'owner' },
+      { model: Worker, type: 'worker' }
+    ];
+
+    const promises = collections.map(async ({ model, type }) => {
+      if (role && role !== type) return [];
+      return await model.find(filter)
+        .select('firstName lastName email phone location status createdAt userType')
+        .lean();
+    });
+
+    const results = await Promise.all(promises);
+    let allUsers = results.flat();
+
+    // Sort by newest first
+    allUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const total = allUsers.length;
+    const paginated = allUsers.slice(skip, skip + currentLimit);
+
+    const formatted = paginated.map(u => ({
+      id: u._id.toString(),
+      firstName: u.firstName,
+      lastName: u.lastName,
+      userType: u.userType,
+      email: u.email,
+      phone: u.phone || 'N/A',
+      address: u.location || 'N/A',
+      status: u.status || 'Active',
+      createdAt: u.createdAt,
+    }));
+
+    res.json({ users: formatted, total });
+
+  } catch (error) {
+    console.error('getAllUsers error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

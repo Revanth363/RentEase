@@ -1,0 +1,137 @@
+/* AboutUs.css - Scoped to AboutUs page only */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+
+/* Scoped resets - only affect AboutUs page */
+.about-us-page * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.about-us-page {
+  background-color: rgba(226, 194, 187, 0.445);
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.about-us-page .tagline {
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.about-us-page .nav-button {
+  background-color: #ffcc00;
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.about-us-page .whole_container {
+  position: relative;
+  top: 10vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-us-page .container {
+  width: 80%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 15px;
+}
+
+.about-us-page .about-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+  .about-us-page .about-section {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.about-us-page .about-info,
+.about-us-page .team-info {
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.about-us-page .about-info h2,
+.about-us-page .team-info h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.about-us-page .mission-item,
+.about-us-page .feature-item,
+.about-us-page .team-member {
+  margin-bottom: 1.5rem;
+}
+
+.about-us-page .mission-item h3,
+.about-us-page .feature-item h3,
+.about-us-page .team-member h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: black;
+}
+
+.about-us-page .feature-list {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 768px) {
+  .about-us-page .feature-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-us-page .container {
+    width: 100%;
+  }
+}
+
+.about-us-page .team-member {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.about-us-page .team-member-info {
+  margin-left: 1rem;
+}
+
+.about-us-page .team-member img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #ffcc00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.about-us-page .team-member h3 {
+  margin-bottom: 0.25rem;
+}
+
+.about-us-page .team-member p {
+  font-size: 0.9rem;
+}

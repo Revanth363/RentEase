@@ -1,5 +1,6 @@
 /* Login.module.css - Scoped styles for Login component */
 
+/* ❗ Fix 1: Remove page scrolling */
 .loginPageRoot {
   display: flex;
   align-items: center;
@@ -9,18 +10,21 @@
   color: #fff;
   margin: 0;
   padding: 0;
+  overflow: hidden; /* <-- NO SCROLL */
 }
 
+/* ❗ Fix 2: Slightly bigger box + better spacing */
 .loginContainer {
   background-color: rgba(18, 18, 18, 0.75);
   border: 1px solid rgba(42, 42, 42, 0.5);
   border-radius: 18px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
-  width: 330px;
+
+  width: 380px;         /* <-- increased from 330px */
   max-width: 100%;
-  min-height: 300px;
-  padding: 30px 28px;
+  min-height: 350px;    /* <-- increased from 300px */
+  padding: 40px 32px;   /* <-- more breathing room */
   margin: 10px 0;
 }
 
@@ -29,7 +33,7 @@
   font-weight: bold;
   color: #FFC107;
   text-align: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   padding: 0;
 }
 
@@ -37,8 +41,8 @@
   font-size: 13px;
   color: white;
   display: block;
-  margin-top: 8px;
-  margin-bottom: 3px;
+  margin-top: 10px;
+  margin-bottom: 4px;
 }
 
 .loginContainer form {
@@ -46,12 +50,13 @@
   flex-direction: column;
 }
 
+/* INPUTS */
 .loginPageRoot input,
 .loginPageRoot select {
   background: #1d1d1d;
   color: #fff;
   border: 2px solid #2a2a2a;
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   font-size: 13px;
 }
@@ -81,23 +86,24 @@
   font-size: 14px;
   cursor: pointer;
   text-align: right;
-  margin-top: 5px;
+  margin-top: 6px;
   background: none;
   border: none;
   padding: 0;
 }
 
+/* BUTTON */
 .loginPageRoot button[type='submit'] {
   background: linear-gradient(135deg, #FFC107, #ff9800);
   color: #111;
   border: none;
-  padding: 10px;
+  padding: 12px;
   border-radius: 10px;
   font-size: 15px;
   cursor: pointer;
   font-weight: bold;
   width: 100%;
-  margin-top: 12px;
+  margin-top: 15px;
   transition: background 0.3s, transform 0.25s;
   transform: none;
 }
@@ -131,6 +137,7 @@
   display: none;
 }
 
+/* PASSWORD FIELD */
 .passwordContainer {
   position: relative;
   width: 100%;
@@ -144,22 +151,20 @@
 
 .togglePassword {
   position: absolute;
-  right: 10px;
-  top: 50%;
+  right: 12px;
+  top: 52%;
   transform: translateY(-50%);
   cursor: pointer;
+  font-size: 16px;
   color: #999;
-  transition: color 0.2s;
+  transition: color 0.2s ease;
 }
 
-.togglePassword:hover {
+.togglePassword:hover i {
   color: #FFC107;
 }
 
-.togglePassword i {
-  font-size: 16px;
-}
-
+/* MODAL */
 .modalBg {
   position: fixed;
   top: 0;
@@ -207,30 +212,3 @@
 .modalBtn:hover {
   background-color: #ff6f00;
 }
-
-.passwordContainer {
-  position: relative;
-  width: 100%;
-}
-
-.passwordContainer input {
-  width: 100%;
-  padding-right: 40px;
-  box-sizing: border-box;
-}
-
-.togglePassword {
-  position: absolute;
-  right: 12px;
-  top: 52%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 16px;
-  color: #999;
-  transition: color 0.2s ease;
-}
-
-.togglePassword:hover i {
-  color: #FFC107;
-}
-

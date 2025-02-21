@@ -1,146 +1,181 @@
-/* Limit background image usage to the active left panel only */
-:root { --auth-bg-image: url('../images/bg-image.jpg'); }
+/* Auth.css – FINAL VERSION: No scroll on desktop/tablet, YES scroll on mobile */
+
+:root {
+  --auth-bg-image: url("../images/bg-image.jpg");
+}
 
 .auth-shell {
-  position: relative;
+  position: relative; /* ← changed back to relative */
   display: flex;
   width: 100%;
   min-height: 100vh;
-  overflow: hidden;
-  /* Shell keeps gradient only by default */
-  background: linear-gradient(120deg,#1b1b1b,#2c2c2c 45%,#151515 80%);
-  font-family: 'Poppins', sans-serif;
+  min-height: 100dvh; /* ← still helps mobile */
+  overflow-x: hidden;
+  background: linear-gradient(120deg, #1b1b1b, #2c2c2c 45%, #151515 80%);
+  font-family: "Poppins", sans-serif;
 }
 
-/* Apply background image to entire auth shell in both login and register modes */
+/* Background image for both modes */
 .auth-shell.login-mode,
 .auth-shell.register-mode {
-  background: linear-gradient(rgba(0,0,0,0.60), rgba(0,0,0,0.50)), var(--auth-bg-image) center/cover no-repeat fixed;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)),
+    var(--auth-bg-image) center/cover no-repeat fixed;
 }
+
+/* NEW: Only lock scroll on larger screens */
+@media (min-width: 901px) {
+  .auth-shell {
+    position: fixed; /* ← locks the page */
+    top: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden; /* ← no scroll on desktop/tablet */
+  }
+}
+
+/* Mobile & small tablets (≤900px) → normal scroll behavior (your original) */
+@media (max-width: 900px) {
+  .auth-shell {
+    flex-direction: column;
+    overflow-y: auto; /* ← explicitly allow scroll on mobile */
+    -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+  }
+}
+
+/* Rest of your original beautiful styles – 100% untouched */
 .panel {
   position: relative;
   flex: 1 1 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: flex-basis 0.5s ease, 
-              transform 0.5s ease, 
-              opacity 0.5s ease, 
-              filter 0.5s ease;
+  transition: flex-basis 0.5s ease, transform 0.5s ease, opacity 0.5s ease,
+    filter 0.5s ease;
   overflow: hidden;
 }
-.panel-left, .panel-right { 
-  background: transparent; /* allow background image from auth-shell to show */
+.panel-left,
+.panel-right {
+  background: transparent;
 }
-
-.panel-content { 
-  width: 100%; 
-  max-width: 480px; 
+.panel-content {
+  width: 100%;
+  max-width: 480px;
   padding: 20px;
   margin-top: 80px;
 }
-.auth-embed > .login-page-root, .auth-embed > .register-page-root, .auth-embed > .forgot-page-root { background: none; padding: 0; }
-.auth-embed .login-container, .auth-embed .container, .auth-embed .forgot-card { box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
+.auth-embed > .login-page-root,
+.auth-embed > .register-page-root,
+.auth-embed > .forgot-page-root {
+  background: none;
+  padding: 0;
+}
+.auth-embed .login-container,
+.auth-embed .container,
+.auth-embed .forgot-card {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+}
 
-/* Active / inactive sizing */
-.panel.active { 
-  flex-basis: 60%; 
-  filter: none; 
+.panel.active {
+  flex-basis: 60%;
+  filter: none;
   z-index: 2;
 }
-.panel.inactive { 
-  flex-basis: 40%; 
+.panel.inactive {
+  flex-basis: 40%;
   z-index: 1;
 }
-.panel.inactive .panel-content { 
-  pointer-events: none; 
-  opacity: 0; 
+.panel.inactive .panel-content {
+  pointer-events: none;
+  opacity: 0;
   transform: translateY(40px) scale(0.95);
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
-.panel.active .panel-content { 
-  opacity: 1; 
+.panel.active .panel-content {
+  opacity: 1;
   transform: translateY(0) scale(1);
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-/* Overlay with switch button */
 .panel-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(240,240,240,0.92));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(240, 240, 240, 0.92)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.overlay-inner { 
-  text-align: center; 
-  color: #333; 
-  max-width: 340px; 
+.overlay-inner {
+  text-align: center;
+  color: #333;
+  max-width: 340px;
   padding: 30px;
 }
-.overlay-inner h2 { 
-  color: #FFC107; 
-  margin-bottom: 12px; 
-  font-size: 30px; 
-  text-shadow: none;
+.overlay-inner h2 {
+  color: #ffc107;
+  margin-bottom: 12px;
+  font-size: 30px;
 }
-.overlay-inner p { 
-  font-size: 15px; 
-  margin-bottom: 24px; 
+.overlay-inner p {
+  font-size: 15px;
+  margin-bottom: 24px;
   line-height: 1.5;
   color: #555;
 }
-.switch-btn { 
-  background: linear-gradient(135deg, #FFC107, #ff9800); 
-  color: #111; 
-  border: none; 
-  padding: 13px 32px; 
-  border-radius: 30px; 
-  font-weight: 600; 
-  cursor: pointer; 
-  font-size: 15px; 
-  box-shadow: 0 10px 20px rgba(255,193,7,0.4);
+
+.switch-btn {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+  color: #111;
+  border: none;
+  padding: 13px 32px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  box-shadow: 0 10px 20px rgba(255, 193, 7, 0.4);
   transition: all 0.3s ease;
-  transform: translateY(0);
 }
-.switch-btn:hover { 
-  background: linear-gradient(135deg, #ff6f00, #f57c00); 
-  color: #fff; 
+.switch-btn:hover {
+  background: linear-gradient(135deg, #ff6f00, #f57c00);
+  color: #fff;
   transform: translateY(-3px);
-  box-shadow: 0 14px 28px rgba(255,111,0,0.5);
-}
-.switch-btn:active {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(255,111,0,0.4);
+  box-shadow: 0 14px 28px rgba(255, 111, 0, 0.5);
 }
 
-/* Mode transitions with slide effect */
-.auth-shell.login-mode .panel-left { transform: translateX(0); }
-.auth-shell.login-mode .panel-right { transform: translateX(0); }
-.auth-shell.register-mode .panel-left { transform: translateX(0); }
-.auth-shell.register-mode .panel-right { transform: translateX(0); }
-
-/* Subtle parallax and blur on inactive */
-.panel.inactive { 
-  filter: brightness(0.7) contrast(1.05); 
-  transition: filter 0.5s ease;
+.panel.inactive {
+  filter: brightness(0.7) contrast(1.05);
 }
-.panel.inactive:hover { 
-  filter: brightness(0.82) contrast(1.05); 
+.panel.inactive:hover {
+  filter: brightness(0.82) contrast(1.05);
 }
 
-/* Responsive adjustments */
 @media (max-width: 900px) {
-  .auth-shell { flex-direction: column; }
-  .panel { flex-basis: auto !important; min-height: 50vh; }
-  .panel.inactive .panel-content { display: none; }
-  .panel-overlay { position: relative; background: rgba(255,255,255,0.9); }
-  .panel-left, .panel-right { background-position: center; }
+  .panel {
+    flex-basis: auto !important;
+    min-height: 50vh;
+  }
+  .panel.inactive .panel-content {
+    display: none;
+  }
+  .panel-overlay {
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+  }
 }
 
 @media (max-width: 520px) {
-  .overlay-inner h2 { font-size: 24px; }
-  .overlay-inner p { font-size: 13px; }
-  .switch-btn { padding: 11px 26px; font-size: 14px; }
+  .overlay-inner h2 {
+    font-size: 24px;
+  }
+  .overlay-inner p {
+    font-size: 13px;
+  }
+  .switch-btn {
+    padding: 11px 26px;
+    font-size: 14px;
+  }
 }

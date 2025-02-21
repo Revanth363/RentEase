@@ -43,7 +43,7 @@
   position: sticky;
   top: 0;
   background: #333;
-  padding: 28px;
+  padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -61,6 +61,7 @@
   font-weight: 500;
   transition: all 0.3s ease;
   font-family: 'Poppins', Arial, sans-serif;
+  margin-left:38px;
 }
 
 .container .navbar a:hover {

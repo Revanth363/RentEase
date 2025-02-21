@@ -13,13 +13,13 @@
 
 /* Desktop Sidebar */
 .filter-sidebar {
-  width: 270px;
+  width: 290px;
   background: white;
   padding: 20px;
   box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
 
   /* FIX: sidebar height below fixed header */
-  height: calc(95vh - 70px);
+  height: calc(95vh - 120px);
 
   color: #333;
   
@@ -27,7 +27,9 @@
   left: 0;
 
   /* FIX: This replaces margin-top: 65px */
-  top: 70px;
+  top: 100px;
+  margin-left:15px;
+  border-radius: 10px;
 
   overflow-y: auto;
   overflow-x: hidden;

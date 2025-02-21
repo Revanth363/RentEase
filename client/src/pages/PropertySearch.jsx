@@ -427,9 +427,7 @@ const PropertySearch = () => {
           )}
         </ul>
 
-        <Link to="/" className="back-link">
-          Back to Home
-        </Link>
+        
       </section>
     </div>
   );

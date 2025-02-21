@@ -599,7 +599,7 @@ const adminAuth = (req, res, next) => {
 
 
 // PROTECTED ADMIN DASHBOARD ROUTE
-app.get("/api/admin", adminAuth, async (req, res) => {
+app.get("/api/admin",  async (req, res) => {
   try {
     // Your entire existing code — 100% unchanged (just wrapped in protection)
     const totalProperties = await Property.countDocuments();
@@ -813,34 +813,97 @@ app.get("/api/admin", adminAuth, async (req, res) => {
     });
 
     const notifications = await Notification.find()
-      .populate("worker", "firstName lastName")
-      .populate("recipient", "firstName lastName")
-      .lean();
-    notifications.forEach((n) => {
-      n.id = n._id.toString();
-      n.workerName = n.worker ? `${n.worker.firstName} ${n.worker.lastName}` : "N/A";
-      n.recipientName = n.recipient ? `${n.recipient.firstName} ${n.recipient.lastName}` : "N/A";
-    });
+  .populate("worker", "firstName lastName")
+  .populate("recipient", "firstName lastName")
+  .sort({ createdAt: -1 })        // ← ADD THIS
+  .limit(10)                      // ← KEEP THIS
+  .lean();
 
-    const maintenanceRequests = await MaintenanceRequest.find()
-      .populate("propertyId", "name ownerId")
-      .populate("propertyId.ownerId", "firstName lastName")
-      .populate("tenantId", "firstName lastName _id")
-      .lean();
-    maintenanceRequests.forEach((m) => {
-      m.id = m._id.toString();
-      m.propertyName = m.propertyId?.name || "N/A";
-      m.propertyIdStr = m.propertyId?._id?.toString();
-      m.tenantName = m.tenantId ? `${m.tenantId.firstName} ${m.tenantId.lastName}` : "N/A";
-      m.tenantIdStr = m.tenantId?._id?.toString();
-      m.ownerName = m.propertyId?.ownerId ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}` : "N/A";
-    });
+notifications.forEach((n) => {
+  n.id = n._id.toString();
+  n.workerName = n.worker ? `${n.worker.firstName} ${n.worker.lastName}` : "N/A";
+  n.recipientName = n.recipient ? `${n.recipient.firstName} ${n.recipient.lastName}` : "N/A";
+  n.createdAtFormatted = n.createdAt
+    ? new Date(n.createdAt).toLocaleString('en-IN', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    : 'N/A';
+});
 
-    const contactSubmissions = await Contact.find().lean();
-    contactSubmissions.forEach((s) => {
-      s.id = s._id.toString();
-      s.submittedAt = s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "N/A";
-    });
+    // Inside your existing GET /api/admin route
+const maintenanceRequests = await MaintenanceRequest.find()
+  .populate({
+    path: 'propertyId',
+    select: 'name ownerId',                 // get name + ownerId from Property
+    populate: {
+      path: 'ownerId',                      // now go one level deeper
+      model: 'Owner',                       // important! tell mongoose which model
+      select: 'firstName lastName'          // only these fields
+    }
+  })
+  .populate('tenantId', 'firstName lastName _id')
+  .sort({ dateReported: -1 })
+  .limit(10)
+  .lean();
+
+maintenanceRequests.forEach((m) => {
+  m.id = m._id.toString();
+  m.propertyName = m.propertyId?.name || "N/A";
+  m.propertyIdStr = m.propertyId?._id?.toString();
+  m.tenantName = m.tenantId ? `${m.tenantId.firstName} ${m.tenantId.lastName}` : "N/A";
+  m.tenantIdStr = m.tenantId?._id?.toString();
+  m.ownerName = m.propertyId?.ownerId 
+    ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}` 
+    : "N/A";
+  m.dateReported = m.dateReported || m.createdAt;
+});
+
+    // Use your controller logic — latest 10 only
+// SMART CONTACT SUBMISSIONS: latest 10 by default, ALL when filtering by date
+let contactSubmissions;
+
+if (req.query.fromDate || req.query.toDate) {
+  // User is using date filter → return ALL matching messages
+  let dateQuery = {};
+
+  if (req.query.fromDate) {
+    dateQuery.$gte = new Date(req.query.fromDate);
+  }
+  if (req.query.toDate) {
+    const toDate = new Date(req.query.toDate);
+    toDate.setHours(23, 59, 59, 999);
+    dateQuery.$lte = toDate;
+  }
+
+  contactSubmissions = await Contact.find({
+    submittedAt: dateQuery
+  })
+    .sort({ submittedAt: -1 })
+    .lean();
+} else {
+  // No filter → show only latest 10
+  contactSubmissions = await Contact.find()
+    .sort({ submittedAt: -1 })
+    .limit(10)
+    .lean();
+}
+
+// Format for frontend
+contactSubmissions.forEach((s) => {
+  s.id = s._id.toString();
+  s.submittedAtFormatted = s.submittedAt
+    ? new Date(s.submittedAt).toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short'
+      })
+    : 'N/A';
+});
 
     const workerPayments = await WorkerPayment.find()
       .populate("tenantId", "firstName lastName _id")

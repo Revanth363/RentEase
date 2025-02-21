@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = '/api';
+export { API_URL };
 
 export const fetchProperties = async () => {
   try {
@@ -63,13 +64,15 @@ export const fetchAdminProperties = async () => {
   }
 };
 
-export const fetchAdminUsers = async () => {
+export const fetchAdminUsers = async (queryString = '') => {
   try {
-    const response = await axios.get(`${API_URL}/admin`, { withCredentials: true });
-    return response.data.users || [];
+    const response = await axios.get(`${API_URL}/admin/users${queryString}`, {
+      withCredentials: true
+    });
+    return response.data; // → { users: [...], total: 123 }
   } catch (error) {
     console.error('Error fetching admin users:', error);
-    return [];
+    return { users: [], total: 0 };
   }
 };
 

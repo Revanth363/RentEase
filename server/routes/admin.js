@@ -60,7 +60,15 @@ router.post("/payment/:id/retry", adminPaymentController.retryPayment);
 router.get("/payments", adminPaymentController.getAllPayments);
 
 // Worker Payments list route
-router.get("/worker-payments", adminWorkerPaymentController.getAllWorkerPayments);
-router.get("/worker-payment/:id", adminWorkerPaymentController.getWorkerPaymentDetails);
+router.get(
+  "/worker-payments",
+  adminWorkerPaymentController.getAllWorkerPayments
+);
+router.get(
+  "/worker-payment/:id",
+  adminWorkerPaymentController.getWorkerPaymentDetails
+);
+
+router.get("/users", adminUserController.getAllUsers); // ← Add this line
 
 module.exports = router;

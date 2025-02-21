@@ -5,59 +5,120 @@ const Tenant = require('../models/tenant');
 
 exports.getPropertyManagement = async (req, res) => {
   try {
-    const properties = await Property.find()
-      .populate('ownerId', 'firstName lastName email')
-      .populate('tenantId', 'firstName lastName email')
-      .lean();
+    const {
+      search = '',
+      ownerName = '',
+      type = '',
+      isRented = '',
+      minPrice = '',
+      maxPrice = '',
+      status = '',
+      verified = '',
+      fromDate = '',
+      toDate = '',
+      page = 1,
+      limit = 25
+    } = req.query;
 
-    const enhancedProperties = properties.map(prop => ({
-      id: prop._id.toString(),
-      name: prop.name,
-      owner: prop.ownerId
-        ? {
-            _id: prop.ownerId._id.toString(),
-            firstName: prop.ownerId.firstName,
-            lastName: prop.ownerId.lastName,
-            email: prop.ownerId.email,
-          }
-        : null,
-      tenant: prop.tenantId
-        ? {
-            _id: prop.tenantId._id.toString(),
-            firstName: prop.tenantId.firstName,
-            lastName: prop.tenantId.lastName,
-            email: prop.tenantId.email,
-          }
-        : null,
-      location: prop.location,
-      address: prop.address,
-      type: prop.type,
-      subtype: prop.subtype,
-      status: prop.status,
-      isRented: prop.isRented,
-      isVerified: prop.isVerified,
-      price: prop.price,
-      securityDeposit: prop.securityDeposit,
-      maintenance: prop.maintenance,
-      availableFrom: prop.availableFrom,
-      leaseDuration: prop.leaseDuration,
-      beds: prop.beds,
-      baths: prop.baths,
-      furnished: prop.furnished,
-      amenities: prop.amenities,
-      description: prop.description,
-      contactNumber: prop.contactNumber,
-      alternativeNumber: prop.alternativeNumber,
-      contactEmail: prop.contactEmail,
-      images: prop.images,
-      createdAt: prop.createdAt,
-      updatedAt: prop.updatedAt,
+    const currentPage = Math.max(1, parseInt(page, 10));
+    const currentLimit = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (currentPage - 1) * currentLimit;
+
+    const hasFilter = search || ownerName || type || isRented !== '' || minPrice || maxPrice || status || verified !== '' || fromDate || toDate;
+
+    const filter = {};
+    if (type) filter.type = type;
+    if (status) filter.status = status;
+    if (isRented !== '') filter.isRented = isRented === 'true';
+    if (verified !== '') filter.isVerified = verified === 'true';
+
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    if (fromDate || toDate) {
+      filter.createdAt = {};
+      if (fromDate) filter.createdAt.$gte = new Date(fromDate);
+      if (toDate) {
+        const end = new Date(toDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end;
+      }
+    }
+
+    let textSearch = {};
+    if (search) {
+      const term = search.trim();
+      textSearch = {
+        $or: [
+          { name: { $regex: term, $options: 'i' } },
+          { location: { $regex: term, $options: 'i' } }
+        ]
+      };
+    }
+
+    let ownerMatch = {};
+    if (ownerName) {
+      const owners = await Owner.find({
+        $or: [
+          { firstName: { $regex: ownerName.trim(), $options: 'i' } },
+          { lastName: { $regex: ownerName.trim(), $options: 'i' } },
+          { $expr: { $regexMatch: { input: { $concat: ['$firstName', ' ', '$lastName'] }, regex: ownerName.trim(), options: 'i' } } }
+        ]
+      }).select('_id');
+
+      const ownerIds = owners.map(o => o._id);
+      if (ownerIds.length === 0) {
+        return res.json({ properties: [], total: 0 });
+      }
+      ownerMatch.ownerId = { $in: ownerIds };
+    }
+
+    let properties;
+    let total;
+
+    if (!hasFilter) {
+      // First load: only 10 latest
+      properties = await Property.find()
+        .populate('ownerId', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean();
+
+      total = properties.length;
+    } else {
+      // Full filtered + paginated
+      properties = await Property.find({ ...filter, ...textSearch, ...ownerMatch })
+        .populate('ownerId', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(currentLimit)
+        .lean();
+
+      total = await Property.countDocuments({ ...filter, ...textSearch, ...ownerMatch });
+    }
+
+    const formatted = properties.map(p => ({
+      _id: p._id.toString(),
+      name: p.name,
+      ownerName: p.ownerId ? `${p.ownerId.firstName} ${p.ownerId.lastName}`.trim() : 'Unknown',
+      ownerId: p.ownerId?._id?.toString(),
+      location: p.location,
+      type: p.type,
+      status: p.status || 'Available',
+      isRented: !!p.isRented,
+      price: p.price,
+      isVerified: !!p.isVerified,
+      createdAt: p.createdAt,
     }));
 
-    res.json({ properties: enhancedProperties });
+    res.json({ properties: formatted, total });
+
   } catch (error) {
     console.error('getPropertyManagement error:', error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    res.status(500).json({ message: 'Server Error' });
   }
 };
 
