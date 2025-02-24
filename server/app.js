@@ -21,6 +21,8 @@ const RentalHistory = require("./models/rentalhistory");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
+const formidable = require('formidable');
+const fs = require('fs');
 
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
@@ -296,33 +298,60 @@ app.get("/login", (req, res) => {
   res.redirect("http://localhost:5173/login");
 });
 
-app.post("/login", async (req, res) => {
+async function handleLogin(req, res) {
   const { userType, email, password } = req.body;
 
   try {
-  // Request logging removed for production
     // Basic required fields: email and password must be present
     if (!email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     // If userType is not provided, allow an admin login attempt first.
-    // This lets admins sign in from the same login form without selecting a role.
+    // Additionally, if not an admin, try to locate the user across Tenant/Owner/Worker
+    // so users do not have to explicitly select their role on the login form.
     if (!userType) {
       try {
-  const admin = await Admin.findOne({ username: email }).select('+password');
+        const admin = await Admin.findOne({ username: email }).select('+password');
         if (admin) {
           if (!admin.password) return res.status(401).json({ error: 'Password not set for this account' });
           if (admin.password !== password) return res.status(401).json({ error: 'Incorrect password' });
           req.session.adminId = admin._id.toString();
-          return res.json({ success: true, redirectUrl: '/admin/dashboard' });
+          return res.json({ success: true, redirectUrl: '/admin/dashboard', admin: true });
         }
       } catch (e) {
         console.error('Admin lookup error:', e);
-        // fallthrough to require userType for non-admin users
+        // fallthrough to try user lookup
       }
-      // No admin found and no userType provided — ask client to select a role for non-admin accounts
-      return res.status(400).json({ error: 'Please select a role' });
+
+      // Try to find the user across known user collections when role is not provided
+      try {
+        let found = await Tenant.findOne({ email }).select('+password');
+        if (found) {
+          userType = 'tenant';
+          user = found;
+        } else {
+          found = await Owner.findOne({ email }).select('+password');
+          if (found) {
+            userType = 'owner';
+            user = found;
+          } else {
+            found = await Worker.findOne({ email }).select('+password');
+            if (found) {
+              userType = 'worker';
+              user = found;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('User lookup error:', e);
+      }
+
+      // If no user found across models, require explicit role selection
+      if (!user) {
+        return res.status(400).json({ error: 'Please select a role' });
+      }
+      // At this point `user` and `userType` are set and we'll continue with the normal flow below
     }
 
     let user;
@@ -375,12 +404,15 @@ app.post("/login", async (req, res) => {
       newListings: user.newListings || false,
     };
 
-    return res.json({ success: true, redirectUrl: getDashboardUrl(userType) });
+    return res.json({ success: true, redirectUrl: getDashboardUrl(userType), user: req.session.user });
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Server error" });
   }
-});
+}
+
+app.post("/login", handleLogin);
+app.post("/api/login", handleLogin);
 
 app.post("/register", async (req, res) => {
   const {
@@ -487,8 +519,9 @@ app.post("/register", async (req, res) => {
 
     return res.json({
       success: true,
-      redirectUrl: "/login",
-      message: "Registration successful",
+      redirectUrl: getDashboardUrl(newUser.userType) || '/worker_register',
+      message: 'Registration successful',
+      user: req.session.user,
     });
   } catch (err) {
     console.error("Registration error:", err);

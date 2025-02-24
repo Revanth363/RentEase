@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../assets/css/Login.module.css';
+import { AuthContext } from '../context/AuthContext';
 
 const initialErrors = { role: '', email: '', password: '' };
 
 export default function Login({ onForgot }) {
-	// Form state
 	const [userType, setUserType] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -12,14 +13,14 @@ export default function Login({ onForgot }) {
 	const [errors, setErrors] = useState(initialErrors);
 	const [serverError, setServerError] = useState('');
 	const [loading, setLoading] = useState(false);
+	const navigate = useNavigate();
+	const { setAuth } = useContext(AuthContext);
 
 	const validateLogin = () => {
 		const e = { ...initialErrors };
-		// Role is optional now so admins can login using the normal form.
 		if (!email) e.email = 'Email is required';
 		if (!password) e.password = 'Password is required';
 		setErrors(e);
-		// don't require role (e.role will be empty string)
 		return !e.email && !e.password;
 	};
 
@@ -29,24 +30,23 @@ export default function Login({ onForgot }) {
 		if (!validateLogin()) return;
 		setLoading(true);
 		try {
-			const res = await fetch('http://localhost:5000/login', {
+			const res = await fetch('/api/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include',
 				body: JSON.stringify({ userType, email, password })
 			});
-			const text = await res.text();
-			let data;
-			try { data = JSON.parse(text); } catch { data = { raw: text }; }
-			if (res.ok && data.success) {
-				window.location.href = data.redirectUrl || '/';
+			const data = await res.json().catch(() => ({}));
+			if (res.ok) {
+				// Update global auth context and navigate
+				setAuth({ user: data.user || null, admin: !!data.admin, loading: false });
+				navigate(data.redirectUrl || '/');
 			} else {
 				setServerError(data.error || 'Login failed');
-				if (data.raw) console.warn('Non-JSON response displayed directly');
 			}
 		} catch (err) {
 			console.error('Login network error:', err);
-			setServerError('Network error. Please check if the server is running on port 5000.');
+			setServerError('Network error. Please ensure the server is running.');
 		} finally {
 			setLoading(false);
 		}
@@ -64,12 +64,12 @@ export default function Login({ onForgot }) {
 						value={userType}
 						onChange={e => setUserType(e.target.value)}
 					>
-						<option value="" disabled>-- Select Role --</option>
+						<option value="">-- Select Role (optional) --</option>
 						<option value="tenant">Tenant</option>
 						<option value="owner">Owner</option>
 						<option value="worker">Worker</option>
 					</select>
-					{errors.role && <div id="roleError" className={styles.errorText} style={{ display: 'block' }}>{errors.role}</div>}
+					{errors.role && <div id="roleError" className={styles.errorText}>{errors.role}</div>}
 
 					<label htmlFor="loginEmail">Email or username:</label>
 					<input
@@ -81,7 +81,7 @@ export default function Login({ onForgot }) {
 						onChange={e => setEmail(e.target.value)}
 						required
 					/>
-					{errors.email && <div id="emailError" className={styles.errorText} style={{ display: 'block' }}>{errors.email}</div>}
+					{errors.email && <div id="emailError" className={styles.errorText}>{errors.email}</div>}
 
 					<label htmlFor="loginPassword">Password:</label>
 					<div className={styles.passwordContainer}>
@@ -102,10 +102,10 @@ export default function Login({ onForgot }) {
 							<i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
 						</span>
 					</div>
-					{errors.password && <div id="passwordError" className={styles.errorText} style={{ display: 'block' }}>{errors.password}</div>}
+					{errors.password && <div id="passwordError" className={styles.errorText}>{errors.password}</div>}
 
 					{serverError && (
-						<div className={styles.errorText} style={{ display: 'block', textAlign: 'center' }}>{serverError}</div>
+						<div className={styles.errorText} style={{ textAlign: 'center' }}>{serverError}</div>
 					)}
 
 					<button type="submit" id="loginBtn" disabled={loading}>

@@ -1,3 +1,79 @@
+// Get all unique locations and service types for filters
+exports.getWorkerFilters = async (req, res) => {
+  try {
+    const locations = await Worker.distinct('location', { location: { $ne: null, $ne: '' } });
+    const areas = await Worker.distinct('area', { area: { $ne: null, $ne: '' } });
+    const serviceTypes = await Worker.distinct('serviceType', { serviceType: { $ne: null, $ne: '' } });
+    // Filter out empty strings and normalize
+    const cleanLocations = locations.filter(l => l && l.trim()).map(l => l.trim());
+    const cleanAreas = areas.filter(a => a && a.trim()).map(a => a.trim());
+    const cleanServiceTypes = serviceTypes.filter(s => s && s.trim()).map(s => s.trim());
+    res.json({ locations: cleanLocations, areas: cleanAreas, serviceTypes: cleanServiceTypes });
+  } catch (error) {
+    console.error('Error fetching filter data:', error);
+    res.status(500).json({ error: 'Error fetching filter data' });
+  }
+};
+
+// Search workers by location (city/area) - dedicated search endpoint
+exports.searchWorkersByLocation = async (req, res) => {
+  try {
+    const { location, area } = req.query;
+    const filter = {
+      $or: [
+        { serviceStatus: 'Available' },
+        { serviceStatus: { $exists: false } },
+        { serviceStatus: null },
+      ],
+    };
+
+    if (location) {
+      filter.location = new RegExp(location, 'i');
+    }
+    if (area) {
+      filter.area = new RegExp(area, 'i');
+    }
+
+    // Exclude workers already booked by this tenant
+    if (req.session.user && req.session.user.userType === 'tenant') {
+      const tenant = await Tenant.findById(req.session.user._id).select('domesticWorkerId');
+      if (tenant && tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+        filter._id = { $nin: tenant.domesticWorkerId };
+      }
+    }
+
+    const workers = await Worker.find(filter).sort({ createdAt: -1 });
+    res.json(workers);
+  } catch (error) {
+    console.error('Error searching workers:', error);
+    res.status(500).json({ error: 'Error searching workers' });
+  }
+};
+
+// Check if tenant can review a worker (must have completed booking)
+exports.canTenantReviewWorker = async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.userType !== 'tenant') {
+      return res.status(401).json({ canReview: false, reason: 'Not a tenant' });
+    }
+    const tenantId = req.session.user._id;
+    const workerId = req.params.id;
+    // Only allow review if tenant has an approved booking with this worker
+    const booking = await WorkerBooking.findOne({
+      tenantId,
+      workerId,
+      status: 'Approved',
+    });
+    if (booking) {
+      return res.json({ canReview: true });
+    } else {
+      return res.json({ canReview: false, reason: 'No completed booking' });
+    }
+  } catch (error) {
+    console.error('Error checking review eligibility:', error);
+    res.status(500).json({ canReview: false, error: 'Server error' });
+  }
+};
 const mongoose = require("mongoose");
 const Worker = require("../models/worker");
 const Booking = require("../models/booking");
@@ -454,9 +530,19 @@ exports.registerWorker = async (req, res) => {
 exports.getAllWorkers = async (req, res) => {
   try {
     const { location, area, serviceType, rating } = req.query;
+    // Show workers who are available OR newly-registered workers where
+    // `serviceStatus` or `availability` may not yet be set. This ensures
+    // newly registered users appear on the services listing.
     const filter = {
-      availability: { $in: ["full-time", "part-time", "weekends"] },
-      serviceStatus: "Available",
+      $and: [
+        {
+          $or: [
+            { serviceStatus: "Available" },
+            { serviceStatus: { $exists: false } },
+            { serviceStatus: null },
+          ],
+        },
+      ],
     };
 
     if (location) filter.location = new RegExp(location, "i");
@@ -473,7 +559,8 @@ exports.getAllWorkers = async (req, res) => {
       }
     }
 
-    const workers = await Worker.find(filter);
+    // Show newest workers first so newly-registered users are visible.
+    const workers = await Worker.find(filter).sort({ createdAt: -1 });
     res.json(workers);
   } catch (error) {
     console.error("Error fetching workers:", error);
@@ -501,10 +588,19 @@ exports.getWorkerById = async (req, res) => {
 // Filter workers based on multiple criteria
 exports.filterWorkers = async (req, res) => {
   try {
-    const { location, area, serviceType, rating } = req.query;
+    const { location, area, serviceType, rating, price, available } = req.query;
+    // Same permissive filter for the filter API: include workers with missing
+    // `serviceStatus` so newly-registered users are not accidentally hidden.
     const filter = {
-      availability: { $in: ["full-time", "part-time", "weekends"] },
-      serviceStatus: "Available",
+      $and: [
+        {
+          $or: [
+            { serviceStatus: "Available" },
+            { serviceStatus: { $exists: false } },
+            { serviceStatus: null },
+          ],
+        },
+      ],
     };
 
     if (location) filter.location = new RegExp(location, "i");
@@ -512,6 +608,21 @@ exports.filterWorkers = async (req, res) => {
     if (serviceType) filter.serviceType = serviceType;
     if (rating) {
       filter["ratingId.average"] = { $gte: parseInt(rating) };
+    }
+    // Price range filter
+    if (price) {
+      let min = 0, max = Infinity;
+      if (price.includes('-')) {
+        [min, max] = price.split('-').map(Number);
+      } else if (price.endsWith('+')) {
+        min = Number(price.replace('+', ''));
+      }
+      filter.price = { $gte: min };
+      if (isFinite(max)) filter.price.$lte = max;
+    }
+    // Available filter
+    if (available === 'true') {
+      filter.isBooked = false;
     }
 
     if (req.session.user && req.session.user.userType === "tenant") {
@@ -521,7 +632,7 @@ exports.filterWorkers = async (req, res) => {
       }
     }
 
-    const workers = await Worker.find(filter);
+    const workers = await Worker.find(filter).sort({ createdAt: -1 });
     res.json(workers);
   } catch (error) {
     console.error("Error filtering workers:", error);
@@ -681,6 +792,11 @@ exports.bookWorkerCorrected = async (req, res) => {
     if (tenant.domesticWorkerId.includes(workerId)) {
       return res.status(400).json({ error: "Worker already booked" });
     }
+
+    // Mark worker as unavailable and booked
+    worker.serviceStatus = "Unavailable";
+    worker.isBooked = true;
+    await worker.save();
 
     const newBooking = new WorkerBooking({
       tenantId,

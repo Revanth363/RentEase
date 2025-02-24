@@ -112,6 +112,7 @@ export default function Register() {
         result = { error: text || 'Registration failed' }; 
       }
       if (res.ok && result.success) {
+        // Redirect directly after registration (no photo upload)
         window.location.href = result.redirectUrl || '/login';
       } else {
         setServerError(result.error || 'Registration failed');

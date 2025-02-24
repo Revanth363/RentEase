@@ -1,16 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import '../assets/css/Header.css';
+import { AuthContext } from '../context/AuthContext';
 
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { auth } = useContext(AuthContext);
   const location = useLocation();
 
   useEffect(() => {
+    // if auth context already loaded, use it
+    if (auth && !auth.loading) {
+      setUser(auth.user);
+      setIsAdmin(!!auth.admin);
+      return;
+    }
     const fetchUser = async () => {
       try {
         const response = await axios.get('/api/check-session', { withCredentials: true });
@@ -23,7 +31,7 @@ const Header = () => {
       }
     };
     fetchUser();
-  }, []);
+  }, [auth]);
 
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);

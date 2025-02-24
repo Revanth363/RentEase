@@ -266,7 +266,7 @@ const HomePage = () => {
     const currentTime = Date.now();
     if (
       Math.abs(e.deltaX) > Math.abs(e.deltaY) &&
-      currentTime - lastScrollTime1 > throttleTime1
+      currentTime - lastScrollTime1 > 1
     ) {
       if (e.deltaX > scrollThreshold1) {
         prevProperty();

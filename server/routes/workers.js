@@ -1,6 +1,6 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const workerController = require("../controllers/workerController");
+const workerController = require('../controllers/workerController');
 // Only require controllers and express at the top. Do not require WorkerPayment here.
 
 // Route to render the worker dashboard
@@ -26,14 +26,47 @@ router.get(
   workerController.renderEditServicePage
 );
 
-// API endpoint to get all workers data
-router.get("/api/workers", workerController.getAllWorkers);
+// API endpoint to get all unique locations, areas, and service types for filters
+router.get('/filters', workerController.getWorkerFilters);
 
-// API endpoint to get a specific worker by ID
-router.get("/api/workers/:id", workerController.getWorkerById);
+// API endpoint to search workers by location
+router.get('/search', workerController.searchWorkersByLocation);
 
-// Add filter functionality for workers
-router.get("/api/workers/filter", workerController.filterWorkers);
+// API endpoint to check if tenant can review a worker
+router.get('/:id/can-review', workerController.canTenantReviewWorker);
+
+// Route to render the worker dashboard
+//router.get("/worker_dashboard", workerController.isAuthenticated, workerController.renderWorkerDashboard);
+
+// Route to render the worker registration page
+router.get(
+  "/worker_register",
+  workerController.isAuthenticated,
+  workerController.renderWorkerRegisterPage
+);
+
+// Route to render the worker details page (no authentication)
+router.get("/workerDetails", workerController.renderWorkerDetailsPage);
+
+// Route to render the service details page
+router.get("/service/:id", workerController.renderServiceDetailsPage);
+
+// Route to render the edit service page
+router.get(
+  "/edit_service/:id",
+  workerController.isAuthenticated,
+  workerController.renderEditServicePage
+);
+
+// API endpoint to get all workers data (mounted at /api/workers/)
+router.get("/", workerController.getAllWorkers);
+
+// Add filter functionality for workers (mounted at /api/workers/filter)
+// Register filter route before ":id" so "filter" doesn't match the id param.
+router.get("/filter", workerController.filterWorkers);
+
+// API endpoint to get a specific worker by ID (mounted at /api/workers/:id)
+router.get("/:id", workerController.getWorkerById);
 
 // API endpoint to register/update a worker
 router.post("/api/workers/register", workerController.registerWorker);
@@ -82,8 +115,5 @@ router.post(
   workerController.isAuthenticated,
   workerController.debookWorker
 );
-
-
-
 
 module.exports = router;
