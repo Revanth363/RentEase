@@ -14,7 +14,9 @@ import ContactUs from './pages/ContactUs';
 import FAQ from './pages/FAQ';
 
 // Admin Pages & Views (same as before)
-import AdminDashboard from './admin/AdminDashboard';
+
+import WorkerServices from './pages/WorkerServices';
+import WorkerCard from './admin/WorkerCard';
 import PropertyManagement from './admin/PropertyManagement';
 import UserManagement from './admin/UserManagement';
 import ServiceBookings from './admin/ServiceBookings';
@@ -65,6 +67,12 @@ const App = () => {
 
           {/* Auth Routes — NO HEADER */}
           <Route path="/login" element={<Auth initial="login" />} />
+          <Route path="/search" element={<div>Search Page</div>} />
+          <Route path="/workerDetails" element={<WorkerServices />} />
+          <Route path="/worker/:id" element={<WorkerCard detailed />} />
+          <Route path="/about_us" element={<div>About Us</div>} />
+          <Route path="/contact_us" element={<div>Contact Us</div>} />
+          <Route path="/faq" element={<div>FAQs</div>} />
           <Route path="/register" element={<Auth initial="register" />} />
 
           {/* User Dashboards */}

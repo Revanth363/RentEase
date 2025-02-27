@@ -1,6 +1,7 @@
 // src/components/Login.jsx  (or wherever your Login component is)
 import React, { useState, useEffect } from 'react';
 import styles from '../assets/css/Login.module.css';
+import { AuthContext } from '../context/AuthContext';
 
 const initialErrors = { role: '', email: '', password: '' };
 

@@ -18,6 +18,8 @@ const Rating = require("./models/rating");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
+const formidable = require('formidable');
+const fs = require('fs');
 
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
@@ -346,7 +348,10 @@ app.post("/login", async (req, res) => {
     console.error("Login error:", err);
     res.status(500).json({ error: "Server error" });
   }
-});
+}
+
+app.post("/login", handleLogin);
+app.post("/api/login", handleLogin);
 
 app.post("/register", async (req, res) => {
   const {
@@ -453,8 +458,9 @@ app.post("/register", async (req, res) => {
 
     return res.json({
       success: true,
-      redirectUrl: "/login",
-      message: "Registration successful",
+      redirectUrl: getDashboardUrl(newUser.userType) || '/worker_register',
+      message: 'Registration successful',
+      user: req.session.user,
     });
   } catch (err) {
     console.error("Registration error:", err);

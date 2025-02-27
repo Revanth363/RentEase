@@ -1,0 +1,489 @@
+/* ---------- PAGE LAYOUT ---------- */
+.root {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: "Poppins", sans-serif;
+  background: #f5f5f5;
+}
+
+.title {
+  font-size: 28px;
+  margin: 12px 0 18px 0; /* slight downward offset so header doesn't overlap */
+  font-weight: 700;
+  color: #2c2c2c;
+  text-align: left;
+  padding-left: 6px;
+}
+
+/* place the title above the left column (search sidebar) */
+.title {
+  /* no extra margin when title is inside sidebar */
+}
+
+.filterToggle {
+  display: none;
+  background: #ffc107;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* ---------- SIDEBAR FILTER ---------- */
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 100px;
+  align-self: flex-start;
+}
+
+.filterCard {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.filterTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffc107;
+  margin-bottom: 20px;
+  border-left: 4px solid #ffc107;
+  padding-left: 12px;
+}
+
+.grid {
+  /* Single-column centered layout: each worker is a boxed detail card */
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.message {
+  margin-bottom: 10px;
+  display: block;
+  color: #2c2c2c;
+  font-size: 15px;
+}
+
+.group select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  color: #666;
+  transition: border-color 0.2s ease;
+}
+
+.group select:hover,
+.group select:focus {
+  border-color: #ffc107;
+  outline: none;
+}
+
+.groupRow {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.groupRow > div {
+  flex: 1;
+}
+
+.groupRow label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  color: #2c2c2c;
+  font-size: 15px;
+}
+
+.groupRow select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  color: #666;
+  transition: border-color 0.2s ease;
+}
+
+.groupRow select:hover,
+.groupRow select:focus {
+  border-color: #ffc107;
+  outline: none;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 0;
+}
+
+.apply {
+  background: #ffc107;
+  padding: 12px 32px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.2s ease;
+  color: #2c2c2c;
+}
+
+.apply:hover {
+  background: #ffb300;
+}
+
+.clear {
+  background: transparent;
+  padding: 12px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background 0.2s ease;
+  color: #666;
+}
+
+.clear:hover {
+  background: #f0f0f0;
+}
+
+/* ---------- MAIN SECTION ---------- */
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+/* When a worker detail is open, make listing cards use the boxed detail dimensions
+   and center them so they match the detailed card look. This is toggled by the
+   `worker-detail-open` body class added by `WorkerCard` when detailed view mounts. */
+/* When previously toggled by detailed view we used a body class - that
+   behavior is no longer required because every worker card should use
+   the boxed detail layout by default on the services page. */
+
+.message {
+  text-align: center;
+  color: #666;
+  padding: 40px;
+  font-size: 16px;
+}
+
+.error {
+  text-align: center;
+  color: #d32f2f;
+  padding: 20px;
+  font-size: 16px;
+  background: #ffebee;
+  border-radius: 8px;
+}
+
+/* ---------- CARD STYLING (MATCHES IMAGE) ---------- */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cardImage {
+  position: relative;
+  height: 260px;
+  background: #eee;
+  overflow: hidden;
+}
+
+.cardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Enforce consistent card height so all listing cards match */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+
+.cardContent {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1 1 auto;
+}
+
+/* Yellow service badge - top right */
+.serviceBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #ffc107;
+  padding: 6px 14px;
+  font-weight: 700;
+  border-radius: 4px;
+  color: #2c2c2c;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+/* Rating Badge - bottom right */
+.ratingBadge {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ratingBadge::before {
+  content: "★";
+  color: #ffc107;
+}
+
+/* Unavailable/Booked Badge - top left */
+.unavailableBadge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #d32f2f;
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Content */
+.cardContent {
+  padding: 20px;
+}
+
+.workerName {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 8px;
+}
+
+.workerLocation {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workerLocation::before {
+  content: "📍";
+  font-size: 16px;
+}
+
+.workerPrice {
+  font-size: 20px;
+  margin: 8px 0;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+.workerExp {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* Worker details row - price and experience side by side */
+.workerDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+}
+
+/* Rate unit styling (e.g., /monthly) */
+.rateUnit {
+  font-size: 14px;
+  font-weight: 400;
+  color: #888;
+}
+
+/* Availability tag */
+.availabilityTag {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: capitalize;
+}
+
+/* Yellow button */
+.viewButton {
+  width: 100%;
+  padding: 12px;
+  font-weight: 700;
+  background: #ffc107;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.2s ease;
+  color: #2c2c2c;
+}
+
+.viewButton:hover {
+  background: #ffb300;
+}
+
+/* ---------- RESPONSIVE DESIGN ---------- */
+
+/* Extra large screens */
+@media (min-width: 1600px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Large screens */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium screens */
+@media (max-width: 1199px) {
+  .sidebar {
+    width: 280px;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets and below */
+@media (max-width: 768px) {
+  .filterToggle {
+    display: block;
+  }
+
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: fixed;
+    left: -100%;
+    top: 0;
+    bottom: 0;
+    background: #fff;
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* on small screens the sidebar stacks above; reset title margin */
+  .title {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .title {
+    font-size: 28px;
+    padding-left: 0;
+  }
+  
+  .root {
+    padding: 20px 16px;
+  }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
+  
+  .filterCard {
+    padding: 20px;
+  }
+  
+  .cardContent {
+    padding: 16px;
+  }
+  
+  .cardImage {
+    height: 200px;
+  }
+}
