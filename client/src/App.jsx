@@ -12,11 +12,12 @@ import Auth from './pages/Auth';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import FAQ from './pages/FAQ';
+import WorkerServices from './pages/WorkerServices';
+import WorkerCard from './pages/WorkerCard';
 
 // Admin Pages & Views (same as before)
 
-import WorkerServices from './pages/WorkerServices';
-import WorkerCard from './admin/WorkerCard';
+import AdminDashboard from './admin/AdminDashboard';
 import PropertyManagement from './admin/PropertyManagement';
 import UserManagement from './admin/UserManagement';
 import ServiceBookings from './admin/ServiceBookings';

@@ -18,8 +18,6 @@ const Rating = require("./models/rating");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
-const formidable = require('formidable');
-const fs = require('fs');
 
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
@@ -43,21 +41,12 @@ mongoose
   .catch((err) => console.error("MongoDB Atlas connection error:", err));
 
 // Middleware
-// CORS: allow common localhost dev ports or configured CLIENT_URL
-const allowedOrigins = new Set([
-  process.env.CLIENT_URL || '',
-  'http://localhost:5173', 'http://127.0.0.1:5173',
-  'http://localhost:5174', 'http://127.0.0.1:5174'
-].filter(Boolean));
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.has(origin)) return callback(null, true);
-    if (/^http:\/\/(localhost|127\.0\.0\.1):51\d{2}$/.test(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -85,23 +74,17 @@ app.use((req, res, next) => {
 // In-memory OTP store
 const otpStore = new Map();
 
-// Rate limiter for OTP requests with JSON response
+// Rate limiter for /forgot-password
 const forgotPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    return res.status(429).json({ success: false, error: "Too many OTP requests, please try again later." });
-  }
+  message: "Too many OTP requests, please try again later.",
 });
 
 // Generate a 6-digit OTP
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
-
-// OTP will be returned in response for development (no email service needed)
 
 // Routes
 app.use("/api/property", propertyRoutes);
@@ -146,10 +129,10 @@ app.get("/api/slider-properties", async (req, res) => {
 });
 
 app.get("/api/check-session", (req, res) => {
-  // Return both regular user session and admin session info
-  const user = req.session.user || null;
-  const isAdmin = !!req.session.adminId;
-  return res.json({ user, admin: isAdmin });
+  if (req.session.user) {
+    return res.json({ user: req.session.user });
+  }
+  return res.json({ user: null });
 });
 
 app.get("/api/logout", (req, res) => {
@@ -225,68 +208,125 @@ app.get("/forgot-password", (req, res) => {
   res.redirect("http://localhost:5173/forgot-password");
 });
 
-async function handleForgotPassword(req, res) {
+app.post("/forgot-password", forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body;
+
   try {
+    let user = null;
+    let userModel = null;
+
     const tenant = await Tenant.findOne({ email });
     const owner = await Owner.findOne({ email });
     const worker = await Worker.findOne({ email });
-    const user = tenant || owner || worker;
-    if (!user) return res.json({ success: false, error: 'Email not found' });
+
+    if (tenant) {
+      user = tenant;
+      userModel = "tenant";
+    } else if (owner) {
+      user = owner;
+      userModel = "owner";
+    } else if (worker) {
+      user = worker;
+      userModel = "worker";
+    }
+
+    if (!user) {
+      return res.json({ success: false, error: "Email not found" });
+    }
 
     const otp = generateOtp();
     const otpExpires = Date.now() + 10 * 60 * 1000;
+
     otpStore.set(email, { otp, expires: otpExpires });
-    setTimeout(() => { const entry = otpStore.get(email); if (entry && entry.expires <= Date.now()) otpStore.delete(email); }, 11 * 60 * 1000);
 
-    // Dev mode: return OTP in response (no email service)
-    return res.json({ success: true, message: 'OTP generated (dev mode - check console)', otp });
+    setTimeout(() => {
+      const entry = otpStore.get(email);
+      if (entry && entry.expires <= Date.now()) otpStore.delete(email);
+    }, 11 * 60 * 1000);
+
+    return res.json({ success: true, message: "OTP generated", otp });
   } catch (err) {
-    console.error('Error in forgot password flow:', err);
-    return res.json({ success: false, error: 'Server error. Please try again later.' });
+    console.error("Error in forgot password flow:", err);
+    return res.json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
   }
-}
+});
 
-app.post('/forgot-password', forgotPasswordLimiter, handleForgotPassword);
-app.post('/api/forgot-password', forgotPasswordLimiter, handleForgotPassword);
-
-function handleVerifyOtp(req, res) {
+app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
   try {
     const entry = otpStore.get(email);
-    if (!entry) return res.json({ success: false, error: 'No OTP requested' });
-    if (Date.now() > entry.expires) { otpStore.delete(email); return res.json({ success: false, error: 'OTP has expired' }); }
-    if (entry.otp !== String(otp)) return res.json({ success: false, error: 'Invalid OTP' });
-    return res.json({ success: true, message: 'OTP verified' });
+    if (!entry) return res.json({ success: false, error: "No OTP requested" });
+    if (Date.now() > entry.expires) {
+      otpStore.delete(email);
+      return res.json({ success: false, error: "OTP has expired" });
+    }
+    if (entry.otp !== String(otp))
+      return res.json({ success: false, error: "Invalid OTP" });
+    return res.json({ success: true, message: "OTP verified" });
   } catch (err) {
-    console.error('Error verifying OTP:', err);
-    return res.json({ success: false, error: 'Server error' });
+    console.error("Error verifying OTP:", err);
+    return res.json({ success: false, error: "Server error" });
   }
-}
-app.post('/verify-otp', handleVerifyOtp);
-app.post('/api/verify-otp', handleVerifyOtp);
+});
 
-async function handleResetPassword(req, res) {
+app.post("/reset-password", async (req, res) => {
   const { email, password } = req.body;
+
   try {
-    if (!password || password.length < 8) return res.json({ success: false, error: 'Password must be at least 8 characters long' });
-    const tenant = await Tenant.findOne({ email }).select('+password');
-    const owner = await Owner.findOne({ email }).select('+password');
-    const worker = await Worker.findOne({ email }).select('+password');
-    const user = tenant || owner || worker;
-    if (!user) return res.json({ success: false, error: 'User not found' });
+    if (!password || password.length < 8) {
+      return res.json({
+        success: false,
+        error: "Password must be at least 8 characters long",
+      });
+    }
+
+    let user = null;
+    let userModel = null;
+
+    const tenant = await Tenant.findOne({ email }).select("+password");
+    const owner = await Owner.findOne({ email }).select("+password");
+    const worker = await Worker.findOne({ email }).select("+password");
+
+    if (tenant) {
+      user = tenant;
+      userModel = "tenant";
+    } else if (owner) {
+      user = owner;
+      userModel = "owner";
+    } else if (worker) {
+      user = worker;
+      userModel = "worker";
+    }
+
+    if (!user) {
+      return res.json({ success: false, error: "User not found" });
+    }
+
     const entry = otpStore.get(email);
-    if (!entry) return res.json({ success: false, error: 'Please verify OTP first' });
-    if (Date.now() > entry.expires) { otpStore.delete(email); return res.json({ success: false, error: 'OTP has expired, please request a new one' }); }
-    user.password = password; await user.save(); otpStore.delete(email);
-    return res.json({ success: true, message: 'Password reset successful' });
+    if (!entry) {
+      return res.json({ success: false, error: "Please verify OTP first" });
+    }
+    if (Date.now() > entry.expires) {
+      otpStore.delete(email);
+      return res.json({
+        success: false,
+        error: "OTP has expired, please request a new one",
+      });
+    }
+
+    user.password = password;
+    await user.save();
+    otpStore.delete(email);
+
+    return res.json({ success: true, message: "Password reset successful" });
   } catch (err) {
-    console.error('Error resetting password:', err);
-    return res.json({ success: false, error: 'Server error' });
+    console.error("Error resetting password:", err);
+    return res.json({ success: false, error: "Server error" });
   }
-}
-app.post('/reset-password', handleResetPassword);
-app.post('/api/reset-password', handleResetPassword);
+});
 
 app.get("/login", (req, res) => {
   if (req.session.user) {
@@ -296,62 +336,69 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const { email, password, userType } = req.body;
+  const { userType, email, password } = req.body;
 
   try {
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
+    if (!userType || !email || !password) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // ADMIN LOGIN (email ends with @admin.com)
-    if (email.toLowerCase().trim().endsWith("@admin.com")) {
-      const admin = await Admin.findOne({ email: email.toLowerCase().trim() }).select("+password");
-      if (!admin || admin.password !== password) {
-        return res.status(401).json({ error: "Invalid admin credentials" });
-      }
+    let user;
+    let Model;
 
-      // Save admin session
-      req.session.adminId = admin._id.toString();
-      req.session.isAdmin = true;
-
-      return res.json({
-        success: true,
-        redirectUrl: "/admin",
-        message: "Admin login successful"
-      });
+    if (userType === "tenant") {
+      Model = Tenant;
+    } else if (userType === "owner") {
+      Model = Owner;
+    } else if (userType === "worker") {
+      Model = Worker;
+    } else {
+      return res.status(400).json({ error: "Invalid user type" });
     }
 
-    // NORMAL USER LOGIN (tenant/owner/worker)
-    if (!userType) {
-      return res.status(400).json({ error: "Please select role" });
+    user = await Model.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ error: "Create an account first" });
     }
 
-    let Model = userType === "tenant" ? Tenant : userType === "owner" ? Owner : Worker;
-    const user = await Model.findOne({ email }).select("+password");
+    if (!user.password) {
+      return res
+        .status(401)
+        .json({ error: "Password not set for this account" });
+    }
 
-    if (!user || user.password !== password) {
-      return res.status(401).json({ error: "Invalid email or password" });
+    if (user.password !== password) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    if (user.status === "Suspended") {
+      return res
+        .status(403)
+        .json({ error: "Your account is suspended temporarily" });
     }
 
     req.session.user = {
       _id: user._id.toString(),
       userType,
-      email: user.email
+      email: user.email,
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      phone: user.phone || "",
+      location: user.location || "",
+      emailNotifications: user.emailNotifications || false,
+      smsNotifications: user.smsNotifications || false,
+      rentReminders: user.rentReminders || false,
+      maintenanceUpdates: user.maintenanceUpdates || false,
+      newListings: user.newListings || false,
     };
 
-    res.json({
-      success: true,
-      redirectUrl: getDashboardUrl(userType)
-    });
-
+    return res.json({ success: true, redirectUrl: getDashboardUrl(userType) });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error" });
   }
-}
-
-app.post("/login", handleLogin);
-app.post("/api/login", handleLogin);
+});
 
 app.post("/register", async (req, res) => {
   const {
@@ -458,9 +505,8 @@ app.post("/register", async (req, res) => {
 
     return res.json({
       success: true,
-      redirectUrl: getDashboardUrl(newUser.userType) || '/worker_register',
-      message: 'Registration successful',
-      user: req.session.user,
+      redirectUrl: "/login",
+      message: "Registration successful",
     });
   } catch (err) {
     console.error("Registration error:", err);
@@ -594,20 +640,34 @@ app.get("/about_us", (req, res) => {
   res.redirect("http://localhost:5173/about_us");
 });
 
-// Admin Authentication Middleware (add this once at the top of your file)
-const adminAuth = (req, res, next) => {
-  if (req.session && req.session.adminId) {
-    return next(); // Admin is logged in → proceed
-  }
-  // Not admin → block access
-  return res.status(401).json({ error: "Admin access required. Please login." });
-};
+// function isAuthenticate(req, res, next) {
+//   if (req.session.adminId) {
+//     return next();
+//   }
+//   res.redirect("http://localhost:5173/admin/login");
+// }
 
+// app.get("/api/admin/login", (req, res) => {
+//   res.redirect("http://localhost:5173/admin/login");
+// });
 
-// PROTECTED ADMIN DASHBOARD ROUTE
-app.get("/api/admin",  async (req, res) => {
+// app.post("/api/admin/login", async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const admin = await Admin.findOne({ username });
+//     if (!admin || admin.password !== password) {
+//       return res.status(401).json({ error: "Invalid username or password" });
+//     }
+//     req.session.adminId = admin._id.toString();
+//     res.json({ success: true, redirectUrl: "/api/admin" });
+//   } catch (err) {
+//     console.error("Login error:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+app.get("/api/admin", async (req, res) => {
   try {
-    // Your entire existing code — 100% unchanged (just wrapped in protection)
     const totalProperties = await Property.countDocuments();
     const totalRenters = await Tenant.countDocuments();
     const totalOwners = await Owner.countDocuments();
@@ -773,21 +833,24 @@ app.get("/api/admin",  async (req, res) => {
       ...tenants.map((t, index) => ({
         id: t._id.toString(), firstName: t.firstName, lastName: t.lastName,
         userType: t.userType, email: t.email, phone: t.phone, address: t.location,
-        createdAt: t.createdAt, status: t.status,
+        createdAt: t.createdAt, status: t.status, tenantBookings: null,
+        serviceType: null, experience: null, numProperties: null,
+        accountNo: null, upiid: null,
         ownerName: t.ownerId ? `${t.ownerId.firstName} ${t.ownerId.lastName}` : "None",
         propertyCount: tenantPropertyCounts[index],
       })),
       ...workers.map((w, index) => ({
         id: w._id.toString(), firstName: w.firstName, lastName: w.lastName,
         userType: w.userType, email: w.email, phone: w.phone, address: w.location,
-        createdAt: w.createdAt, status: w.status,
-        serviceType: w.serviceType, experience: w.experience,
-        clientCount: workerClientCounts[index],
+        createdAt: w.createdAt, status: w.status, tenantBookings: null,
+        serviceType: w.serviceType, experience: w.experience, numProperties: null,
+        accountNo: null, upiid: null, clientCount: workerClientCounts[index],
       })),
       ...owners.map((o) => ({
         id: o._id.toString(), firstName: o.firstName, lastName: o.lastName,
         userType: o.userType, email: o.email, phone: o.phone, address: o.location,
-        createdAt: o.createdAt, status: o.status,
+        createdAt: o.createdAt, status: o.status, tenantBookings: null,
+        serviceType: null, experience: null,
         numProperties: o.numProperties || o.propertyIds?.length || 0,
         accountNo: o.accountNo, upiid: o.upiid,
       })),
@@ -819,97 +882,34 @@ app.get("/api/admin",  async (req, res) => {
     });
 
     const notifications = await Notification.find()
-  .populate("worker", "firstName lastName")
-  .populate("recipient", "firstName lastName")
-  .sort({ createdAt: -1 })        // ← ADD THIS
-  .limit(10)                      // ← KEEP THIS
-  .lean();
+      .populate("worker", "firstName lastName")
+      .populate("recipient", "firstName lastName")
+      .lean();
+    notifications.forEach((n) => {
+      n.id = n._id.toString();
+      n.workerName = n.worker ? `${n.worker.firstName} ${n.worker.lastName}` : "N/A";
+      n.recipientName = n.recipient ? `${n.recipient.firstName} ${n.recipient.lastName}` : "N/A";
+    });
 
-notifications.forEach((n) => {
-  n.id = n._id.toString();
-  n.workerName = n.worker ? `${n.worker.firstName} ${n.worker.lastName}` : "N/A";
-  n.recipientName = n.recipient ? `${n.recipient.firstName} ${n.recipient.lastName}` : "N/A";
-  n.createdAtFormatted = n.createdAt
-    ? new Date(n.createdAt).toLocaleString('en-IN', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    : 'N/A';
-});
+    const maintenanceRequests = await MaintenanceRequest.find()
+      .populate("propertyId", "name ownerId")
+      .populate("propertyId.ownerId", "firstName lastName")
+      .populate("tenantId", "firstName lastName _id")
+      .lean();
+    maintenanceRequests.forEach((m) => {
+      m.id = m._id.toString();
+      m.propertyName = m.propertyId?.name || "N/A";
+      m.propertyIdStr = m.propertyId?._id?.toString();
+      m.tenantName = m.tenantId ? `${m.tenantId.firstName} ${m.tenantId.lastName}` : "N/A";
+      m.tenantIdStr = m.tenantId?._id?.toString();
+      m.ownerName = m.propertyId?.ownerId ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}` : "N/A";
+    });
 
-    // Inside your existing GET /api/admin route
-const maintenanceRequests = await MaintenanceRequest.find()
-  .populate({
-    path: 'propertyId',
-    select: 'name ownerId',                 // get name + ownerId from Property
-    populate: {
-      path: 'ownerId',                      // now go one level deeper
-      model: 'Owner',                       // important! tell mongoose which model
-      select: 'firstName lastName'          // only these fields
-    }
-  })
-  .populate('tenantId', 'firstName lastName _id')
-  .sort({ dateReported: -1 })
-  .limit(10)
-  .lean();
-
-maintenanceRequests.forEach((m) => {
-  m.id = m._id.toString();
-  m.propertyName = m.propertyId?.name || "N/A";
-  m.propertyIdStr = m.propertyId?._id?.toString();
-  m.tenantName = m.tenantId ? `${m.tenantId.firstName} ${m.tenantId.lastName}` : "N/A";
-  m.tenantIdStr = m.tenantId?._id?.toString();
-  m.ownerName = m.propertyId?.ownerId 
-    ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}` 
-    : "N/A";
-  m.dateReported = m.dateReported || m.createdAt;
-});
-
-    // Use your controller logic — latest 10 only
-// SMART CONTACT SUBMISSIONS: latest 10 by default, ALL when filtering by date
-let contactSubmissions;
-
-if (req.query.fromDate || req.query.toDate) {
-  // User is using date filter → return ALL matching messages
-  let dateQuery = {};
-
-  if (req.query.fromDate) {
-    dateQuery.$gte = new Date(req.query.fromDate);
-  }
-  if (req.query.toDate) {
-    const toDate = new Date(req.query.toDate);
-    toDate.setHours(23, 59, 59, 999);
-    dateQuery.$lte = toDate;
-  }
-
-  contactSubmissions = await Contact.find({
-    submittedAt: dateQuery
-  })
-    .sort({ submittedAt: -1 })
-    .lean();
-} else {
-  // No filter → show only latest 10
-  contactSubmissions = await Contact.find()
-    .sort({ submittedAt: -1 })
-    .limit(10)
-    .lean();
-}
-
-// Format for frontend
-contactSubmissions.forEach((s) => {
-  s.id = s._id.toString();
-  s.submittedAtFormatted = s.submittedAt
-    ? new Date(s.submittedAt).toLocaleString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZoneName: 'short'
-      })
-    : 'N/A';
-});
+    const contactSubmissions = await Contact.find().lean();
+    contactSubmissions.forEach((s) => {
+      s.id = s._id.toString();
+      s.submittedAt = s.submittedAt ? new Date(s.submittedAt).toLocaleString() : "N/A";
+    });
 
     const workerPayments = await WorkerPayment.find()
       .populate("tenantId", "firstName lastName _id")
@@ -924,64 +924,49 @@ contactSubmissions.forEach((s) => {
       p.receivedById = p.workerId?._id?.toString();
     });
 
-    // Final Response
     res.json({
-      stats,
-      properties,
-      users,
-      bookings,
-      payments,
-      notifications,
-      maintenanceRequests,
-      contactSubmissions,
-      workerPayments,
+      stats, properties, users, bookings, payments, notifications,
+      maintenanceRequests, contactSubmissions, workerPayments,
       analyticsData: {
         quarters: quarters.map(q => q.name),
-        newProperties,
-        newTenants,
-        newWorkers,
-        newOwners,
-        newServices,
+        newProperties, newTenants, newWorkers, newOwners, newServices,
         totalRevenue: quarterlyRevenue,
-        userTypeDistribution,
-        propertyStatusDistribution
+        userTypeDistribution, propertyStatusDistribution
       }
     });
-
   } catch (err) {
-    console.error("Error fetching admin dashboard data:", err);
+    console.error("Error fetching dashboard data:", err);
     res.status(500).json({ error: "Server Error" });
   }
 });
 
-// PROTECTED ROUTE — Only logged-in admin can access
-app.get("/api/admin/message/:id", adminAuth, async (req, res) => {
+// FIXED & FINAL VERSION — Keep this in app.js
+app.get("/api/admin/message/:id", async (req, res) => {
   try {
     const submission = await Contact.findById(req.params.id).lean();
-
     if (!submission) {
       return res.status(404).json({ error: "Message not found" });
     }
 
     res.json({
       id: submission._id.toString(),
-      name: submission.name || "Anonymous",
-      email: submission.email || "N/A",
-      phone: submission.phone || "N/A",
-      subject: submission.subject || "(No subject)",
-      message: submission.message || "No message",
-      submittedAt: submission.submittedAt,
+      name: submission.name || 'Anonymous',
+      email: submission.email || 'N/A',
+      phone: submission.phone || 'N/A',
+      subject: submission.subject || '(No subject)',
+      message: submission.message || 'No message',
+      submittedAt: submission.submittedAt, // raw ISO string
       submittedAtFormatted: submission.submittedAt
-        ? new Date(submission.submittedAt).toLocaleString("en-IN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            timeZoneName: "short",
+        ? new Date(submission.submittedAt).toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
           })
-        : "Date not available",
+        : 'Date not available'
     });
   } catch (err) {
     console.error("Error fetching message details:", err);
