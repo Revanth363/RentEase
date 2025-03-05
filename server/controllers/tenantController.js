@@ -160,6 +160,128 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
+// JSON endpoint for React: returns the same data as the EJS render but as JSON
+exports.getDashboardData = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      console.log("Unauthorized access to dashboard-data");
+      return res.status(401).json({ success: false, message: "Please log in" });
+    }
+    const userId = req.session.user._id;
+
+    const tenant = await Tenant.findById(userId)
+      .populate("savedListings")
+      .populate({
+        path: "maintenanceRequestIds",
+        model: "MaintenanceRequest",
+        options: { sort: { dateReported: -1 } },
+      })
+      .populate({
+        path: "complaintIds",
+        model: "Complaint",
+        options: { sort: { dateSubmitted: -1 } },
+      });
+
+    if (!tenant)
+      return res
+        .status(404)
+        .json({ success: false, message: "Tenant not found" });
+
+    let domesticWorkers = [];
+    if (tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+      domesticWorkers = await Worker.find({
+        _id: { $in: tenant.domesticWorkerId },
+      }).populate("ratingId");
+    }
+
+    const currentProperty = await Property.findOne({ tenantId: userId });
+    let propertyOwner = null;
+    if (currentProperty && currentProperty.ownerId)
+      propertyOwner = await Owner.findById(currentProperty.ownerId);
+
+    const payments = await Payment.find({ tenantId: userId })
+      .sort({ paymentDate: -1 })
+      .limit(10);
+    const nextPayment = await Payment.findOne({
+      tenantId: userId,
+      status: "Pending",
+    }).sort({ dueDate: 1 });
+    const activeMaintenanceRequests = await MaintenanceRequest.find({
+      tenantId: userId,
+      status: { $in: ["Pending", "In Progress"] },
+    }).sort({ dateReported: -1 });
+    const completedMaintenanceRequests = await MaintenanceRequest.find({
+      tenantId: userId,
+      status: "Resolved",
+    })
+      .sort({ dateReported: -1 })
+      .limit(5);
+    const complaints = await Complaint.find({ tenantId: userId }).sort({
+      dateSubmitted: -1,
+    });
+    const rentalHistory = await RentalHistory.findOne({ tenantId: userId });
+    const ratings = await Rating.find({
+      tenantId: userId,
+      propertyId: { $exists: true },
+    }).populate("propertyId");
+
+    const notificationsRaw = await Notification.find({
+      recipient: userId,
+      recipientType: "Tenant",
+    }).sort({ createdDate: -1 });
+    const notifications = notificationsRaw.map((n) => ({
+      _id: n._id,
+      type: n.type,
+      message: n.message,
+      workerName: n.workerName,
+      propertyName: n.propertyName,
+      createdDate: n.createdDate || new Date(),
+      status: n.status,
+      read: n.read,
+    }));
+
+    const WorkerPayment = require("../models/workerPayment");
+    const workerPaymentsRaw = await WorkerPayment.find({ tenantId: userId })
+      .populate("workerId")
+      .sort({ paymentDate: -1 });
+    const workerPayments = workerPaymentsRaw.map((payment) => ({
+      _id: payment._id,
+      paymentDate: payment.paymentDate,
+      workerName: payment.workerId
+        ? `${payment.workerId.firstName} ${payment.workerId.lastName}`
+        : "N/A",
+      serviceType: payment.workerId ? payment.workerId.serviceType : "N/A",
+      amount: payment.amount,
+      paymentMethod: payment.paymentMethod,
+      status: payment.status,
+      receiptUrl: payment.receiptUrl,
+      transactionId: payment.transactionId,
+    }));
+
+    return res.json({
+      success: true,
+      user: tenant,
+      currentProperty,
+      propertyOwner,
+      payments,
+      nextPayment,
+      activeMaintenanceRequests,
+      completedMaintenanceRequests,
+      complaints,
+      workers: domesticWorkers,
+      rentalHistory: rentalHistory ? rentalHistory.propertyIds : [],
+      ratings,
+      notifications,
+      workerPayments,
+    });
+  } catch (error) {
+    console.error("Dashboard-data error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error: " + error.message });
+  }
+};
+
 // Maintenance Request Controller
 exports.submitMaintenanceRequest = async (req, res) => {
   try {
