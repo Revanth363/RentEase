@@ -1,9 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
-import { LoadingProvider } from './LoadingContext';
-import Header from './components/Header';
-import HomePage from './pages/Homepage';
-import Auth from './pages/Auth';
-import AdminDashboard from './pages/AdminDashboard';
+import { Routes, Route } from "react-router-dom";
+import { LoadingProvider } from "./LoadingContext";
+import Header from "./components/Header";
+import HomePage from "./pages/Homepage";
+import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/AdminDashboard";
+import TenantDashboard from "./pages/TenantDashboard";
 
 const App = () => {
   return (
@@ -19,13 +20,31 @@ const App = () => {
           <Route path="/faq" element={<div>FAQs</div>} />
           <Route path="/register" element={<Auth initial="register" />} />
           <Route path="/login" element={<Auth initial="login" />} />
-          <Route path="/worker_register" element={<div>Worker Register Page</div>} />
-          <Route path="/privacy_policy" element={<div>Privacy Policy Page</div>} />
-          <Route path="/termsofservice" element={<div>Terms of Service Page</div>} />
-          <Route path="/property-management" element={<div>Property Management Page</div>} />
-          <Route path="/tenant/tenant_dashboard" element={<div>Tenant Dashboard</div>} />
+          <Route
+            path="/worker_register"
+            element={<div>Worker Register Page</div>}
+          />
+          <Route
+            path="/privacy_policy"
+            element={<div>Privacy Policy Page</div>}
+          />
+          <Route
+            path="/termsofservice"
+            element={<div>Terms of Service Page</div>}
+          />
+          <Route
+            path="/property-management"
+            element={<div>Property Management Page</div>}
+          />
+          <Route
+            path="/tenant/tenant_dashboard"
+            element={<TenantDashboard />}
+          />
           <Route path="/owner_dashboard" element={<div>Owner Dashboard</div>} />
-          <Route path="/worker_dashboard" element={<div>Worker Dashboard</div>} />
+          <Route
+            path="/worker_dashboard"
+            element={<div>Worker Dashboard</div>}
+          />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/property" element={<div>Property Details Page</div>} />
         </Routes>
