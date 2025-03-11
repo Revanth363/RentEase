@@ -5,6 +5,7 @@ import HomePage from "./pages/Homepage";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import TenantDashboard from "./pages/TenantDashboard";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
 const App = () => {
   return (
@@ -40,7 +41,7 @@ const App = () => {
             path="/tenant/tenant_dashboard"
             element={<TenantDashboard />}
           />
-          <Route path="/owner_dashboard" element={<div>Owner Dashboard</div>} />
+          <Route path="/owner_dashboard" element={<OwnerDashboard />} />
           <Route
             path="/worker_dashboard"
             element={<div>Worker Dashboard</div>}
