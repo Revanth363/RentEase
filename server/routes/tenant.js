@@ -18,6 +18,12 @@ router.use((req, res, next) => {
 
 // Tenant dashboard route
 router.get("/tenant_dashboard", isAuthenticated, tenantController.getDashboard);
+// New: dashboard JSON data for React frontend
+router.get(
+  "/dashboard-data",
+  isAuthenticated,
+  tenantController.getDashboardData
+);
 
 // Maintenance request submission
 router.post(

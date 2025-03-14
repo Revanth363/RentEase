@@ -1,7 +1,6 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -21,5 +20,6 @@
     "formidable": "^3.5.4",
     "helmet": "^8.1.0",
     "mongoose": "^8.19.2"
-  }
+  },
+  "description": ""
 }
