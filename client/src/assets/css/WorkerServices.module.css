@@ -16,10 +16,7 @@
   padding-left: 6px;
 }
 
-/* place the title above the left column (search sidebar) */
-.title {
-  /* no extra margin when title is inside sidebar */
-}
+
 
 .filterToggle {
   display: none;

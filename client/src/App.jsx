@@ -5,6 +5,7 @@ import { LoadingProvider } from './LoadingContext';
 import Header from './components/Header';
 
 // Pages
+
 import HomePage from './pages/Homepage';
 import PropertySearch from './pages/PropertySearch';
 import PropertyDetails from './pages/PropertyDetails';
@@ -14,6 +15,9 @@ import ContactUs from './pages/ContactUs';
 import FAQ from './pages/FAQ';
 import WorkerServices from './pages/WorkerServices';
 import WorkerCard from './pages/WorkerCard';
+
+import TenantDashboard from "./pages/TenantDashboard";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
 // Admin Pages & Views (same as before)
 
@@ -77,8 +81,8 @@ const App = () => {
           <Route path="/register" element={<Auth initial="register" />} />
 
           {/* User Dashboards */}
-          <Route path="/tenant/tenant_dashboard" element={<div>Tenant Dashboard</div>} />
-          <Route path="/owner_dashboard" element={<div>Owner Dashboard</div>} />
+          <Route path="/tenant/tenant_dashboard" element={<TenantDashboard/>} />
+          <Route path="/owner_dashboard" element={<OwnerDashboard/>} />
           <Route path="/worker_dashboard" element={<div>Worker Dashboard</div>} />
           <Route path="/worker_register" element={<div>Worker Register</div>} />
           <Route path="/property-management" element={<div>Property Management</div>} />
