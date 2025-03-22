@@ -3,7 +3,7 @@ import * as tenantService from "../services/tenantService";
 import "../assets/css/TenantDashboard.css";
 
 const Sidebar = ({ onSelect, current }) => (
-  <div className="sidebar" id="sidebar">
+  <div className="tntd-sidebar" id="sidebar">
     <h2>Tenant Dashboard</h2>
     <ul>
       <li onClick={() => onSelect("home")}>
@@ -438,30 +438,34 @@ const TenantDashboard = () => {
 
   return (
     <div>
-      <div className="overlay" id="overlay"></div>
+      <div className="tntd-overlay" id="overlay"></div>
       <button
-        className="menu-toggle"
+        className="tntd-menu-toggle"
         onClick={() =>
-          document.querySelector(".sidebar")?.classList.toggle("active")
+          document
+            .querySelector(".tntd-sidebar")
+            ?.classList.toggle("tntd-active")
         }
       >
         <strong>&gt;</strong>
       </button>
-      <div className="dashboard-container">
+      <div className="tntd-dashboard-container">
         <Sidebar onSelect={setSection} current={section} />
-        <div className="main-content">
+        <div className="tntd-main-content">
           {/* Home */}
           <div
             id="home"
-            className={`section ${section === "home" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "home" ? "tntd-active" : ""
+            }`}
           >
             <h3>
               Welcome, {user.firstName} {user.lastName}
             </h3>
             {currentProperty ? (
-              <div className="property-summary">
-                <div className="property-card" id="home_property_card">
-                  <div className="img_container">
+              <div className="tntd-property-summary">
+                <div className="tntd-property-card" id="home_property_card">
+                  <div className="tntd-img_container">
                     <img
                       src={
                         currentProperty.images && currentProperty.images[0]
@@ -471,7 +475,7 @@ const TenantDashboard = () => {
                       alt="Property"
                     />
                   </div>
-                  <div className="property-details">
+                  <div className="tntd-property-details">
                     <p>
                       <strong>Property:</strong> {currentProperty.subtype || ""}{" "}
                       {currentProperty.name || "N/A"}
@@ -497,7 +501,7 @@ const TenantDashboard = () => {
                   </div>
                   <button
                     id="unrent-btn"
-                    className="unrent-btn"
+                    className="tntd-unrent-btn"
                     onClick={() => setShowUnrentModal(true)}
                   >
                     Request Unrent
@@ -508,8 +512,8 @@ const TenantDashboard = () => {
               <p>No current property rented.</p>
             )}
 
-            <div className="quick-stats">
-              <div className="stat-box">
+            <div className="tntd-quick-stats">
+              <div className="tntd-stat-box">
                 <h4>Active Maintenance</h4>
                 <p>
                   {activeMaintenanceRequests
@@ -518,7 +522,7 @@ const TenantDashboard = () => {
                   Pending Requests
                 </p>
               </div>
-              <div className="stat-box">
+              <div className="tntd-stat-box">
                 <h4>Saved Properties</h4>
                 <p>
                   {user.savedListings ? user.savedListings.length : 0}{" "}
@@ -531,11 +535,13 @@ const TenantDashboard = () => {
           {/* Rent Payments */}
           <div
             id="rentPayments"
-            className={`section ${section === "rentPayments" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "rentPayments" ? "tntd-active" : ""
+            }`}
           >
             <h3>Rent Payments</h3>
             {currentProperty ? (
-              <div className="current-rent">
+              <div className="tntd-current-rent">
                 {dashboard.nextPayment ? (
                   <p>
                     Next Rent Due:{" "}
@@ -548,7 +554,7 @@ const TenantDashboard = () => {
                   <p>No rent due date available.</p>
                 )}
                 <button
-                  className="pay-buttons"
+                  className="tntd-pay-buttons"
                   onClick={handleCheckRecentPayment}
                 >
                   Pay Rent
@@ -559,7 +565,7 @@ const TenantDashboard = () => {
             )}
 
             <h4>Payment History</h4>
-            <table className="payment-history">
+            <table className="tntd-payment-history">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -594,26 +600,28 @@ const TenantDashboard = () => {
           {/* Maintenance */}
           <div
             id="maintenance"
-            className={`section ${section === "maintenance" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "maintenance" ? "tntd-active" : ""
+            }`}
           >
             <h3>Maintenance Requests</h3>
             <button
-              className="book-button"
+              className="tntd-book-button"
               onClick={() => setShowMaintenancePopup(true)}
             >
               Submit New Request
             </button>
             <h4>Active Requests</h4>
-            <div className="maintenance-cards">
+            <div className="tntd-maintenance-cards">
               {(activeMaintenanceRequests || []).map((r) => (
-                <div className="maintenance-card" key={r._id}>
-                  <div className="maintenance-header">
+                <div className="tntd-maintenance-card" key={r._id}>
+                  <div className="tntd-maintenance-header">
                     <h5>{r.issueType || "Unknown"} Issue</h5>
                     <span
-                      className={`status ${
+                      className={`tntd-status ${
                         r.status
                           ? r.status.toLowerCase().replace(" ", "-")
-                          : "pending"
+                          : "tntd-pending"
                       }`}
                     >
                       {r.status || "Pending"}
@@ -637,17 +645,19 @@ const TenantDashboard = () => {
                     <strong>Assigned To:</strong>{" "}
                     {r.assignedTo || "Awaiting assignment"}
                   </p>
-                  <button className="small-button">Update</button>
+                  <button className="tntd-small-button">Update</button>
                 </div>
               ))}
             </div>
             <h4>Completed Requests</h4>
-            <div className="maintenance-cards">
+            <div className="tntd-maintenance-cards">
               {(completedMaintenanceRequests || []).map((r) => (
-                <div className="maintenance-card" key={r._id}>
-                  <div className="maintenance-header">
+                <div className="tntd-maintenance-card" key={r._id}>
+                  <div className="tntd-maintenance-header">
                     <h5>{r.issueType || "Unknown"} Issue</h5>
-                    <span className="status completed">Completed</span>
+                    <span className="tntd-status tntd-completed">
+                      Completed
+                    </span>
                   </div>
                   <p>
                     <strong>Date Reported:</strong>{" "}
@@ -672,11 +682,13 @@ const TenantDashboard = () => {
           {/* Complaints */}
           <div
             id="complaints"
-            className={`section ${section === "complaints" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "complaints" ? "tntd-active" : ""
+            }`}
           >
             <h3>Submit a Query / Complaint</h3>
             <form
-              className="query-form"
+              className="tntd-query-form"
               id="complaint-form"
               ref={complaintFormRef}
               onSubmit={handleSubmitComplaint}
@@ -696,12 +708,12 @@ const TenantDashboard = () => {
                 name="subject"
                 type="text"
                 placeholder="Subject"
-                className="query-text-input"
+                className="tntd-query-text-input"
                 required
               />
               <textarea
                 name="complaint-text"
-                className="query-text-input"
+                className="tntd-query-text-input"
                 rows={4}
                 placeholder="Describe your issue..."
                 required
@@ -709,13 +721,13 @@ const TenantDashboard = () => {
               <button type="submit">Submit Complaint</button>
             </form>
             <h4>Previous Complaints</h4>
-            <div className="complaints-history">
+            <div className="tntd-complaints-history">
               {(dashboard.complaints || []).map((c) => (
-                <div className="complaint-item" key={c._id}>
-                  <div className="complaint-header">
+                <div className="tntd-complaint-item" key={c._id}>
+                  <div className="tntd-complaint-header">
                     <h5>{c.subject}</h5>
                     <span
-                      className={`status ${
+                      className={`tntd-status ${
                         c.status
                           ? c.status.toLowerCase().replace(" ", "-")
                           : "open"
@@ -746,15 +758,17 @@ const TenantDashboard = () => {
           {/* Movers / Workers */}
           <div
             id="movers"
-            className={`section ${section === "movers" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "movers" ? "tntd-active" : ""
+            }`}
           >
             <h3>Domestic Worker Services</h3>
-            <div className="service-categories">
-              <div className="service-category">
+            <div className="tntd-service-categories">
+              <div className="tntd-service-category">
                 <h4>Cleaning Services</h4>
                 <p>Professional house cleaning</p>
                 <button
-                  className="book-button"
+                  className="tntd-book-button"
                   onClick={() =>
                     (window.location.href = "/workerDetails?service=cleaning")
                   }
@@ -762,11 +776,11 @@ const TenantDashboard = () => {
                   Find Cleaners
                 </button>
               </div>
-              <div className="service-category">
+              <div className="tntd-service-category">
                 <h4>Cooking Services</h4>
                 <p>Skilled cooks for daily meals</p>
                 <button
-                  className="book-button"
+                  className="tntd-book-button"
                   onClick={() =>
                     (window.location.href = "/workerDetails?service=cooking")
                   }
@@ -774,11 +788,11 @@ const TenantDashboard = () => {
                   Find Cooks
                 </button>
               </div>
-              <div className="service-category">
+              <div className="tntd-service-category">
                 <h4>Laundry Services</h4>
                 <p>Washing and ironing services</p>
                 <button
-                  className="book-button"
+                  className="tntd-book-button"
                   onClick={() =>
                     (window.location.href = "/workerDetails?service=laundry")
                   }
@@ -788,9 +802,9 @@ const TenantDashboard = () => {
               </div>
             </div>
             <h4>Your Current Service Providers</h4>
-            <div className="worker-cards">
+            <div className="tntd-worker-cards">
               {(workers || []).length === 0 ? (
-                <div className="no-workers-message">
+                <div className="tntd-no-workers-message">
                   <p>
                     You don't have any domestic workers assigned yet. Browse the
                     services above to find help.
@@ -799,7 +813,7 @@ const TenantDashboard = () => {
               ) : (
                 (workers || []).map((worker, index) => (
                   <div
-                    className="worker-card"
+                    className="tntd-worker-card"
                     data-worker-id={worker._id || `worker_${index}`}
                     key={worker._id || index}
                   >
@@ -807,34 +821,34 @@ const TenantDashboard = () => {
                       src={worker.image || "/resources/default-worker.jpg"}
                       alt="Worker"
                     />
-                    <div className="worker-details">
-                      <h5 className="worker-name">
+                    <div className="tntd-worker-details">
+                      <h5 className="tntd-worker-name">
                         {worker.firstName} {worker.lastName}
                       </h5>
                       <p>
                         <strong>Service:</strong>{" "}
-                        <span className="worker-service">
+                        <span className="tntd-worker-service">
                           {worker.serviceType || "N/A"}
                         </span>
                       </p>
                       <p>
                         <strong>Schedule:</strong>{" "}
-                        <span className="worker-schedule">
+                        <span className="tntd-worker-schedule">
                           {worker.availability || "N/A"}
                         </span>
                       </p>
                       <p>
                         <strong>Fee:</strong> ₹
-                        <span className="worker-fee">
+                        <span className="tntd-worker-fee">
                           {worker.price || "N/A"}
                         </span>
-                        <span className="worker-rate-unit">
+                        <span className="tntd-worker-rate-unit">
                           {worker.rateUnit ? "/" + worker.rateUnit : ""}
                         </span>
                       </p>
                       <p>
                         <strong>Experience:</strong>{" "}
-                        <span className="worker-experience">
+                        <span className="tntd-worker-experience">
                           {worker.experience
                             ? worker.experience + " years"
                             : "N/A"}
@@ -842,24 +856,26 @@ const TenantDashboard = () => {
                       </p>
                       <p>
                         <strong>Phone:</strong>{" "}
-                        <span className="worker-phone">
+                        <span className="tntd-worker-phone">
                           {worker.phone || "N/A"}
                         </span>
                       </p>
-                      <div className="rating">
+                      <div className="tntd-rating">
                         {worker.ratingId && worker.ratingId.average ? (
-                          <span className="worker-rating">
+                          <span className="tntd-worker-rating">
                             {"⭐".repeat(Math.round(worker.ratingId.average))}{" "}
                             {worker.ratingId.average.toFixed(1)}
                           </span>
                         ) : (
-                          <span className="worker-rating">No ratings yet</span>
+                          <span className="tntd-worker-rating">
+                            No ratings yet
+                          </span>
                         )}
                       </div>
-                      <div className="worker-payment-section">
+                      <div className="tntd-worker-payment-section">
                         <h6>Payment</h6>
                         <button
-                          className="pay-worker-btn"
+                          className="tntd-pay-worker-btn"
                           onClick={() => openWorkerPaymentPopup(worker)}
                           disabled={worker.paymentStatus === "paid"}
                         >
@@ -868,7 +884,7 @@ const TenantDashboard = () => {
                             : "Pay Worker"}
                         </button>
                         <button
-                          className="debook-worker-btn"
+                          className="tntd-debook-worker-btn"
                           onClick={() => handleDebookWorker(worker._id)}
                         >
                           Debook
@@ -880,7 +896,7 @@ const TenantDashboard = () => {
               )}
             </div>
             <h4>Worker Payment History</h4>
-            <table className="payment-history-table">
+            <table className="tntd-payment-history-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -919,15 +935,17 @@ const TenantDashboard = () => {
           {/* Notifications */}
           <div
             id="notifications"
-            className={`section ${section === "notifications" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "notifications" ? "tntd-active" : ""
+            }`}
           >
             <h3>Notifications</h3>
-            <div className="notification-container">
+            <div className="tntd-notification-container">
               {notifications && notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
-                    className={`notification-card ${
-                      notification.read ? "read" : "unread"
+                    className={`tntd-notification-card ${
+                      notification.read ? "tntd-read" : "tntd-unread"
                     }`}
                     key={notification._id}
                     data-notification-id={notification._id}
@@ -948,7 +966,7 @@ const TenantDashboard = () => {
                     <p>
                       <strong>Status:</strong>{" "}
                       <span
-                        className={`notification-status ${
+                        className={`tntd-notification-status ${
                           notification.status &&
                           notification.status.toLowerCase()
                         }`}
@@ -962,7 +980,7 @@ const TenantDashboard = () => {
                     </p>
                     {!notification.read && (
                       <button
-                        className="mark-read-button"
+                        className="tntd-mark-read-button"
                         onClick={() =>
                           handleMarkNotificationRead(notification._id)
                         }
@@ -981,7 +999,9 @@ const TenantDashboard = () => {
           {/* Saved Listings */}
           <div
             id="savedListings"
-            className={`section ${section === "savedListings" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "savedListings" ? "tntd-active" : ""
+            }`}
           >
             <h3>Saved Listings</h3>
             <p>
@@ -989,14 +1009,14 @@ const TenantDashboard = () => {
               {user.savedListings ? user.savedListings.length : 0} properties
               for future reference.
             </p>
-            <div className="saved-properties">
+            <div className="tntd-saved-properties">
               {(user.savedListings || []).map((property) => (
                 <div
-                  className="property-card"
+                  className="tntd-property-card"
                   data-property-id={property._id}
                   key={property._id}
                 >
-                  <div className="img_container">
+                  <div className="tntd-img_container">
                     <img
                       src={
                         property.images && property.images[0]
@@ -1006,7 +1026,7 @@ const TenantDashboard = () => {
                       alt="Property"
                     />
                   </div>
-                  <div className="property-info">
+                  <div className="tntd-property-info">
                     <h4>{property.name || "N/A"}</h4>
                     <p>
                       <strong>Location:</strong> {property.location || "N/A"}
@@ -1020,14 +1040,14 @@ const TenantDashboard = () => {
                         ? new Date(property.availableFrom).toLocaleDateString()
                         : "Immediate"}
                     </p>
-                    <div className="property-features">
+                    <div className="tntd-property-features">
                       <span>{property.subtype || "N/A"}</span>
                       <span>{property.size || "N/A"}</span>
                       <span>{property.furnished || "N/A"}</span>
                     </div>
-                    <div className="card-actions">
+                    <div className="tntd-card-actions">
                       <button
-                        className="book-button"
+                        className="tntd-book-button"
                         onClick={() =>
                           (window.location.href = `/book-property?id=${property._id}`)
                         }
@@ -1035,13 +1055,13 @@ const TenantDashboard = () => {
                         Book Now
                       </button>
                       <a
-                        className="view-details book-button"
+                        className="tntd-view-details tntd-book-button"
                         href={`/property?id=${property._id}`}
                       >
                         View Details
                       </a>
                       <button
-                        className="remove-button"
+                        className="tntd-remove-button"
                         onClick={() => handleRemoveSavedProperty(property._id)}
                       >
                         Remove
@@ -1062,25 +1082,27 @@ const TenantDashboard = () => {
           {/* Ratings */}
           <div
             id="ratings"
-            className={`section ${section === "ratings" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "ratings" ? "tntd-active" : ""
+            }`}
           >
             <h3>Reviews & Ratings</h3>
             <h4>Your Property Reviews</h4>
             {currentProperty && (
-              <div className="review-form">
+              <div className="tntd-review-form">
                 <h5>Review Your Current Property</h5>
-                <div className="star-rating">
+                <div className="tntd-star-rating">
                   <span>Rate your experience: </span>
                   <div
-                    className="stars"
-                    id="star-rating"
+                    className="tntd-stars"
+                    id="tntd-star-rating"
                     data-property-id={currentProperty._id}
                   >
                     {[1, 2, 3, 4, 5].map((r) => (
                       <span
                         key={r}
-                        className={`star ${
-                          selectedRating >= r ? "active" : ""
+                        className={`tntd-star ${
+                          selectedRating >= r ? "tntd-active" : ""
                         }`}
                         onMouseEnter={() => handleStarHover(r)}
                         onClick={() => handleStarClick(r)}
@@ -1109,25 +1131,25 @@ const TenantDashboard = () => {
               </div>
             )}
             <h4>Past Reviews</h4>
-            <div className="past-reviews">
+            <div className="tntd-past-reviews">
               {(ratings || []).map((r) => (
-                <div className="review-card" key={r._id}>
-                  <div className="review-header">
+                <div className="tntd-review-card" key={r._id}>
+                  <div className="tntd-review-header">
                     <h5>
                       {r.propertyId && r.propertyId.name
                         ? r.propertyId.name
                         : "Unknown Property"}
                     </h5>
-                    <div className="rating">
+                    <div className="tntd-rating">
                       {r.rating ? "⭐".repeat(r.rating) : ""}{" "}
                       {r.rating ? r.rating.toFixed(1) : "N/A"}
                     </div>
                   </div>
-                  <p className="review-date">
+                  <p className="tntd-review-date">
                     Reviewed on:{" "}
                     {r.date ? new Date(r.date).toLocaleDateString() : "N/A"}
                   </p>
-                  <p className="review-text">
+                  <p className="tntd-review-text">
                     {r.review || "No review provided"}
                   </p>
                 </div>
@@ -1138,19 +1160,21 @@ const TenantDashboard = () => {
           {/* Settings */}
           <div
             id="settings"
-            className={`section ${section === "settings" ? "active" : ""}`}
+            className={`tntd-section ${
+              section === "settings" ? "tntd-active" : ""
+            }`}
           >
             <h3>Account Settings</h3>
-            <div className="settings-container">
-              <div id="profile-section">
+            <div className="tntd-settings-container">
+              <div id="tntd-profile-section">
                 <h4>Personal Information</h4>
                 <form
-                  className="profile-form"
+                  className="tntd-profile-form"
                   id="profile-form"
                   ref={profileFormRef}
                   onSubmit={handleUpdateProfile}
                 >
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>Full Name</label>
                     <input
                       name="fullname"
@@ -1160,7 +1184,7 @@ const TenantDashboard = () => {
                       }`}
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>Email Address</label>
                     <input
                       name="email"
@@ -1168,7 +1192,7 @@ const TenantDashboard = () => {
                       defaultValue={user.email || ""}
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>Phone Number</label>
                     <input
                       name="phone"
@@ -1176,7 +1200,7 @@ const TenantDashboard = () => {
                       defaultValue={user.phone || ""}
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>Current Address</label>
                     <textarea
                       name="address"
@@ -1186,46 +1210,46 @@ const TenantDashboard = () => {
                   </div>
                   <button
                     type="submit"
-                    className="settings-submission-class book-button"
+                    className="tntd-settings-submission-class tntd-book-button"
                   >
                     Update Profile
                   </button>
                 </form>
               </div>
 
-              <div id="security-section">
+              <div id="tntd-security-section">
                 <h4>Security Settings</h4>
                 <form
-                  className="password-form"
+                  className="tntd-password-form"
                   id="password-form"
                   ref={passwordFormRef}
                   onSubmit={handleChangePassword}
                 >
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>Current Password</label>
                     <input name="current-password" type="password" />
                   </div>
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>New Password</label>
                     <input name="new-password" type="password" />
                   </div>
-                  <div className="form-group">
+                  <div className="tntd-form-group">
                     <label>Confirm New Password</label>
                     <input name="confirm-password" type="password" />
                   </div>
                   <button
                     type="submit"
-                    className="settings-submission-class book-button"
+                    className="tntd-settings-submission-class tntd-book-button"
                   >
                     Change Password
                   </button>
                 </form>
               </div>
 
-              <div id="preferences-section">
+              <div id="tntd-preferences-section">
                 <h4>Notification Preferences</h4>
-                <form className="notification-form">
-                  <div className="checkbox-group">
+                <form className="tntd-notification-form">
+                  <div className="tntd-checkbox-group">
                     <label>Email Notifications</label>
                     <input
                       type="checkbox"
@@ -1233,11 +1257,11 @@ const TenantDashboard = () => {
                       defaultChecked={user.emailNotifications}
                     />
                     <label
-                      className="button"
+                      className="tntd-button"
                       htmlFor="email-notifications"
                     ></label>
                   </div>
-                  <div className="checkbox-group">
+                  <div className="tntd-checkbox-group">
                     <label>SMS Notifications</label>
                     <input
                       type="checkbox"
@@ -1245,20 +1269,23 @@ const TenantDashboard = () => {
                       defaultChecked={user.smsNotifications}
                     />
                     <label
-                      className="button"
+                      className="tntd-button"
                       htmlFor="sms-notifications"
                     ></label>
                   </div>
-                  <div className="checkbox-group">
+                  <div className="tntd-checkbox-group">
                     <label>Rent Due Reminders</label>
                     <input
                       type="checkbox"
                       id="rent-reminders"
                       defaultChecked={user.rentReminders}
                     />
-                    <label className="button" htmlFor="rent-reminders"></label>
+                    <label
+                      className="tntd-button"
+                      htmlFor="rent-reminders"
+                    ></label>
                   </div>
-                  <div className="checkbox-group">
+                  <div className="tntd-checkbox-group">
                     <label>Maintenance Updates</label>
                     <input
                       type="checkbox"
@@ -1266,22 +1293,25 @@ const TenantDashboard = () => {
                       defaultChecked={user.maintenanceUpdates}
                     />
                     <label
-                      className="button"
+                      className="tntd-button"
                       htmlFor="maintenance-updates"
                     ></label>
                   </div>
-                  <div className="checkbox-group">
+                  <div className="tntd-checkbox-group">
                     <label>New Property Listings</label>
                     <input
                       type="checkbox"
                       id="new-listings"
                       defaultChecked={user.newListings}
                     />
-                    <label className="button" htmlFor="new-listings"></label>
+                    <label
+                      className="tntd-button"
+                      htmlFor="new-listings"
+                    ></label>
                   </div>
                   <button
                     type="button"
-                    className="settings-submission-class book-button"
+                    className="tntd-settings-submission-class tntd-book-button"
                     onClick={async () => {
                       const payload = {
                         emailNotifications: document.getElementById(
@@ -1318,10 +1348,10 @@ const TenantDashboard = () => {
                 </form>
               </div>
 
-              <div id="delete-account-section">
+              <div id="tntd-delete-account-section">
                 <h4>Delete Account</h4>
                 <button
-                  className="settings-submission-class delete-account-btn remove-button"
+                  className="tntd-settings-submission-class tntd-delete-account-btn tntd-remove-button"
                   onClick={handleCheckAccountStatusAndDelete}
                 >
                   Delete Account
@@ -1335,12 +1365,12 @@ const TenantDashboard = () => {
       {/* Maintenance request popup */}
       <div
         id="maintenance-request-popup"
-        className="popup-container"
+        className="tntd-popup-container"
         style={{ display: showMaintenancePopup ? "flex" : "none" }}
       >
-        <div className="popup-content">
+        <div className="tntd-popup-content">
           <span
-            className="close-btn"
+            className="tntd-close-btn"
             onClick={() => setShowMaintenancePopup(false)}
           >
             ×
@@ -1351,7 +1381,7 @@ const TenantDashboard = () => {
             ref={maintFormRef}
             onSubmit={handleSubmitMaintenance}
           >
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Issue Type:</label>
               <select name="issue-type" id="issue-type" required>
                 <option value="">Select an issue type</option>
@@ -1363,7 +1393,7 @@ const TenantDashboard = () => {
                 <option>Other</option>
               </select>
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Description:</label>
               <textarea
                 name="description"
@@ -1373,7 +1403,7 @@ const TenantDashboard = () => {
                 required
               ></textarea>
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Location:</label>
               <input
                 name="location"
@@ -1382,12 +1412,12 @@ const TenantDashboard = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Preferred Date</label>
               <input name="preferred-date" id="preferred-date" type="date" />
             </div>
-            <div className="form-group">
-              <button type="submit" className="submit-btn">
+            <div className="tntd-form-group">
+              <button type="submit" className="tntd-submit-btn">
                 Submit Request
               </button>
             </div>
@@ -1398,11 +1428,11 @@ const TenantDashboard = () => {
       {/* Payment popup */}
       <div
         id="payment-popup-container"
-        className="popup-container"
+        className="tntd-popup-container"
         style={{ display: showPaymentPopup ? "flex" : "none" }}
       >
-        <div className="popup-content">
-          <span className="close-btn" onClick={closePaymentPopup}>
+        <div className="tntd-popup-content">
+          <span className="tntd-close-btn" onClick={closePaymentPopup}>
             ×
           </span>
           <h3>Pay Rent</h3>
@@ -1411,7 +1441,7 @@ const TenantDashboard = () => {
             ref={paymentFormRef}
             onSubmit={handleSubmitPayment}
           >
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Rent Amount (₹):</label>
               <input
                 name="rent-amount"
@@ -1420,7 +1450,7 @@ const TenantDashboard = () => {
                 readOnly
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Payment Method:</label>
               <select name="payment-method" id="payment-method" required>
                 <option value="">Select Payment Method</option>
@@ -1430,7 +1460,7 @@ const TenantDashboard = () => {
                 <option>Bank Transfer</option>
               </select>
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Transaction ID:</label>
               <input
                 name="transaction-id"
@@ -1439,8 +1469,8 @@ const TenantDashboard = () => {
                 required
               />
             </div>
-            <div className="form-group">
-              <button type="submit" className="submit-btn">
+            <div className="tntd-form-group">
+              <button type="submit" className="tntd-submit-btn">
                 Submit Payment
               </button>
             </div>
@@ -1451,11 +1481,11 @@ const TenantDashboard = () => {
       {/* Worker payment popup */}
       <div
         id="worker-payment-popup"
-        className="popup-container"
+        className="tntd-popup-container"
         style={{ display: showWorkerPaymentPopup ? "flex" : "none" }}
       >
-        <div className="popup-content">
-          <span className="close-btn" onClick={closeWorkerPaymentPopup}>
+        <div className="tntd-popup-content">
+          <span className="tntd-close-btn" onClick={closeWorkerPaymentPopup}>
             ×
           </span>
           <h3>Pay Worker</h3>
@@ -1464,7 +1494,7 @@ const TenantDashboard = () => {
             ref={workerPaymentFormRef}
             onSubmit={handleWorkerPayment}
           >
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Worker Name:</label>
               <input
                 name="worker-name"
@@ -1484,7 +1514,7 @@ const TenantDashboard = () => {
                 }
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Service Type:</label>
               <input
                 name="service-type"
@@ -1497,7 +1527,7 @@ const TenantDashboard = () => {
                 readOnly
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Payment Amount (₹):</label>
               <input
                 name="payment-amount"
@@ -1508,7 +1538,7 @@ const TenantDashboard = () => {
                 readOnly
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Payment Date:</label>
               <input
                 name="payment-date"
@@ -1518,7 +1548,7 @@ const TenantDashboard = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Payment Method:</label>
               <select
                 name="worker-payment-method"
@@ -1531,7 +1561,7 @@ const TenantDashboard = () => {
                 <option>Digital Wallet</option>
               </select>
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Transaction ID (if applicable):</label>
               <input
                 name="worker-transaction-id"
@@ -1539,7 +1569,7 @@ const TenantDashboard = () => {
                 placeholder="Enter transaction ID"
               />
             </div>
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Notes (optional):</label>
               <textarea
                 name="payment-notes"
@@ -1547,8 +1577,8 @@ const TenantDashboard = () => {
                 rows={3}
               ></textarea>
             </div>
-            <div className="form-group">
-              <button type="submit" className="submit-btn">
+            <div className="tntd-form-group">
+              <button type="submit" className="tntd-submit-btn">
                 Submit Payment
               </button>
             </div>
@@ -1559,11 +1589,14 @@ const TenantDashboard = () => {
       {/* Unrent modal */}
       <div
         id="unrent-modal"
-        className="modal"
+        className="tntd-modal"
         style={{ display: showUnrentModal ? "flex" : "none" }}
       >
-        <div className="modal-content">
-          <span className="close" onClick={() => setShowUnrentModal(false)}>
+        <div className="tntd-modal-content">
+          <span
+            className="tntd-close"
+            onClick={() => setShowUnrentModal(false)}
+          >
             &times;
           </span>
           <h4>Unrent Property</h4>
@@ -1575,7 +1608,7 @@ const TenantDashboard = () => {
           ></textarea>
           <button
             id="confirm-unrent"
-            className="btn btn-danger"
+            className="tntd-btn tntd-btn-danger"
             onClick={handleRequestUnrent}
           >
             Confirm Unrent
@@ -1586,12 +1619,12 @@ const TenantDashboard = () => {
       {/* Delete account modal */}
       <div
         id="delete-account-popup"
-        className="popup-container"
+        className="tntd-popup-container"
         style={{ display: showDeleteAccountModal ? "flex" : "none" }}
       >
-        <div className="popup-content">
+        <div className="tntd-popup-content">
           <span
-            className="close-btn"
+            className="tntd-close-btn"
             onClick={() => setShowDeleteAccountModal(false)}
           >
             ×
@@ -1606,12 +1639,12 @@ const TenantDashboard = () => {
             ref={deleteAccountFormRef}
             onSubmit={handleDeleteAccount}
           >
-            <div className="form-group">
+            <div className="tntd-form-group">
               <label>Password:</label>
               <input name="delete-password" type="password" required />
             </div>
-            <div className="form-group">
-              <button type="submit" className="submit-btn">
+            <div className="tntd-form-group">
+              <button type="submit" className="tntd-submit-btn">
                 Confirm Deletion
               </button>
             </div>

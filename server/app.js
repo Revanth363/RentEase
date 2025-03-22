@@ -334,10 +334,20 @@ app.post("/login", async (req, res) => {
     }
 
     req.session.user = {
-      _id: user._id.toString(),
-      userType,
-      email: user.email
-    };
+  _id: user._id.toString(),
+  userType,
+  email: user.email,
+  firstName: user.firstName || "",
+  lastName: user.lastName || "",
+  phone: user.phone || "",
+  location: user.location || "",
+  emailNotifications: user.emailNotifications || false,
+  smsNotifications: user.smsNotifications || false,
+  rentReminders: user.rentReminders || false,
+  maintenanceUpdates: user.maintenanceUpdates || false,
+  newListings: user.newListings || false,
+};
+
 
     res.json({
       success: true,
