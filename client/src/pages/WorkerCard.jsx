@@ -69,7 +69,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
     return (
       <main className={styles.root}>
         <div className={styles.headerRow}>
-          <Link to="/workerDetails" className={styles.backLink}>Back to services</Link>
+          <Link to="/workerDetails" className={styles.backLink}> ← </Link>
           <h1 className={styles.title}>{worker.firstName} {worker.lastName}</h1>
         </div>
 

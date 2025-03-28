@@ -1161,3 +1161,132 @@ exports.debookWorker = async (req, res) => {
     });
   }
 };
+
+
+// Add this function to workerController.js
+exports.getDashboardDataAPI = async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.userType !== "worker") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const worker = await Worker.findById(req.session.user._id);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+    const user = worker.toObject();
+    user.clientIds = Array.isArray(user.clientIds) ? user.clientIds : [];
+
+    // === SAME LOGIC AS renderWorkerDashboardSafer ===
+    const services = user.serviceType ? [{
+      name: user.serviceType,
+      price: user.price || 0,
+      rateUnit: user.rateUnit || "monthly",
+      experience: user.experience || 0,
+      serviceStatus: user.serviceStatus || "Available",
+      image: user.image || "/images/default_service.jpg",
+    }] : [];
+
+    const bookingsRaw = await WorkerBooking.find({ workerId: user._id })
+      .populate("tenantId", "firstName lastName phone")
+      .lean();
+
+    const bookings = bookingsRaw.map(b => ({
+      _id: b._id,
+      serviceName: b.serviceType || user.serviceType || "N/A",
+      tenantId: {
+        firstName: b.tenantId?.firstName || "N/A",
+        lastName: b.tenantId?.lastName || "",
+        phone: b.tenantId?.phone || "N/A",
+      },
+      propertyId: { address: b.tenantAddress || "N/A" },
+      date: b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "N/A",
+      time: b.bookingDate ? new Date(b.bookingDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A",
+      status: b.status || "Pending",
+    }));
+
+    const clients = user.clientIds.length > 0 ? await Tenant.find({ _id: { $in: user.clientIds } })
+      .select('firstName lastName phone email')
+      .lean() : [];
+
+    const clientBookings = await WorkerBooking.find({
+      workerId: user._id,
+      tenantId: { $in: user.clientIds },
+      status: "Approved"
+    }).select("tenantId serviceType bookingDate").lean();
+
+    const formattedClients = clients.map(client => {
+      const related = clientBookings.filter(cb => cb.tenantId.toString() === client._id.toString());
+      const servicesUsed = related.length > 0
+        ? [...new Set(related.map(cb => cb.serviceType))].filter(Boolean)
+        : [user.serviceType || "N/A"];
+      const bookingDate = related[0]?.bookingDate;
+
+      return {
+        _id: client._id,
+        firstName: client.firstName,
+        lastName: client.lastName,
+        phone: client.phone || "N/A",
+        email: client.email || "N/A",
+        services: servicesUsed,
+        bookingDate: bookingDate ? new Date(bookingDate).toLocaleDateString() : "N/A",
+      };
+    });
+
+    const payments = await WorkerPayment.find({ workerId: user._id }).lean();
+    const transactions = payments.map(p => ({
+      _id: p._id,
+      title: "Salary Payment",
+      serviceName: user.serviceType || "N/A",
+      clientName: p.userName || "Client",
+      date: p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : "N/A",
+      amount: p.amount || 0,
+      status: p.status || "Pending",
+    }));
+
+    const earnings = {
+      monthly: payments.filter(p => p.status === "Paid").reduce((s, p) => s + p.amount, 0),
+      pending: payments.filter(p => p.status === "Pending").reduce((s, p) => s + p.amount, 0),
+    };
+
+    const reviews = {
+      averageRating: user.ratingId?.average || 0,
+      count: user.ratingId?.reviews?.length || 0,
+      items: (user.ratingId?.reviews || []).map(r => ({
+        user: r.user || "Anonymous",
+        rating: r.rating || 0,
+        date: r.date ? new Date(r.date).toLocaleDateString() : "N/A",
+        comment: r.comment || "No comment",
+        serviceName: r.serviceName || user.serviceType || "N/A",
+      })),
+    };
+
+    const notifications = await Notification.find({
+      recipient: user._id,
+      recipientType: "Worker"
+    }).sort({ createdDate: -1 }).lean();
+
+    const formattedNotifications = notifications.map(n => ({
+      _id: n._id,
+      type: n.type || "Info",
+      message: n.message || "",
+      tenantName: n.tenantName || null,
+      createdDate: n.createdDate || new Date(),
+      read: n.read || false,
+    }));
+
+    res.json({
+      user,
+      services,
+      bookings,
+      clients: formattedClients,
+      earnings,
+      transactions,
+      reviews,
+      notifications: formattedNotifications,
+    });
+
+  } catch (error) {
+    console.error("Error in getDashboardDataAPI:", error);
+    res.status(500).json({ error: "Failed to load dashboard" });
+  }
+};
