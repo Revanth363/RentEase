@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const workerController = require('../controllers/workerController');
+const workerController = require("../controllers/workerController");
 // Only require controllers and express at the top. Do not require WorkerPayment here.
 
 // Route to render the worker dashboard
@@ -27,13 +27,13 @@ router.get(
 );
 
 // API endpoint to get all unique locations, areas, and service types for filters
-router.get('/filters', workerController.getWorkerFilters);
+router.get("/filters", workerController.getWorkerFilters);
 
 // API endpoint to search workers by location
-router.get('/search', workerController.searchWorkersByLocation);
+router.get("/search", workerController.searchWorkersByLocation);
 
 // API endpoint to check if tenant can review a worker
-router.get('/:id/can-review', workerController.canTenantReviewWorker);
+router.get("/:id/can-review", workerController.canTenantReviewWorker);
 
 // Route to render the worker dashboard
 //router.get("/worker_dashboard", workerController.isAuthenticated, workerController.renderWorkerDashboard);
@@ -114,6 +114,13 @@ router.post(
   "/api/workers/debook/:id",
   workerController.isAuthenticated,
   workerController.debookWorker
+);
+
+// Add this line with your other API routes
+router.get(
+  "/api/dashboard",
+  workerController.isAuthenticated,
+  workerController.getDashboardDataAPI
 );
 
 module.exports = router;

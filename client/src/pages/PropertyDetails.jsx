@@ -206,9 +206,7 @@ const PropertyDetails = () => {
           <p className={styles.price}>₹{property.price?.toLocaleString()}</p>
           <button
             className={styles.contactNow}
-            onClick={() => {
-              window.location.href = `http://localhost:5000/api/bookings/book-property?id=${property._id}`;
-            }}
+            onClick={() => navigate(`/book-property?id=${property._id}`)}
           >
             Book Now
           </button>

@@ -15,9 +15,11 @@ import ContactUs from './pages/ContactUs';
 import FAQ from './pages/FAQ';
 import WorkerServices from './pages/WorkerServices';
 import WorkerCard from './pages/WorkerCard';
+import BookProperty from './pages/BookProperty';
 
 import TenantDashboard from "./pages/TenantDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import WorkerDashboard from "./pages/WorkerDashboard";
 
 // Admin Pages & Views (same as before)
 
@@ -69,6 +71,8 @@ const App = () => {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy_policy" element={<div>Privacy Policy</div>} />
           <Route path="/termsofservice" element={<div>Terms of Service</div>} />
+          <Route path="/book-property" element={<BookProperty />} />
+
 
           {/* Auth Routes — NO HEADER */}
           <Route path="/login" element={<Auth initial="login" />} />
@@ -83,7 +87,7 @@ const App = () => {
           {/* User Dashboards */}
           <Route path="/tenant/tenant_dashboard" element={<TenantDashboard/>} />
           <Route path="/owner_dashboard" element={<OwnerDashboard/>} />
-          <Route path="/worker_dashboard" element={<div>Worker Dashboard</div>} />
+          <Route path="/worker_dashboard" element={<WorkerDashboard/>} />
           <Route path="/worker_register" element={<div>Worker Register</div>} />
           <Route path="/property-management" element={<div>Property Management</div>} />
 
