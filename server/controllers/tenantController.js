@@ -1449,3 +1449,38 @@ exports.login = async (req, res) => {
     res.status(500).render("pages/login", { error: "Server error" });
   }
 };
+
+// Get work history for a tenant (given a worker)
+exports.getWorkerWorkHistory = async (req, res) => {
+  try {
+    const tenantId = req.session.user._id;
+    const { workerId } = req.params;
+
+    if (!workerId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing worker ID" });
+    }
+
+    const WorkTracking = require("../models/workTracking");
+
+    // Get all verified work dates for this worker-tenant pair
+    const workHistory = await WorkTracking.find({
+      workerId,
+      tenantId,
+      otpVerified: true,
+    }).sort({ workDate: -1 });
+
+    const completedDates = workHistory.map((w) => w.workDate);
+
+    res.json({
+      success: true,
+      data: completedDates,
+    });
+  } catch (error) {
+    console.error("Error fetching work history:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch work history" });
+  }
+};

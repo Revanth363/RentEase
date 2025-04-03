@@ -123,4 +123,23 @@ router.get(
   workerController.getDashboardDataAPI
 );
 
+// Work tracking routes
+router.post(
+  "/work-tracking/generate-otp",
+  workerController.isAuthenticated,
+  workerController.generateWorkOTP
+);
+
+router.post(
+  "/work-tracking/verify-otp",
+  workerController.isAuthenticated,
+  workerController.verifyWorkOTP
+);
+
+router.get(
+  "/work-tracking/history/:tenantId",
+  workerController.isAuthenticated,
+  workerController.getWorkHistory
+);
+
 module.exports = router;

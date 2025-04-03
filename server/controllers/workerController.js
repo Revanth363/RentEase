@@ -1,17 +1,31 @@
 // Get all unique locations and service types for filters
 exports.getWorkerFilters = async (req, res) => {
   try {
-    const locations = await Worker.distinct('location', { location: { $ne: null, $ne: '' } });
-    const areas = await Worker.distinct('area', { area: { $ne: null, $ne: '' } });
-    const serviceTypes = await Worker.distinct('serviceType', { serviceType: { $ne: null, $ne: '' } });
+    const locations = await Worker.distinct("location", {
+      location: { $ne: null, $ne: "" },
+    });
+    const areas = await Worker.distinct("area", {
+      area: { $ne: null, $ne: "" },
+    });
+    const serviceTypes = await Worker.distinct("serviceType", {
+      serviceType: { $ne: null, $ne: "" },
+    });
     // Filter out empty strings and normalize
-    const cleanLocations = locations.filter(l => l && l.trim()).map(l => l.trim());
-    const cleanAreas = areas.filter(a => a && a.trim()).map(a => a.trim());
-    const cleanServiceTypes = serviceTypes.filter(s => s && s.trim()).map(s => s.trim());
-    res.json({ locations: cleanLocations, areas: cleanAreas, serviceTypes: cleanServiceTypes });
+    const cleanLocations = locations
+      .filter((l) => l && l.trim())
+      .map((l) => l.trim());
+    const cleanAreas = areas.filter((a) => a && a.trim()).map((a) => a.trim());
+    const cleanServiceTypes = serviceTypes
+      .filter((s) => s && s.trim())
+      .map((s) => s.trim());
+    res.json({
+      locations: cleanLocations,
+      areas: cleanAreas,
+      serviceTypes: cleanServiceTypes,
+    });
   } catch (error) {
-    console.error('Error fetching filter data:', error);
-    res.status(500).json({ error: 'Error fetching filter data' });
+    console.error("Error fetching filter data:", error);
+    res.status(500).json({ error: "Error fetching filter data" });
   }
 };
 
@@ -21,23 +35,29 @@ exports.searchWorkersByLocation = async (req, res) => {
     const { location, area } = req.query;
     const filter = {
       $or: [
-        { serviceStatus: 'Available' },
+        { serviceStatus: "Available" },
         { serviceStatus: { $exists: false } },
         { serviceStatus: null },
       ],
     };
 
     if (location) {
-      filter.location = new RegExp(location, 'i');
+      filter.location = new RegExp(location, "i");
     }
     if (area) {
-      filter.area = new RegExp(area, 'i');
+      filter.area = new RegExp(area, "i");
     }
 
     // Exclude workers already booked by this tenant
-    if (req.session.user && req.session.user.userType === 'tenant') {
-      const tenant = await Tenant.findById(req.session.user._id).select('domesticWorkerId');
-      if (tenant && tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+    if (req.session.user && req.session.user.userType === "tenant") {
+      const tenant = await Tenant.findById(req.session.user._id).select(
+        "domesticWorkerId"
+      );
+      if (
+        tenant &&
+        tenant.domesticWorkerId &&
+        tenant.domesticWorkerId.length > 0
+      ) {
         filter._id = { $nin: tenant.domesticWorkerId };
       }
     }
@@ -45,16 +65,16 @@ exports.searchWorkersByLocation = async (req, res) => {
     const workers = await Worker.find(filter).sort({ createdAt: -1 });
     res.json(workers);
   } catch (error) {
-    console.error('Error searching workers:', error);
-    res.status(500).json({ error: 'Error searching workers' });
+    console.error("Error searching workers:", error);
+    res.status(500).json({ error: "Error searching workers" });
   }
 };
 
 // Check if tenant can review a worker (must have completed booking)
 exports.canTenantReviewWorker = async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.userType !== 'tenant') {
-      return res.status(401).json({ canReview: false, reason: 'Not a tenant' });
+    if (!req.session.user || req.session.user.userType !== "tenant") {
+      return res.status(401).json({ canReview: false, reason: "Not a tenant" });
     }
     const tenantId = req.session.user._id;
     const workerId = req.params.id;
@@ -62,16 +82,16 @@ exports.canTenantReviewWorker = async (req, res) => {
     const booking = await WorkerBooking.findOne({
       tenantId,
       workerId,
-      status: 'Approved',
+      status: "Approved",
     });
     if (booking) {
       return res.json({ canReview: true });
     } else {
-      return res.json({ canReview: false, reason: 'No completed booking' });
+      return res.json({ canReview: false, reason: "No completed booking" });
     }
   } catch (error) {
-    console.error('Error checking review eligibility:', error);
-    res.status(500).json({ canReview: false, error: 'Server error' });
+    console.error("Error checking review eligibility:", error);
+    res.status(500).json({ canReview: false, error: "Server error" });
   }
 };
 const mongoose = require("mongoose");
@@ -148,7 +168,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
     const bookings = await WorkerBooking.find({ workerId: user._id })
       .populate("tenantId", "firstName lastName")
       .lean();
-    
+
     const formattedBookings = bookings.map((booking) => ({
       _id: booking._id,
       serviceName: booking.serviceType || user.serviceType || "N/A",
@@ -170,32 +190,34 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
 
     // ===== CRITICAL FIX: Fetch clients ONLY from worker.clientIds =====
     const clients = await Tenant.find({
-      _id: { $in: user.clientIds }
+      _id: { $in: user.clientIds },
     })
-    .select('firstName lastName phone email')
-    .lean();
+      .select("firstName lastName phone email")
+      .lean();
 
     // Get services for each client from WorkerBooking
     const clientBookings = await WorkerBooking.find({
       workerId: user._id,
       tenantId: { $in: user.clientIds },
-      status: "Approved"
+      status: "Approved",
     })
-    .select("tenantId serviceType bookingDate")
-    .lean();
+      .select("tenantId serviceType bookingDate")
+      .lean();
 
     const formattedClients = clients.map((client) => {
       const tenantBookings = clientBookings.filter(
         (b) => b.tenantId && b.tenantId.toString() === client._id.toString()
       );
-      
-      const services = tenantBookings.length > 0
-        ? tenantBookings.map((b) => b.serviceType).filter((s) => s)
-        : [user.serviceType || "N/A"];
-      
-      const bookingDate = tenantBookings.length > 0 && tenantBookings[0].bookingDate
-        ? tenantBookings[0].bookingDate
-        : null;
+
+      const services =
+        tenantBookings.length > 0
+          ? tenantBookings.map((b) => b.serviceType).filter((s) => s)
+          : [user.serviceType || "N/A"];
+
+      const bookingDate =
+        tenantBookings.length > 0 && tenantBookings[0].bookingDate
+          ? tenantBookings[0].bookingDate
+          : null;
 
       return {
         _id: client._id,
@@ -212,7 +234,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
     const payments = await WorkerPayment.find({
       workerId: new mongoose.Types.ObjectId(user._id),
     }).lean();
-    
+
     const transactions = payments.map((payment) => ({
       title: "Worker Payment",
       serviceName: user.serviceType || "N/A",
@@ -223,7 +245,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       amount: payment.amount || 0,
       status: payment.status || "Pending",
     }));
-    
+
     const earnings = {
       monthly: payments.reduce(
         (sum, p) => (p.status === "Paid" ? sum + p.amount : sum),
@@ -240,29 +262,34 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
     const formattedReviews = {
       averageRating: reviews.average || 0,
       count: reviews.reviews ? reviews.reviews.length : 0,
-      items: reviews.reviews ? reviews.reviews.map((review) => ({
-        user: review.user || "Anonymous",
-        rating: review.rating || 0,
-        date: review.date ? new Date(review.date).toLocaleDateString() : "N/A",
-        comment: review.comment || "No comment",
-        serviceName: review.serviceName || user.serviceType || "N/A",
-      })) : [],
+      items: reviews.reviews
+        ? reviews.reviews.map((review) => ({
+            user: review.user || "Anonymous",
+            rating: review.rating || 0,
+            date: review.date
+              ? new Date(review.date).toLocaleDateString()
+              : "N/A",
+            comment: review.comment || "No comment",
+            serviceName: review.serviceName || user.serviceType || "N/A",
+          }))
+        : [],
     };
 
     // ===== CRITICAL FIX: Fetch notifications correctly =====
-    const notifications = await Notification.find({ 
-      recipient: user._id, 
-      recipientType: "Worker" 
+    const notifications = await Notification.find({
+      recipient: user._id,
+      recipientType: "Worker",
     })
-    .sort({ createdDate: -1 })
-    .lean();
-    
+      .sort({ createdDate: -1 })
+      .lean();
+
     const formattedNotifications = notifications.map((notification) => ({
       _id: notification._id,
       type: notification.type || "Notification",
       message: notification.message || "",
       tenantName: notification.tenantName || null,
-      createdDate: notification.createdDate || notification.createdAt || new Date(),
+      createdDate:
+        notification.createdDate || notification.createdAt || new Date(),
       status: notification.status || "Info",
       read: notification.read || false,
     }));
@@ -284,7 +311,7 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       notifications: formattedNotifications,
       successMessage: req.session.successMessage,
     });
-    
+
     req.session.successMessage = null;
   } catch (error) {
     console.error("Error rendering worker dashboard:", {
@@ -553,8 +580,14 @@ exports.getAllWorkers = async (req, res) => {
     }
 
     if (req.session.user && req.session.user.userType === "tenant") {
-      const tenant = await Tenant.findById(req.session.user._id).select("domesticWorkerId");
-      if (tenant && tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+      const tenant = await Tenant.findById(req.session.user._id).select(
+        "domesticWorkerId"
+      );
+      if (
+        tenant &&
+        tenant.domesticWorkerId &&
+        tenant.domesticWorkerId.length > 0
+      ) {
         filter._id = { $nin: tenant.domesticWorkerId };
       }
     }
@@ -611,23 +644,30 @@ exports.filterWorkers = async (req, res) => {
     }
     // Price range filter
     if (price) {
-      let min = 0, max = Infinity;
-      if (price.includes('-')) {
-        [min, max] = price.split('-').map(Number);
-      } else if (price.endsWith('+')) {
-        min = Number(price.replace('+', ''));
+      let min = 0,
+        max = Infinity;
+      if (price.includes("-")) {
+        [min, max] = price.split("-").map(Number);
+      } else if (price.endsWith("+")) {
+        min = Number(price.replace("+", ""));
       }
       filter.price = { $gte: min };
       if (isFinite(max)) filter.price.$lte = max;
     }
     // Available filter
-    if (available === 'true') {
+    if (available === "true") {
       filter.isBooked = false;
     }
 
     if (req.session.user && req.session.user.userType === "tenant") {
-      const tenant = await Tenant.findById(req.session.user._id).select("domesticWorkerId");
-      if (tenant && tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
+      const tenant = await Tenant.findById(req.session.user._id).select(
+        "domesticWorkerId"
+      );
+      if (
+        tenant &&
+        tenant.domesticWorkerId &&
+        tenant.domesticWorkerId.length > 0
+      ) {
         filter._id = { $nin: tenant.domesticWorkerId };
       }
     }
@@ -668,10 +708,10 @@ exports.deleteWorkerService = async (req, res) => {
 
     // ✅ NEW CHECK: Cannot delete if has active clients
     if (worker.clientIds && worker.clientIds.length > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Cannot delete service while you have active clients",
         clientCount: worker.clientIds.length,
-        hasClients: true 
+        hasClients: true,
       });
     }
 
@@ -832,10 +872,10 @@ exports.updateWorkerBookingStatus = async (req, res) => {
 
     const updatedBooking = await WorkerBooking.findOneAndUpdate(
       { _id: bookingId, workerId: workerId },
-      { 
+      {
         status: status,
         ...(status === "Approved" && { approvedDate: new Date() }),
-        ...(status === "Declined" && { declinedDate: new Date() })
+        ...(status === "Declined" && { declinedDate: new Date() }),
       },
       { new: true, runValidators: true }
     );
@@ -867,7 +907,9 @@ exports.updateWorkerBookingStatus = async (req, res) => {
         const tenantIdStr = tenant._id.toString();
 
         // Add worker to tenant's domesticWorkerId if not already there
-        if (!tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)) {
+        if (
+          !tenant.domesticWorkerId.some((id) => id.toString() === workerIdStr)
+        ) {
           tenant.domesticWorkerId.push(workerId);
           await tenant.save();
         }
@@ -877,8 +919,10 @@ exports.updateWorkerBookingStatus = async (req, res) => {
           worker.clientIds.push(tenant._id);
           worker.isBooked = true;
           await worker.save();
-          
-          console.log(`Added tenant ${tenantIdStr} to worker ${workerId} clientIds`);
+
+          console.log(
+            `Added tenant ${tenantIdStr} to worker ${workerId} clientIds`
+          );
           console.log(`Worker clientIds after approval:`, worker.clientIds);
         }
 
@@ -890,7 +934,7 @@ exports.updateWorkerBookingStatus = async (req, res) => {
         status === "Approved"
           ? `Your booking for ${updatedBooking.serviceType} has been approved by ${worker.firstName} ${worker.lastName}.`
           : `Your booking for ${updatedBooking.serviceType} has been declined by ${worker.firstName} ${worker.lastName}.`;
-      
+
       await sendNotification(updatedBooking.tenantId, "Tenant", {
         message,
         bookingId: updatedBooking._id,
@@ -1039,7 +1083,6 @@ exports.updateWorkerSettings = async (req, res) => {
   }
 };
 
-
 exports.debookWorker = async (req, res) => {
   try {
     if (!req.session.user || req.session.user.userType !== "tenant") {
@@ -1062,8 +1105,10 @@ exports.debookWorker = async (req, res) => {
     }
 
     // Check if worker is booked by this tenant
-    if (!tenant.domesticWorkerId.some(id => id.toString() === workerId)) {
-      return res.status(400).json({ error: "Worker is not booked by this tenant" });
+    if (!tenant.domesticWorkerId.some((id) => id.toString() === workerId)) {
+      return res
+        .status(400)
+        .json({ error: "Worker is not booked by this tenant" });
     }
 
     // Check if current billing cycle payment is made for monthly workers
@@ -1077,15 +1122,39 @@ exports.debookWorker = async (req, res) => {
       const bookingDate = new Date(booking.bookingDate);
       const now = new Date();
       const dayOfMonth = bookingDate.getDate();
-      
+
       let currentCycleStart, currentCycleEnd;
-      
+
       if (now.getDate() >= dayOfMonth) {
-        currentCycleStart = new Date(now.getFullYear(), now.getMonth(), dayOfMonth);
-        currentCycleEnd = new Date(now.getFullYear(), now.getMonth() + 1, dayOfMonth - 1, 23, 59, 59, 999);
+        currentCycleStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          dayOfMonth
+        );
+        currentCycleEnd = new Date(
+          now.getFullYear(),
+          now.getMonth() + 1,
+          dayOfMonth - 1,
+          23,
+          59,
+          59,
+          999
+        );
       } else {
-        currentCycleStart = new Date(now.getFullYear(), now.getMonth() - 1, dayOfMonth);
-        currentCycleEnd = new Date(now.getFullYear(), now.getMonth(), dayOfMonth - 1, 23, 59, 59, 999);
+        currentCycleStart = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          dayOfMonth
+        );
+        currentCycleEnd = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          dayOfMonth - 1,
+          23,
+          59,
+          59,
+          999
+        );
       }
 
       const recentPayment = await WorkerPayment.findOne({
@@ -1096,33 +1165,34 @@ exports.debookWorker = async (req, res) => {
       });
 
       if (!recentPayment) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Payment pending for current billing cycle",
-          message: "Please complete the current billing cycle payment before debooking the worker." 
+          message:
+            "Please complete the current billing cycle payment before debooking the worker.",
         });
       }
     }
 
     // ===== CRITICAL FIX: Remove tenant from worker's clientIds =====
     worker.clientIds = worker.clientIds.filter(
-      id => id.toString() !== tenantId.toString()
+      (id) => id.toString() !== tenantId.toString()
     );
-    
+
     // Update worker's isBooked status based on remaining clients
     worker.isBooked = worker.clientIds.length > 0;
     await worker.save();
 
     // Remove worker from tenant's domesticWorkerId array
     tenant.domesticWorkerId = tenant.domesticWorkerId.filter(
-      id => id.toString() !== workerId
+      (id) => id.toString() !== workerId
     );
     await tenant.save();
 
     // Delete or update WorkerBooking records
-    await WorkerBooking.deleteMany({ 
-      tenantId, 
-      workerId, 
-      status: "Approved" 
+    await WorkerBooking.deleteMany({
+      tenantId,
+      workerId,
+      status: "Approved",
     });
 
     // Send notification to worker
@@ -1146,22 +1216,23 @@ exports.debookWorker = async (req, res) => {
       $push: { notificationIds: savedNotification._id },
     });
 
-    console.log(`Worker ${workerId} debooked successfully by tenant ${tenantId}`);
+    console.log(
+      `Worker ${workerId} debooked successfully by tenant ${tenantId}`
+    );
     console.log(`Worker clientIds after debook:`, worker.clientIds);
 
-    res.json({ 
-      success: true, 
-      message: "Worker debooked successfully" 
+    res.json({
+      success: true,
+      message: "Worker debooked successfully",
     });
   } catch (error) {
     console.error("Error debooking worker:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Server error while debooking worker",
-      message: error.message 
+      message: error.message,
     });
   }
 };
-
 
 // Add this function to workerController.js
 exports.getDashboardDataAPI = async (req, res) => {
@@ -1177,20 +1248,24 @@ exports.getDashboardDataAPI = async (req, res) => {
     user.clientIds = Array.isArray(user.clientIds) ? user.clientIds : [];
 
     // === SAME LOGIC AS renderWorkerDashboardSafer ===
-    const services = user.serviceType ? [{
-      name: user.serviceType,
-      price: user.price || 0,
-      rateUnit: user.rateUnit || "monthly",
-      experience: user.experience || 0,
-      serviceStatus: user.serviceStatus || "Available",
-      image: user.image || "/images/default_service.jpg",
-    }] : [];
+    const services = user.serviceType
+      ? [
+          {
+            name: user.serviceType,
+            price: user.price || 0,
+            rateUnit: user.rateUnit || "monthly",
+            experience: user.experience || 0,
+            serviceStatus: user.serviceStatus || "Available",
+            image: user.image || "/images/default_service.jpg",
+          },
+        ]
+      : [];
 
     const bookingsRaw = await WorkerBooking.find({ workerId: user._id })
       .populate("tenantId", "firstName lastName phone")
       .lean();
 
-    const bookings = bookingsRaw.map(b => ({
+    const bookings = bookingsRaw.map((b) => ({
       _id: b._id,
       serviceName: b.serviceType || user.serviceType || "N/A",
       tenantId: {
@@ -1199,26 +1274,41 @@ exports.getDashboardDataAPI = async (req, res) => {
         phone: b.tenantId?.phone || "N/A",
       },
       propertyId: { address: b.tenantAddress || "N/A" },
-      date: b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "N/A",
-      time: b.bookingDate ? new Date(b.bookingDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A",
+      date: b.bookingDate
+        ? new Date(b.bookingDate).toLocaleDateString()
+        : "N/A",
+      time: b.bookingDate
+        ? new Date(b.bookingDate).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "N/A",
       status: b.status || "Pending",
     }));
 
-    const clients = user.clientIds.length > 0 ? await Tenant.find({ _id: { $in: user.clientIds } })
-      .select('firstName lastName phone email')
-      .lean() : [];
+    const clients =
+      user.clientIds.length > 0
+        ? await Tenant.find({ _id: { $in: user.clientIds } })
+            .select("firstName lastName phone email")
+            .lean()
+        : [];
 
     const clientBookings = await WorkerBooking.find({
       workerId: user._id,
       tenantId: { $in: user.clientIds },
-      status: "Approved"
-    }).select("tenantId serviceType bookingDate").lean();
+      status: "Approved",
+    })
+      .select("tenantId serviceType bookingDate")
+      .lean();
 
-    const formattedClients = clients.map(client => {
-      const related = clientBookings.filter(cb => cb.tenantId.toString() === client._id.toString());
-      const servicesUsed = related.length > 0
-        ? [...new Set(related.map(cb => cb.serviceType))].filter(Boolean)
-        : [user.serviceType || "N/A"];
+    const formattedClients = clients.map((client) => {
+      const related = clientBookings.filter(
+        (cb) => cb.tenantId.toString() === client._id.toString()
+      );
+      const servicesUsed =
+        related.length > 0
+          ? [...new Set(related.map((cb) => cb.serviceType))].filter(Boolean)
+          : [user.serviceType || "N/A"];
       const bookingDate = related[0]?.bookingDate;
 
       return {
@@ -1228,30 +1318,38 @@ exports.getDashboardDataAPI = async (req, res) => {
         phone: client.phone || "N/A",
         email: client.email || "N/A",
         services: servicesUsed,
-        bookingDate: bookingDate ? new Date(bookingDate).toLocaleDateString() : "N/A",
+        bookingDate: bookingDate
+          ? new Date(bookingDate).toLocaleDateString()
+          : "N/A",
       };
     });
 
     const payments = await WorkerPayment.find({ workerId: user._id }).lean();
-    const transactions = payments.map(p => ({
+    const transactions = payments.map((p) => ({
       _id: p._id,
       title: "Salary Payment",
       serviceName: user.serviceType || "N/A",
       clientName: p.userName || "Client",
-      date: p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : "N/A",
+      date: p.paymentDate
+        ? new Date(p.paymentDate).toLocaleDateString()
+        : "N/A",
       amount: p.amount || 0,
       status: p.status || "Pending",
     }));
 
     const earnings = {
-      monthly: payments.filter(p => p.status === "Paid").reduce((s, p) => s + p.amount, 0),
-      pending: payments.filter(p => p.status === "Pending").reduce((s, p) => s + p.amount, 0),
+      monthly: payments
+        .filter((p) => p.status === "Paid")
+        .reduce((s, p) => s + p.amount, 0),
+      pending: payments
+        .filter((p) => p.status === "Pending")
+        .reduce((s, p) => s + p.amount, 0),
     };
 
     const reviews = {
       averageRating: user.ratingId?.average || 0,
       count: user.ratingId?.reviews?.length || 0,
-      items: (user.ratingId?.reviews || []).map(r => ({
+      items: (user.ratingId?.reviews || []).map((r) => ({
         user: r.user || "Anonymous",
         rating: r.rating || 0,
         date: r.date ? new Date(r.date).toLocaleDateString() : "N/A",
@@ -1262,10 +1360,12 @@ exports.getDashboardDataAPI = async (req, res) => {
 
     const notifications = await Notification.find({
       recipient: user._id,
-      recipientType: "Worker"
-    }).sort({ createdDate: -1 }).lean();
+      recipientType: "Worker",
+    })
+      .sort({ createdDate: -1 })
+      .lean();
 
-    const formattedNotifications = notifications.map(n => ({
+    const formattedNotifications = notifications.map((n) => ({
       _id: n._id,
       type: n.type || "Info",
       message: n.message || "",
@@ -1284,9 +1384,166 @@ exports.getDashboardDataAPI = async (req, res) => {
       reviews,
       notifications: formattedNotifications,
     });
-
   } catch (error) {
     console.error("Error in getDashboardDataAPI:", error);
     res.status(500).json({ error: "Failed to load dashboard" });
+  }
+};
+
+// Generate OTP for work tracking
+exports.generateWorkOTP = async (req, res) => {
+  try {
+    const workerId = req.session.user._id;
+    const { tenantId, workDate } = req.body;
+
+    if (!tenantId || !workDate) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    // Generate 4-digit random OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+    // Calculate expiry time (5 minutes from now)
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    // Save OTP to database
+    const WorkTracking = require("../models/workTracking");
+    const workTracking = new WorkTracking({
+      workerId,
+      tenantId,
+      workDate: new Date(workDate),
+      otp,
+      otpVerified: false,
+      expiresAt,
+    });
+
+    await workTracking.save();
+
+    // Create a notification for the tenant so it appears in their dashboard
+    try {
+      const workerObj = await Worker.findById(workerId).select(
+        "firstName lastName"
+      );
+      const tenantObj = await Tenant.findById(tenantId).select(
+        "firstName lastName"
+      );
+
+      const notif = new Notification({
+        type: "Work-OTP",
+        message: `Work OTP generated by ${
+          workerObj ? `${workerObj.firstName} ${workerObj.lastName}` : "Worker"
+        } for ${new Date(workDate).toLocaleDateString()}`,
+        recipient: tenantId,
+        recipientType: "Tenant",
+        tenant: tenantId,
+        tenantName: tenantObj
+          ? `${tenantObj.firstName} ${tenantObj.lastName}`
+          : undefined,
+        worker: workerId,
+        workerName: workerObj
+          ? `${workerObj.firstName} ${workerObj.lastName}`
+          : undefined,
+        status: "Info",
+        createdDate: new Date(),
+        read: false,
+      });
+
+      await notif.save();
+    } catch (notifErr) {
+      console.error("Failed to create tenant notification:", notifErr);
+    }
+
+    res.json({
+      success: true,
+      message: "OTP generated successfully",
+      otp, // Send OTP to frontend for display (in production, send via SMS)
+    });
+  } catch (error) {
+    console.error("Error generating OTP:", error);
+    res.status(500).json({ success: false, message: "Failed to generate OTP" });
+  }
+};
+
+// Verify OTP and mark work as completed
+exports.verifyWorkOTP = async (req, res) => {
+  try {
+    const workerId = req.session.user._id;
+    const { tenantId, workDate, otp } = req.body;
+
+    if (!tenantId || !workDate || !otp) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    const WorkTracking = require("../models/workTracking");
+
+    // Find the OTP record
+    const workTracking = await WorkTracking.findOne({
+      workerId,
+      tenantId,
+      workDate: new Date(workDate),
+      otp,
+    });
+
+    if (!workTracking) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    // Check if OTP is expired
+    if (new Date() > workTracking.expiresAt) {
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP has expired" });
+    }
+
+    // Mark as verified
+    workTracking.otpVerified = true;
+    await workTracking.save();
+
+    res.json({
+      success: true,
+      message: "Work marked as completed successfully",
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ success: false, message: "Failed to verify OTP" });
+  }
+};
+
+// Get work history for a worker (given a tenant)
+exports.getWorkHistory = async (req, res) => {
+  try {
+    const workerId = req.session.user._id;
+    const { tenantId } = req.params;
+
+    if (!tenantId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing tenant ID" });
+    }
+
+    const WorkTracking = require("../models/workTracking");
+
+    // Get all verified work dates for this worker-tenant pair
+    const workHistory = await WorkTracking.find({
+      workerId,
+      tenantId,
+      otpVerified: true,
+    }).sort({ workDate: -1 });
+
+    const completedDates = workHistory.map((w) => w.workDate);
+
+    res.json({
+      success: true,
+      data: completedDates,
+    });
+  } catch (error) {
+    console.error("Error fetching work history:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch work history" });
   }
 };

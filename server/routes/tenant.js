@@ -86,4 +86,11 @@ router.post(
   tenantController.requestUnrentProperty
 );
 
+// Work tracking routes
+router.get(
+  "/work-tracking/history/:workerId",
+  isAuthenticated,
+  tenantController.getWorkerWorkHistory
+);
+
 module.exports = router;
