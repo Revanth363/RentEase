@@ -123,3 +123,19 @@ export const deleteAccount = async (password) => {
   );
   return res.data;
 };
+
+export const getWorkHistory = async (workerId) => {
+  const res = await axios.get(`${BASE}/work-tracking/history/${workerId}`, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+export const sendWorkOTPToTenant = async (workerId, workDate) => {
+  const res = await axios.post(
+    `${BASE}/work-tracking/send-otp`,
+    { workerId, workDate },
+    { withCredentials: true }
+  );
+  return res.data;
+};

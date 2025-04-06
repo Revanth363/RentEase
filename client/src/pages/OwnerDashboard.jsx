@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as ownerService from "../services/ownerService";
 import "../assets/css/OwnerDashboard.css";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useLoading } from "../LoadingContext";
 
 const Sidebar = ({ onSelect, current }) => (
   <div className="ownd-sidebar" id="sidebar">
@@ -35,6 +37,7 @@ const Sidebar = ({ onSelect, current }) => (
 );
 
 const OwnerDashboard = () => {
+  const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState("properties");
@@ -63,38 +66,22 @@ const OwnerDashboard = () => {
     ownerService
       .getOwnerDashboard()
       .then((res) => {
-        console.log("OwnerDashboard: Response received:", res);
-        if (!mounted) {
-          console.log("OwnerDashboard: Component unmounted, ignoring response");
-          return;
-        }
+        if (!mounted) return;
         if (res && (res.user || res.success)) {
-          console.log("OwnerDashboard: Valid response, setting dashboard");
           setDashboard(res);
         } else {
-          console.error("OwnerDashboard: Invalid response format:", res);
           setDashboard(null);
         }
       })
       .catch((err) => {
         if (mounted) {
-          console.error(
-            "OwnerDashboard: Error fetching dashboard:",
-            err.message || err
-          );
-          if (err.response) {
-            console.error(
-              "OwnerDashboard: Error response data:",
-              err.response.data
-            );
-            console.error("OwnerDashboard: Error status:", err.response.status);
-          }
+          console.error("OwnerDashboard: Error fetching dashboard:", err);
         }
       })
       .finally(() => {
         if (mounted) {
-          console.log("OwnerDashboard: Setting loading to false");
           setLoading(false);
+          setIsLoading(false);
         }
       });
     return () => {
@@ -107,12 +94,9 @@ const OwnerDashboard = () => {
     console.log("Current section:", section);
   }, [section]);
 
-  if (loading)
-    return (
-      <div style={{ padding: 20, marginTop: "100px" }}>
-        <p>Loading owner dashboard...</p>
-      </div>
-    );
+  if (loading) {
+    return <LoadingSpinner />;
+  }
   if (!dashboard)
     return (
       <div style={{ padding: 20, marginTop: "100px" }}>
@@ -283,14 +267,14 @@ const OwnerDashboard = () => {
     const form = settingsFormRef.current;
 
     const formData = {
-      firstName: form["firstName"]?.value || "",
-      lastName: form["lastName"]?.value || "",
-      email: form["email"]?.value || "",
-      phone: form["phone"]?.value || "",
-      location: form["location"]?.value || "",
-      accountNo: form["accountNo"]?.value || "",
-      upiid: form["upiid"]?.value || "",
-      numProperties: form["numProperties"]?.value || "",
+      firstName: form["firstName"]?.value?.trim() || "",
+      lastName: form["lastName"]?.value?.trim() || "",
+      email: form["email"]?.value?.trim() || "",
+      phone: form["phone"]?.value?.trim() || "",
+      location: form["location"]?.value?.trim() || "",
+      accountNo: form["accountNo"]?.value?.trim() || "",
+      upiid: form["upiid"]?.value?.trim() || "",
+      numProperties: form["numProperties"]?.value?.trim() || "",
       emailNotifications:
         document.getElementById("emailNotifications")?.checked.toString() ||
         "false",
@@ -311,14 +295,87 @@ const OwnerDashboard = () => {
       confirmPassword: form["confirmPassword"]?.value || "",
     };
 
+    // Validation
+    const nameRegex = /^[A-Za-z\s-]+$/;
+    const emailRegex =
+      /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
     if (!formData.firstName) {
       alert("First name is required");
+      return;
+    }
+    if (!nameRegex.test(formData.firstName)) {
+      alert("First name must contain only letters, spaces, and hyphens");
+      return;
+    }
+
+    if (!formData.lastName) {
+      alert("Last name is required");
+      return;
+    }
+    if (!nameRegex.test(formData.lastName)) {
+      alert("Last name must contain only letters, spaces, and hyphens");
       return;
     }
 
     if (!formData.email) {
       alert("Email is required");
       return;
+    }
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    if (!formData.phone) {
+      alert("Phone number is required");
+      return;
+    }
+    if (!phoneRegex.test(formData.phone)) {
+      alert("Phone number must be exactly 10 digits");
+      return;
+    }
+
+    if (!formData.location) {
+      alert("Location is required");
+      return;
+    }
+
+    // Password validation (only if attempting to change password)
+    if (formData.newPassword || formData.currentPassword) {
+      if (!formData.currentPassword) {
+        alert("Current password is required to change password");
+        return;
+      }
+      if (!formData.newPassword) {
+        alert("New password is required");
+        return;
+      }
+      if (formData.newPassword.length < 8) {
+        alert("New password must be at least 8 characters long");
+        return;
+      }
+      if (!/[A-Z]/.test(formData.newPassword)) {
+        alert("New password must contain at least one uppercase letter");
+        return;
+      }
+      if (!/[a-z]/.test(formData.newPassword)) {
+        alert("New password must contain at least one lowercase letter");
+        return;
+      }
+      if (!/[0-9]/.test(formData.newPassword)) {
+        alert("New password must contain at least one number");
+        return;
+      }
+      if (!formData.confirmPassword) {
+        alert("Confirm password is required");
+        return;
+      }
+      if (formData.newPassword !== formData.confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
     }
 
     try {

@@ -392,6 +392,8 @@ body {
 }
 
 .tntd-form-group input[type="text"],
+.tntd-form-group input[type="password"],
+.tntd-form-group input[type="email"],
 .tntd-form-group input[type="date"],
 .tntd-form-group select,
 .tntd-form-group textarea {
@@ -400,6 +402,24 @@ body {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+}
+
+.tntd-form-group input[type="text"].error,
+.tntd-form-group input[type="password"].error,
+.tntd-form-group input[type="email"].error,
+.tntd-form-group input[type="date"].error,
+.tntd-form-group select.error,
+.tntd-form-group textarea.error {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.tntd-error-message {
+  display: block;
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 .tntd-form-group textarea {
@@ -418,6 +438,15 @@ body {
 
 .tntd-submit-btn:hover {
   background-color: #45a049;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background-color: inherit;
 }
 
 /* Complaint Section Styling */
@@ -1188,3 +1217,120 @@ body {
   font-family: "Poppins", sans-serif;
 }
 
+/* Work Tracking Styles */
+.tntd-track-work-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  margin-top: 8px;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tntd-track-work-btn:hover {
+  background-color: #2980b9;
+}
+
+.tntd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.tntd-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tntd-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.tntd-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.tntd-modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #95a5a6;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tntd-modal-close:hover {
+  color: #333;
+}
+
+.tntd-modal-body {
+  padding: 20px;
+}
+
+.tntd-work-history {
+  padding: 10px 0;
+}
+
+.tntd-work-history h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.tntd-work-dates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tntd-work-date-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border-left: 4px solid #27ae60;
+}
+
+.tntd-work-date-item i {
+  color: #27ae60;
+  font-size: 16px;
+}
+
+.tntd-no-work-history {
+  padding: 20px;
+  text-align: center;
+  color: #95a5a6;
+  font-style: italic;
+}

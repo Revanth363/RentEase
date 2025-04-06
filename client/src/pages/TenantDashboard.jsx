@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import * as tenantService from "../services/tenantService";
 import "../assets/css/TenantDashboard.css";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useLoading } from "../LoadingContext";
+import CalendarTiles from "../components/CalendarTiles";
 
 const Sidebar = ({ onSelect, current }) => (
   <div className="tntd-sidebar" id="sidebar">
@@ -46,6 +50,7 @@ const Sidebar = ({ onSelect, current }) => (
 );
 
 const TenantDashboard = () => {
+  const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState("home");
@@ -58,6 +63,9 @@ const TenantDashboard = () => {
     useState(null);
   const [showUnrentModal, setShowUnrentModal] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [showWorkTrackingModal, setShowWorkTrackingModal] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState(null);
+  const [workerWorkHistory, setWorkerWorkHistory] = useState([]);
 
   // Forms
   const maintFormRef = useRef();
@@ -85,15 +93,19 @@ const TenantDashboard = () => {
       })
       .catch((err) => console.error(err))
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          setIsLoading(false);
+        }
       });
     return () => {
       mounted = false;
     };
   }, []);
 
-  if (loading)
-    return <div style={{ padding: 20 }}>Loading tenant dashboard...</div>;
+  if (loading) {
+    return <LoadingSpinner />;
+  }
   if (!dashboard)
     return <div style={{ padding: 20 }}>Unable to load dashboard.</div>;
 
@@ -327,6 +339,42 @@ const TenantDashboard = () => {
     const email = form["email"].value.trim();
     const phone = form["phone"].value.trim();
     const location = form["address"].value.trim();
+
+    // Validation
+    const nameRegex = /^[A-Za-z\s-]+$/;
+    const emailRegex =
+      /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
+    if (!fullname) {
+      alert("Full name is required");
+      return;
+    }
+    if (!nameRegex.test(fullname)) {
+      alert("Full name must contain only letters, spaces, and hyphens");
+      return;
+    }
+    if (!email) {
+      alert("Email is required");
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+    if (!phone) {
+      alert("Phone number is required");
+      return;
+    }
+    if (!phoneRegex.test(phone)) {
+      alert("Phone number must be exactly 10 digits");
+      return;
+    }
+    if (!location) {
+      alert("Location is required");
+      return;
+    }
+
     const parts = fullname.split(" ").filter((p) => p);
     const firstName = parts[0] || "";
     const lastName = parts.slice(1).join(" ") || "";
@@ -350,10 +398,11 @@ const TenantDashboard = () => {
             location: res.user.location,
           },
         }));
-        alert("Profile updated");
-      } else alert(res.message || "Error");
+        alert("Profile updated successfully");
+      } else alert(res.message || "Error updating profile");
     } catch (err) {
       console.error(err);
+      alert("Error updating profile");
     }
   };
 
@@ -363,18 +412,53 @@ const TenantDashboard = () => {
     const currentPassword = form["current-password"].value;
     const newPassword = form["new-password"].value;
     const confirmPassword = form["confirm-password"].value;
-    if (newPassword !== confirmPassword) return alert("Passwords do not match");
+
+    // Validation
+    if (!currentPassword) {
+      alert("Current password is required");
+      return;
+    }
+    if (!newPassword) {
+      alert("New password is required");
+      return;
+    }
+    if (newPassword.length < 8) {
+      alert("New password must be at least 8 characters long");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      alert("New password must contain at least one uppercase letter");
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      alert("New password must contain at least one lowercase letter");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      alert("New password must contain at least one number");
+      return;
+    }
+    if (!confirmPassword) {
+      alert("Confirm password is required");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
     try {
       const res = await tenantService.changePassword({
         currentPassword,
         newPassword,
       });
       if (res.success) {
-        alert(res.message || "Password changed");
+        alert(res.message || "Password changed successfully");
         form.reset();
-      } else alert(res.message || "Error");
+      } else alert(res.message || "Error changing password");
     } catch (err) {
       console.error(err);
+      alert("Error changing password");
     }
   };
 
@@ -429,6 +513,22 @@ const TenantDashboard = () => {
     } catch (err) {
       console.error("Delete account error:", err);
       alert("Network error while deleting account");
+    }
+  };
+
+  const openWorkerTrackingModal = async (worker) => {
+    try {
+      setSelectedWorker(worker);
+      const res = await tenantService.getWorkHistory(worker._id);
+      if (res.success) {
+        setWorkerWorkHistory(res.data || []);
+      } else {
+        setWorkerWorkHistory([]);
+      }
+      setShowWorkTrackingModal(true);
+    } catch (err) {
+      console.error("Error opening work tracking:", err);
+      alert("Failed to load work history");
     }
   };
 
@@ -882,6 +982,12 @@ const TenantDashboard = () => {
                           {worker.paymentStatus === "paid"
                             ? "Paid"
                             : "Pay Worker"}
+                        </button>
+                        <button
+                          className="tntd-track-work-btn"
+                          onClick={() => openWorkerTrackingModal(worker)}
+                        >
+                          <i className="fa-solid fa-calendar"></i> Track Work
                         </button>
                         <button
                           className="tntd-debook-worker-btn"
@@ -1651,6 +1757,38 @@ const TenantDashboard = () => {
           </form>
         </div>
       </div>
+
+      {/* Work Tracking Modal */}
+      {showWorkTrackingModal && selectedWorker && (
+        <div className="tntd-modal-overlay">
+          <div className="tntd-modal-content">
+            <div className="tntd-modal-header">
+              <h3>
+                Work History - {selectedWorker.firstName}{" "}
+                {selectedWorker.lastName}
+              </h3>
+              <button
+                className="tntd-modal-close"
+                onClick={() => setShowWorkTrackingModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="tntd-modal-body">
+              {workerWorkHistory && workerWorkHistory.length > 0 ? (
+                <div className="tntd-work-history">
+                  <h4>Completed Work Dates:</h4>
+                  <CalendarTiles completedDates={workerWorkHistory} />
+                </div>
+              ) : (
+                <p className="tntd-no-work-history">
+                  No work history recorded yet.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
