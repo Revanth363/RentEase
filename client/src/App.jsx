@@ -1,45 +1,47 @@
 // src/App.jsx — FINAL & CLEAN VERSION
 import React from "react";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { LoadingProvider } from "./LoadingContext";
 import Header from "./components/Header";
 
 // Pages
 
-import HomePage from "./pages/Homepage";
-import PropertySearch from "./pages/PropertySearch";
-import PropertyDetails from "./pages/PropertyDetails";
-import Auth from "./pages/Auth";
 import AboutUs from "./pages/AboutUs";
+import Auth from "./pages/Auth";
+import BookProperty from "./pages/BookProperty";
 import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
-import WorkerServices from "./pages/WorkerServices";
+import HomePage from "./pages/Homepage";
+import PropertyDetails from "./pages/PropertyDetails";
+import PropertySearch from "./pages/PropertySearch";
 import WorkerCard from "./pages/WorkerCard";
-import BookProperty from "./pages/BookProperty";
+import WorkerServices from "./pages/WorkerServices";
+import WorkerRegister from "./pages/WorkerRegister";
 
-import TenantDashboard from "./pages/TenantDashboard";
+
 import OwnerDashboard from "./pages/OwnerDashboard";
+import TenantDashboard from "./pages/TenantDashboard";
 import WorkerDashboard from "./pages/WorkerDashboard";
 
 // Admin Pages & Views (same as before)
 
 import AdminDashboard from "./admin/AdminDashboard";
-import PropertyManagement from "./admin/PropertyManagement";
-import UserManagement from "./admin/UserManagement";
-import ServiceBookings from "./admin/ServiceBookings";
-import Payments from "./admin/Payments";
-import WorkerPayments from "./admin/WorkerPayments";
-import Notifications from "./admin/Notifications";
-import MaintenanceRequests from "./admin/MaintenanceRequests";
-import Messages from "./admin/Messages";
 import BookingView from "./admin/BookingView";
+import MaintenanceRequests from "./admin/MaintenanceRequests";
 import MaintenanceView from "./admin/MaintenanceView";
-import NotificationView from "./admin/NotificationView";
 import MessageView from "./admin/MessageView";
+import Messages from "./admin/Messages";
+import NotificationView from "./admin/NotificationView";
+import Notifications from "./admin/Notifications";
 import PaymentView from "./admin/PaymentView";
+import Payments from "./admin/Payments";
+import PropertyManagement from "./admin/PropertyManagement";
 import PropertyView from "./admin/PropertyView";
+import ServiceBookings from "./admin/ServiceBookings";
+import UserManagement from "./admin/UserManagement";
 import UserView from "./admin/UserView";
 import WorkerPaymentView from "./admin/WorkerPaymentView";
+import WorkerPayments from "./admin/WorkerPayments";
 
 import AdminRoute from "./components/AdminRoute";
 
@@ -117,11 +119,9 @@ const App = () => {
           />
           <Route path="/owner_dashboard" element={<OwnerDashboard />} />
           <Route path="/worker_dashboard" element={<WorkerDashboard />} />
-          <Route path="/worker_register" element={<div>Worker Register</div>} />
-          <Route
-            path="/property-management"
-            element={<div>Property Management</div>}
-          />
+          <Route path="/worker_register" element={<WorkerRegister/>} />
+          
+         
 
           {/* ADMIN ROUTES — PROTECTED & NO HEADER */}
           <Route

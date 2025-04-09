@@ -1,16 +1,33 @@
 // src/pages/WorkerCard.jsx
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import styles from '../assets/css/WorkerCard.module.css';
 import { useLoading } from '../LoadingContext';
 
 export default function WorkerCard({ worker: propWorker = null, detailed = false }) {
   const params = useParams();
+  const navigate = useNavigate();
   const [worker, setWorker] = useState(propWorker);
   const [loading, setLoading] = useState(detailed && !propWorker);
   const [error, setError] = useState('');
   const { setIsLoading } = useLoading();
+
+  // 🔥 added: logged in user
+  const [loggedInUser, setLoggedInUser] = useState(null);
+
+  useEffect(() => {
+    // fetch session user
+    (async () => {
+      try {
+        const res = await fetch("/api/check-session", { credentials: "include" });
+        const data = await res.json();
+        setLoggedInUser(data.user || null);
+      } catch {
+        setLoggedInUser(null);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -44,6 +61,46 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
   }, [detailed, propWorker, params.id, setIsLoading]);
 
 
+  /* ===========================================================
+        BOOK WORKER LOGIC (Only addition, UI unchanged)
+  ============================================================ */
+  const handleBook = async (e) => {
+    e.preventDefault();
+
+    if (!loggedInUser) {
+      alert("Please login as a tenant to book a worker");
+      return navigate("/login");
+    }
+
+    if (loggedInUser.userType !== "tenant") {
+      alert("Only tenants can book a worker");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/workers/${worker._id}/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ serviceType: worker.serviceType }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error);
+        return;
+      }
+
+      alert("Booking request sent successfully!");
+      navigate("/tenant/tenant_dashboard");
+
+    } catch (err) {
+      alert("Server error while booking");
+    }
+  };
+
+
   /* -----------------------------------
        DETAILED PAGE VIEW
   ------------------------------------ */
@@ -62,14 +119,13 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
     const img = worker.image || worker.photo || worker.photos?.[0] || '/images/default-worker.jpg';
 
-    // FIXED: availability based on serviceStatus
     const availabilityText =
       worker.serviceStatus === "Available" ? "Available" : "Unavailable";
 
     return (
       <main className={styles.root}>
         <div className={styles.headerRow}>
-          <Link to="/workerDetails" className={styles.backLink}> ← </Link>
+          <Link to="/workerDetails" className={styles.backLink}>Back to services</Link>
           <h1 className={styles.title}>{worker.firstName} {worker.lastName}</h1>
         </div>
 
@@ -111,8 +167,15 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
               </div>
             </div>
 
+            {/* ⭐ ORIGINAL UI UNCHANGED — ONLY LOGIC ADDED */}
             <div className={styles.actionsRow}>
-              <a className={styles.bookBtn} href="/login">Book Now</a>
+              <a
+                className={styles.bookBtn}
+                href="#"
+                onClick={handleBook}
+              >
+                Book Now
+              </a>
             </div>
 
             <div style={{ marginTop: 32 }}>
@@ -136,7 +199,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
 
   /* -----------------------------------
-       LIST / GRID CARD VIEW
+       LIST CARD VIEW
   ------------------------------------ */
   if (!worker) return null;
 
@@ -167,17 +230,12 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
       <div className={styles.cardContent}>
         <div className={styles.workerName}>{fullName}</div>
 
-        {/* 📍 Location */}
-        {location && (
-          <div className={styles.workerLocation}>📍 {location}</div>
-        )}
+        {location && <div className={styles.workerLocation}>📍 {location}</div>}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', margin: '12px 0' }}>
           <div className={styles.workerPrice}>
             {price ? `₹${Number(price).toLocaleString()}` : 'Contact'}/month
           </div>
-
-          {/* 🕒 Experience */}
           <div className={styles.workerExp}>🕒 {experience} years</div>
         </div>
 

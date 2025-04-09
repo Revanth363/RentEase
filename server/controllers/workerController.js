@@ -97,6 +97,7 @@ exports.canTenantReviewWorker = async (req, res) => {
 const mongoose = require("mongoose");
 const Worker = require("../models/worker");
 const Booking = require("../models/booking");
+const Property = require("../models/property");
 const Tenant = require("../models/tenant");
 const Payment = require("../models/payment");
 const WorkerPayment = require("../models/workerPayment");
@@ -423,9 +424,9 @@ exports.renderEditServicePage = async (req, res) => {
   }
 };
 
-// Register/Update worker details
 exports.registerWorker = async (req, res) => {
   const form = new formidable.IncomingForm();
+  
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error("Error parsing form:", err);
@@ -433,94 +434,115 @@ exports.registerWorker = async (req, res) => {
     }
 
     try {
-      const fullName = fields["full-name"] ? fields["full-name"][0] : "";
-      const nameParts = fullName.trim().split(" ");
+      // Helper function to extract field value (formidable returns arrays)
+      const getField = (fieldName) => {
+        const value = fields[fieldName];
+        if (Array.isArray(value)) return value[0];
+        return value || "";
+      };
+
+      // Extract all fields
+      const fullName = getField("full-name").trim();
+      const nameParts = fullName.split(" ");
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
-      const phone = fields["phone"] ? fields["phone"][0] : "";
-      const email = fields["email"] ? fields["email"][0] : "";
-      const city = fields["city"] ? fields["city"][0] : "";
-      const area = fields["area"] ? fields["area"][0] : "";
-      const serviceType = fields["service-type"]
-        ? fields["service-type"][0]
-        : "";
-      const experience = fields["experience"]
-        ? parseInt(fields["experience"][0])
-        : 0;
-      const price = fields["price"] ? parseInt(fields["price"][0]) : 0;
-      const description = fields["description"] ? fields["description"][0] : "";
-      const availability = fields["availability"]
-        ? fields["availability"][0]
-        : null;
-      const rateUnit = fields["rateUnit"] ? fields["rateUnit"][0] : "monthly";
-      const termsAgreement = fields["terms-agreement"]
-        ? fields["terms-agreement"][0] === "on"
-        : false;
+      
+      const phone = getField("phone");
+      const email = getField("email");
+      const city = getField("city");
+      const area = getField("area");
+      const serviceType = getField("service-type");
+      const experience = parseInt(getField("experience")) || 0;
+      const price = parseInt(getField("price")) || 0;
+      const description = getField("description");
+      const availability = getField("availability");
+      const rateUnit = getField("rateUnit") || "monthly";
+      const termsAgreement = getField("terms-agreement") === "on" || getField("terms-agreement") === "true";
 
-      if (
-        !phone ||
-        !email ||
-        !city ||
-        !area ||
-        !serviceType ||
-        !description ||
-        !price ||
-        !availability ||
-        !termsAgreement
-      ) {
-        return res
-          .status(400)
-          .json({ error: "All required fields must be provided" });
+      console.log("Processing registration:", {
+        fullName,
+        firstName,
+        lastName,
+        phone,
+        email,
+        city,
+        area,
+        serviceType,
+        termsAgreement
+      });
+
+      // Validation
+      if (!fullName || !phone || !email || !city || !area || !serviceType || !description || !availability) {
+        return res.status(400).json({ 
+          error: "All required fields must be provided",
+          missing: {
+            fullName: !fullName,
+            phone: !phone,
+            email: !email,
+            city: !city,
+            area: !area,
+            serviceType: !serviceType,
+            description: !description,
+            availability: !availability
+          }
+        });
       }
 
+      if (!termsAgreement) {
+        return res.status(400).json({ error: "You must agree to Terms & Conditions" });
+      }
+
+      // Phone validation - exactly 10 digits
       if (!/^[0-9]{10}$/.test(phone)) {
-        return res
-          .status(400)
-          .json({ error: "Phone number must be a 10-digit number" });
+        return res.status(400).json({ error: "Phone number must be exactly 10 digits" });
       }
 
+      // Email validation
       if (!/^\S+@\S+\.\S+$/.test(email)) {
         return res.status(400).json({ error: "Invalid email address" });
       }
 
+      // Experience validation
       if (experience < 0 || experience > 50) {
-        return res
-          .status(400)
-          .json({ error: "Experience must be between 0 and 50 years" });
+        return res.status(400).json({ error: "Experience must be between 0 and 50 years" });
       }
 
+      // Price validation
       if (price < 1000) {
-        return res.status(400).json({ error: "Rate must be at least ₹1000" });
+        return res.status(400).json({ error: "Salary must be at least ₹1000" });
       }
 
+      // Availability validation
       if (!["full-time", "part-time", "weekends"].includes(availability)) {
-        return res.status(400).json({ error: "Invalid availability" });
+        return res.status(400).json({ error: "Invalid availability option" });
       }
 
+      // Rate unit validation
       if (!["hourly", "daily", "monthly"].includes(rateUnit)) {
         return res.status(400).json({ error: "Invalid rate unit" });
       }
 
+      // Handle image upload
       let imageBase64 = null;
       if (files["image"] && files["image"][0]) {
         const image = files["image"][0];
-        const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+        const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+        
         if (!allowedTypes.includes(image.mimetype)) {
-          return res
-            .status(400)
-            .json({ error: "Image must be JPEG, PNG, or GIF" });
+          return res.status(400).json({ error: "Image must be JPEG, PNG, GIF, or WEBP" });
         }
+
         const imageData = fs.readFileSync(image.filepath);
-        imageBase64 = `data:${image.mimetype};base64,${imageData.toString(
-          "base64"
-        )}`;
+        imageBase64 = `data:${image.mimetype};base64,${imageData.toString("base64")}`;
       }
 
+      // Find and update worker
       const worker = await Worker.findById(req.session.user._id);
       if (!worker) {
-        return res.status(404).json({ error: "Worker not found" });
+        return res.status(404).json({ error: "Worker account not found" });
       }
 
+      // Update worker fields
       worker.firstName = firstName;
       worker.lastName = lastName;
       worker.phone = phone;
@@ -534,13 +556,17 @@ exports.registerWorker = async (req, res) => {
       worker.description = description;
       worker.availability = availability;
       worker.serviceStatus = availability ? "Available" : "Unavailable";
+      
       if (imageBase64) {
         worker.image = imageBase64;
       }
 
       await worker.save();
 
+      // Update session
       req.session.user = worker.toObject();
+
+      console.log("Worker profile updated successfully:", worker._id);
 
       res.json({
         success: true,
@@ -548,7 +574,10 @@ exports.registerWorker = async (req, res) => {
       });
     } catch (error) {
       console.error("Error updating worker:", error);
-      res.status(500).json({ error: "Error updating worker profile" });
+      res.status(500).json({ 
+        error: "Error updating worker profile",
+        details: error.message 
+      });
     }
   });
 };
@@ -706,15 +735,36 @@ exports.deleteWorkerService = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    // ✅ NEW CHECK: Cannot delete if has active clients
+    // ---- NEW CHECK: BLOCK deletion ONLY if client has rented property ----
+    let activeRentedClients = 0;
+
     if (worker.clientIds && worker.clientIds.length > 0) {
+      const tenants = await Tenant.find({
+        _id: { $in: worker.clientIds }
+      }).lean();
+
+      for (const tenant of tenants) {
+        const rentedProperty = await Property.findOne({
+          tenantId: tenant._id,
+          isRented: true,
+        }).lean();
+
+        if (rentedProperty) {
+          activeRentedClients++;
+        }
+      }
+    }
+
+    // ❌ Block deletion only if rented clients exist
+    if (activeRentedClients > 0) {
       return res.status(400).json({
-        error: "Cannot delete service while you have active clients",
-        clientCount: worker.clientIds.length,
+        error: "Cannot delete service while clients are in rented properties",
         hasClients: true,
+        rentedClientCount: activeRentedClients,
       });
     }
 
+    // ---- SERVICE CAN BE DELETED ----
     worker.serviceType = null;
     worker.experience = null;
     worker.price = null;
@@ -804,7 +854,7 @@ exports.bookWorkerCorrected = async (req, res) => {
     if (!req.session.user || req.session.user.userType !== "tenant") {
       return res
         .status(401)
-        .json({ error: "Unauthorized: Please log in as a tenant" });
+        .json({ error: "Please login as a tenant" });
     }
 
     const workerId = req.params.id;
@@ -813,6 +863,18 @@ exports.bookWorkerCorrected = async (req, res) => {
 
     if (!serviceType) {
       return res.status(400).json({ error: "Service type is required" });
+    }
+
+    // 🔥 Tenant must be renting a property
+    const rentedProperty = await Property.findOne({
+      tenantId,
+      isRented: true,
+    });
+
+    if (!rentedProperty) {
+      return res.status(400).json({
+        error: "You must rent a property before booking a worker",
+      });
     }
 
     const worker = await Worker.findById(workerId);
@@ -844,20 +906,22 @@ exports.bookWorkerCorrected = async (req, res) => {
       serviceType,
       status: "Pending",
       tenantName: `${tenant.firstName} ${tenant.lastName}`,
-      tenantAddress: tenant.location || "Not provided",
+      tenantAddress: rentedProperty.address || tenant.location || "Not provided",
       bookingDate: new Date(),
     });
 
     await newBooking.save();
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Booking request sent successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "Booking request sent successfully",
+    });
   } catch (error) {
     console.error("Error booking worker:", error);
     return res.status(500).json({ error: "Server error while booking worker" });
   }
 };
+
 
 // Update worker booking status
 exports.updateWorkerBookingStatus = async (req, res) => {
@@ -1043,7 +1107,6 @@ exports.updateWorkerSettings = async (req, res) => {
       location,
       experience,
       availability,
-      serviceType,
       currentPassword,
       newPassword,
     } = req.body;
@@ -1056,25 +1119,92 @@ exports.updateWorkerSettings = async (req, res) => {
         .json({ success: false, error: "Worker not found" });
     }
 
-    worker.firstName = firstName;
-    worker.lastName = lastName;
-    worker.email = email;
-    worker.phone = phone;
-    worker.location = location;
-    worker.experience = experience;
-    worker.availability = availability;
-    worker.serviceType = serviceType;
+    // ✅ VALIDATION - Trim and check for empty values
+    if (!firstName || !firstName.trim()) {
+      return res.status(400).json({ success: false, error: "First name is required" });
+    }
+    if (firstName.trim().length < 2) {
+      return res.status(400).json({ success: false, error: "First name must be at least 2 characters long" });
+    }
 
-    if (newPassword) {
+    if (!lastName || !lastName.trim()) {
+      return res.status(400).json({ success: false, error: "Last name is required" });
+    }
+    if (lastName.trim().length < 2) {
+      return res.status(400).json({ success: false, error: "Last name must be at least 2 characters long" });
+    }
+
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, error: "Email is required" });
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({ success: false, error: "Please enter a valid email address" });
+    }
+
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ success: false, error: "Phone number is required" });
+    }
+    const phoneDigits = phone.replace(/[\s\-\(\)]/g, "");
+    if (!/^[0-9]{10}$/.test(phoneDigits)) {
+      return res.status(400).json({ success: false, error: "Please enter a valid 10-digit phone number" });
+    }
+
+    if (experience && (experience < 0 || experience > 100)) {
+      return res.status(400).json({ success: false, error: "Experience must be between 0 and 100 years" });
+    }
+
+    // ✅ Update only personal information - TRIM all values
+    worker.firstName = firstName.trim();
+    worker.lastName = lastName.trim();
+    worker.email = email.trim();
+    worker.phone = phone.trim();
+    
+    // ✅ Only update location if provided
+    if (location && location.trim()) {
+      worker.location = location.trim();
+    }
+    
+    // ✅ Only update experience if provided and valid
+    if (experience !== undefined && experience !== null && experience !== '') {
+      worker.experience = experience;
+    }
+    
+    // ✅ Only update availability if provided
+    if (availability && ['full-time', 'part-time', 'weekends'].includes(availability)) {
+      worker.availability = availability;
+    }
+
+    // ✅ DO NOT UPDATE serviceType - it should only be updated through worker registration
+    // Removed: worker.serviceType = serviceType;
+
+    // ✅ Password change validation
+    if (newPassword && newPassword.trim()) {
+      if (!currentPassword || !currentPassword.trim()) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Please enter your current password to change password" 
+        });
+      }
       if (currentPassword !== worker.password) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Current password is incorrect" });
+        return res.status(400).json({ 
+          success: false, 
+          error: "Current password is incorrect" 
+        });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "New password must be at least 6 characters long" 
+        });
       }
       worker.password = newPassword;
     }
 
     await worker.save();
+
+    // ✅ Update session with fresh worker data
+    req.session.user = worker.toObject();
 
     res.json({ success: true, message: "Settings updated successfully" });
   } catch (error) {
@@ -1247,20 +1377,23 @@ exports.getDashboardDataAPI = async (req, res) => {
     const user = worker.toObject();
     user.clientIds = Array.isArray(user.clientIds) ? user.clientIds : [];
 
-    // === SAME LOGIC AS renderWorkerDashboardSafer ===
+    // SERVICES
     const services = user.serviceType
       ? [
           {
+            _id: user._id,
             name: user.serviceType,
             price: user.price || 0,
             rateUnit: user.rateUnit || "monthly",
             experience: user.experience || 0,
             serviceStatus: user.serviceStatus || "Available",
             image: user.image || "/images/default_service.jpg",
+            description: user.description || "",
           },
         ]
       : [];
 
+    // BOOKINGS
     const bookingsRaw = await WorkerBooking.find({ workerId: user._id })
       .populate("tenantId", "firstName lastName phone")
       .lean();
@@ -1286,45 +1419,56 @@ exports.getDashboardDataAPI = async (req, res) => {
       status: b.status || "Pending",
     }));
 
-    const clients =
-      user.clientIds.length > 0
-        ? await Tenant.find({ _id: { $in: user.clientIds } })
-            .select("firstName lastName phone email")
-            .lean()
-        : [];
-
-    const clientBookings = await WorkerBooking.find({
-      workerId: user._id,
-      tenantId: { $in: user.clientIds },
-      status: "Approved",
+    // CLIENTS → ONLY THOSE WHO HAVE A RENTED PROPERTY
+    const tenants = await Tenant.find({
+      _id: { $in: user.clientIds },
     })
-      .select("tenantId serviceType bookingDate")
+      .select("firstName lastName phone email")
       .lean();
 
-    const formattedClients = clients.map((client) => {
-      const related = clientBookings.filter(
-        (cb) => cb.tenantId.toString() === client._id.toString()
-      );
-      const servicesUsed =
-        related.length > 0
-          ? [...new Set(related.map((cb) => cb.serviceType))].filter(Boolean)
-          : [user.serviceType || "N/A"];
-      const bookingDate = related[0]?.bookingDate;
+    const formattedClients = [];
 
-      return {
+    for (const client of tenants) {
+      // Find the rented property for this client
+      const rentedProperty = await Property.findOne({
+        tenantId: client._id,
+        isRented: true,
+      })
+        .select("address location")
+        .lean();
+
+      // ❌ If client has NO rented property → skip entirely
+      if (!rentedProperty) continue;
+
+      // Find approved worker booking
+      const approvedBooking = await WorkerBooking.findOne({
+        workerId: user._id,
+        tenantId: client._id,
+        status: "Approved",
+      }).lean();
+
+      const servicesUsed = approvedBooking?.serviceType
+        ? [approvedBooking.serviceType]
+        : [user.serviceType || "N/A"];
+
+      formattedClients.push({
         _id: client._id,
         firstName: client.firstName,
         lastName: client.lastName,
         phone: client.phone || "N/A",
         email: client.email || "N/A",
         services: servicesUsed,
-        bookingDate: bookingDate
-          ? new Date(bookingDate).toLocaleDateString()
+        bookingDate: approvedBooking?.bookingDate
+          ? new Date(approvedBooking.bookingDate).toLocaleDateString()
           : "N/A",
-      };
-    });
+        address: rentedProperty.address || "N/A",
+        location: rentedProperty.location || "N/A",
+      });
+    }
 
+    // PAYMENTS
     const payments = await WorkerPayment.find({ workerId: user._id }).lean();
+
     const transactions = payments.map((p) => ({
       _id: p._id,
       title: "Salary Payment",
@@ -1346,10 +1490,12 @@ exports.getDashboardDataAPI = async (req, res) => {
         .reduce((s, p) => s + p.amount, 0),
     };
 
+    // REVIEWS
     const reviews = {
       averageRating: user.ratingId?.average || 0,
       count: user.ratingId?.reviews?.length || 0,
       items: (user.ratingId?.reviews || []).map((r) => ({
+        _id: r._id || `${user._id}-${Date.now()}`,
         user: r.user || "Anonymous",
         rating: r.rating || 0,
         date: r.date ? new Date(r.date).toLocaleDateString() : "N/A",
@@ -1358,6 +1504,7 @@ exports.getDashboardDataAPI = async (req, res) => {
       })),
     };
 
+    // NOTIFICATIONS
     const notifications = await Notification.find({
       recipient: user._id,
       recipientType: "Worker",
@@ -1374,11 +1521,12 @@ exports.getDashboardDataAPI = async (req, res) => {
       read: n.read || false,
     }));
 
+    // FINAL RESPONSE
     res.json({
       user,
       services,
       bookings,
-      clients: formattedClients,
+      clients: formattedClients, // Only tenants WITH rented property
       earnings,
       transactions,
       reviews,
@@ -1387,6 +1535,30 @@ exports.getDashboardDataAPI = async (req, res) => {
   } catch (error) {
     console.error("Error in getDashboardDataAPI:", error);
     res.status(500).json({ error: "Failed to load dashboard" });
+  }
+};
+
+
+// Mark notification as read
+exports.markNotificationAsRead = async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+    const userId = req.session.user._id;
+
+    const notification = await Notification.findOneAndUpdate(
+      { _id: notificationId, recipient: userId },
+      { read: true },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ error: "Notification not found" });
+    }
+
+    res.json({ success: true, notification });
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ error: "Failed to mark notification as read" });
   }
 };
 

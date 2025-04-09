@@ -1,24 +1,24 @@
 // src/pages/WorkerDashboard.jsx
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "../assets/css/workerDashboard.css";
+import CalendarTiles from "../components/CalendarTiles";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useLoading } from "../LoadingContext";
-import CalendarTiles from "../components/CalendarTiles";
 
 import {
-  getDashboardData,
-  toggleAvailability,
-  deleteService,
-  updateBookingStatus,
-  updateSettings,
   checkBookedStatus,
   deleteAccount,
+  deleteService,
   generateWorkOTP,
-  verifyWorkOTP,
+  getDashboardData,
   getWorkHistory,
+  toggleAvailability,
+  updateBookingStatus,
+  updateSettings,
+  verifyWorkOTP,
 } from "../services/workerService";
 
 const WorkerDashboard = () => {
@@ -537,7 +537,7 @@ const WorkerDashboard = () => {
                   }}
                   onClick={() => navigate("/worker_register")}
                 >
-                  Register Now
+                  Add Service
                 </span>
               </p>
             )}
@@ -618,7 +618,7 @@ const WorkerDashboard = () => {
               {clients.map((client) => (
                 <div key={client._id} className="wrkd-tentant-details">
                   <strong>
-                    {client.firstName} {client.firstName} {client.lastName}
+                    {client.firstName} {client.lastName}
                   </strong>
                   <ul>
                     <li>
@@ -630,6 +630,12 @@ const WorkerDashboard = () => {
                     </li>
                     <li>
                       <strong>Email:</strong> {client.email || "N/A"}
+                    </li>
+                    <li>
+                      <strong>Address:</strong> {client.address || "No address"}
+                    </li>
+                    <li>
+                      <strong>Location:</strong> {client.location || "N/A"}
                     </li>
                     {client.bookingDate && (
                       <li>

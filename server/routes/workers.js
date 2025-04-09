@@ -65,63 +65,64 @@ router.get("/", workerController.getAllWorkers);
 // Register filter route before ":id" so "filter" doesn't match the id param.
 router.get("/filter", workerController.filterWorkers);
 
-// API endpoint to get a specific worker by ID (mounted at /api/workers/:id)
-router.get("/:id", workerController.getWorkerById);
-
-// API endpoint to register/update a worker
-router.post("/api/workers/register", workerController.registerWorker);
-
-// API endpoint to toggle worker availability
-router.post(
-  "/api/workers/:id/toggle",
-  workerController.toggleWorkerAvailability
-);
-
-// API endpoint to delete worker service details
-router.post(
-  "/api/workers/delete-service",
-  workerController.deleteWorkerService
-);
-
-router.post("/api/workers/:id/book", workerController.bookWorkerCorrected);
-router.post(
-  "/api/workers/bookings/:id/status",
-  workerController.updateWorkerBookingStatus
-);
-// API endpoint to check if worker is booked
-router.get(
-  "/api/workers/check-booked/:id",
-  workerController.isAuthenticated,
-  workerController.checkWorkerBookedStatus
-);
-
-// API endpoint to delete worker account
-router.delete(
-  "/api/workers/delete-account/:id",
-  workerController.isAuthenticated,
-  workerController.deleteWorkerAccount
-);
-router.get("/worker_dashboard", workerController.renderWorkerDashboardSafer);
-// API endpoint to update worker settings
-router.post(
-  "/api/workers/update-settings",
-  workerController.isAuthenticated,
-  workerController.updateWorkerSettings
-);
-
-// API endpoint to debook a worker
-router.post(
-  "/api/workers/debook/:id",
-  workerController.isAuthenticated,
-  workerController.debookWorker
-);
-
 // Add this line with your other API routes
 router.get(
   "/api/dashboard",
   workerController.isAuthenticated,
   workerController.getDashboardDataAPI
 );
+
+// API endpoint to get a specific worker by ID (mounted at /api/workers/:id)
+router.get("/:id", workerController.getWorkerById);
+
+// API endpoint to register/update a worker
+router.post("/register", workerController.registerWorker);
+
+// API endpoint to toggle worker availability
+router.post(
+  "/:id/toggle",
+  workerController.toggleWorkerAvailability
+);
+
+// API endpoint to delete worker service details
+router.post(
+  "/delete-service",
+  workerController.deleteWorkerService
+);
+
+router.post("/:id/book", workerController.bookWorkerCorrected);
+router.post(
+  "/bookings/:id/status",
+  workerController.updateWorkerBookingStatus
+);
+// API endpoint to check if worker is booked
+router.get(
+  "/check-booked/:id",
+  workerController.isAuthenticated,
+  workerController.checkWorkerBookedStatus
+);
+
+// API endpoint to delete worker account
+router.delete(
+  "/delete-account/:id",
+  workerController.isAuthenticated,
+  workerController.deleteWorkerAccount
+);
+router.get("/worker_dashboard", workerController.renderWorkerDashboardSafer);
+// API endpoint to update worker settings
+router.post(
+  "/update-settings",
+  workerController.isAuthenticated,
+  workerController.updateWorkerSettings
+);
+
+// API endpoint to debook a worker
+router.post(
+  "/debook/:id",
+  workerController.isAuthenticated,
+  workerController.debookWorker
+);
+
 
 // Work tracking routes
 router.post(
