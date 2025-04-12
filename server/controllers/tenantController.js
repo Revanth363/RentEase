@@ -225,6 +225,34 @@ exports.getDashboardData = async (req, res) => {
       propertyId: { $exists: true },
     }).populate("propertyId");
 
+    // Enrich rental history with property images and ratings
+    let enrichedRentalHistory = [];
+    if (
+      rentalHistory &&
+      rentalHistory.propertyIds &&
+      rentalHistory.propertyIds.length > 0
+    ) {
+      enrichedRentalHistory = await Promise.all(
+        rentalHistory.propertyIds.map(async (historyItem) => {
+          const propertyId = historyItem.property;
+          const property = await Property.findById(propertyId);
+          const propertyRating = ratings.find(
+            (r) =>
+              r.propertyId && String(r.propertyId._id) === String(propertyId)
+          );
+
+          return {
+            ...historyItem.toObject(),
+            property: property ? property._id : propertyId,
+            propertyName: property ? property.name : "Property",
+            propertyImages: property ? property.images : [],
+            rating: propertyRating ? propertyRating.rating : null,
+            review: propertyRating ? propertyRating.review : null,
+          };
+        })
+      );
+    }
+
     const notificationsRaw = await Notification.find({
       recipient: userId,
       recipientType: "Tenant",
@@ -269,7 +297,7 @@ exports.getDashboardData = async (req, res) => {
       completedMaintenanceRequests,
       complaints,
       workers: domesticWorkers,
-      rentalHistory: rentalHistory ? rentalHistory.propertyIds : [],
+      rentalHistory: enrichedRentalHistory,
       ratings,
       notifications,
       workerPayments,
@@ -1192,8 +1220,8 @@ exports.deleteAccount = async (req, res) => {
         .json({ success: false, message: "Password is required" });
     }
 
-    // Find tenant
-    const tenant = await Tenant.findById(tenantId);
+    // Find tenant with password field (it has select: false by default)
+    const tenant = await Tenant.findById(tenantId).select("+password");
     if (!tenant) {
       console.log("Tenant not found for ID:", tenantId);
       return res
@@ -1202,7 +1230,7 @@ exports.deleteAccount = async (req, res) => {
     }
 
     // Verify password
-    if (tenant.password !== password) {
+    if (tenant.password !== password.trim()) {
       console.log("Incorrect password for tenant ID:", tenantId);
       return res
         .status(401)
@@ -1355,6 +1383,19 @@ exports.requestUnrentProperty = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please pay this month's rent before requesting to unrent.",
+      });
+    }
+    // Check for active worker bookings
+    const WorkerBooking = require("../models/workerBooking");
+    const activeBookings = await WorkerBooking.find({
+      tenantId,
+      status: { $in: ["Pending", "Approved"] },
+    });
+    if (activeBookings.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please debook all active domestic workers before requesting to unrent.",
       });
     }
     // Find owner

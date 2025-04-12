@@ -4,7 +4,7 @@
   --primary-color: #2563eb; /* Blue */
   --primary-dark: #1d4ed8;
   --secondary-color: #0ea5e9; /* Light Blue */
-  --accent-color: #ff0000; /* Orange accent */
+  --accent-color: #f59e0b; /* Orange accent */
   --dark-color: #111827; /* Near Black */
   --text-color: #374151; /* Dark Gray for text */
   --text-light: #6b7280; /* Light Gray for secondary text */
@@ -29,7 +29,6 @@
   --radius-full: 9999px;
   font-family: "Poppins", Arial, sans-serif;
   overflow-x: hidden;
-  
 }
 
 /* General Styles */
@@ -558,7 +557,6 @@
   margin-bottom: 100px;
   margin-top: 0px;
   font-family: "Poppins", Arial, sans-serif;
-  
 }
 
 .home-container .info {

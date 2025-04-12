@@ -639,19 +639,39 @@ exports.approveUnrentProperty = async (req, res) => {
     const tenantId = unrentRequest.tenantId;
     // Approve or reject
     if (action === "approve") {
-      // Create rental history record
+      // Get property and tenant details for rental history
+      const property = await Property.findById(propertyId);
+      const tenant = await Tenant.findById(tenantId);
+
+      // Find or create rental history record for this tenant
       const RentalHistory = require("../models/rentalhistory");
-      await new RentalHistory({
-        propertyId,
-        tenantId,
-        ownerId,
+      let rentalHistoryRecord = await RentalHistory.findOne({ tenantId });
+
+      const propertyDetails = {
+        property: propertyId,
         startDate: null,
         endDate: new Date(),
-        monthlyRent: null,
+        rent: property ? property.price : null,
+        owner:
+          property && property.ownerId ? property.ownerId.toString() : null,
+        address: property ? property.address : "N/A",
         status: "Completed",
-      }).save();
+        reasonForMoving: unrentRequest.reason || "Unrent requested",
+      };
+
+      if (rentalHistoryRecord) {
+        // Add property to existing rental history
+        rentalHistoryRecord.propertyIds.push(propertyDetails);
+        await rentalHistoryRecord.save();
+      } else {
+        // Create new rental history record
+        rentalHistoryRecord = await new RentalHistory({
+          tenantId,
+          propertyIds: [propertyDetails],
+        }).save();
+      }
+
       // Update property status
-      const property = await Property.findById(propertyId);
       if (property) {
         property.tenantId = null;
         property.status = "Available";
@@ -659,10 +679,10 @@ exports.approveUnrentProperty = async (req, res) => {
         property.lastRentedDate = null;
         await property.save();
       }
-      // Update tenant
+      // Update tenant - add rentalHistoryIds reference and remove propertyId
       await Tenant.findByIdAndUpdate(tenantId, {
         $unset: { propertyId: "" },
-        $push: { rentalHistory: propertyId },
+        $addToSet: { rentalHistoryIds: rentalHistoryRecord._id },
       });
       // Update owner
       await Owner.findByIdAndUpdate(ownerId, {

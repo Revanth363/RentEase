@@ -38,8 +38,8 @@ const Sidebar = ({ onSelect, current }) => (
         <i className="fa-solid fa-bookmark"></i> Saved Listings
       </li>
 
-      <li onClick={() => onSelect("ratings")}>
-        <i className="fa-solid fa-star-half-stroke"></i> Reviews & Ratings
+      <li onClick={() => onSelect("rentalHistory")}>
+        <i className="fa-solid fa-star-half-stroke"></i> Rental History
       </li>
 
       <li onClick={() => onSelect("settings")}>
@@ -78,51 +78,53 @@ const TenantDashboard = () => {
 
   // Rating
   const [selectedRating, setSelectedRating] = useState(0);
+  const [showRatePopup, setShowRatePopup] = useState(false);
+  const [rateTargetProperty, setRateTargetProperty] = useState(null);
+  const [ratingReviewText, setRatingReviewText] = useState("");
 
+  // Load dashboard data on mount
   useEffect(() => {
     let mounted = true;
-    tenantService
-      .getDashboard()
-      .then((res) => {
-        if (!mounted) return;
-        if (res && res.success) {
-          setDashboard(res);
-        } else {
-          setDashboard(res);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => {
+    (async () => {
+      try {
+        const res = await tenantService.getDashboard?.();
         if (mounted) {
-          setLoading(false);
-          setIsLoading(false);
+          if (res && res.success) {
+            // The backend returns the full data directly, not nested in a 'data' field
+            setDashboard(res);
+          } else {
+            console.warn("Dashboard response not successful:", res);
+            setDashboard({});
+          }
         }
-      });
+      } catch (err) {
+        console.error("Failed to load tenant dashboard:", err);
+        if (mounted) setDashboard({});
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
     return () => {
       mounted = false;
     };
   }, []);
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-  if (!dashboard)
-    return <div style={{ padding: 20 }}>Unable to load dashboard.</div>;
-
+  // Safe destructuring from dashboard
   const {
     user = {},
-    currentProperty,
-    propertyOwner,
+    currentProperty = null,
+    payments = [],
     activeMaintenanceRequests = [],
     completedMaintenanceRequests = [],
-    notifications = [],
     workers = [],
-    payments = [],
-    workerPayments = [],
+    notifications = [],
     ratings = [],
-  } = dashboard;
-
-  // Handlers
+    rentalHistory = [],
+    propertyOwner = null,
+    nextPayment = null,
+    complaints = [],
+    workerPayments = [],
+  } = dashboard && dashboard.success === false ? {} : dashboard || {};
   const handleSubmitMaintenance = async (e) => {
     e.preventDefault();
     const form = maintFormRef.current;
@@ -154,7 +156,9 @@ const TenantDashboard = () => {
       alert("Error submitting request");
     }
   };
-
+  {
+    /* Rental History */
+  }
   const handleSubmitComplaint = async (e) => {
     e.preventDefault();
     const form = complaintFormRef.current;
@@ -311,11 +315,16 @@ const TenantDashboard = () => {
   };
 
   const handleSubmitReview = async () => {
+    // Generic review submitter used by current property or rental-history popup
     if (!selectedRating) return alert("Please select a rating");
-    const reviewText = document.getElementById("review-text")?.value || "";
+    const propertyId =
+      rateTargetProperty || (currentProperty && currentProperty._id);
+    const reviewText =
+      ratingReviewText || document.getElementById("review-text")?.value || "";
+    if (!propertyId) return alert("No property selected to review");
     try {
       const res = await tenantService.submitReview({
-        propertyId: currentProperty._id,
+        propertyId,
         rating: selectedRating,
         review: reviewText,
       });
@@ -324,11 +333,14 @@ const TenantDashboard = () => {
           ...prev,
           ratings: [res.rating, ...(prev.ratings || [])],
         }));
-        document.getElementById("review-text").value = "";
         setSelectedRating(0);
+        setRatingReviewText("");
+        setShowRatePopup(false);
+        setRateTargetProperty(null);
       } else alert(res.message || "Error");
     } catch (err) {
       console.error(err);
+      alert("Error submitting review");
     }
   };
 
@@ -340,18 +352,17 @@ const TenantDashboard = () => {
     const phone = form["phone"].value.trim();
     const location = form["address"].value.trim();
 
-    // Validation
-    const nameRegex = /^[A-Za-z\s-]+$/;
+    const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
     const emailRegex =
       /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const phoneRegex = /^[0-9]{10}$/;
+    const phoneRegex = /^\d{10}$/;
 
     if (!fullname) {
       alert("Full name is required");
       return;
     }
     if (!nameRegex.test(fullname)) {
-      alert("Full name must contain only letters, spaces, and hyphens");
+      alert("Full name must contain only letters");
       return;
     }
     if (!email) {
@@ -367,7 +378,7 @@ const TenantDashboard = () => {
       return;
     }
     if (!phoneRegex.test(phone)) {
-      alert("Phone number must be exactly 10 digits");
+      alert("Phone number must be exactly 10 numerical digits");
       return;
     }
     if (!location) {
@@ -472,6 +483,14 @@ const TenantDashboard = () => {
       } else alert(res.message || "Error");
     } catch (err) {
       console.error(err);
+      // Show server-provided message (e.g., "Please pay this month's rent before requesting to unrent.")
+      const serverMessage =
+        err && err.response && err.response.data && err.response.data.message
+          ? err.response.data.message
+          : err && err.message
+          ? err.message
+          : "Network error";
+      alert(serverMessage);
     }
   };
 
@@ -491,9 +510,27 @@ const TenantDashboard = () => {
       const status = await tenantService.checkAccountStatus();
       if (status.success) {
         setShowDeleteAccountModal(true);
-      } else alert(status.message || "Cannot delete account");
+      } else {
+        // Check for specific conditions
+        if (status.hasActiveRentals && status.hasActiveBookings) {
+          alert(
+            "Cannot delete account. Please unrent your property and debook your domestic workers first."
+          );
+        } else if (status.hasActiveRentals) {
+          alert(
+            "Cannot delete account while renting a property. Please request to unrent first."
+          );
+        } else if (status.hasActiveBookings) {
+          alert(
+            "Cannot delete account with active worker bookings. Please debook all workers first."
+          );
+        } else {
+          alert(status.message || "Cannot delete account");
+        }
+      }
     } catch (err) {
       console.error(err);
+      alert("Error checking account status. Please try again.");
     }
   };
 
@@ -512,7 +549,12 @@ const TenantDashboard = () => {
       }
     } catch (err) {
       console.error("Delete account error:", err);
-      alert("Network error while deleting account");
+      // Try to get error message from response
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Network error while deleting account";
+      alert(errorMessage);
     }
   };
 
@@ -642,13 +684,10 @@ const TenantDashboard = () => {
             <h3>Rent Payments</h3>
             {currentProperty ? (
               <div className="tntd-current-rent">
-                {dashboard.nextPayment ? (
+                {nextPayment ? (
                   <p>
-                    Next Rent Due:{" "}
-                    <strong>₹{dashboard.nextPayment.amount}</strong> on{" "}
-                    {new Date(
-                      dashboard.nextPayment.dueDate
-                    ).toLocaleDateString()}
+                    Next Rent Due: <strong>₹{nextPayment.amount}</strong> on{" "}
+                    {new Date(nextPayment.dueDate).toLocaleDateString()}
                   </p>
                 ) : (
                   <p>No rent due date available.</p>
@@ -822,7 +861,7 @@ const TenantDashboard = () => {
             </form>
             <h4>Previous Complaints</h4>
             <div className="tntd-complaints-history">
-              {(dashboard.complaints || []).map((c) => (
+              {(complaints || []).map((c) => (
                 <div className="tntd-complaint-item" key={c._id}>
                   <div className="tntd-complaint-header">
                     <h5>{c.subject}</h5>
@@ -862,45 +901,6 @@ const TenantDashboard = () => {
               section === "movers" ? "tntd-active" : ""
             }`}
           >
-            <h3>Domestic Worker Services</h3>
-            <div className="tntd-service-categories">
-              <div className="tntd-service-category">
-                <h4>Cleaning Services</h4>
-                <p>Professional house cleaning</p>
-                <button
-                  className="tntd-book-button"
-                  onClick={() =>
-                    (window.location.href = "/workerDetails?service=cleaning")
-                  }
-                >
-                  Find Cleaners
-                </button>
-              </div>
-              <div className="tntd-service-category">
-                <h4>Cooking Services</h4>
-                <p>Skilled cooks for daily meals</p>
-                <button
-                  className="tntd-book-button"
-                  onClick={() =>
-                    (window.location.href = "/workerDetails?service=cooking")
-                  }
-                >
-                  Find Cooks
-                </button>
-              </div>
-              <div className="tntd-service-category">
-                <h4>Laundry Services</h4>
-                <p>Washing and ironing services</p>
-                <button
-                  className="tntd-book-button"
-                  onClick={() =>
-                    (window.location.href = "/workerDetails?service=laundry")
-                  }
-                >
-                  Find Help
-                </button>
-              </div>
-            </div>
             <h4>Your Current Service Providers</h4>
             <div className="tntd-worker-cards">
               {(workers || []).length === 0 ? (
@@ -1185,6 +1185,141 @@ const TenantDashboard = () => {
             </div>
           </div>
 
+          {/* Rental History */}
+          <div
+            id="rentalHistory"
+            className={`tntd-section ${
+              section === "rentalHistory" ? "tntd-active" : ""
+            }`}
+          >
+            <h3>Rental History</h3>
+            <div className="tntd-rental-history-cards">
+              {(rentalHistory || []).length > 0 ? (
+                (rentalHistory || []).map((h, idx) => {
+                  const propId = h.property || h._id;
+                  const propName =
+                    h.propertyName || h.address || "Previous Property";
+                  const propAddress = h.address || "N/A";
+                  const propImages =
+                    h.propertyImages && h.propertyImages.length > 0
+                      ? h.propertyImages[0]
+                      : "/images/default-property.jpg";
+                  const rating = h.rating || null;
+
+                  const hasRated = (ratings || []).some((r) => {
+                    const ratedId =
+                      r.propertyId &&
+                      (r.propertyId._id ? r.propertyId._id : r.propertyId);
+                    return (
+                      ratedId && propId && String(ratedId) === String(propId)
+                    );
+                  });
+
+                  return (
+                    <div className="tntd-history-card" key={propId || idx}>
+                      <div className="tntd-img_container">
+                        <img
+                          src={propImages}
+                          alt={propName}
+                          style={{ height: "200px", objectFit: "cover" }}
+                        />
+                      </div>
+                      <div className="tntd-history-header">
+                        <h5>{propName}</h5>
+                        <p>{propAddress}</p>
+                      </div>
+                      <div className="tntd-rating">
+                        {rating ? (
+                          <span className="tntd-history-rating">
+                            {"⭐".repeat(Math.round(rating))}{" "}
+                            {rating.toFixed(1)}
+                          </span>
+                        ) : (
+                          <span className="tntd-history-no-rating">
+                            No rating yet
+                          </span>
+                        )}
+                      </div>
+                      <div className="tntd-card-actions">
+                        <button
+                          className="tntd-book-button"
+                          onClick={() =>
+                            (window.location.href = `/property?id=${propId}`)
+                          }
+                        >
+                          View Details
+                        </button>
+                        {!hasRated && !rating && (
+                          <button
+                            className="tntd-book-button"
+                            onClick={() => {
+                              setRateTargetProperty(propId);
+                              setShowRatePopup(true);
+                            }}
+                          >
+                            Rate this property
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p>No previous rentals found.</p>
+              )}
+            </div>
+
+            {showRatePopup && (
+              <div className="tntd-overlay-popup">
+                <div className="tntd-rate-popup">
+                  <h4>Rate this property</h4>
+                  <div className="tntd-star-rating">
+                    {[1, 2, 3, 4, 5].map((r) => (
+                      <span
+                        key={r}
+                        className={`tntd-star ${
+                          selectedRating >= r ? "tntd-active" : ""
+                        }`}
+                        onMouseEnter={() => handleStarHover(r)}
+                        onClick={() => handleStarClick(r)}
+                      >
+                        <i
+                          className={
+                            selectedRating >= r ? "fas fa-star" : "far fa-star"
+                          }
+                        ></i>
+                      </span>
+                    ))}
+                  </div>
+                  <textarea
+                    value={ratingReviewText}
+                    onChange={(e) => setRatingReviewText(e.target.value)}
+                    rows={4}
+                    placeholder="Share your experience..."
+                  ></textarea>
+                  <div className="tntd-rate-actions">
+                    <button
+                      className="tntd-book-button"
+                      onClick={handleSubmitReview}
+                    >
+                      Submit
+                    </button>
+                    <button
+                      className="tntd-remove-button"
+                      onClick={() => {
+                        setShowRatePopup(false);
+                        setRateTargetProperty(null);
+                        setSelectedRating(0);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Ratings */}
           <div
             id="ratings"
@@ -1285,9 +1420,7 @@ const TenantDashboard = () => {
                     <input
                       name="fullname"
                       id="fullname"
-                      defaultValue={`${user.firstName || ""} ${
-                        user.lastName || ""
-                      }`}
+                      defaultValue={user.firstName + user.lastName || ""}
                     />
                   </div>
                   <div className="tntd-form-group">

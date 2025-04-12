@@ -107,21 +107,37 @@ export const requestUnrent = async (reason) => {
 };
 
 export const checkAccountStatus = async () => {
-  const res = await axios.post(
-    `${BASE}/check-account-status`,
-    {},
-    { withCredentials: true }
-  );
-  return res.data;
+  try {
+    const res = await axios.post(
+      `${BASE}/check-account-status`,
+      {},
+      { withCredentials: true }
+    );
+    return res.data;
+  } catch (err) {
+    // Return the error response data if it exists
+    if (err.response && err.response.data) {
+      return err.response.data;
+    }
+    throw err;
+  }
 };
 
 export const deleteAccount = async (password) => {
-  const res = await axios.post(
-    `${BASE}/delete-account`,
-    { password },
-    { withCredentials: true }
-  );
-  return res.data;
+  try {
+    const res = await axios.post(
+      `${BASE}/delete-account`,
+      { password },
+      { withCredentials: true }
+    );
+    return res.data;
+  } catch (err) {
+    // Return the error response data if it exists
+    if (err.response && err.response.data) {
+      return err.response.data;
+    }
+    throw err;
+  }
 };
 
 export const getWorkHistory = async (workerId) => {

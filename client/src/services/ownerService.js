@@ -30,7 +30,7 @@ export const getNotifications = async () => {
 };
 
 export const updateMaintenanceRequestStatus = async (payload) => {
-  const res = await axios.post(`/maintenance-request/status`, payload, {
+  const res = await axios.post(`${BASE}/maintenance-request/status`, payload, {
     withCredentials: true,
   });
   return res.data;
