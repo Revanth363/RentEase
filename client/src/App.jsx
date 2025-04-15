@@ -16,6 +16,7 @@ import FAQ from './pages/FAQ';
 import WorkerServices from './pages/WorkerServices';
 import WorkerCard from './pages/WorkerCard';
 import BookProperty from './pages/BookProperty';
+import WorkerRegister from './pages/WorkerRegister';
 
 import TenantDashboard from "./pages/TenantDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
@@ -72,6 +73,7 @@ const App = () => {
           <Route path="/privacy_policy" element={<div>Privacy Policy</div>} />
           <Route path="/termsofservice" element={<div>Terms of Service</div>} />
           <Route path="/book-property" element={<BookProperty />} />
+          <Route path="/worker_register" element={<WorkerRegister />} />
 
 
           {/* Auth Routes — NO HEADER */}
