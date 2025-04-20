@@ -26,11 +26,11 @@ const Sidebar = ({ onSelect, current }) => (
       <li onClick={() => onSelect("reports")}>
         <i className="fa-solid fa-chart-column"></i> Reports & Analytics
       </li>
-      <li onClick={() => onSelect("settings")}>
-        <i className="fa-solid fa-gears"></i> Settings
-      </li>
       <li onClick={() => onSelect("notifications")}>
         <i className="fa-solid fa-bell"></i> Notifications
+      </li>
+      <li onClick={() => onSelect("settings")}>
+        <i className="fa-solid fa-gears"></i> Settings
       </li>
     </ul>
   </div>
@@ -296,17 +296,18 @@ const OwnerDashboard = () => {
     };
 
     // Validation
-    const nameRegex = /^[A-Za-z\s-]+$/;
+
+    const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
     const emailRegex =
       /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const phoneRegex = /^[0-9]{10}$/;
+    const phoneRegex = /^\d{10}$/;
 
     if (!formData.firstName) {
       alert("First name is required");
       return;
     }
     if (!nameRegex.test(formData.firstName)) {
-      alert("First name must contain only letters, spaces, and hyphens");
+      alert("First name must contain only letters");
       return;
     }
 
@@ -315,7 +316,7 @@ const OwnerDashboard = () => {
       return;
     }
     if (!nameRegex.test(formData.lastName)) {
-      alert("Last name must contain only letters, spaces, and hyphens");
+      alert("Last name must contain only letters");
       return;
     }
 
@@ -333,7 +334,7 @@ const OwnerDashboard = () => {
       return;
     }
     if (!phoneRegex.test(formData.phone)) {
-      alert("Phone number must be exactly 10 digits");
+      alert("Phone number must be exactly 10 numerical digits");
       return;
     }
 

@@ -18,8 +18,8 @@ const Rating = require("./models/rating");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
-const formidable = require('formidable');
-const fs = require('fs');
+const formidable = require("formidable");
+const fs = require("fs");
 
 const propertyRoutes = require("./routes/property");
 const workerRoutes = require("./routes/workers");
@@ -27,7 +27,6 @@ const TenantRoutes = require("./routes/tenant");
 const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/admin");
-
 
 require("dns").setDefaultResultOrder("ipv4first");
 
@@ -44,20 +43,27 @@ mongoose
 
 // Middleware
 // CORS: allow common localhost dev ports or configured CLIENT_URL
-const allowedOrigins = new Set([
-  process.env.CLIENT_URL || '',
-  'http://localhost:5173', 'http://127.0.0.1:5173',
-  'http://localhost:5174', 'http://127.0.0.1:5174'
-].filter(Boolean));
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.has(origin)) return callback(null, true);
-    if (/^http:\/\/(localhost|127\.0\.0\.1):51\d{2}$/.test(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-}));
+const allowedOrigins = new Set(
+  [
+    process.env.CLIENT_URL || "",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+  ].filter(Boolean)
+);
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) return callback(null, true);
+      if (/^http:\/\/(localhost|127\.0\.0\.1):51\d{2}$/.test(origin))
+        return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -92,8 +98,13 @@ const forgotPasswordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
-    return res.status(429).json({ success: false, error: "Too many OTP requests, please try again later." });
-  }
+    return res
+      .status(429)
+      .json({
+        success: false,
+        error: "Too many OTP requests, please try again later.",
+      });
+  },
 });
 
 // Generate a 6-digit OTP
@@ -218,7 +229,9 @@ app.post("/api/submit-form", async (req, res) => {
 
 // Replaced EJS Routes with API or Redirects
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to RentEase API. Use /api endpoints for React frontend." });
+  res.json({
+    message: "Welcome to RentEase API. Use /api endpoints for React frontend.",
+  });
 });
 
 app.get("/forgot-password", (req, res) => {
@@ -232,61 +245,88 @@ async function handleForgotPassword(req, res) {
     const owner = await Owner.findOne({ email });
     const worker = await Worker.findOne({ email });
     const user = tenant || owner || worker;
-    if (!user) return res.json({ success: false, error: 'Email not found' });
+    if (!user) return res.json({ success: false, error: "Email not found" });
 
     const otp = generateOtp();
     const otpExpires = Date.now() + 10 * 60 * 1000;
     otpStore.set(email, { otp, expires: otpExpires });
-    setTimeout(() => { const entry = otpStore.get(email); if (entry && entry.expires <= Date.now()) otpStore.delete(email); }, 11 * 60 * 1000);
+    setTimeout(() => {
+      const entry = otpStore.get(email);
+      if (entry && entry.expires <= Date.now()) otpStore.delete(email);
+    }, 11 * 60 * 1000);
 
     // Dev mode: return OTP in response (no email service)
-    return res.json({ success: true, message: 'OTP generated (dev mode - check console)', otp });
+    return res.json({
+      success: true,
+      message: "OTP generated (dev mode - check console)",
+      otp,
+    });
   } catch (err) {
-    console.error('Error in forgot password flow:', err);
-    return res.json({ success: false, error: 'Server error. Please try again later.' });
+    console.error("Error in forgot password flow:", err);
+    return res.json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
   }
 }
 
-app.post('/forgot-password', forgotPasswordLimiter, handleForgotPassword);
-app.post('/api/forgot-password', forgotPasswordLimiter, handleForgotPassword);
+app.post("/forgot-password", forgotPasswordLimiter, handleForgotPassword);
+app.post("/api/forgot-password", forgotPasswordLimiter, handleForgotPassword);
 
 function handleVerifyOtp(req, res) {
   const { email, otp } = req.body;
   try {
     const entry = otpStore.get(email);
-    if (!entry) return res.json({ success: false, error: 'No OTP requested' });
-    if (Date.now() > entry.expires) { otpStore.delete(email); return res.json({ success: false, error: 'OTP has expired' }); }
-    if (entry.otp !== String(otp)) return res.json({ success: false, error: 'Invalid OTP' });
-    return res.json({ success: true, message: 'OTP verified' });
+    if (!entry) return res.json({ success: false, error: "No OTP requested" });
+    if (Date.now() > entry.expires) {
+      otpStore.delete(email);
+      return res.json({ success: false, error: "OTP has expired" });
+    }
+    if (entry.otp !== String(otp))
+      return res.json({ success: false, error: "Invalid OTP" });
+    return res.json({ success: true, message: "OTP verified" });
   } catch (err) {
-    console.error('Error verifying OTP:', err);
-    return res.json({ success: false, error: 'Server error' });
+    console.error("Error verifying OTP:", err);
+    return res.json({ success: false, error: "Server error" });
   }
 }
-app.post('/verify-otp', handleVerifyOtp);
-app.post('/api/verify-otp', handleVerifyOtp);
+app.post("/verify-otp", handleVerifyOtp);
+app.post("/api/verify-otp", handleVerifyOtp);
 
 async function handleResetPassword(req, res) {
   const { email, password } = req.body;
   try {
-    if (!password || password.length < 8) return res.json({ success: false, error: 'Password must be at least 8 characters long' });
-    const tenant = await Tenant.findOne({ email }).select('+password');
-    const owner = await Owner.findOne({ email }).select('+password');
-    const worker = await Worker.findOne({ email }).select('+password');
+    if (!password || password.length < 8)
+      return res.json({
+        success: false,
+        error: "Password must be at least 8 characters long",
+      });
+    const tenant = await Tenant.findOne({ email }).select("+password");
+    const owner = await Owner.findOne({ email }).select("+password");
+    const worker = await Worker.findOne({ email }).select("+password");
     const user = tenant || owner || worker;
-    if (!user) return res.json({ success: false, error: 'User not found' });
+    if (!user) return res.json({ success: false, error: "User not found" });
     const entry = otpStore.get(email);
-    if (!entry) return res.json({ success: false, error: 'Please verify OTP first' });
-    if (Date.now() > entry.expires) { otpStore.delete(email); return res.json({ success: false, error: 'OTP has expired, please request a new one' }); }
-    user.password = password; await user.save(); otpStore.delete(email);
-    return res.json({ success: true, message: 'Password reset successful' });
+    if (!entry)
+      return res.json({ success: false, error: "Please verify OTP first" });
+    if (Date.now() > entry.expires) {
+      otpStore.delete(email);
+      return res.json({
+        success: false,
+        error: "OTP has expired, please request a new one",
+      });
+    }
+    user.password = password;
+    await user.save();
+    otpStore.delete(email);
+    return res.json({ success: true, message: "Password reset successful" });
   } catch (err) {
-    console.error('Error resetting password:', err);
-    return res.json({ success: false, error: 'Server error' });
+    console.error("Error resetting password:", err);
+    return res.json({ success: false, error: "Server error" });
   }
 }
-app.post('/reset-password', handleResetPassword);
-app.post('/api/reset-password', handleResetPassword);
+app.post("/reset-password", handleResetPassword);
+app.post("/api/reset-password", handleResetPassword);
 
 app.get("/login", (req, res) => {
   if (req.session.user) {
@@ -305,7 +345,9 @@ app.post("/login", async (req, res) => {
 
     // ADMIN LOGIN (email ends with @admin.com)
     if (email.toLowerCase().trim().endsWith("@admin.com")) {
-      const admin = await Admin.findOne({ email: email.toLowerCase().trim() }).select("+password");
+      const admin = await Admin.findOne({
+        email: email.toLowerCase().trim(),
+      }).select("+password");
       if (!admin || admin.password !== password) {
         return res.status(401).json({ error: "Invalid admin credentials" });
       }
@@ -317,7 +359,7 @@ app.post("/login", async (req, res) => {
       return res.json({
         success: true,
         redirectUrl: "/admin",
-        message: "Admin login successful"
+        message: "Admin login successful",
       });
     }
 
@@ -326,7 +368,8 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Please select role" });
     }
 
-    let Model = userType === "tenant" ? Tenant : userType === "owner" ? Owner : Worker;
+    let Model =
+      userType === "tenant" ? Tenant : userType === "owner" ? Owner : Worker;
     const user = await Model.findOne({ email }).select("+password");
 
     if (!user || user.password !== password) {
@@ -334,33 +377,29 @@ app.post("/login", async (req, res) => {
     }
 
     req.session.user = {
-  _id: user._id.toString(),
-  userType,
-  email: user.email,
-  firstName: user.firstName || "",
-  lastName: user.lastName || "",
-  phone: user.phone || "",
-  location: user.location || "",
-  emailNotifications: user.emailNotifications || false,
-  smsNotifications: user.smsNotifications || false,
-  rentReminders: user.rentReminders || false,
-  maintenanceUpdates: user.maintenanceUpdates || false,
-  newListings: user.newListings || false,
-};
-
+      _id: user._id.toString(),
+      userType,
+      email: user.email,
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      phone: user.phone || "",
+      location: user.location || "",
+      emailNotifications: user.emailNotifications || false,
+      smsNotifications: user.smsNotifications || false,
+      rentReminders: user.rentReminders || false,
+      maintenanceUpdates: user.maintenanceUpdates || false,
+      newListings: user.newListings || false,
+    };
 
     res.json({
       success: true,
-      redirectUrl: getDashboardUrl(userType)
+      redirectUrl: getDashboardUrl(userType),
     });
-
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Server error" });
   }
-}
-
-);
+});
 
 app.post("/register", async (req, res) => {
   const {
@@ -418,19 +457,14 @@ app.post("/register", async (req, res) => {
         userType: "tenant",
       });
     } else if (userType === "worker") {
-      if (!serviceType || !experience) {
-        return res
-          .status(400)
-          .json({ error: "Service type and experience required for workers" });
-      }
       newUser = new Worker({
         firstName,
         lastName,
         email,
         phone,
         location,
-        serviceType,
-        experience: Number(experience) || 0,
+        serviceType: serviceType || "Not specified",
+        experience: experience ? Number(experience) : 0,
         password: plainPassword,
         userType: "worker",
       });
@@ -467,8 +501,8 @@ app.post("/register", async (req, res) => {
 
     return res.json({
       success: true,
-      redirectUrl: getDashboardUrl(newUser.userType) || '/worker_register',
-      message: 'Registration successful',
+      redirectUrl: getDashboardUrl(newUser.userType) || "/worker_register",
+      message: "Registration successful",
       user: req.session.user,
     });
   } catch (err) {
@@ -531,7 +565,7 @@ app.get("/api/search", async (req, res) => {
     if (propertyType) {
       query.$or = [
         { type: { $regex: propertyType.trim(), $options: "i" } },
-        { subtype: { $regex: propertyType.trim(), $options: "i" } }
+        { subtype: { $regex: propertyType.trim(), $options: "i" } },
       ];
     }
 
@@ -547,14 +581,14 @@ app.get("/api/search", async (req, res) => {
       query.baths = { $gte: Number(bathrooms) };
     }
 
-   if (furnishing) {
-  query.furnished = { $regex: furnishing.trim(), $options: "i" };
-}
+    if (furnishing) {
+      query.furnished = { $regex: furnishing.trim(), $options: "i" };
+    }
 
     if (amenities) {
       const amenitiesArray = amenities
         .split(",")
-        .map(item => item.trim())
+        .map((item) => item.trim())
         .filter(Boolean);
 
       if (amenitiesArray.length > 0) {
@@ -562,9 +596,7 @@ app.get("/api/search", async (req, res) => {
       }
     }
 
-    const properties = await Property.find(query)
-      .select("-__v")
-      .lean();
+    const properties = await Property.find(query).select("-__v").lean();
 
     res.json(properties);
   } catch (err) {
@@ -574,7 +606,9 @@ app.get("/api/search", async (req, res) => {
 });
 app.get("/property_listing_page", isAuthenticated, (req, res) => {
   if (req.session.user.userType !== "owner") {
-    return res.json({ redirectUrl: getDashboardUrl(req.session.user.userType) });
+    return res.json({
+      redirectUrl: getDashboardUrl(req.session.user.userType),
+    });
   }
   res.json({ message: "Owner property listing page" });
 });
@@ -609,12 +643,13 @@ const adminAuth = (req, res, next) => {
     return next(); // Admin is logged in → proceed
   }
   // Not admin → block access
-  return res.status(401).json({ error: "Admin access required. Please login." });
+  return res
+    .status(401)
+    .json({ error: "Admin access required. Please login." });
 };
 
-
 // PROTECTED ADMIN DASHBOARD ROUTE
-app.get("/api/admin",  async (req, res) => {
+app.get("/api/admin", async (req, res) => {
   try {
     // Your entire existing code — 100% unchanged (just wrapped in protection)
     const totalProperties = await Property.countDocuments();
@@ -623,8 +658,11 @@ app.get("/api/admin",  async (req, res) => {
     const totalWorkers = await Worker.countDocuments();
     const activeRentals = await Property.countDocuments({ isRented: true });
     const pendingBookings = await Booking.countDocuments({ status: "Pending" });
-    const cancelledBookings = await Booking.countDocuments({ status: "Terminated" });
-    const activeUsers = (await Tenant.countDocuments({ status: "Active" })) +
+    const cancelledBookings = await Booking.countDocuments({
+      status: "Terminated",
+    });
+    const activeUsers =
+      (await Tenant.countDocuments({ status: "Active" })) +
       (await Worker.countDocuments({ status: "Active" })) +
       (await Owner.countDocuments({ status: "Active" }));
 
@@ -669,7 +707,8 @@ app.get("/api/admin",  async (req, res) => {
 
     const workersAvailable = await Worker.countDocuments({ status: "Active" });
 
-    const userGrowth = (await Tenant.countDocuments({ createdAt: { $gte: oneMonthAgo } })) +
+    const userGrowth =
+      (await Tenant.countDocuments({ createdAt: { $gte: oneMonthAgo } })) +
       (await Worker.countDocuments({ createdAt: { $gte: oneMonthAgo } })) +
       (await Owner.countDocuments({ createdAt: { $gte: oneMonthAgo } }));
 
@@ -680,94 +719,143 @@ app.get("/api/admin",  async (req, res) => {
     };
 
     const stats = {
-      totalProperties, totalRenters, totalOwners, totalWorkers, activeRentals,
-      pendingBookings, cancelledBookings, activeUsers, totalRevenue,
-      revenueDaily, revenueWeekly, revenueMonthly, propertiesActive,
-      propertiesPending, propertiesAvailable, workersAvailable, userGrowth,
+      totalProperties,
+      totalRenters,
+      totalOwners,
+      totalWorkers,
+      activeRentals,
+      pendingBookings,
+      cancelledBookings,
+      activeUsers,
+      totalRevenue,
+      revenueDaily,
+      revenueWeekly,
+      revenueMonthly,
+      propertiesActive,
+      propertiesPending,
+      propertiesAvailable,
+      workersAvailable,
+      userGrowth,
       bookingStatusDistribution,
     };
 
     const currentYear = new Date().getFullYear();
     const quarters = [
-      { name: 'Q1 (Jan-Apr)', months: [0, 1, 2, 3] },
-      { name: 'Q2 (May-Aug)', months: [4, 5, 6, 7] },
-      { name: 'Q3 (Sep-Dec)', months: [8, 9, 10, 11] }
+      { name: "Q1 (Jan-Apr)", months: [0, 1, 2, 3] },
+      { name: "Q2 (May-Aug)", months: [4, 5, 6, 7] },
+      { name: "Q3 (Sep-Dec)", months: [8, 9, 10, 11] },
     ];
 
-    const newProperties = await Promise.all(quarters.map(async (quarter) => {
-      const start = new Date(currentYear, quarter.months[0], 1);
-      const end = new Date(currentYear, quarter.months[3] + 1, 0);
-      return await Property.countDocuments({ createdAt: { $gte: start, $lte: end } });
-    }));
+    const newProperties = await Promise.all(
+      quarters.map(async (quarter) => {
+        const start = new Date(currentYear, quarter.months[0], 1);
+        const end = new Date(currentYear, quarter.months[3] + 1, 0);
+        return await Property.countDocuments({
+          createdAt: { $gte: start, $lte: end },
+        });
+      })
+    );
 
-    const newTenants = await Promise.all(quarters.map(async (quarter) => {
-      const start = new Date(currentYear, quarter.months[0], 1);
-      const end = new Date(currentYear, quarter.months[3] + 1, 0);
-      return await Tenant.countDocuments({ createdAt: { $gte: start, $lte: end } });
-    }));
+    const newTenants = await Promise.all(
+      quarters.map(async (quarter) => {
+        const start = new Date(currentYear, quarter.months[0], 1);
+        const end = new Date(currentYear, quarter.months[3] + 1, 0);
+        return await Tenant.countDocuments({
+          createdAt: { $gte: start, $lte: end },
+        });
+      })
+    );
 
-    const newWorkers = await Promise.all(quarters.map(async (quarter) => {
-      const start = new Date(currentYear, quarter.months[0], 1);
-      const end = new Date(currentYear, quarter.months[3] + 1, 0);
-      return await Worker.countDocuments({ createdAt: { $gte: start, $lte: end } });
-    }));
+    const newWorkers = await Promise.all(
+      quarters.map(async (quarter) => {
+        const start = new Date(currentYear, quarter.months[0], 1);
+        const end = new Date(currentYear, quarter.months[3] + 1, 0);
+        return await Worker.countDocuments({
+          createdAt: { $gte: start, $lte: end },
+        });
+      })
+    );
 
-    const newOwners = await Promise.all(quarters.map(async (quarter) => {
-      const start = new Date(currentYear, quarter.months[0], 1);
-      const end = new Date(currentYear, quarter.months[3] + 1, 0);
-      return await Owner.countDocuments({ createdAt: { $gte: start, $lte: end } });
-    }));
+    const newOwners = await Promise.all(
+      quarters.map(async (quarter) => {
+        const start = new Date(currentYear, quarter.months[0], 1);
+        const end = new Date(currentYear, quarter.months[3] + 1, 0);
+        return await Owner.countDocuments({
+          createdAt: { $gte: start, $lte: end },
+        });
+      })
+    );
 
-    const newServices = await Promise.all(quarters.map(async (quarter) => {
-      const start = new Date(currentYear, quarter.months[0], 1);
-      const end = new Date(currentYear, quarter.months[3] + 1, 0);
-      return await Booking.countDocuments({
-        createdAt: { $gte: start, $lte: end },
-        status: { $in: ['Active', 'Pending'] }
-      });
-    }));
+    const newServices = await Promise.all(
+      quarters.map(async (quarter) => {
+        const start = new Date(currentYear, quarter.months[0], 1);
+        const end = new Date(currentYear, quarter.months[3] + 1, 0);
+        return await Booking.countDocuments({
+          createdAt: { $gte: start, $lte: end },
+          status: { $in: ["Active", "Pending"] },
+        });
+      })
+    );
 
-    const quarterlyRevenue = await Promise.all(quarters.map(async (quarter) => {
-      const start = new Date(currentYear, quarter.months[0], 1);
-      const end = new Date(currentYear, quarter.months[3] + 1, 0);
-      const result = await Payment.aggregate([
-        { $match: { paymentDate: { $gte: start, $lte: end }, status: { $in: ['Paid', 'Completed'] } } },
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]);
-      return result.length > 0 ? Math.round(result[0].total) : 0;
-    }));
+    const quarterlyRevenue = await Promise.all(
+      quarters.map(async (quarter) => {
+        const start = new Date(currentYear, quarter.months[0], 1);
+        const end = new Date(currentYear, quarter.months[3] + 1, 0);
+        const result = await Payment.aggregate([
+          {
+            $match: {
+              paymentDate: { $gte: start, $lte: end },
+              status: { $in: ["Paid", "Completed"] },
+            },
+          },
+          { $group: { _id: null, total: { $sum: "$amount" } } },
+        ]);
+        return result.length > 0 ? Math.round(result[0].total) : 0;
+      })
+    );
 
     const userTypeDistribution = {
       tenants: await Tenant.countDocuments(),
       owners: await Owner.countDocuments(),
-      workers: await Worker.countDocuments()
+      workers: await Worker.countDocuments(),
     };
 
     const propertyStatusDistribution = {
       rented: await Property.countDocuments({ isRented: true }),
       available: await Property.countDocuments({ isRented: false }),
-      pending: await Property.countDocuments({ isVerified: false })
+      pending: await Property.countDocuments({ isVerified: false }),
     };
 
     const properties = await Property.find()
       .populate("ownerId", "firstName lastName email _id")
       .populate("tenantId", "firstName lastName email _id")
-      .populate({ path: "activeWorkers", select: "firstName lastName _id", match: { status: "Active" } })
+      .populate({
+        path: "activeWorkers",
+        select: "firstName lastName _id",
+        match: { status: "Active" },
+      })
       .lean();
 
     properties.forEach((p) => {
       p.id = p._id.toString();
-      p.ownerName = p.ownerId ? `${p.ownerId.firstName} ${p.ownerId.lastName}` : "N/A";
+      p.ownerName = p.ownerId
+        ? `${p.ownerId.firstName} ${p.ownerId.lastName}`
+        : "N/A";
       p.ownerIdStr = p.ownerId?._id?.toString() || null;
-      p.tenantName = p.tenantId ? `${p.tenantId.firstName} ${p.tenantId.lastName}` : "N/A";
+      p.tenantName = p.tenantId
+        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
+        : "N/A";
       p.tenantIdStr = p.tenantId?._id?.toString() || null;
-      p.activeWorkers = p.activeWorkers?.map((w) => ({
-        name: `${w.firstName} ${w.lastName}`,
-        id: w._id.toString(),
-      })) || [];
+      p.activeWorkers =
+        p.activeWorkers?.map((w) => ({
+          name: `${w.firstName} ${w.lastName}`,
+          id: w._id.toString(),
+        })) || [];
     });
 
-    const tenants = await Tenant.find().populate("ownerId", "firstName lastName").lean();
+    const tenants = await Tenant.find()
+      .populate("ownerId", "firstName lastName")
+      .lean();
     const workers = await Worker.find({ status: "Active" }).lean();
     const owners = await Owner.find().populate("propertyIds").lean();
 
@@ -775,30 +863,54 @@ app.get("/api/admin",  async (req, res) => {
       tenants.map((t) => Property.countDocuments({ tenantId: t._id }))
     );
     const workerClientCounts = await Promise.all(
-      workers.map((w) => Booking.countDocuments({ assignedWorker: w._id, status: "Active" }))
+      workers.map((w) =>
+        Booking.countDocuments({ assignedWorker: w._id, status: "Active" })
+      )
     );
 
     const users = [
       ...tenants.map((t, index) => ({
-        id: t._id.toString(), firstName: t.firstName, lastName: t.lastName,
-        userType: t.userType, email: t.email, phone: t.phone, address: t.location,
-        createdAt: t.createdAt, status: t.status,
-        ownerName: t.ownerId ? `${t.ownerId.firstName} ${t.ownerId.lastName}` : "None",
+        id: t._id.toString(),
+        firstName: t.firstName,
+        lastName: t.lastName,
+        userType: t.userType,
+        email: t.email,
+        phone: t.phone,
+        address: t.location,
+        createdAt: t.createdAt,
+        status: t.status,
+        ownerName: t.ownerId
+          ? `${t.ownerId.firstName} ${t.ownerId.lastName}`
+          : "None",
         propertyCount: tenantPropertyCounts[index],
       })),
       ...workers.map((w, index) => ({
-        id: w._id.toString(), firstName: w.firstName, lastName: w.lastName,
-        userType: w.userType, email: w.email, phone: w.phone, address: w.location,
-        createdAt: w.createdAt, status: w.status,
-        serviceType: w.serviceType, experience: w.experience,
+        id: w._id.toString(),
+        firstName: w.firstName,
+        lastName: w.lastName,
+        userType: w.userType,
+        email: w.email,
+        phone: w.phone,
+        address: w.location,
+        createdAt: w.createdAt,
+        status: w.status,
+        serviceType: w.serviceType,
+        experience: w.experience,
         clientCount: workerClientCounts[index],
       })),
       ...owners.map((o) => ({
-        id: o._id.toString(), firstName: o.firstName, lastName: o.lastName,
-        userType: o.userType, email: o.email, phone: o.phone, address: o.location,
-        createdAt: o.createdAt, status: o.status,
+        id: o._id.toString(),
+        firstName: o.firstName,
+        lastName: o.lastName,
+        userType: o.userType,
+        email: o.email,
+        phone: o.phone,
+        address: o.location,
+        createdAt: o.createdAt,
+        status: o.status,
         numProperties: o.numProperties || o.propertyIds?.length || 0,
-        accountNo: o.accountNo, upiid: o.upiid,
+        accountNo: o.accountNo,
+        upiid: o.upiid,
       })),
     ];
 
@@ -811,114 +923,133 @@ app.get("/api/admin",  async (req, res) => {
 
     bookings.forEach((b) => {
       b.id = b._id.toString();
-      b.userName = b.tenantId ? `${b.tenantId.firstName} ${b.tenantId.lastName}` : "N/A";
+      b.userName = b.tenantId
+        ? `${b.tenantId.firstName} ${b.tenantId.lastName}`
+        : "N/A";
       b.userId = b.tenantId?._id?.toString();
       b.propertyName = b.propertyId?.name || "N/A";
       b.propertyIdStr = b.propertyId?._id?.toString();
-      b.ownerName = b.propertyId?.ownerId ? `${b.propertyId.ownerId.firstName} ${b.propertyId.ownerId.lastName}` : "N/A";
-      b.workerName = b.assignedWorker ? `${b.assignedWorker.firstName} ${b.assignedWorker.lastName}` : "None";
+      b.ownerName = b.propertyId?.ownerId
+        ? `${b.propertyId.ownerId.firstName} ${b.propertyId.ownerId.lastName}`
+        : "N/A";
+      b.workerName = b.assignedWorker
+        ? `${b.assignedWorker.firstName} ${b.assignedWorker.lastName}`
+        : "None";
       b.workerId = b.assignedWorker?._id?.toString();
     });
 
-    const payments = await Payment.find().populate("tenantId", "firstName lastName _id").lean();
+    const payments = await Payment.find()
+      .populate("tenantId", "firstName lastName _id")
+      .lean();
     payments.forEach((p) => {
       p.id = p._id.toString();
-      p.userName = p.tenantId ? `${p.tenantId.firstName} ${p.tenantId.lastName}` : "N/A";
+      p.userName = p.tenantId
+        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
+        : "N/A";
       p.user = p.tenantId?._id;
     });
 
     const notifications = await Notification.find()
-  .populate("worker", "firstName lastName")
-  .populate("recipient", "firstName lastName")
-  .sort({ createdAt: -1 })        // ← ADD THIS
-  .limit(10)                      // ← KEEP THIS
-  .lean();
+      .populate("worker", "firstName lastName")
+      .populate("recipient", "firstName lastName")
+      .sort({ createdAt: -1 }) // ← ADD THIS
+      .limit(10) // ← KEEP THIS
+      .lean();
 
-notifications.forEach((n) => {
-  n.id = n._id.toString();
-  n.workerName = n.worker ? `${n.worker.firstName} ${n.worker.lastName}` : "N/A";
-  n.recipientName = n.recipient ? `${n.recipient.firstName} ${n.recipient.lastName}` : "N/A";
-  n.createdAtFormatted = n.createdAt
-    ? new Date(n.createdAt).toLocaleString('en-IN', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    : 'N/A';
-});
+    notifications.forEach((n) => {
+      n.id = n._id.toString();
+      n.workerName = n.worker
+        ? `${n.worker.firstName} ${n.worker.lastName}`
+        : "N/A";
+      n.recipientName = n.recipient
+        ? `${n.recipient.firstName} ${n.recipient.lastName}`
+        : "N/A";
+      n.createdAtFormatted = n.createdAt
+        ? new Date(n.createdAt).toLocaleString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "N/A";
+    });
 
     // Inside your existing GET /api/admin route
-const maintenanceRequests = await MaintenanceRequest.find()
-  .populate({
-    path: 'propertyId',
-    select: 'name ownerId',                 // get name + ownerId from Property
-    populate: {
-      path: 'ownerId',                      // now go one level deeper
-      model: 'Owner',                       // important! tell mongoose which model
-      select: 'firstName lastName'          // only these fields
-    }
-  })
-  .populate('tenantId', 'firstName lastName _id')
-  .sort({ dateReported: -1 })
-  .limit(10)
-  .lean();
+    const maintenanceRequests = await MaintenanceRequest.find()
+      .populate({
+        path: "propertyId",
+        select: "name ownerId", // get name + ownerId from Property
+        populate: {
+          path: "ownerId", // now go one level deeper
+          model: "Owner", // important! tell mongoose which model
+          select: "firstName lastName", // only these fields
+        },
+      })
+      .populate("tenantId", "firstName lastName _id")
+      .sort({ dateReported: -1 })
+      .limit(10)
+      .lean();
 
-maintenanceRequests.forEach((m) => {
-  m.id = m._id.toString();
-  m.propertyName = m.propertyId?.name || "N/A";
-  m.propertyIdStr = m.propertyId?._id?.toString();
-  m.tenantName = m.tenantId ? `${m.tenantId.firstName} ${m.tenantId.lastName}` : "N/A";
-  m.tenantIdStr = m.tenantId?._id?.toString();
-  m.ownerName = m.propertyId?.ownerId 
-    ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}` 
-    : "N/A";
-  m.dateReported = m.dateReported || m.createdAt;
-});
+    maintenanceRequests.forEach((m) => {
+      m.id = m._id.toString();
+      m.propertyName = m.propertyId?.name || "N/A";
+      m.propertyIdStr = m.propertyId?._id?.toString();
+      m.tenantName = m.tenantId
+        ? `${m.tenantId.firstName} ${m.tenantId.lastName}`
+        : "N/A";
+      m.tenantIdStr = m.tenantId?._id?.toString();
+      m.ownerName = m.propertyId?.ownerId
+        ? `${m.propertyId.ownerId.firstName} ${m.propertyId.ownerId.lastName}`
+        : "N/A";
+      m.dateReported = m.dateReported || m.createdAt;
+    });
 
     // Use your controller logic — latest 10 only
-// SMART CONTACT SUBMISSIONS: latest 10 by default, ALL when filtering by date
-let contactSubmissions;
+    // SMART CONTACT SUBMISSIONS: latest 10 by default, ALL when filtering by date
+    let contactSubmissions;
 
-if (req.query.fromDate || req.query.toDate) {
-  // User is using date filter → return ALL matching messages
-  let dateQuery = {};
+    if (req.query.fromDate || req.query.toDate) {
+      // User is using date filter → return ALL matching messages
+      let dateQuery = {};
 
-  if (req.query.fromDate) {
-    dateQuery.$gte = new Date(req.query.fromDate);
-  }
-  if (req.query.toDate) {
-    const toDate = new Date(req.query.toDate);
-    toDate.setHours(23, 59, 59, 999);
-    dateQuery.$lte = toDate;
-  }
+      if (req.query.fromDate) {
+        dateQuery.$gte = new Date(req.query.fromDate);
+      }
+      if (req.query.toDate) {
+        const toDate = new Date(req.query.toDate);
+        toDate.setHours(23, 59, 59, 999);
+        dateQuery.$lte = toDate;
+      }
 
-  contactSubmissions = await Contact.find({
-    submittedAt: dateQuery
-  })
-    .sort({ submittedAt: -1 })
-    .lean();
-} else {
-  // No filter → show only latest 10
-  contactSubmissions = await Contact.find()
-    .sort({ submittedAt: -1 })
-    .limit(10)
-    .lean();
-}
-
-// Format for frontend
-contactSubmissions.forEach((s) => {
-  s.id = s._id.toString();
-  s.submittedAtFormatted = s.submittedAt
-    ? new Date(s.submittedAt).toLocaleString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZoneName: 'short'
+      contactSubmissions = await Contact.find({
+        submittedAt: dateQuery,
       })
-    : 'N/A';
-});
+        .sort({ submittedAt: -1 })
+        .lean();
+    } else {
+      // No filter → show only latest 10
+      contactSubmissions = await Contact.find()
+        .sort({ submittedAt: -1 })
+        .limit(10)
+        .lean();
+    }
+
+    // Format for frontend
+    contactSubmissions.forEach((s) => {
+      s.id = s._id.toString();
+      s.submittedAtFormatted = s.submittedAt
+        ? new Date(s.submittedAt).toLocaleString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            timeZoneName: "short",
+          })
+        : "N/A";
+    });
 
     const workerPayments = await WorkerPayment.find()
       .populate("tenantId", "firstName lastName _id")
@@ -927,9 +1058,13 @@ contactSubmissions.forEach((s) => {
       .lean();
     workerPayments.forEach((p) => {
       p.id = p._id.toString();
-      p.paidByName = p.tenantId ? `${p.tenantId.firstName} ${p.tenantId.lastName}` : p.userName || "N/A";
+      p.paidByName = p.tenantId
+        ? `${p.tenantId.firstName} ${p.tenantId.lastName}`
+        : p.userName || "N/A";
       p.paidById = p.tenantId?._id?.toString();
-      p.receivedByName = p.workerId ? `${p.workerId.firstName} ${p.workerId.lastName}` : "N/A";
+      p.receivedByName = p.workerId
+        ? `${p.workerId.firstName} ${p.workerId.lastName}`
+        : "N/A";
       p.receivedById = p.workerId?._id?.toString();
     });
 
@@ -945,7 +1080,7 @@ contactSubmissions.forEach((s) => {
       contactSubmissions,
       workerPayments,
       analyticsData: {
-        quarters: quarters.map(q => q.name),
+        quarters: quarters.map((q) => q.name),
         newProperties,
         newTenants,
         newWorkers,
@@ -953,10 +1088,9 @@ contactSubmissions.forEach((s) => {
         newServices,
         totalRevenue: quarterlyRevenue,
         userTypeDistribution,
-        propertyStatusDistribution
-      }
+        propertyStatusDistribution,
+      },
     });
-
   } catch (err) {
     console.error("Error fetching admin dashboard data:", err);
     res.status(500).json({ error: "Server Error" });
