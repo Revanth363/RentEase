@@ -41,7 +41,13 @@ export const updateBookingStatus = async (bookingId, status) => {
 // NOTIFICATIONS
 // ============================================================
 export const markNotificationAsRead = async (notificationId) => {
-  const res = await workerApi.post(`/notifications/${notificationId}/read`);
+  const res = await axios.post(
+    `${API}/notifications/${notificationId}/read`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
   return res.data;
 };
 
@@ -71,10 +77,12 @@ export const deleteAccount = async (workerId, password) => {
 // REGISTER / UPDATE WORKER PROFILE (from WorkerRegister page)
 // ============================================================
 export const registerWorker = async (formData) => {
-  const res = await workerApi.post("/register", formData, {
+  // FIXED: Changed from "/worker_register" to "/api/workers/register"
+  const res = await axios.post(`${API}/register`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
+    withCredentials: true,
   });
   return res.data;
 };

@@ -97,18 +97,14 @@ const App = () => {
           <Route path="/about_us" element={<AboutUs />} />
           <Route path="/contact_us" element={<ContactUs />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/workerDetails" element={<WorkerServices />} />
+          <Route path="/worker/:id" element={<WorkerCard detailed />} />
           <Route path="/privacy_policy" element={<div>Privacy Policy</div>} />
           <Route path="/termsofservice" element={<div>Terms of Service</div>} />
           <Route path="/book-property" element={<BookProperty />} />
 
           {/* Auth Routes — NO HEADER */}
           <Route path="/login" element={<Auth initial="login" />} />
-          <Route path="/search" element={<div>Search Page</div>} />
-          <Route path="/workerDetails" element={<WorkerServices />} />
-          <Route path="/worker/:id" element={<WorkerCard detailed />} />
-          <Route path="/about_us" element={<div>About Us</div>} />
-          <Route path="/contact_us" element={<div>Contact Us</div>} />
-          <Route path="/faq" element={<div>FAQs</div>} />
           <Route path="/register" element={<Auth initial="register" />} />
 
           {/* User Dashboards */}
