@@ -23,6 +23,9 @@ const Sidebar = ({ onSelect, current }) => (
       <li onClick={() => onSelect("complaints")}>
         <i className="fa-solid fa-message"></i> Complaints
       </li>
+      <li onClick={() => onSelect("rentUnrentRequests")}>
+        <i className="fa-solid fa-key"></i> Rent/Unrent Requests
+      </li>
       <li onClick={() => onSelect("reports")}>
         <i className="fa-solid fa-chart-column"></i> Reports & Analytics
       </li>
@@ -820,6 +823,101 @@ const OwnerDashboard = () => {
           </div>
         </div>
 
+        {/* Rent/Unrent Requests Section */}
+        <div
+          className={`ownd-section ${
+            section === "rentUnrentRequests" ? "ownd-active" : ""
+          }`}
+        >
+          <h3>Rent/Unrent Requests</h3>
+          <div className="ownd-notification-container">
+            {notifications &&
+            notifications.filter(
+              (notification) =>
+                notification.type === "Booking Request" ||
+                notification.type === "Unrent Request"
+            ).length > 0 ? (
+              notifications
+                .filter(
+                  (notification) =>
+                    notification.type === "Booking Request" ||
+                    notification.type === "Unrent Request"
+                )
+                .map((notification) => (
+                  <div
+                    key={notification._id}
+                    className="ownd-notification-card"
+                    data-notification-id={notification._id}
+                    data-is-unrent={notification.isUnrentRequest || false}
+                  >
+                    <div className="ownd-notification-header">
+                      <h4>{notification.type || "Request"}</h4>
+                      <span
+                        className={`ownd-notification-status ownd-${(
+                          notification.status || "pending"
+                        ).toLowerCase()}`}
+                      >
+                        {notification.status || "Pending"}
+                      </span>
+                    </div>
+                    <div className="ownd-notification-details">
+                      <p>
+                        <strong>Message:</strong>{" "}
+                        {notification.message || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Recipient:</strong>{" "}
+                        {notification.recipientName || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Property:</strong>{" "}
+                        {notification.propertyName || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {notification.createdDate
+                          ? new Date(
+                              notification.createdDate
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                    {notification.status === "Pending" ? (
+                      <div className="ownd-notification-actions">
+                        <button
+                          className="ownd-action-button ownd-approve-button"
+                          onClick={() =>
+                            handleNotificationAction(
+                              notification._id,
+                              "approve",
+                              notification.isUnrentRequest || false
+                            )
+                          }
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="ownd-action-button ownd-reject-button"
+                          onClick={() =>
+                            handleNotificationAction(
+                              notification._id,
+                              "reject",
+                              notification.isUnrentRequest || false
+                            )
+                          }
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ))
+            ) : (
+              <p>No rent/unrent requests available.</p>
+            )}
+          </div>
+        </div>
+
         {/* Reports Section */}
         <div
           className={`ownd-section ${
@@ -1089,94 +1187,105 @@ const OwnerDashboard = () => {
         >
           <h3>Notifications</h3>
           <div className="ownd-notification-container">
-            {notifications && notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <div
-                  key={notification._id}
-                  className="ownd-notification-card"
-                  data-notification-id={notification._id}
-                  data-is-unrent={notification.isUnrentRequest || false}
-                >
-                  <div className="ownd-notification-header">
-                    <h4>{notification.type || "Notification"}</h4>
-                    <span
-                      className={`ownd-notification-status ownd-${(
-                        notification.status || "pending"
-                      ).toLowerCase()}`}
-                    >
-                      {notification.status || "Pending"}
-                    </span>
-                  </div>
-                  <div className="ownd-notification-details">
-                    {notification.type === "Query" ? (
-                      <>
-                        <p>
-                          <strong>Query:</strong>
-                          <br />
-                          {notification.message?.split("\n\n")[0] || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Contact Name:</strong>{" "}
-                          {notification.recipientName || "N/A"}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p>
-                          <strong>Message:</strong>{" "}
-                          {notification.message || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Recipient:</strong>{" "}
-                          {notification.recipientName || "N/A"}
-                        </p>
-                      </>
-                    )}
-                    <p>
-                      <strong>Property:</strong>{" "}
-                      {notification.propertyName || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Date:</strong>{" "}
-                      {notification.createdDate
-                        ? new Date(
-                            notification.createdDate
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </p>
-                  </div>
-                  {(notification.status === "Pending" &&
-                    notification.type !== "Query") ||
-                  notification.isUnrentRequest ? (
-                    <div className="ownd-notification-actions">
-                      <button
-                        className="ownd-action-button ownd-approve-button"
-                        onClick={() =>
-                          handleNotificationAction(
-                            notification._id,
-                            "approve",
-                            notification.isUnrentRequest || false
-                          )
-                        }
+            {notifications &&
+            notifications.filter(
+              (notification) =>
+                notification.type !== "Booking Request" &&
+                notification.type !== "Unrent Request"
+            ).length > 0 ? (
+              notifications
+                .filter(
+                  (notification) =>
+                    notification.type !== "Booking Request" &&
+                    notification.type !== "Unrent Request"
+                )
+                .map((notification) => (
+                  <div
+                    key={notification._id}
+                    className="ownd-notification-card"
+                    data-notification-id={notification._id}
+                    data-is-unrent={notification.isUnrentRequest || false}
+                  >
+                    <div className="ownd-notification-header">
+                      <h4>{notification.type || "Notification"}</h4>
+                      <span
+                        className={`ownd-notification-status ownd-${(
+                          notification.status || "pending"
+                        ).toLowerCase()}`}
                       >
-                        Approve
-                      </button>
-                      <button
-                        className="ownd-action-button ownd-reject-button"
-                        onClick={() =>
-                          handleNotificationAction(
-                            notification._id,
-                            "reject",
-                            notification.isUnrentRequest || false
-                          )
-                        }
-                      >
-                        Reject
-                      </button>
+                        {notification.status || "Pending"}
+                      </span>
                     </div>
-                  ) : null}
-                </div>
-              ))
+                    <div className="ownd-notification-details">
+                      {notification.type === "Query" ? (
+                        <>
+                          <p>
+                            <strong>Query:</strong>
+                            <br />
+                            {notification.message?.split("\n\n")[0] || "N/A"}
+                          </p>
+                          <p>
+                            <strong>Contact Name:</strong>{" "}
+                            {notification.recipientName || "N/A"}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p>
+                            <strong>Message:</strong>{" "}
+                            {notification.message || "N/A"}
+                          </p>
+                          <p>
+                            <strong>Recipient:</strong>{" "}
+                            {notification.recipientName || "N/A"}
+                          </p>
+                        </>
+                      )}
+                      <p>
+                        <strong>Property:</strong>{" "}
+                        {notification.propertyName || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {notification.createdDate
+                          ? new Date(
+                              notification.createdDate
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                    {(notification.status === "Pending" &&
+                      notification.type !== "Query") ||
+                    notification.isUnrentRequest ? (
+                      <div className="ownd-notification-actions">
+                        <button
+                          className="ownd-action-button ownd-approve-button"
+                          onClick={() =>
+                            handleNotificationAction(
+                              notification._id,
+                              "approve",
+                              notification.isUnrentRequest || false
+                            )
+                          }
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="ownd-action-button ownd-reject-button"
+                          onClick={() =>
+                            handleNotificationAction(
+                              notification._id,
+                              "reject",
+                              notification.isUnrentRequest || false
+                            )
+                          }
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ))
             ) : (
               <p>No notifications available.</p>
             )}

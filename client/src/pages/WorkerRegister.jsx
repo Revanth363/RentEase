@@ -47,9 +47,10 @@ const WorkerRegister = () => {
 
         // Pre-fill form - matching EJS exactly
         setFormData({
-          "full-name": user.firstName && user.lastName 
-            ? `${user.firstName} ${user.lastName}` 
-            : "",
+          "full-name":
+            user.firstName && user.lastName
+              ? `${user.firstName} ${user.lastName}`
+              : "",
           phone: user.phone || "",
           email: user.email || "",
           "service-type": user.serviceType || "",
@@ -101,24 +102,24 @@ const WorkerRegister = () => {
       val = value;
     }
 
-    setFormData(prev => ({ ...prev, [name]: val }));
+    setFormData((prev) => ({ ...prev, [name]: val }));
 
     // Update areas when city changes
     if (name === "city") {
       updateAreas(value);
-      setFormData(prev => ({ ...prev, area: "" })); // Reset area
+      setFormData((prev) => ({ ...prev, area: "" })); // Reset area
     }
 
     // Clear error for this field
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   // Validation with regex - matching EJS validation
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Full name validation
     if (!formData["full-name"] || formData["full-name"].trim() === "") {
       newErrors["full-name"] = "Full name is required";
@@ -160,8 +161,6 @@ const WorkerRegister = () => {
     // Price validation
     if (!formData.price) {
       newErrors.price = "Expected salary is required";
-    } else if (formData.price < 1000) {
-      newErrors.price = "Salary must be at least ₹1000";
     }
 
     // Availability validation
@@ -221,9 +220,9 @@ const WorkerRegister = () => {
     setLoading(true);
 
     const form = new FormData();
-    
+
     // Append all form data - matching backend expectations
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
       if (key === "image" && formData[key]) {
         form.append(key, formData[key]);
       } else if (key === "terms-agreement") {
@@ -231,14 +230,19 @@ const WorkerRegister = () => {
         if (formData[key]) {
           form.append(key, "on");
         }
-      } else if (key !== "image" && formData[key] !== null && formData[key] !== false && formData[key] !== "") {
+      } else if (
+        key !== "image" &&
+        formData[key] !== null &&
+        formData[key] !== false &&
+        formData[key] !== ""
+      ) {
         form.append(key, formData[key]);
       }
     });
 
     try {
       const response = await registerWorker(form);
-      
+
       if (response.success) {
         alert("Profile updated successfully! Redirecting to dashboard.");
         navigate("/worker_dashboard");
@@ -246,7 +250,8 @@ const WorkerRegister = () => {
         alert("Error updating profile: " + (response.error || "Unknown error"));
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error || err.message || "Failed to update profile";
+      const errorMsg =
+        err.response?.data?.error || err.message || "Failed to update profile";
       alert("Error updating profile: " + errorMsg);
       console.error("Registration error:", err);
     } finally {
@@ -259,16 +264,17 @@ const WorkerRegister = () => {
       <div className="worker-register-page-container">
         <div className="worker-register-page-header">
           <h1>Worker Profile Update</h1>
-          <p>Update your profile details below to manage your service on RentEase</p>
+          <p>
+            Update your profile details below to manage your service on RentEase
+          </p>
         </div>
 
         <div className="worker-register-registration-form-container">
           <form id="worker-registration-form" onSubmit={handleSubmit}>
-            
             {/* Personal Information */}
             <div className="worker-register-form-section">
               <h2>Personal Information</h2>
-              
+
               <div className="worker-register-form-row">
                 <div className="worker-register-form-group">
                   <label htmlFor="full-name">Full Name*</label>
@@ -282,7 +288,9 @@ const WorkerRegister = () => {
                     className={errors["full-name"] ? "error" : ""}
                   />
                   {errors["full-name"] && (
-                    <span className="worker-register-error-message">{errors["full-name"]}</span>
+                    <span className="worker-register-error-message">
+                      {errors["full-name"]}
+                    </span>
                   )}
                 </div>
 
@@ -299,7 +307,9 @@ const WorkerRegister = () => {
                     className={errors.phone ? "error" : ""}
                   />
                   {errors.phone && (
-                    <span className="worker-register-error-message">{errors.phone}</span>
+                    <span className="worker-register-error-message">
+                      {errors.phone}
+                    </span>
                   )}
                 </div>
               </div>
@@ -317,7 +327,9 @@ const WorkerRegister = () => {
                     className={errors.email ? "error" : ""}
                   />
                   {errors.email && (
-                    <span className="worker-register-error-message">{errors.email}</span>
+                    <span className="worker-register-error-message">
+                      {errors.email}
+                    </span>
                   )}
                 </div>
               </div>
@@ -326,7 +338,7 @@ const WorkerRegister = () => {
             {/* Service Details */}
             <div className="worker-register-form-section">
               <h2>Service Details</h2>
-              
+
               <div className="worker-register-form-row">
                 <div className="worker-register-form-group">
                   <label htmlFor="service-type">Service Type*</label>
@@ -344,7 +356,9 @@ const WorkerRegister = () => {
                     <option value="Gardener">Gardener</option>
                   </select>
                   {errors["service-type"] && (
-                    <span className="worker-register-error-message">{errors["service-type"]}</span>
+                    <span className="worker-register-error-message">
+                      {errors["service-type"]}
+                    </span>
                   )}
                 </div>
 
@@ -361,7 +375,9 @@ const WorkerRegister = () => {
                     className={errors.experience ? "error" : ""}
                   />
                   {errors.experience && (
-                    <span className="worker-register-error-message">{errors.experience}</span>
+                    <span className="worker-register-error-message">
+                      {errors.experience}
+                    </span>
                   )}
                 </div>
               </div>
@@ -379,14 +395,16 @@ const WorkerRegister = () => {
                     className={errors.description ? "error" : ""}
                   />
                   {errors.description && (
-                    <span className="worker-register-error-message">{errors.description}</span>
+                    <span className="worker-register-error-message">
+                      {errors.description}
+                    </span>
                   )}
                 </div>
               </div>
 
               <div className="worker-register-form-row">
                 <div className="worker-register-form-group">
-                  <label htmlFor="price">Expected Monthly Salary (₹)*</label>
+                  <label htmlFor="price">Expected Daily Salary (₹)*</label>
                   <input
                     type="number"
                     id="price"
@@ -397,7 +415,9 @@ const WorkerRegister = () => {
                     className={errors.price ? "error" : ""}
                   />
                   {errors.price && (
-                    <span className="worker-register-error-message">{errors.price}</span>
+                    <span className="worker-register-error-message">
+                      {errors.price}
+                    </span>
                   )}
                 </div>
 
@@ -416,7 +436,9 @@ const WorkerRegister = () => {
                     <option value="weekends">Weekends Only</option>
                   </select>
                   {errors.availability && (
-                    <span className="worker-register-error-message">{errors.availability}</span>
+                    <span className="worker-register-error-message">
+                      {errors.availability}
+                    </span>
                   )}
                 </div>
               </div>
@@ -425,7 +447,7 @@ const WorkerRegister = () => {
             {/* Location Details */}
             <div className="worker-register-form-section">
               <h2>Location Details</h2>
-              
+
               <div className="worker-register-form-row">
                 <div className="worker-register-form-group">
                   <label htmlFor="city">City*</label>
@@ -444,7 +466,9 @@ const WorkerRegister = () => {
                     <option value="sricity">Sricity</option>
                   </select>
                   {errors.city && (
-                    <span className="worker-register-error-message">{errors.city}</span>
+                    <span className="worker-register-error-message">
+                      {errors.city}
+                    </span>
                   )}
                 </div>
 
@@ -461,14 +485,16 @@ const WorkerRegister = () => {
                     <option value="">
                       {formData.city ? "Select Area" : "First select city"}
                     </option>
-                    {areas.map(area => (
+                    {areas.map((area) => (
                       <option key={area} value={area}>
                         {area.charAt(0).toUpperCase() + area.slice(1)}
                       </option>
                     ))}
                   </select>
                   {errors.area && (
-                    <span className="worker-register-error-message">{errors.area}</span>
+                    <span className="worker-register-error-message">
+                      {errors.area}
+                    </span>
                   )}
                 </div>
               </div>
@@ -477,7 +503,7 @@ const WorkerRegister = () => {
             {/* Documents */}
             <div className="worker-register-form-section">
               <h2>Documents</h2>
-              
+
               <div className="worker-register-form-row">
                 <div className="worker-register-form-group">
                   <label htmlFor="image">Recent Photo*</label>
@@ -490,7 +516,14 @@ const WorkerRegister = () => {
                   />
                   {currentUser?.image && (
                     <p className="worker-register-current-photo">
-                      Current Photo: <a href={currentUser.image} target="_blank" rel="noopener noreferrer">View</a>
+                      Current Photo:{" "}
+                      <a
+                        href={currentUser.image}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View
+                      </a>
                     </p>
                   )}
                 </div>
@@ -515,7 +548,9 @@ const WorkerRegister = () => {
                   </label>
                 </div>
                 {errors["terms-agreement"] && (
-                  <span className="worker-register-error-message">{errors["terms-agreement"]}</span>
+                  <span className="worker-register-error-message">
+                    {errors["terms-agreement"]}
+                  </span>
                 )}
               </div>
             </div>

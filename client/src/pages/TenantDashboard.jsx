@@ -212,9 +212,34 @@ const TenantDashboard = () => {
     }
   };
 
-  const openWorkerPaymentPopup = (worker) => {
-    setSelectedWorkerForPayment(worker);
-    setShowWorkerPaymentPopup(true);
+  const openWorkerPaymentPopup = async (worker) => {
+    try {
+      // Fetch work history to count completed days
+      const res = await tenantService.getWorkHistory(worker._id);
+      const workDays = res.data || [];
+
+      // Check if any work has been done
+      if (!workDays || workDays.length === 0) {
+        alert("No work has been done. No need for payment.");
+        return;
+      }
+
+      // Calculate payment: number of days * base rate
+      const numberOfDays = workDays.length;
+      const baseRate = worker.price || 0;
+      const calculatedAmount = numberOfDays * baseRate;
+
+      // Store calculated amount temporarily for the form
+      setSelectedWorkerForPayment({
+        ...worker,
+        calculatedDays: numberOfDays,
+        calculatedAmount: calculatedAmount,
+      });
+      setShowWorkerPaymentPopup(true);
+    } catch (err) {
+      console.error("Error fetching work history:", err);
+      alert("Failed to load work history. Please try again.");
+    }
   };
   const closeWorkerPaymentPopup = () => {
     setShowWorkerPaymentPopup(false);
@@ -1767,15 +1792,41 @@ const TenantDashboard = () => {
               />
             </div>
             <div className="tntd-form-group">
-              <label>Payment Amount (₹):</label>
+              <label style={{ fontSize: "18px", fontWeight: "bold" }}>
+                Total Payment Amount (₹)
+              </label>
+              <div
+                style={{
+                  fontSize: "28px",
+                  fontWeight: "bold",
+                  color: "#2b7cff",
+                  padding: "15px",
+                  textAlign: "center",
+                  backgroundColor: "#f0f5ff",
+                  borderRadius: "6px",
+                  marginBottom: "10px",
+                }}
+              >
+                ₹{" "}
+                {selectedWorkerForPayment
+                  ? (
+                      selectedWorkerForPayment.calculatedAmount || 0
+                    ).toLocaleString()
+                  : "0"}
+              </div>
               <input
+                type="hidden"
                 name="payment-amount"
-                id="payment-amount"
                 defaultValue={
-                  selectedWorkerForPayment ? selectedWorkerForPayment.price : ""
+                  selectedWorkerForPayment
+                    ? selectedWorkerForPayment.calculatedAmount || 0
+                    : 0
                 }
-                readOnly
               />
+              <p style={{ fontSize: "12px", color: "#666", margin: "5px 0" }}>
+                ({selectedWorkerForPayment?.calculatedDays || 0} days × ₹
+                {selectedWorkerForPayment?.price || 0}/day)
+              </p>
             </div>
             <div className="tntd-form-group">
               <label>Payment Date:</label>

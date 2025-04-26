@@ -459,7 +459,7 @@ const WorkerDashboard = () => {
             <i className="fas fa-rectangle-list"></i> My Services
           </li>
           <li onClick={() => showSection("bookings")}>
-            <i className="fas fa-clipboard-list"></i> Boking Requests
+            <i className="fas fa-clipboard-list"></i> Booking Requests
           </li>
           <li onClick={() => showSection("clients")}>
             <i className="fas fa-users"></i> My Clients

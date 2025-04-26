@@ -149,7 +149,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
                 <div style={{ fontSize: 24, fontWeight: 700 }}>
                   {worker.price ? `₹${Number(worker.price).toLocaleString()}` : 'Contact'}
                 </div>
-                <div style={{ fontSize: 13, color: '#999' }}>per month</div>
+                <div style={{ fontSize: 13, color: '#999' }}>per day</div>
               </div>
 
               <div>
@@ -234,7 +234,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
         <div style={{ display: 'flex', justifyContent: 'space-between', margin: '12px 0' }}>
           <div className={styles.workerPrice}>
-            {price ? `₹${Number(price).toLocaleString()}` : 'Contact'}/month
+            {price ? `₹${Number(price).toLocaleString()}` : 'Contact'}/day
           </div>
           <div className={styles.workerExp}>🕒 {experience} years</div>
         </div>
