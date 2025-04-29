@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useLoading } from '../LoadingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
-import { fetchAdminBookings } from '../services/api';
+import { fetchAdminWorkerBookings } from '../services/api';
 import AdminNavbar from '../components/AdminNavbar';
 
 const ServiceBookings = () => {
@@ -15,57 +15,92 @@ const ServiceBookings = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const [filters, setFilters] = useState({
+  // Local filters (what user types/selects)
+  const [localFilters, setLocalFilters] = useState({
     status: searchParams.get('status') || '',
-    propertyId: searchParams.get('propertyId') || '',
-    workerId: searchParams.get('workerId') || '',
+    tenantName: searchParams.get('tenantName') || '',
+    workerName: searchParams.get('workerName') || '',
     fromDate: searchParams.get('fromDate') || '',
     toDate: searchParams.get('toDate') || '',
+    minAmount: searchParams.get('minAmount') || '',
+    maxAmount: searchParams.get('maxAmount') || '',
     page: Number(searchParams.get('page')) || 1,
     limit: Number(searchParams.get('limit')) || 25,
   });
+
+  // Applied filters (what's actually sent to backend)
+  const [appliedFilters, setAppliedFilters] = useState({ ...localFilters });
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
-      Object.keys(filters).forEach(key => {
-        if (filters[key]) params.append(key, filters[key]);
+      Object.keys(appliedFilters).forEach(key => {
+        if (appliedFilters[key]) params.append(key, appliedFilters[key]);
       });
 
-      const res = await fetchAdminBookings(`?${params.toString()}`);
+      const res = await fetchAdminWorkerBookings(`?${params.toString()}`);
       setBookings(res.bookings || res);
       setTotal(res.total || res.length);
     } catch (err) {
+      console.error('Failed to load bookings:', err);
       alert('Failed to load bookings');
+      setBookings([]);
+      setTotal(0);
     } finally {
       setLoading(false);
       setIsLoading(false);
     }
-  }, [filters, setIsLoading]);
+  }, [appliedFilters, setIsLoading]);
 
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
 
-  useEffect(() => {
-    const newParams = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) newParams.set(key, filters[key]);
-    });
-    setSearchParams(newParams, { replace: true });
-  }, [filters, setSearchParams]);
+  const applyFilters = () => {
+    const newApplied = { ...localFilters, page: 1 };
+    setAppliedFilters(newApplied);
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+    const params = new URLSearchParams();
+    Object.keys(newApplied).forEach(key => {
+      if (newApplied[key]) params.set(key, newApplied[key]);
+    });
+    if (newApplied.page === 1) params.delete('page');
+    if (newApplied.limit === 25) params.delete('limit');
+    setSearchParams(params, { replace: true });
   };
 
   const resetFilters = () => {
-    setFilters({
-      status: '', propertyId: '', workerId: '', fromDate: '', toDate: '',
-      page: 1, limit: 25
-    });
+    const reset = {
+      status: '', tenantName: '', workerName: '', fromDate: '', toDate: '',
+      minAmount: '', maxAmount: '', page: 1, limit: 25
+    };
+    setLocalFilters(reset);
+    setAppliedFilters(reset);
+    setSearchParams(new URLSearchParams(), { replace: true });
+  };
+
+  const handleFilterChange = (key, value) => {
+    setLocalFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handlePageChange = (newPage) => {
+    setAppliedFilters(prev => ({ ...prev, page: newPage }));
+    setLocalFilters(prev => ({ ...prev, page: newPage }));
+    const params = new URLSearchParams(searchParams);
+    params.set('page', newPage);
+    setSearchParams(params, { replace: true });
+  };
+
+  const handleLimitChange = (newLimit) => {
+    const limit = Number(newLimit);
+    setAppliedFilters(prev => ({ ...prev, limit, page: 1 }));
+    setLocalFilters(prev => ({ ...prev, limit, page: 1 }));
+    const params = new URLSearchParams(searchParams);
+    params.set('limit', limit);
+    params.set('page', '1');
+    setSearchParams(params, { replace: true });
   };
 
   if (loading) return <LoadingSpinner />;
@@ -93,66 +128,90 @@ const ServiceBookings = () => {
 
           <div style={{ display: 'grid', gap: '16px' }}>
             <div>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Tenant Name</label>
+              <input
+                type="text"
+                placeholder="Search by tenant name"
+                value={localFilters.tenantName}
+                onChange={e => handleFilterChange('tenantName', e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Worker Name</label>
+              <input
+                type="text"
+                placeholder="Search by worker name"
+                value={localFilters.workerName}
+                onChange={e => handleFilterChange('workerName', e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
+              />
+            </div>
+
+            <div>
               <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Status</label>
               <select
-                value={filters.status}
+                value={localFilters.status}
                 onChange={e => handleFilterChange('status', e.target.value)}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
               >
                 <option value="">All Status</option>
                 <option value="Pending">Pending</option>
                 <option value="Active">Active</option>
+                <option value="Approved">Approved</option>
                 <option value="Completed">Completed</option>
                 <option value="Terminated">Terminated</option>
+                <option value="Declined">Declined</option>
                 <option value="Cancelled">Cancelled</option>
               </select>
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Property ID</label>
-              <input
-                type="text"
-                placeholder="e.g. PROP123"
-                value={filters.propertyId}
-                onChange={e => handleFilterChange('propertyId', e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Worker ID</label>
-              <input
-                type="text"
-                placeholder="e.g. WORK456"
-                value={filters.workerId}
-                onChange={e => handleFilterChange('workerId', e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>From Date</label>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Booked From</label>
               <input
                 type="date"
-                value={filters.fromDate}
+                value={localFilters.fromDate}
                 onChange={e => handleFilterChange('fromDate', e.target.value)}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>To Date</label>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Booked To</label>
               <input
                 type="date"
-                value={filters.toDate}
+                value={localFilters.toDate}
                 onChange={e => handleFilterChange('toDate', e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Min Amount (₹)</label>
+              <input
+                type="number"
+                placeholder="Min price"
+                value={localFilters.minAmount}
+                onChange={e => handleFilterChange('minAmount', e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>Max Amount (₹)</label>
+              <input
+                type="number"
+                placeholder="Max price"
+                value={localFilters.maxAmount}
+                onChange={e => handleFilterChange('maxAmount', e.target.value)}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d5d9d9' }}
               />
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button
-                onClick={fetchBookings}
+                onClick={applyFilters}
                 style={{
                   flex: 1,
                   padding: '12px',
@@ -193,46 +252,64 @@ const ServiceBookings = () => {
           }}>
             <div style={{ padding: '20px', borderBottom: '1px solid #eaeded', background: '#fafafa' }}>
               <h2 style={{ margin: 0, color: '#232f3e' }}>
-                Bookings ({total.toLocaleString()})
+                Service Bookings ({total.toLocaleString()})
               </h2>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', minWidth: '1500px', tableLayout: 'fixed' }}>
+              <table style={{ width: '100%', minWidth: '1400px', tableLayout: 'fixed' }}>
                 <thead style={{ background: '#232f3e', color: 'white' }}>
                   <tr>
-                    <th style={{ width: '90px', padding: '14px 12px' }}>ID</th>
+                    <th style={{ width: '80px', padding: '14px 12px' }}>ID</th>
                     <th style={{ width: '140px' }}>Tenant</th>
                     <th style={{ width: '160px' }}>Property</th>
                     <th style={{ width: '140px' }}>Worker</th>
+                    <th style={{ width: '130px' }}>Service Type</th>
                     <th style={{ width: '100px' }}>Status</th>
-                    <th style={{ width: '110px' }}>Booked</th>
-                    <th style={{ width: '110px' }}>Start</th>
-                    <th style={{ width: '110px' }}>End</th>
+                    <th style={{ width: '120px' }}>Booking Date</th>
                     <th style={{ width: '110px' }}>Amount</th>
-                    <th style={{ width: '220px' }}>Actions</th>
+                    <th style={{ width: '200px' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {bookings.length === 0 ? (
                     <tr>
-                      <td colSpan="10" style={{ textAlign: 'center', padding: '60px', color: '#555' }}>
-                        No bookings found.
+                      <td colSpan="9" style={{ textAlign: 'center', padding: '60px', color: '#555' }}>
+                        No service bookings found.
                       </td>
                     </tr>
                   ) : (
                     bookings.map(b => (
                       <tr key={b.id} style={{ borderBottom: '1px solid #eaeded' }}>
-                        <td style={{ padding: '14px 12px', fontWeight: '500' }}>{b.id}</td>
-                        <td><a href={`/admin/user/${b.userId}/tenant`} style={{ color: '#0066cc' }}>{b.userName}</a></td>
-                        <td><a href={`/admin/property/${b.propertyIdStr}`} style={{ color: '#0066cc' }}>{b.propertyName}</a></td>
+                        <td style={{ padding: '14px 12px', fontWeight: '500', fontSize: '13px' }}>{b.id.substring(0, 8)}...</td>
                         <td>
-                          {b.workerId ? (
-                            <a href={`/admin/user/${b.workerId}/worker`} style={{ color: '#0066cc' }}>{b.workerName}</a>
+                          {b.tenantId ? (
+                            <a href={`/admin/user/${b.tenantId}/tenant`} style={{ color: '#0066cc' }}>
+                              {b.tenantName || 'N/A'}
+                            </a>
                           ) : (
-                            <span style={{ color: '#999' }}>Not Assigned</span>
+                            <span>{b.tenantName || 'N/A'}</span>
                           )}
                         </td>
+                        <td>
+                          {b.propertyId ? (
+                            <a href={`/admin/property/${b.propertyId}`} style={{ color: '#0066cc' }}>
+                              {b.propertyName}
+                            </a>
+                          ) : (
+                            <span style={{ color: '#999', fontStyle: 'italic' }}>N/A</span>
+                          )}
+                        </td>
+                        <td>
+                          {b.workerId && b.workerName !== 'Not Available' ? (
+                            <a href={`/admin/user/${b.workerId}/worker`} style={{ color: '#0066cc' }}>
+                              {b.workerName}
+                            </a>
+                          ) : (
+                            <span style={{ color: '#999', fontStyle: 'italic' }}>Not Available</span>
+                          )}
+                        </td>
+                        <td>{b.serviceType || 'N/A'}</td>
                         <td>
                           <span style={{
                             padding: '6px 12px',
@@ -240,12 +317,12 @@ const ServiceBookings = () => {
                             fontSize: '12px',
                             fontWeight: '600',
                             background: 
-                              b.status === 'Active' ? '#d4edda' :
+                              b.status === 'Active' || b.status === 'Approved' ? '#d4edda' :
                               b.status === 'Pending' ? '#fff3cd' :
                               b.status === 'Completed' ? '#d1ecf1' :
                               '#f8d7da',
                             color:
-                              b.status === 'Active' ? '#155724' :
+                              b.status === 'Active' || b.status === 'Approved' ? '#155724' :
                               b.status === 'Pending' ? '#856404' :
                               b.status === 'Completed' ? '#0c5460' :
                               '#721c24'
@@ -254,16 +331,18 @@ const ServiceBookings = () => {
                           </span>
                         </td>
                         <td>{b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : 'N/A'}</td>
-                        <td>{b.startDate ? new Date(b.startDate).toLocaleDateString() : 'N/A'}</td>
-                        <td>{b.endDate ? new Date(b.endDate).toLocaleDateString() : 'N/A'}</td>
-                        <td style={{ fontWeight: '600' }}>₹{b.price?.toLocaleString()}</td>
+                        <td style={{ fontWeight: '600' }}>
+                          {b.price > 0 ? `₹${b.price.toLocaleString()}` : <span style={{ color: '#999', fontStyle: 'italic' }}>Not Available</span>}
+                        </td>
                         <td>
                           <div className={styles['action-buttons']}>
-                            <a href={`/admin/booking/${b.id}`}>View</a>
+                            <a href={b.type === 'property' ? `/admin/booking/${b.id}` : `/admin/worker-booking/${b.id}`}>
+                              View
+                            </a>
                             {b.status === 'Pending' && (
                               <>
                                 <button className={styles.success}>Approve</button>
-                                <button className={styles.danger}>Reject</button>
+                                <button className={styles.danger}>Decline</button>
                               </>
                             )}
                           </div>
@@ -287,26 +366,42 @@ const ServiceBookings = () => {
               gap: '12px'
             }}>
               <div style={{ color: '#555' }}>
-                Showing {(filters.page - 1) * filters.limit + 1} to {Math.min(filters.page * filters.limit, total)} of {total} bookings
+                Showing {(appliedFilters.page - 1) * appliedFilters.limit + 1} to {Math.min(appliedFilters.page * appliedFilters.limit, total)} of {total} bookings
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button
-                  onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
-                  disabled={filters.page === 1}
-                  style={{ padding: '8px 12px', border: '1px solid #d5d9d9', background: 'white', borderRadius: '6px' }}
-                >Previous</button>
+                  onClick={() => handlePageChange(appliedFilters.page - 1)}
+                  disabled={appliedFilters.page === 1}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #d5d9d9',
+                    background: 'white',
+                    borderRadius: '6px',
+                    cursor: appliedFilters.page === 1 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  Previous
+                </button>
                 <span style={{ padding: '8px 16px', background: '#232f3e', color: 'white', borderRadius: '6px' }}>
-                  Page {filters.page}
+                  Page {appliedFilters.page}
                 </span>
                 <button
-                  onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
-                  disabled={filters.page * filters.limit >= total}
-                  style={{ padding: '8px 12px', border: '1px solid #d5d9d9', background: 'white', borderRadius: '6px' }}
-                >Next</button>
+                  onClick={() => handlePageChange(appliedFilters.page + 1)}
+                  disabled={appliedFilters.page * appliedFilters.limit >= total}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #d5d9d9',
+                    background: 'white',
+                    borderRadius: '6px',
+                    cursor: appliedFilters.page * appliedFilters.limit >= total ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  Next
+                </button>
               </div>
               <select
-                value={filters.limit}
-                onChange={e => setFilters(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
+                value={appliedFilters.limit}
+                onChange={e => handleLimitChange(e.target.value)}
                 style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d5d9d9' }}
               >
                 <option value={10}>10</option>

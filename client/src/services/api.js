@@ -288,6 +288,18 @@ export const fetchBookingDetails = async (id) => {
   }
 };
 
+export const fetchWorkerBookingDetails = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/admin/worker-booking/${id}`, { 
+      withCredentials: true 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching worker booking details:', error);
+    throw error;
+  }
+};
+
 export const fetchPropertyDetails = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/admin/property/${id}`, { withCredentials: true });
@@ -382,6 +394,49 @@ export const debookWorker = async (workerId) => {
     return response.data;
   } catch (error) {
     console.error('Error debooking worker:', error);
+    throw error;
+  }
+};
+
+
+// Add this to your api.js file
+export const fetchAdminWorkerBookings = async (queryString = '') => {
+  try {
+    const response = await axios.get(`${API_URL}/admin/worker-bookings${queryString}`, {
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching worker bookings:', error);
+    return { bookings: [], total: 0 };
+  }
+};
+
+
+export const approveWorkerBooking = async (id) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/admin/worker-booking/approve/${id}`,
+      {},
+      { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error approving worker booking:', error);
+    throw error;
+  }
+};
+
+export const declineWorkerBooking = async (id) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/admin/worker-booking/decline/${id}`,
+      {},
+      { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error declining worker booking:', error);
     throw error;
   }
 };

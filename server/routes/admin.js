@@ -10,17 +10,47 @@ const adminWorkerPaymentController = require("../controllers/adminWorkerPaymentC
 
 // View routes
 router.get("/user/:id/:userType", adminUserController.getUserDetails);
+
+// Property Booking Routes
 router.get("/booking/:id", adminBookingController.getBookingDetails);
+router.post("/booking/approve/:id", adminBookingController.approveBooking);
+router.post("/booking/reject/:id", adminBookingController.rejectBooking);
+
+// Worker/Service Booking Routes
+router.get("/worker-bookings", adminBookingController.getAllWorkerBookings);
+router.get(
+  "/worker-booking/:id",
+  adminBookingController.getWorkerBookingDetails
+);
+router.post(
+  "/worker-booking/approve/:id",
+  adminBookingController.approveWorkerBooking
+);
+router.post(
+  "/worker-booking/decline/:id",
+  adminBookingController.declineWorkerBooking
+);
+
+// Notification routes
 router.get(
   "/notification/:id",
   adminNotificationController.getNotificationDetails
 );
+router.post(
+  "/notification/complete/:id",
+  adminNotificationController.completeNotification
+);
+
+// Maintenance routes
 router.get(
   "/maintenance/:id",
   adminMaintenanceController.getMaintenanceDetails
 );
+router.post(
+  "/maintenance/complete/:id",
+  adminMaintenanceController.completeMaintenance
+);
 
-// Action routes
 // Property Management
 router.post("/property/verify/:id", adminPropertyController.toggleVerify);
 router.delete("/property/delete/:id", adminPropertyController.deleteProperty);
@@ -33,33 +63,15 @@ router.get("/property/:id", adminPropertyController.getPropertyView);
 // User Management
 router.post("/user/status/:id/:userType", adminUserController.changeUserStatus);
 router.delete("/user/delete/:id/:userType", adminUserController.deleteUser);
+router.get("/users", adminUserController.getAllUsers);
 
-// Booking Management
-router.post("/booking/approve/:id", adminBookingController.approveBooking);
-router.post("/booking/reject/:id", adminBookingController.rejectBooking);
-
-// Notification Management
-router.post(
-  "/notification/complete/:id",
-  adminNotificationController.completeNotification
-);
-
-// Maintenance Management
-router.post(
-  "/maintenance/complete/:id",
-  adminMaintenanceController.completeMaintenance
-);
-
+// Payment routes
 router.get("/payment/:id", adminPaymentController.getPaymentDetails);
-
-// Payment actions routes
 router.post("/payment/:id/refund", adminPaymentController.refundPayment);
 router.post("/payment/:id/retry", adminPaymentController.retryPayment);
-
-// Payments list route (if not already existing)
 router.get("/payments", adminPaymentController.getAllPayments);
 
-// Worker Payments list route
+// Worker Payment routes
 router.get(
   "/worker-payments",
   adminWorkerPaymentController.getAllWorkerPayments
@@ -68,7 +80,5 @@ router.get(
   "/worker-payment/:id",
   adminWorkerPaymentController.getWorkerPaymentDetails
 );
-
-router.get("/users", adminUserController.getAllUsers); // ← Add this line
 
 module.exports = router;

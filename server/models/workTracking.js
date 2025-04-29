@@ -30,7 +30,7 @@ const workTrackingSchema = new mongoose.Schema(
     },
     expiresAt: {
       type: Date,
-      default: () => new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
+      default: () => new Date(Date.now() + 20 * 60 * 1000), // 5 minutes from now
     },
   },
   { timestamps: true }

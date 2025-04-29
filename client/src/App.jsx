@@ -259,6 +259,14 @@ const App = () => {
               </AdminRoute>
             }
           />
+          <Route
+            path="/admin/worker-booking/:id"
+            element={
+              <AdminRoute>
+                <BookingView />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </div>
     </LoadingProvider>

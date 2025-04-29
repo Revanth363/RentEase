@@ -426,7 +426,7 @@ exports.renderEditServicePage = async (req, res) => {
 
 exports.registerWorker = async (req, res) => {
   const form = new formidable.IncomingForm();
-  
+
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error("Error parsing form:", err);
@@ -446,7 +446,7 @@ exports.registerWorker = async (req, res) => {
       const nameParts = fullName.split(" ");
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
-      
+
       const phone = getField("phone");
       const email = getField("email");
       const city = getField("city");
@@ -457,7 +457,9 @@ exports.registerWorker = async (req, res) => {
       const description = getField("description");
       const availability = getField("availability");
       const rateUnit = getField("rateUnit") || "monthly";
-      const termsAgreement = getField("terms-agreement") === "on" || getField("terms-agreement") === "true";
+      const termsAgreement =
+        getField("terms-agreement") === "on" ||
+        getField("terms-agreement") === "true";
 
       console.log("Processing registration:", {
         fullName,
@@ -468,12 +470,21 @@ exports.registerWorker = async (req, res) => {
         city,
         area,
         serviceType,
-        termsAgreement
+        termsAgreement,
       });
 
       // Validation
-      if (!fullName || !phone || !email || !city || !area || !serviceType || !description || !availability) {
-        return res.status(400).json({ 
+      if (
+        !fullName ||
+        !phone ||
+        !email ||
+        !city ||
+        !area ||
+        !serviceType ||
+        !description ||
+        !availability
+      ) {
+        return res.status(400).json({
           error: "All required fields must be provided",
           missing: {
             fullName: !fullName,
@@ -483,18 +494,22 @@ exports.registerWorker = async (req, res) => {
             area: !area,
             serviceType: !serviceType,
             description: !description,
-            availability: !availability
-          }
+            availability: !availability,
+          },
         });
       }
 
       if (!termsAgreement) {
-        return res.status(400).json({ error: "You must agree to Terms & Conditions" });
+        return res
+          .status(400)
+          .json({ error: "You must agree to Terms & Conditions" });
       }
 
       // Phone validation - exactly 10 digits
       if (!/^[0-9]{10}$/.test(phone)) {
-        return res.status(400).json({ error: "Phone number must be exactly 10 digits" });
+        return res
+          .status(400)
+          .json({ error: "Phone number must be exactly 10 digits" });
       }
 
       // Email validation
@@ -504,7 +519,9 @@ exports.registerWorker = async (req, res) => {
 
       // Experience validation
       if (experience < 0 || experience > 50) {
-        return res.status(400).json({ error: "Experience must be between 0 and 50 years" });
+        return res
+          .status(400)
+          .json({ error: "Experience must be between 0 and 50 years" });
       }
 
       // Price validation
@@ -526,14 +543,23 @@ exports.registerWorker = async (req, res) => {
       let imageBase64 = null;
       if (files["image"] && files["image"][0]) {
         const image = files["image"][0];
-        const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-        
+        const allowedTypes = [
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "image/webp",
+        ];
+
         if (!allowedTypes.includes(image.mimetype)) {
-          return res.status(400).json({ error: "Image must be JPEG, PNG, GIF, or WEBP" });
+          return res
+            .status(400)
+            .json({ error: "Image must be JPEG, PNG, GIF, or WEBP" });
         }
 
         const imageData = fs.readFileSync(image.filepath);
-        imageBase64 = `data:${image.mimetype};base64,${imageData.toString("base64")}`;
+        imageBase64 = `data:${image.mimetype};base64,${imageData.toString(
+          "base64"
+        )}`;
       }
 
       // Find and update worker
@@ -556,7 +582,7 @@ exports.registerWorker = async (req, res) => {
       worker.description = description;
       worker.availability = availability;
       worker.serviceStatus = availability ? "Available" : "Unavailable";
-      
+
       if (imageBase64) {
         worker.image = imageBase64;
       }
@@ -574,9 +600,9 @@ exports.registerWorker = async (req, res) => {
       });
     } catch (error) {
       console.error("Error updating worker:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Error updating worker profile",
-        details: error.message 
+        details: error.message,
       });
     }
   });
@@ -740,7 +766,7 @@ exports.deleteWorkerService = async (req, res) => {
 
     if (worker.clientIds && worker.clientIds.length > 0) {
       const tenants = await Tenant.find({
-        _id: { $in: worker.clientIds }
+        _id: { $in: worker.clientIds },
       }).lean();
 
       for (const tenant of tenants) {
@@ -852,9 +878,7 @@ exports.deleteWorkerAccount = async (req, res) => {
 exports.bookWorkerCorrected = async (req, res) => {
   try {
     if (!req.session.user || req.session.user.userType !== "tenant") {
-      return res
-        .status(401)
-        .json({ error: "Please login as a tenant" });
+      return res.status(401).json({ error: "Please login as a tenant" });
     }
 
     const workerId = req.params.id;
@@ -906,7 +930,8 @@ exports.bookWorkerCorrected = async (req, res) => {
       serviceType,
       status: "Pending",
       tenantName: `${tenant.firstName} ${tenant.lastName}`,
-      tenantAddress: rentedProperty.address || tenant.location || "Not provided",
+      tenantAddress:
+        rentedProperty.address || tenant.location || "Not provided",
       bookingDate: new Date(),
     });
 
@@ -921,7 +946,6 @@ exports.bookWorkerCorrected = async (req, res) => {
     return res.status(500).json({ error: "Server error while booking worker" });
   }
 };
-
 
 // Update worker booking status
 exports.updateWorkerBookingStatus = async (req, res) => {
@@ -1121,37 +1145,67 @@ exports.updateWorkerSettings = async (req, res) => {
 
     // ✅ VALIDATION - Trim and check for empty values
     if (!firstName || !firstName.trim()) {
-      return res.status(400).json({ success: false, error: "First name is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "First name is required" });
     }
     if (firstName.trim().length < 2) {
-      return res.status(400).json({ success: false, error: "First name must be at least 2 characters long" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "First name must be at least 2 characters long",
+        });
     }
 
     if (!lastName || !lastName.trim()) {
-      return res.status(400).json({ success: false, error: "Last name is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Last name is required" });
     }
     if (lastName.trim().length < 2) {
-      return res.status(400).json({ success: false, error: "Last name must be at least 2 characters long" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Last name must be at least 2 characters long",
+        });
     }
 
     if (!email || !email.trim()) {
-      return res.status(400).json({ success: false, error: "Email is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Email is required" });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      return res.status(400).json({ success: false, error: "Please enter a valid email address" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Please enter a valid email address" });
     }
 
     if (!phone || !phone.trim()) {
-      return res.status(400).json({ success: false, error: "Phone number is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Phone number is required" });
     }
     const phoneDigits = phone.replace(/[\s\-\(\)]/g, "");
     if (!/^[0-9]{10}$/.test(phoneDigits)) {
-      return res.status(400).json({ success: false, error: "Please enter a valid 10-digit phone number" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Please enter a valid 10-digit phone number",
+        });
     }
 
     if (experience && (experience < 0 || experience > 100)) {
-      return res.status(400).json({ success: false, error: "Experience must be between 0 and 100 years" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Experience must be between 0 and 100 years",
+        });
     }
 
     // ✅ Update only personal information - TRIM all values
@@ -1159,19 +1213,22 @@ exports.updateWorkerSettings = async (req, res) => {
     worker.lastName = lastName.trim();
     worker.email = email.trim();
     worker.phone = phone.trim();
-    
+
     // ✅ Only update location if provided
     if (location && location.trim()) {
       worker.location = location.trim();
     }
-    
+
     // ✅ Only update experience if provided and valid
-    if (experience !== undefined && experience !== null && experience !== '') {
+    if (experience !== undefined && experience !== null && experience !== "") {
       worker.experience = experience;
     }
-    
+
     // ✅ Only update availability if provided
-    if (availability && ['full-time', 'part-time', 'weekends'].includes(availability)) {
+    if (
+      availability &&
+      ["full-time", "part-time", "weekends"].includes(availability)
+    ) {
       worker.availability = availability;
     }
 
@@ -1181,21 +1238,21 @@ exports.updateWorkerSettings = async (req, res) => {
     // ✅ Password change validation
     if (newPassword && newPassword.trim()) {
       if (!currentPassword || !currentPassword.trim()) {
-        return res.status(400).json({ 
-          success: false, 
-          error: "Please enter your current password to change password" 
+        return res.status(400).json({
+          success: false,
+          error: "Please enter your current password to change password",
         });
       }
       if (currentPassword !== worker.password) {
-        return res.status(400).json({ 
-          success: false, 
-          error: "Current password is incorrect" 
+        return res.status(400).json({
+          success: false,
+          error: "Current password is incorrect",
         });
       }
       if (newPassword.length < 6) {
-        return res.status(400).json({ 
-          success: false, 
-          error: "New password must be at least 6 characters long" 
+        return res.status(400).json({
+          success: false,
+          error: "New password must be at least 6 characters long",
         });
       }
       worker.password = newPassword;
@@ -1538,7 +1595,6 @@ exports.getDashboardDataAPI = async (req, res) => {
   }
 };
 
-
 // Mark notification as read
 exports.markNotificationAsRead = async (req, res) => {
   try {
@@ -1578,7 +1634,7 @@ exports.generateWorkOTP = async (req, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
     // Calculate expiry time (5 minutes from now)
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 20 * 60 * 1000);
 
     // Save OTP to database
     const WorkTracking = require("../models/workTracking");
