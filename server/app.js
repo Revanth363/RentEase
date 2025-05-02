@@ -57,7 +57,8 @@ app.use(
     origin(origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.has(origin)) return callback(null, true);
-      if (/^http:\/\/(localhost|127\.0\.0\.1):51\d{2}$/.test(origin))
+      // Allow any localhost port for development
+      if (/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin))
         return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },

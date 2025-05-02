@@ -1,17 +1,32 @@
 // src/components/Login.jsx  (or wherever your Login component is)
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from '../assets/css/Login.module.css';
 import { AuthContext } from '../context/AuthContext';
+import { 
+  loginUser, 
+  clearError, 
+  clearRedirectUrl,
+  selectAuthLoading, 
+  selectAuthError, 
+  selectRedirectUrl 
+} from '../store/slices/authSlice';
 
 const initialErrors = { role: '', email: '', password: '' };
 
 export default function Login({ onForgot }) {
+  // Redux hooks
+  const dispatch = useDispatch();
+  const loading = useSelector(selectAuthLoading);
+  const authError = useSelector(selectAuthError);
+  const redirectUrl = useSelector(selectRedirectUrl);
+
+  // Local form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState(initialErrors);
-  const [loading, setLoading] = useState(false);
 
   // THIS IS THE KEY: recalculate isAdmin on every email change
   const isAdmin = email.trim().toLowerCase().endsWith('@admin.com');
@@ -23,6 +38,19 @@ export default function Login({ onForgot }) {
       setErrors(prev => ({ ...prev, role: '' }));
     }
   }, [isAdmin]);
+
+  // Clear Redux error when component mounts or when user starts typing
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch, email, password, userType]);
+
+  // Handle redirect after successful login
+  useEffect(() => {
+    if (redirectUrl) {
+      dispatch(clearRedirectUrl());
+      window.location.replace(redirectUrl);
+    }
+  }, [redirectUrl, dispatch]);
 
   const validate = () => {
     const e = { ...initialErrors };
@@ -43,34 +71,13 @@ export default function Login({ onForgot }) {
     e.preventDefault();
     if (!validate()) return;
 
-    setLoading(true);
+    // Create payload based on user type
+    const payload = isAdmin
+      ? { email, password }                          // Admin → no userType
+      : { email, password, userType };               // Normal user → send userType
 
-    try {
-      const payload = isAdmin
-        ? { email, password }                          // Admin → no userType
-        : { email, password, userType };               // Normal user → send userType
-
-      const res = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        
-        window.location.replace(data.redirectUrl); // Cleaner redirect, no history back
-      } else {
-        alert('Login failed: ' + (data.error || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Network error');
-    } finally {
-      setLoading(false);
-    }
+    // Dispatch Redux action for login
+    dispatch(loginUser(payload));
   };
 
   return (
@@ -129,6 +136,13 @@ export default function Login({ onForgot }) {
           <button type="submit" disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
+
+          {/* Display Redux auth error */}
+          {authError && (
+            <div className={styles.errorText} style={{ marginTop: '10px', textAlign: 'center' }}>
+              {authError}
+            </div>
+          )}
 
           <div className={styles.forgotWrapper}>
             <button type="button" className={styles.forgotPassword} onClick={onForgot}>

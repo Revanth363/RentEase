@@ -1,11 +1,27 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "../assets/css/Register.module.css";
+import {
+  signupUser,
+  clearError,
+  clearRedirectUrl,
+  selectAuthLoading,
+  selectAuthError,
+  selectRedirectUrl,
+} from "../store/slices/authSlice";
 
 const nameRegex = /^[A-Za-z\s-]+$/;
 const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const phoneRegex = /^[0-9]{10}$/;
 
 export default function Register() {
+  // Redux hooks
+  const dispatch = useDispatch();
+  const loading = useSelector(selectAuthLoading);
+  const authError = useSelector(selectAuthError);
+  const redirectUrl = useSelector(selectRedirectUrl);
+
+  // Local form state
   const [userType, setUserType] = useState("tenant");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -17,12 +33,23 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const [touched, setTouched] = useState({});
 
   const setFieldTouched = (key) => setTouched((t) => ({ ...t, [key]: true }));
+
+  // Clear Redux error when component mounts or form fields change
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch, firstName, lastName, email, phone, location, password, confirmPassword, userType]);
+
+  // Handle redirect after successful registration
+  useEffect(() => {
+    if (redirectUrl) {
+      dispatch(clearRedirectUrl());
+      window.location.href = redirectUrl;
+    }
+  }, [redirectUrl, dispatch]);
 
   const validate = useMemo(() => {
     const errors = {};
@@ -84,7 +111,6 @@ export default function Register() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setServerError("");
     // mark all as touched
     setTouched({
       firstName: true,
@@ -97,49 +123,24 @@ export default function Register() {
       confirmPassword: true,
     });
     if (!isValid) return;
-    setLoading(true);
-    try {
-      const payload = {
-        userType,
-        firstName,
-        lastName,
-        email,
-        phone,
-        location,
-        numProperties: userType === "owner" ? numProperties : undefined,
-        password,
-      };
-      Object.keys(payload).forEach(
-        (k) => payload[k] === undefined && delete payload[k]
-      );
 
-      const res = await fetch("http://localhost:5000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-      const text = await res.text();
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch {
-        result = { error: text || "Registration failed" };
-      }
-      if (res.ok && result.success) {
-        // Redirect directly after registration (no photo upload)
-        window.location.href = result.redirectUrl || "/login";
-      } else {
-        setServerError(result.error || "Registration failed");
-      }
-    } catch (err) {
-      console.error("Registration network error:", err);
-      setServerError(
-        "Network error. Please check if the server is running on port 5000."
-      );
-    } finally {
-      setLoading(false);
-    }
+    // Build payload
+    const payload = {
+      userType,
+      firstName,
+      lastName,
+      email,
+      phone,
+      location,
+      numProperties: userType === "owner" ? numProperties : undefined,
+      password,
+    };
+    Object.keys(payload).forEach(
+      (k) => payload[k] === undefined && delete payload[k]
+    );
+
+    // Dispatch Redux action for signup
+    dispatch(signupUser(payload));
   };
 
   const show = (key) => touched[key] && validate[key];
@@ -400,13 +401,13 @@ export default function Register() {
           >
             {loading ? "Registering..." : "Register"}
           </button>
-          {serverError && (
+          {authError && (
             <div
               id="serverError"
               className={`${styles.error} ${styles.visible}`}
               style={{ marginTop: 8 }}
             >
-              {serverError}
+              {authError}
             </div>
           )}
         </form>
