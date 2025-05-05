@@ -99,12 +99,10 @@ const forgotPasswordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
-    return res
-      .status(429)
-      .json({
-        success: false,
-        error: "Too many OTP requests, please try again later.",
-      });
+    return res.status(429).json({
+      success: false,
+      error: "Too many OTP requests, please try again later.",
+    });
   },
 });
 
@@ -950,11 +948,13 @@ app.get("/api/admin", async (req, res) => {
       p.user = p.tenantId?._id;
     });
 
-    const notifications = await Notification.find()
+    const notifications = await Notification.find({
+      type: { $ne: "Work-OTP" }, // ⬅ exclude Work-OTP notifications
+    })
       .populate("worker", "firstName lastName")
       .populate("recipient", "firstName lastName")
-      .sort({ createdAt: -1 }) // ← ADD THIS
-      .limit(10) // ← KEEP THIS
+      .sort({ createdAt: -1 })
+      .limit(10)
       .lean();
 
     notifications.forEach((n) => {
