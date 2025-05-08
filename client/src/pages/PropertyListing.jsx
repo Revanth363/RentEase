@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import '../assets/css/propertylisting.css';
+import { useRef, useState } from "react";
+import "../assets/css/propertylisting.css";
 
 const PropertyListing = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -8,12 +8,16 @@ const PropertyListing = () => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    const validImageFiles = files.filter(file => file.type.startsWith('image/'));
+    const validImageFiles = files.filter((file) =>
+      file.type.startsWith("image/")
+    );
 
     const newFiles = validImageFiles.filter(
-      file => !selectedFiles.some(
-        existing => existing.name === file.name && existing.size === file.size
-      )
+      (file) =>
+        !selectedFiles.some(
+          (existing) =>
+            existing.name === file.name && existing.size === file.size
+        )
     );
 
     const updatedFiles = [...selectedFiles, ...newFiles].slice(0, 10);
@@ -21,7 +25,7 @@ const PropertyListing = () => {
 
     // Clear error if images exist
     if (updatedFiles.length > 0) {
-      setErrors(prev => ({ ...prev, photos: false }));
+      setErrors((prev) => ({ ...prev, photos: false }));
     }
 
     if (updatedFiles.length >= 10 && newFiles.length > 0) {
@@ -43,8 +47,8 @@ const PropertyListing = () => {
     let isValid = true;
 
     // Check required fields
-    form.querySelectorAll('[required]').forEach(field => {
-      if (field.type === 'checkbox' && !field.checked) {
+    form.querySelectorAll("[required]").forEach((field) => {
+      if (field.type === "checkbox" && !field.checked) {
         newErrors[field.name || field.id] = true;
         isValid = false;
       } else if (!field.value.trim()) {
@@ -63,31 +67,32 @@ const PropertyListing = () => {
 
     if (!isValid) {
       alert("Please fill in all required fields marked with *");
-      const firstError = document.querySelector('.pl-form-group.pl-error');
+      const firstError = document.querySelector(".pl-form-group.pl-error");
       if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return;
     }
 
     // Append images
-    selectedFiles.forEach(file => {
-      formData.append('property-photos', file);
+    selectedFiles.forEach((file) => {
+      formData.append("property-photos", file);
     });
 
     try {
-      const response = await fetch('/api/property/list-property', {
-        method: 'POST',
+      const response = await fetch("/api/property/list-property", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        alert("Property listing submitted successfully! Our team will review your listing and it will be live soon.");
-        form.reset();
-        setSelectedFiles([]);
-        setErrors({});
+        alert(
+          "Property listing submitted successfully! Our team will review your listing and it will be live soon."
+        );
+
+        window.location.href = "/owner_dashboard"; // redirect after success
       } else {
         alert(result.error || "Error listing property");
       }
@@ -98,7 +103,7 @@ const PropertyListing = () => {
   };
 
   const resetForm = () => {
-    document.getElementById('property-listing-form').reset();
+    document.getElementById("property-listing-form").reset();
     setSelectedFiles([]);
     setErrors({});
   };
@@ -116,12 +121,20 @@ const PropertyListing = () => {
         </div>
 
         <div className="pl-listing-form-container">
-          <form id="property-listing-form" onSubmit={handleSubmit} encType="multipart/form-data">
+          <form
+            id="property-listing-form"
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+          >
             {/* Basic Information */}
             <div className="pl-form-section">
               <h2>Basic Information</h2>
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors['property-type'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors["property-type"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="property-type">Property Type*</label>
                   <select id="property-type" name="property-type" required>
                     <option value="">Select Property Type</option>
@@ -131,11 +144,21 @@ const PropertyListing = () => {
                     <option value="pg">PG/Hostel</option>
                     <option value="commercial">Commercial Space</option>
                   </select>
-                  <span className="pl-error-message">Please select a property type</span>
+                  <span className="pl-error-message">
+                    Please select a property type
+                  </span>
                 </div>
-                <div className={`pl-form-group ${errors['property-subtype'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors["property-subtype"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="property-subtype">Property Subtype*</label>
-                  <select id="property-subtype" name="property-subtype" required>
+                  <select
+                    id="property-subtype"
+                    name="property-subtype"
+                    required
+                  >
                     <option value="">Select Property Subtype</option>
                     <option value="1bhk">1 BHK</option>
                     <option value="2bhk">2 BHK</option>
@@ -146,12 +169,18 @@ const PropertyListing = () => {
                     <option value="studio">Studio</option>
                     <option value="other">Other</option>
                   </select>
-                  <span className="pl-error-message">Please select a property subtype</span>
+                  <span className="pl-error-message">
+                    Please select a property subtype
+                  </span>
                 </div>
               </div>
 
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors.bedrooms ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors.bedrooms ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="bedrooms">Bedrooms*</label>
                   <select id="bedrooms" name="bedrooms" required>
                     <option value="">Select</option>
@@ -161,9 +190,15 @@ const PropertyListing = () => {
                     <option value="4">4</option>
                     <option value="5+">5+</option>
                   </select>
-                  <span className="pl-error-message">Please select number of bedrooms</span>
+                  <span className="pl-error-message">
+                    Please select number of bedrooms
+                  </span>
                 </div>
-                <div className={`pl-form-group ${errors.bathrooms ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors.bathrooms ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="bathrooms">Bathrooms*</label>
                   <select id="bathrooms" name="bathrooms" required>
                     <option value="">Select</option>
@@ -172,7 +207,9 @@ const PropertyListing = () => {
                     <option value="3">3</option>
                     <option value="4+">4+</option>
                   </select>
-                  <span className="pl-error-message">Please select number of bathrooms</span>
+                  <span className="pl-error-message">
+                    Please select number of bathrooms
+                  </span>
                 </div>
                 <div className="pl-form-group">
                   <label htmlFor="furnishing">Furnishing Status</label>
@@ -186,8 +223,14 @@ const PropertyListing = () => {
               </div>
 
               <div className="pl-form-row">
-                <div className={`pl-form-group pl-full-width ${errors['property-description'] ? 'pl-error' : ''}`}>
-                  <label htmlFor="property-description">Property Description*</label>
+                <div
+                  className={`pl-form-group pl-full-width ${
+                    errors["property-description"] ? "pl-error" : ""
+                  }`}
+                >
+                  <label htmlFor="property-description">
+                    Property Description*
+                  </label>
                   <textarea
                     id="property-description"
                     name="property-description"
@@ -195,7 +238,9 @@ const PropertyListing = () => {
                     required
                     placeholder="Describe your property in detail, including special features and nearby amenities"
                   ></textarea>
-                  <span className="pl-error-message">Please provide a property description</span>
+                  <span className="pl-error-message">
+                    Please provide a property description
+                  </span>
                 </div>
               </div>
             </div>
@@ -204,32 +249,81 @@ const PropertyListing = () => {
             <div className="pl-form-section">
               <h2>Location Details</h2>
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors.address ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors.address ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="address">Complete Address*</label>
-                  <input type="text" id="address" name="address" required placeholder="Street address" />
-                  <span className="pl-error-message">Please enter the address</span>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    required
+                    placeholder="Street address"
+                  />
+                  <span className="pl-error-message">
+                    Please enter the address
+                  </span>
                 </div>
                 <div className="pl-form-group">
                   <label htmlFor="landmark">Landmark</label>
-                  <input type="text" id="landmark" name="landmark" placeholder="Nearby landmark for easy navigation" />
+                  <input
+                    type="text"
+                    id="landmark"
+                    name="landmark"
+                    placeholder="Nearby landmark for easy navigation"
+                  />
                 </div>
               </div>
 
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors.city ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${errors.city ? "pl-error" : ""}`}
+                >
                   <label htmlFor="city">City*</label>
-                  <input type="text" id="city" name="city" required placeholder="City" />
-                  <span className="pl-error-message">Please enter the city</span>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    required
+                    placeholder="City"
+                  />
+                  <span className="pl-error-message">
+                    Please enter the city
+                  </span>
                 </div>
-                <div className={`pl-form-group ${errors.state ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${errors.state ? "pl-error" : ""}`}
+                >
                   <label htmlFor="state">State*</label>
-                  <input type="text" id="state" name="state" required placeholder="State" />
-                  <span className="pl-error-message">Please enter the state</span>
+                  <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    required
+                    placeholder="State"
+                  />
+                  <span className="pl-error-message">
+                    Please enter the state
+                  </span>
                 </div>
-                <div className={`pl-form-group ${errors.pincode ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors.pincode ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="pincode">Pincode*</label>
-                  <input type="text" id="pincode" name="pincode" required placeholder="Pincode" />
-                  <span className="pl-error-message">Please enter the pincode</span>
+                  <input
+                    type="text"
+                    id="pincode"
+                    name="pincode"
+                    required
+                    placeholder="Pincode"
+                  />
+                  <span className="pl-error-message">
+                    Please enter the pincode
+                  </span>
                 </div>
               </div>
 
@@ -250,27 +344,69 @@ const PropertyListing = () => {
             <div className="pl-form-section">
               <h2>Rental Details</h2>
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors['rent-amount'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors["rent-amount"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="rent-amount">Monthly Rent (₹)*</label>
-                  <input type="number" id="rent-amount" name="rent-amount" required placeholder="e.g., 15000" />
-                  <span className="pl-error-message">Please enter the monthly rent</span>
+                  <input
+                    type="number"
+                    id="rent-amount"
+                    name="rent-amount"
+                    required
+                    placeholder="e.g., 15000"
+                  />
+                  <span className="pl-error-message">
+                    Please enter the monthly rent
+                  </span>
                 </div>
-                <div className={`pl-form-group ${errors['security-deposit'] ? 'pl-error' : ''}`}>
-                  <label htmlFor="security-deposit">Security Deposit (₹)*</label>
-                  <input type="number" id="security-deposit" name="security-deposit" required placeholder="e.g., 30000" />
-                  <span className="pl-error-message">Please enter the security deposit</span>
+                <div
+                  className={`pl-form-group ${
+                    errors["security-deposit"] ? "pl-error" : ""
+                  }`}
+                >
+                  <label htmlFor="security-deposit">
+                    Security Deposit (₹)*
+                  </label>
+                  <input
+                    type="number"
+                    id="security-deposit"
+                    name="security-deposit"
+                    required
+                    placeholder="e.g., 30000"
+                  />
+                  <span className="pl-error-message">
+                    Please enter the security deposit
+                  </span>
                 </div>
                 <div className="pl-form-group">
                   <label htmlFor="maintenance">Maintenance Charges (₹)</label>
-                  <input type="number" id="maintenance" name="maintenance" placeholder="e.g., 1500" />
+                  <input
+                    type="number"
+                    id="maintenance"
+                    name="maintenance"
+                    placeholder="e.g., 1500"
+                  />
                 </div>
               </div>
 
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors['available-from'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors["available-from"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="available-from">Available From*</label>
-                  <input type="date" id="available-from" name="available-from" required />
-                  <span className="pl-error-message">Please select availability date</span>
+                  <input
+                    type="date"
+                    id="available-from"
+                    name="available-from"
+                    required
+                  />
+                  <span className="pl-error-message">
+                    Please select availability date
+                  </span>
                 </div>
                 <div className="pl-form-group">
                   <label htmlFor="preferred-tenants">Preferred Tenants</label>
@@ -281,8 +417,14 @@ const PropertyListing = () => {
                     <option value="company">Company</option>
                   </select>
                 </div>
-                <div className={`pl-form-group ${errors['lease-duration'] ? 'pl-error' : ''}`}>
-                  <label htmlFor="lease-duration">Minimum Lease Duration*</label>
+                <div
+                  className={`pl-form-group ${
+                    errors["lease-duration"] ? "pl-error" : ""
+                  }`}
+                >
+                  <label htmlFor="lease-duration">
+                    Minimum Lease Duration*
+                  </label>
                   <select id="lease-duration" name="lease-duration" required>
                     <option value="">Select</option>
                     <option value="3">3 months</option>
@@ -291,7 +433,9 @@ const PropertyListing = () => {
                     <option value="12">12 months</option>
                     <option value="24">24 months</option>
                   </select>
-                  <span className="pl-error-message">Please select lease duration</span>
+                  <span className="pl-error-message">
+                    Please select lease duration
+                  </span>
                 </div>
               </div>
             </div>
@@ -300,11 +444,32 @@ const PropertyListing = () => {
             <div className="pl-form-section">
               <h2>Amenities & Facilities</h2>
               <div className="pl-amenities-grid">
-                {['parking', 'lift', 'Balcony', 'security', 'gym', 'swimming-pool', 'children-play-area', 'club-house', 'gated-community', 'wifi', 'ac', 'gas-pipeline'].map(amenity => (
+                {[
+                  "parking",
+                  "lift",
+                  "Balcony",
+                  "security",
+                  "gym",
+                  "swimming-pool",
+                  "children-play-area",
+                  "club-house",
+                  "gated-community",
+                  "wifi",
+                  "ac",
+                  "gas-pipeline",
+                ].map((amenity) => (
                   <div key={amenity} className="pl-amenity-checkbox">
-                    <input type="checkbox" id={amenity} name="amenities" value={amenity} />
+                    <input
+                      type="checkbox"
+                      id={amenity}
+                      name="amenities"
+                      value={amenity}
+                    />
                     <label htmlFor={amenity}>
-                      {amenity === 'ac' ? 'Water supply' : amenity.charAt(0).toUpperCase() + amenity.slice(1).replace(/-/g, ' ')}
+                      {amenity === "ac"
+                        ? "Water supply"
+                        : amenity.charAt(0).toUpperCase() +
+                          amenity.slice(1).replace(/-/g, " ")}
                     </label>
                   </div>
                 ))}
@@ -315,8 +480,14 @@ const PropertyListing = () => {
             <div className="pl-form-section">
               <h2>Property Photos</h2>
               <div className="pl-form-row">
-                <div className={`pl-form-group pl-full-width ${errors.photos ? 'pl-error' : ''}`}>
-                  <label htmlFor="property-photos">Upload Photos (Max 10)*</label>
+                <div
+                  className={`pl-form-group pl-full-width ${
+                    errors.photos ? "pl-error" : ""
+                  }`}
+                >
+                  <label htmlFor="property-photos">
+                    Upload Photos (Max 10)*
+                  </label>
                   <div className="pl-file-upload-container">
                     <input
                       ref={fileInputRef}
@@ -326,18 +497,28 @@ const PropertyListing = () => {
                       multiple
                       accept="image/*"
                       onChange={handleFileChange}
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                     />
-                    <div className="pl-file-upload-button" onClick={openFileDialog}>
+                    <div
+                      className="pl-file-upload-button"
+                      onClick={openFileDialog}
+                    >
                       <span>Choose Files</span>
                     </div>
                   </div>
-                  <span className="pl-error-message">Please upload at least one image</span>
+                  <span className="pl-error-message">
+                    Please upload at least one image
+                  </span>
                   <div className="pl-preview-container">
                     {selectedFiles.map((file, index) => (
                       <div key={index} className="pl-preview-item">
                         <img src={URL.createObjectURL(file)} alt={file.name} />
-                        <span className="pl-remove-preview" onClick={() => removeImage(index)}>×</span>
+                        <span
+                          className="pl-remove-preview"
+                          onClick={() => removeImage(index)}
+                        >
+                          ×
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -349,46 +530,107 @@ const PropertyListing = () => {
             <div className="pl-form-section">
               <h2>Contact Information</h2>
               <div className="pl-form-row">
-                <div className={`pl-form-group ${errors['owner-name'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors["owner-name"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="owner-name">Owner Name*</label>
-                  <input type="text" id="owner-name" name="owner-name" required placeholder="Full Name" />
-                  <span className="pl-error-message">Please enter owner name</span>
+                  <input
+                    type="text"
+                    id="owner-name"
+                    name="owner-name"
+                    required
+                    placeholder="Full Name"
+                  />
+                  <span className="pl-error-message">
+                    Please enter owner name
+                  </span>
                 </div>
-                <div className={`pl-form-group ${errors['contact-number'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group ${
+                    errors["contact-number"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="contact-number">Contact Number*</label>
-                  <input type="tel" id="contact-number" name="contact-number" required placeholder="10-digit mobile number" pattern="[0-9]{10}" />
-                  <span className="pl-error-message">Please enter a valid 10-digit contact number</span>
+                  <input
+                    type="tel"
+                    id="contact-number"
+                    name="contact-number"
+                    required
+                    placeholder="10-digit mobile number"
+                    pattern="[0-9]{10}"
+                  />
+                  <span className="pl-error-message">
+                    Please enter a valid 10-digit contact number
+                  </span>
                 </div>
                 <div className="pl-form-group">
                   <label htmlFor="alternative-number">Alternative Number</label>
-                  <input type="tel" id="alternative-number" name="alternative-number" placeholder="Alternative contact number" pattern="[0-9]{10}" />
+                  <input
+                    type="tel"
+                    id="alternative-number"
+                    name="alternative-number"
+                    placeholder="Alternative contact number"
+                    pattern="[0-9]{10}"
+                  />
                 </div>
               </div>
               <div className="pl-form-row">
-                <div className={`pl-form-group pl-full-width ${errors['contact-email'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group pl-full-width ${
+                    errors["contact-email"] ? "pl-error" : ""
+                  }`}
+                >
                   <label htmlFor="contact-email">Email Address*</label>
-                  <input type="email" id="contact-email" name="contact-email" required placeholder="Email address" />
-                  <span className="pl-error-message">Please enter a valid email address</span>
+                  <input
+                    type="email"
+                    id="contact-email"
+                    name="contact-email"
+                    required
+                    placeholder="Email address"
+                  />
+                  <span className="pl-error-message">
+                    Please enter a valid email address
+                  </span>
                 </div>
               </div>
               <div className="pl-form-row">
-                <div className={`pl-form-group pl-full-width ${errors['terms-agreement'] ? 'pl-error' : ''}`}>
+                <div
+                  className={`pl-form-group pl-full-width ${
+                    errors["terms-agreement"] ? "pl-error" : ""
+                  }`}
+                >
                   <div className="pl-agreement-checkbox">
-                    <input type="checkbox" id="terms-agreement" name="terms-agreement" required />
+                    <input
+                      type="checkbox"
+                      id="terms-agreement"
+                      name="terms-agreement"
+                      required
+                    />
                     <label htmlFor="terms-agreement">
-                      I agree to RentEase's <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>*
+                      I agree to RentEase's <a href="#">Terms & Conditions</a>{" "}
+                      and <a href="#">Privacy Policy</a>*
                     </label>
                   </div>
-                  <span className="pl-error-message">Please agree to the terms and conditions</span>
+                  <span className="pl-error-message">
+                    Please agree to the terms and conditions
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="pl-form-actions">
-              <button type="button" className="pl-secondary-button" onClick={resetForm}>
+              <button
+                type="button"
+                className="pl-secondary-button"
+                onClick={resetForm}
+              >
                 Clear All
               </button>
-              <button type="submit" className="pl-primary-button">Submit Listing</button>
+              <button type="submit" className="pl-primary-button">
+                Submit Listing
+              </button>
             </div>
           </form>
         </div>

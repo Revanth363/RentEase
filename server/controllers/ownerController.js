@@ -147,7 +147,25 @@ exports.getOwnerDashboard = async (req, res) => {
         propertyMap.get(request.propertyId?.toString()) || "N/A";
     });
 
-    const complaints = await Complaint.find({ tenantId: { $in: tenantIds } });
+    // Fetch complaints with tenant & property info
+    let complaints = await Complaint.find({ tenantId: { $in: tenantIds } })
+      .populate("tenantId", "firstName lastName phone")
+      .populate("propertyId", "name")
+      .lean();
+
+    // Format complaints for frontend
+    complaints = complaints.map((c) => ({
+      _id: c._id,
+      property: c.propertyId?.name || "N/A",
+      subject: c.subject || "N/A",
+      reportedBy: c.tenantId
+        ? `${c.tenantId.firstName} ${c.tenantId.lastName}`
+        : "N/A",
+      dateSubmitted: c.dateSubmitted,
+      status: c.status || "Open",
+      phone: c.tenantId?.phone || "",
+    }));
+
     const agreements = await Agreement.find({ ownerId: objectId });
     // Fetch notifications from Notification model
     let notifications = await Notification.find({

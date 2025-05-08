@@ -21,6 +21,7 @@ import TenantDashboard from "./pages/TenantDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import WorkerDashboard from "./pages/WorkerDashboard";
 import WorkerRegister from "./pages/WorkerRegister";
+import PropertyListing from "./pages/PropertyListing";
 
 // Admin Pages & Views (same as before)
 
@@ -115,6 +116,7 @@ const App = () => {
           <Route path="/owner_dashboard" element={<OwnerDashboard />} />
           <Route path="/worker_dashboard" element={<WorkerDashboard />} />
           <Route path="/worker_register" element={<WorkerRegister />} />
+          <Route path="/property_listing_page" element={<PropertyListing/>} />
           <Route
             path="/property-management"
             element={<div>Property Management</div>}
