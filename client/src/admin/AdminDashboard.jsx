@@ -207,7 +207,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  
   if (error) return <div className={styles.error} style={{ textAlign: 'center', padding: '50px', color: '#ef4444' }}>{error}</div>;
 
   const statsItems = [

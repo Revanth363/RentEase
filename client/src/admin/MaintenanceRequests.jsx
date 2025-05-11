@@ -147,7 +147,7 @@ const MaintenanceRequests = () => {
     setSearchParams(params, { replace: true });
   };
 
-  if (loading) return <LoadingSpinner />;
+  
 
   return (
     <div className={styles.container}>

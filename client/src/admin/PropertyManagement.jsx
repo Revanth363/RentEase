@@ -150,7 +150,7 @@ const PropertyManagement = () => {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  
 
   return (
     <div className={styles.container}>

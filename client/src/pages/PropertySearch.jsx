@@ -153,22 +153,11 @@ const PropertySearch = () => {
     }
   };
 
-  if (loading) return <LoadingSpinner />;
+  
 
   return (
     <div className="property-search-page">
-      {/* Mobile Filter Icon */}
-      <div className="filter-icon" ref={filterIconRef} onClick={toggleSidebar}>
-        <img
-          src="https://cdn-icons-png.flaticon.com/128/3839/3839020.png"
-          alt="Filter"
-          width="25"
-          height="25"
-        />
-      </div>
-
-      {/* Overlay */}
-      <div className="overlay" ref={overlayRef} onClick={toggleSidebar} />
+     
 
       {/* Filter Sidebar */}
       <aside className="filter-sidebar" ref={sidebarRef}>

@@ -168,7 +168,7 @@ const handleDelete = async (userId, userType) => {
   }
 };
 
-  if (loading) return <LoadingSpinner />;
+  
 
   return (
     <div className={styles.container}>
