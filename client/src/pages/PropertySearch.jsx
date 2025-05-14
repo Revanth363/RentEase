@@ -153,6 +153,11 @@ const PropertySearch = () => {
     }
   };
 
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   
 
   return (
@@ -337,7 +342,7 @@ const PropertySearch = () => {
               <li key={property._id} className="property-card">
                 <div className="property-image">
                   <img
-                    src={property.images?.[0] || "/placeholder.jpg"}
+                    src={(typeof property.images?.[0] === 'string' ? property.images[0] : property.images?.[0]?.url) || "/placeholder.jpg"}
                     alt={property.name}
                   />
                   <div className="property-type">

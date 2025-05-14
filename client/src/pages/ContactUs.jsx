@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
-import '../assets/css/contactUs.css';  // ← now completely safe
+import "../assets/css/ContactUs.css"; 
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', subject: '', message: '',
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
   });
 
-  const [modal, setModal] = useState({ show: false, message: '', type: '' });
+  const [modal, setModal] = useState({ show: false, message: "", type: "" });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,55 +22,85 @@ const ContactUs = () => {
 
     const trimmedName = formData.name.trim();
     if (!trimmedName) {
-      setModal({ show: true, message: 'Please enter your name.' });
+      setModal({ show: true, message: "Please enter your name." });
       return;
     }
     if (!/^[A-Za-z\s]+$/.test(trimmedName)) {
-      setModal({ show: true, message: 'Name can only contain letters and spaces.' });
+      setModal({
+        show: true,
+        message: "Name can only contain letters and spaces.",
+      });
       return;
     }
 
     if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(formData.email)) {
-      setModal({ show: true, message: 'Please enter a valid Gmail address (e.g., example@gmail.com)', type: 'error' });
+      setModal({
+        show: true,
+        message: "Please enter a valid Gmail address (e.g., example@gmail.com)",
+        type: "error",
+      });
       return;
     }
 
     if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
-      setModal({ show: true, message: 'Please enter a valid 10-digit phone number', type: 'error' });
+      setModal({
+        show: true,
+        message: "Please enter a valid 10-digit phone number",
+        type: "error",
+      });
       return;
     }
 
-    setModal({ show: true, message: 'Submitting your message...', type: 'loading' });
+    setModal({
+      show: true,
+      message: "Submitting your message...",
+      type: "loading",
+    });
 
     try {
-      const response = await fetch('http://localhost:5000/api/submit-form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:5000/api/submit-form", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setModal({ show: true, message: 'Thank you! We will get back to you shortly.', type: 'success' });
-        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+        setModal({
+          show: true,
+          message: "Thank you! We will get back to you shortly.",
+          type: "success",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
       } else {
-        setModal({ show: true, message: result.error || 'Submission failed. Please try again.', type: 'error' });
+        setModal({
+          show: true,
+          message: result.error || "Submission failed. Please try again.",
+          type: "error",
+        });
       }
     } catch (error) {
-      setModal({ show: true, message: 'Network error. Is your backend running on port 3000?', type: 'error' });
+      setModal({
+        show: true,
+        message: "Network error. Is your backend running on port 3000?",
+        type: "error",
+      });
     }
   };
 
-  const closeModal = () => setModal({ show: false, message: '', type: '' });
+  const closeModal = () => setModal({ show: false, message: "", type: "" });
 
   return (
     <>
-      
-
       {/* THIS IS THE ONLY CHANGE – wraps everything safely */}
       <div className="contact-us-page-wrapper">
-
         <div className="whole_container">
           <div className="container">
             <div className="contact-section">
@@ -101,25 +135,66 @@ const ContactUs = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label htmlFor="name">Your Name</label>
-                    <input type="text" id="name" name="name" className="form-control" value={formData.name} onChange={handleChange} required />
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      className="form-control"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="email">Email Address</label>
-                    <input type="email" id="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      className="form-control"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" className="form-control" value={formData.phone} onChange={handleChange} placeholder="10 digits only" />
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      className="form-control"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="10 digits only"
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" className="form-control" value={formData.subject} onChange={handleChange} required />
+                    <input
+                      type="text"
+                      id="subject"
+                      name="subject"
+                      className="form-control"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="message">Your Message</label>
-                    <textarea id="message" name="message" className="form-control" value={formData.message} onChange={handleChange} required />
+                    <textarea
+                      id="message"
+                      name="message"
+                      className="form-control"
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
-                  <button type="submit" className="btn">Submit Message</button>
+                  <button type="submit" className="btn">
+                    Submit Message
+                  </button>
                 </form>
               </div>
             </div>
@@ -127,19 +202,31 @@ const ContactUs = () => {
         </div>
 
         {/* YOUR ORIGINAL MODAL – 100% untouched */}
-        <div className="modal" style={{ display: modal.show ? 'flex' : 'none' }}>
+        <div
+          className="modal"
+          style={{ display: modal.show ? "flex" : "none" }}
+        >
           <div className="modal-content">
-            <span className="close-button" onClick={closeModal}>×</span>
-            <p style={{
-              color: modal.type === 'success' ? 'green' : modal.type === 'error' ? 'red' : '#333',
-              fontWeight: 'bold'
-            }}>
+            <span className="close-button" onClick={closeModal}>
+              ×
+            </span>
+            <p
+              style={{
+                color:
+                  modal.type === "success"
+                    ? "green"
+                    : modal.type === "error"
+                    ? "red"
+                    : "#333",
+                fontWeight: "bold",
+              }}
+            >
               {modal.message}
             </p>
           </div>
         </div>
-
-      </div> {/* ← end of .contact-us-page-wrapper */}
+      </div>{" "}
+      {/* ← end of .contact-us-page-wrapper */}
     </>
   );
 };

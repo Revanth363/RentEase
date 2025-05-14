@@ -1,10 +1,14 @@
 import { useRef, useState } from "react";
+import { APIProvider, Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import "../assets/css/propertylisting.css";
 
 const PropertyListing = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
+
+  // New state for map coordinates
+  const [coordinates, setCoordinates] = useState(null); // { lat, lng }
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -23,7 +27,6 @@ const PropertyListing = () => {
     const updatedFiles = [...selectedFiles, ...newFiles].slice(0, 10);
     setSelectedFiles(updatedFiles);
 
-    // Clear error if images exist
     if (updatedFiles.length > 0) {
       setErrors((prev) => ({ ...prev, photos: false }));
     }
@@ -63,26 +66,47 @@ const PropertyListing = () => {
       isValid = false;
     }
 
+    // Force pinning location on map
+    if (!coordinates || typeof coordinates.lat !== "number" || typeof coordinates.lng !== "number") {
+      newErrors.coordinates = true;
+      isValid = false;
+    }
+
     setErrors(newErrors);
 
     if (!isValid) {
-      alert("Please fill in all required fields marked with *");
-      const firstError = document.querySelector(".pl-form-group.pl-error");
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      alert("Please fill in all required fields marked with * (including pinning the location on the map)");
+
+      // Scroll to map section if coordinates error
+      if (newErrors.coordinates) {
+        const mapSection = document.querySelector(".map-section");
+        if (mapSection) {
+          mapSection.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      } else {
+        const firstError = document.querySelector(".pl-form-group.pl-error");
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
       return;
     }
 
     // Append images
     selectedFiles.forEach((file) => {
-      formData.append("property-photos", file);
+      formData.append("images", file);
     });
+
+    // Append coordinates
+    if (coordinates) {
+      formData.append("coordinates", JSON.stringify(coordinates));
+    }
 
     try {
       const response = await fetch("/api/property/list-property", {
         method: "POST",
         body: formData,
+        credentials: "include", // Send session cookies
       });
 
       const result = await response.json();
@@ -91,8 +115,7 @@ const PropertyListing = () => {
         alert(
           "Property listing submitted successfully! Our team will review your listing and it will be live soon."
         );
-
-        window.location.href = "/owner_dashboard"; // redirect after success
+        window.location.href = "/owner_dashboard";
       } else {
         alert(result.error || "Error listing property");
       }
@@ -105,6 +128,7 @@ const PropertyListing = () => {
   const resetForm = () => {
     document.getElementById("property-listing-form").reset();
     setSelectedFiles([]);
+    setCoordinates(null); // reset map pin too
     setErrors({});
   };
 
@@ -327,15 +351,87 @@ const PropertyListing = () => {
                 </div>
               </div>
 
-              <div className="pl-form-row">
-                <div className="pl-form-group pl-full-width">
-                  <label htmlFor="map-link">Google Maps Embed Link</label>
-                  <input
-                    type="url"
-                    id="map-link"
-                    name="map-link"
-                    placeholder="Paste Google Maps embed link (e.g., https://www.google.com/maps/embed?..."
-                  />
+              {/* ── Interactive Map ── */}
+              <div className="pl-form-row map-section">
+                <div
+                  className={`pl-form-group pl-full-width ${
+                    errors.coordinates ? "pl-error" : ""
+                  }`}
+                >
+                  <label>
+                    Pin Exact Property Location on Map <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <p style={{
+                    fontSize: "0.95rem",
+                    color: "#555",
+                    margin: "8px 0 12px 0",
+                    lineHeight: "1.4"
+                  }}>
+                    Click anywhere on the map or drag the red pin to mark the <strong>exact position</strong> of your property.
+                  </p>
+
+                  <div
+                    style={{
+                      height: "420px",
+                      width: "100%",
+                      border: errors.coordinates ? "2px dashed red" : "1px solid #ccc",
+                      borderRadius: "6px",
+                      overflow: "hidden",
+                      marginTop: "4px",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
+                    }}
+                  >
+                    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+                      <Map
+                        defaultCenter={{ lat: 20.5937, lng: 78.9629 }} // Center of India
+                        defaultZoom={5}
+                        gestureHandling="greedy" // better mobile experience
+                        onClick={(ev) => {
+                          if (ev.detail?.latLng) {
+                            setCoordinates({
+                              lat: ev.detail.latLng.lat,
+                              lng: ev.detail.latLng.lng
+                            });
+                            setErrors(prev => ({ ...prev, coordinates: false }));
+                          }
+                        }}
+                      >
+                        {coordinates ? (
+                          <AdvancedMarker
+                            position={coordinates}
+                            draggable={true}
+                            onDragEnd={(ev) => {
+                              if (ev.detail?.latLng) {
+                                setCoordinates({
+                                  lat: ev.detail.latLng.lat,
+                                  lng: ev.detail.latLng.lng
+                                });
+                                setErrors(prev => ({ ...prev, coordinates: false }));
+                              }
+                            }}
+                          >
+                            <Pin
+                              background={"#d32f2f"}
+                              glyphColor={"#ffffff"}
+                              borderColor={"#b71c1c"}
+                            />
+                          </AdvancedMarker>
+                        ) : null}
+                      </Map>
+                    </APIProvider>
+                  </div>
+
+                  {coordinates && (
+                    <small style={{ color: "#2e7d32", marginTop: "10px", display: "block" }}>
+                      ✓ Location pinned: {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
+                    </small>
+                  )}
+
+                  {errors.coordinates && (
+                    <span className="pl-error-message" style={{ fontWeight: "600" }}>
+                      Please pin the exact location — this field is required
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

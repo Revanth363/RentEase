@@ -123,7 +123,7 @@ const PropertyDetails = () => {
       <div className={styles.propertyGallery}>
         <div className={styles.mainImageContainer}>
           <img
-            src={property.images[currentImageIndex]}
+            src={typeof property.images[currentImageIndex] === 'string' ? property.images[currentImageIndex] : property.images[currentImageIndex]?.url}
             alt="Property"
             className={styles.mainImage}
           />
@@ -163,7 +163,7 @@ const PropertyDetails = () => {
           {property.images.map((img, i) => (
             <img
               key={i}
-              src={img}
+              src={typeof img === 'string' ? img : img?.url}
               alt=""
               className={`${styles.thumbnail} ${
                 i === currentImageIndex ? styles.active : ""

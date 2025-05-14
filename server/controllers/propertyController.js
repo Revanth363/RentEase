@@ -1,8 +1,7 @@
 const Property = require("../models/property");
-const formidable = require("formidable");
-const fs = require("fs");
 const mongoose = require("mongoose");
 const Owner = require("../models/owner");
+const cloudinary = require("../config/cloudinary");
 
 exports.listProperty = async (req, res) => {
   try {
@@ -10,105 +9,60 @@ exports.listProperty = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized: Please log in" });
     }
 
-    // Initialize formidable
-    const form = new formidable.Formidable({
-      multiples: true,
-      maxFileSize: 5 * 1024 * 1024, // 5MB per file
-      maxFiles: 10, // Max 10 images
-    });
+    // Extract fields from req.body (form data was parsed)
+    const {
+      "property-type": type,
+      "property-subtype": subtype,
+      bedrooms,
+      bathrooms,
+      furnishing,
+      "property-description": description,
+      address,
+      city,
+      state,
+      pincode,
+      landmark,
+      "rent-amount": price,
+      "map-link": mapLink,
+      "security-deposit": securityDeposit,
+      maintenance,
+      "available-from": availableFrom,
+      "preferred-tenants": preferredTenants,
+      "lease-duration": leaseDuration,
+      amenities = [],
+      "owner-name": owner,
+      "contact-number": contactNumber,
+      "alternative-number": alternativeNumber,
+      "contact-email": contactEmail,
+    } = req.body;
 
-    // Parse form data
-    const { fields, files } = await new Promise((resolve, reject) => {
-      form.parse(req, (err, parsedFields, parsedFiles) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve({ fields: parsedFields, files: parsedFiles });
-      });
-    });
+    // Support multer.any() which produces req.files as an array
+    // Also accept other multer shapes (req.file, req.files.images)
+    let uploadedFiles = [];
 
-    // Log parsed fields and files
-    console.log("Parsed form fields:", fields);
-    console.log("Parsed files:", files ? Object.keys(files) : files);
+    if (Array.isArray(req.files)) {
+      // Filter files that were uploaded under the "images" field (or common variants)
+      uploadedFiles = req.files.filter((f) =>
+        ["images", "image", "property-photos", "photos"].includes(f.fieldname)
+      );
+      // If nothing matched, assume all files are images
+      if (uploadedFiles.length === 0) uploadedFiles = req.files;
+    } else if (req.files && req.files.images) {
+      uploadedFiles = req.files.images;
+    } else if (req.file) {
+      uploadedFiles = [req.file];
+    }
 
-    // Extract fields (handle arrays)
-    const getField = (field) => (Array.isArray(field) ? field[0] : field);
-    const type = getField(fields["property-type"]);
-    const subtype = getField(fields["property-subtype"]);
-    const bedrooms = getField(fields.bedrooms);
-    const bathrooms = getField(fields.bathrooms);
-    const furnishing = getField(fields.furnishing);
-    const description = getField(fields["property-description"]);
-    const address = getField(fields.address);
-    const city = getField(fields.city);
-    const state = getField(fields.state);
-    const pincode = getField(fields.pincode);
-    const landmark = getField(fields.landmark);
-    const price = getField(fields["rent-amount"]);
-    const mapLink = getField(fields["map-link"]);
-    const securityDeposit = getField(fields["security-deposit"]);
-    const maintenance = getField(fields.maintenance);
-    const availableFrom = getField(fields["available-from"]);
-    const preferredTenants = getField(fields["preferred-tenants"]);
-    const leaseDuration = getField(fields["lease-duration"]);
-    const amenities = fields.amenities || [];
-    const owner = getField(fields["owner-name"]);
-    const contactNumber = getField(fields["contact-number"]);
-    const alternativeNumber = getField(fields["alternative-number"]);
-    const contactEmail = getField(fields["contact-email"]);
-
-    // Extract and validate images
-    const images = files["property-photos"]
-      ? Array.isArray(files["property-photos"])
-        ? files["property-photos"]
-        : [files["property-photos"]]
-      : [];
-
-    if (!images || images.length === 0) {
-      console.log("No images received");
+    if (!uploadedFiles || uploadedFiles.length === 0) {
+      console.log("No images received", { filesPresent: !!req.files, file: !!req.file });
       return res.status(400).json({ error: "At least one image is required" });
     }
 
-    // Convert files to Base64
-    const base64Images = images.map((file, index) => {
-      if (!file.mimetype.startsWith("image/")) {
-        console.log(`Invalid file at index ${index}:`, file.mimetype);
-        throw new Error(`Image ${index + 1} is not a valid image`);
-      }
-      try {
-        const fileContent = fs.readFileSync(file.filepath);
-        const base64 = fileContent.toString("base64");
-        return `data:${file.mimetype};base64,${base64}`;
-      } catch (error) {
-        console.error(`Error reading file at index ${index}:`, error);
-        throw new Error(`Failed to process image ${index + 1}`);
-      }
-    });
-
-    // Validate Base64 images
-    base64Images.forEach((base64, index) => {
-      if (!base64.startsWith("data:image/")) {
-        console.log(
-          `Invalid Base64 at index ${index}:`,
-          base64.substring(0, 50)
-        );
-        throw new Error(`Image ${index + 1} is not a valid image`);
-      }
-      const sizeInBytes = Buffer.from(base64.split(",")[1], "base64").length;
-      if (sizeInBytes > 5 * 1024 * 1024) {
-        throw new Error(`Image ${index + 1} exceeds 5MB limit`);
-      }
-    });
-
-    // Log Base64 images preview
-    console.log(
-      "Base64 images preview:",
-      base64Images.map((img, i) => ({
-        index: i,
-        preview: img.substring(0, 30) + "...",
-      }))
-    );
+    // Map Cloudinary files to our schema format, robust to different storage engines
+    const images = uploadedFiles.map((file) => ({
+      url: file.secure_url || file.path || file.url || file.location || "",
+      publicId: file.public_id || file.publicId || file.key || file.filename || "",
+    }));
 
     // Construct full address
     const addressParts = [address];
@@ -129,7 +83,7 @@ exports.listProperty = async (req, res) => {
       baths: parseInt(bathrooms),
       furnished: furnishing || "unfurnished",
       description,
-      images: base64Images,
+      images, // Cloudinary URLs with publicIds
       amenities: Array.isArray(amenities)
         ? amenities
         : amenities
@@ -154,7 +108,7 @@ exports.listProperty = async (req, res) => {
 
     await property.save();
 
-    // 🚨 FIX: UPDATE OWNER propertyIds
+    // Update owner
     await Owner.findByIdAndUpdate(req.session.user._id, {
       $push: { propertyIds: property._id },
       $inc: { numProperties: 1 }
@@ -197,10 +151,27 @@ exports.deleteProperty = async (req, res) => {
       });
     }
 
+    // Delete images from Cloudinary
+    if (property.images && property.images.length > 0) {
+      for (const image of property.images) {
+        if (image.publicId) {
+          try {
+            await cloudinary.uploader.destroy(image.publicId);
+            console.log(`Deleted image from Cloudinary: ${image.publicId}`);
+          } catch (err) {
+            console.error(
+              `Error deleting image from Cloudinary: ${image.publicId}`,
+              err
+            );
+          }
+        }
+      }
+    }
+
     // Delete the property
     await Property.findByIdAndDelete(propertyId);
 
-    // 🚨 FIX: UPDATE OWNER propertyIds
+    // Update owner
     await Owner.findByIdAndUpdate(property.ownerId, {
       $pull: { propertyIds: propertyId },
       $inc: { numProperties: -1 }

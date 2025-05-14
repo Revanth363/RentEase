@@ -103,8 +103,7 @@ const Payment = require("../models/payment");
 const WorkerPayment = require("../models/workerPayment");
 const WorkerBooking = require("../models/workerBooking");
 const Notification = require("../models/notification");
-const formidable = require("formidable");
-const fs = require("fs");
+const cloudinary = require("../config/cloudinary");
 const workerBooking = require("../models/workerBooking");
 
 // Middleware to check if user is authenticated
@@ -425,187 +424,169 @@ exports.renderEditServicePage = async (req, res) => {
 };
 
 exports.registerWorker = async (req, res) => {
-  const form = new formidable.IncomingForm();
+  try {
+    // Extract all fields from req.body (form data was parsed by express.json/urlencoded)
+    const {
+      "full-name": fullName = "",
+      phone,
+      email,
+      city,
+      area,
+      "service-type": serviceType,
+      experience: experienceStr = "0",
+      price: priceStr = "0",
+      description,
+      availability,
+      rateUnit = "monthly",
+      "terms-agreement": termsAgreement,
+    } = req.body;
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error("Error parsing form:", err);
-      return res.status(500).json({ error: "Error processing form data" });
+    const fullNameTrimmed = fullName.trim();
+    const nameParts = fullNameTrimmed.split(" ");
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    const experience = parseInt(experienceStr) || 0;
+    const price = parseInt(priceStr) || 0;
+
+    console.log("Processing registration:", {
+      fullName: fullNameTrimmed,
+      firstName,
+      lastName,
+      phone,
+      email,
+      city,
+      area,
+      serviceType,
+      termsAgreement,
+    });
+
+    // Validation
+    if (
+      !fullNameTrimmed ||
+      !phone ||
+      !email ||
+      !city ||
+      !area ||
+      !serviceType ||
+      !description ||
+      !availability
+    ) {
+      return res.status(400).json({
+        error: "All required fields must be provided",
+        missing: {
+          fullName: !fullNameTrimmed,
+          phone: !phone,
+          email: !email,
+          city: !city,
+          area: !area,
+          serviceType: !serviceType,
+          description: !description,
+          availability: !availability,
+        },
+      });
     }
 
-    try {
-      // Helper function to extract field value (formidable returns arrays)
-      const getField = (fieldName) => {
-        const value = fields[fieldName];
-        if (Array.isArray(value)) return value[0];
-        return value || "";
-      };
+    if (termsAgreement !== "on" && termsAgreement !== "true") {
+      return res
+        .status(400)
+        .json({ error: "You must agree to Terms & Conditions" });
+    }
 
-      // Extract all fields
-      const fullName = getField("full-name").trim();
-      const nameParts = fullName.split(" ");
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || "";
+    // Phone validation - exactly 10 digits
+    if (!/^[0-9]{10}$/.test(phone)) {
+      return res
+        .status(400)
+        .json({ error: "Phone number must be exactly 10 digits" });
+    }
 
-      const phone = getField("phone");
-      const email = getField("email");
-      const city = getField("city");
-      const area = getField("area");
-      const serviceType = getField("service-type");
-      const experience = parseInt(getField("experience")) || 0;
-      const price = parseInt(getField("price")) || 0;
-      const description = getField("description");
-      const availability = getField("availability");
-      const rateUnit = getField("rateUnit") || "monthly";
-      const termsAgreement =
-        getField("terms-agreement") === "on" ||
-        getField("terms-agreement") === "true";
+    // Email validation
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email address" });
+    }
 
-      console.log("Processing registration:", {
-        fullName,
-        firstName,
-        lastName,
-        phone,
-        email,
-        city,
-        area,
-        serviceType,
-        termsAgreement,
-      });
+    // Experience validation
+    if (experience < 0 || experience > 50) {
+      return res
+        .status(400)
+        .json({ error: "Experience must be between 0 and 50 years" });
+    }
 
-      // Validation
-      if (
-        !fullName ||
-        !phone ||
-        !email ||
-        !city ||
-        !area ||
-        !serviceType ||
-        !description ||
-        !availability
-      ) {
-        return res.status(400).json({
-          error: "All required fields must be provided",
-          missing: {
-            fullName: !fullName,
-            phone: !phone,
-            email: !email,
-            city: !city,
-            area: !area,
-            serviceType: !serviceType,
-            description: !description,
-            availability: !availability,
-          },
-        });
-      }
+    // Price validation
+    if (price < 1000) {
+      return res.status(400).json({ error: "Salary must be at least ₹1000" });
+    }
 
-      if (!termsAgreement) {
-        return res
-          .status(400)
-          .json({ error: "You must agree to Terms & Conditions" });
-      }
+    // Availability validation
+    if (!["full-time", "part-time", "weekends"].includes(availability)) {
+      return res.status(400).json({ error: "Invalid availability option" });
+    }
 
-      // Phone validation - exactly 10 digits
-      if (!/^[0-9]{10}$/.test(phone)) {
-        return res
-          .status(400)
-          .json({ error: "Phone number must be exactly 10 digits" });
-      }
+    // Rate unit validation
+    if (!["hourly", "daily", "monthly"].includes(rateUnit)) {
+      return res.status(400).json({ error: "Invalid rate unit" });
+    }
 
-      // Email validation
-      if (!/^\S+@\S+\.\S+$/.test(email)) {
-        return res.status(400).json({ error: "Invalid email address" });
-      }
+    // Find and update worker
+    const worker = await Worker.findById(req.session.user._id);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker account not found" });
+    }
 
-      // Experience validation
-      if (experience < 0 || experience > 50) {
-        return res
-          .status(400)
-          .json({ error: "Experience must be between 0 and 50 years" });
-      }
+    // Update worker fields
+    worker.firstName = firstName;
+    worker.lastName = lastName;
+    worker.phone = phone;
+    worker.email = email;
+    worker.location = city;
+    worker.area = area;
+    worker.serviceType = serviceType;
+    worker.experience = experience;
+    worker.price = price;
+    worker.rateUnit = rateUnit;
+    worker.description = description;
+    worker.availability = availability;
+    worker.serviceStatus = availability ? "Available" : "Unavailable";
 
-      // Price validation
-      if (price < 1000) {
-        return res.status(400).json({ error: "Salary must be at least ₹1000" });
-      }
-
-      // Availability validation
-      if (!["full-time", "part-time", "weekends"].includes(availability)) {
-        return res.status(400).json({ error: "Invalid availability option" });
-      }
-
-      // Rate unit validation
-      if (!["hourly", "daily", "monthly"].includes(rateUnit)) {
-        return res.status(400).json({ error: "Invalid rate unit" });
-      }
-
-      // Handle image upload
-      let imageBase64 = null;
-      if (files["image"] && files["image"][0]) {
-        const image = files["image"][0];
-        const allowedTypes = [
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "image/webp",
-        ];
-
-        if (!allowedTypes.includes(image.mimetype)) {
-          return res
-            .status(400)
-            .json({ error: "Image must be JPEG, PNG, GIF, or WEBP" });
+    // Handle image upload from multer (Cloudinary)
+    if (req.files && req.files.image && req.files.image.length > 0) {
+      const file = req.files.image[0];
+      
+      // If worker has an old image with publicId, delete it from Cloudinary
+      if (worker.image && worker.image.publicId) {
+        try {
+          await cloudinary.uploader.destroy(worker.image.publicId);
+          console.log(`Deleted old worker image: ${worker.image.publicId}`);
+        } catch (err) {
+          console.error(`Error deleting old image from Cloudinary:`, err);
         }
-
-        const imageData = fs.readFileSync(image.filepath);
-        imageBase64 = `data:${image.mimetype};base64,${imageData.toString(
-          "base64"
-        )}`;
       }
 
-      // Find and update worker
-      const worker = await Worker.findById(req.session.user._id);
-      if (!worker) {
-        return res.status(404).json({ error: "Worker account not found" });
-      }
-
-      // Update worker fields
-      worker.firstName = firstName;
-      worker.lastName = lastName;
-      worker.phone = phone;
-      worker.email = email;
-      worker.location = city;
-      worker.area = area;
-      worker.serviceType = serviceType;
-      worker.experience = experience;
-      worker.price = price;
-      worker.rateUnit = rateUnit;
-      worker.description = description;
-      worker.availability = availability;
-      worker.serviceStatus = availability ? "Available" : "Unavailable";
-
-      if (imageBase64) {
-        worker.image = imageBase64;
-      }
-
-      await worker.save();
-
-      // Update session
-      req.session.user = worker.toObject();
-
-      console.log("Worker profile updated successfully:", worker._id);
-
-      res.json({
-        success: true,
-        message: "Worker profile updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating worker:", error);
-      res.status(500).json({
-        error: "Error updating worker profile",
-        details: error.message,
-      });
+      // Set new image from Cloudinary upload
+      worker.image = {
+        url: file.secure_url,
+        publicId: file.public_id,
+      };
     }
-  });
+
+    await worker.save();
+
+    // Update session
+    req.session.user = worker.toObject();
+
+    console.log("Worker profile updated successfully:", worker._id);
+
+    res.json({
+      success: true,
+      message: "Worker profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating worker:", error);
+    res.status(500).json({
+      error: "Error updating worker profile",
+      details: error.message,
+    });
+  }
 };
 
 // Get all workers as JSON for API
@@ -857,6 +838,16 @@ exports.deleteWorkerAccount = async (req, res) => {
 
     if (worker.password !== password) {
       return res.status(401).json({ error: "Invalid password" });
+    }
+
+    // Delete worker image from Cloudinary
+    if (worker.image && worker.image.publicId) {
+      try {
+        await cloudinary.uploader.destroy(worker.image.publicId);
+        console.log(`Deleted worker image from Cloudinary: ${worker.image.publicId}`);
+      } catch (err) {
+        console.error(`Error deleting worker image from Cloudinary:`, err);
+      }
     }
 
     await Worker.deleteOne({ _id: workerId });

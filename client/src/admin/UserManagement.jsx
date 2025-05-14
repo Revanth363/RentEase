@@ -168,6 +168,10 @@ const handleDelete = async (userId, userType) => {
   }
 };
 
+
+if (loading) {
+    return <LoadingSpinner />;
+  }
   
 
   return (

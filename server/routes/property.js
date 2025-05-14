@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const propertyController = require("../controllers/propertyController");
+const { uploadProperties } = require("../middleware/uploadCloudinary");
 
 const Property = require("../models/property"); // Adjust path as needed
 const Notification = require("../models/notification");
@@ -9,8 +10,19 @@ const Notification = require("../models/notification");
 // Authentication middleware (reusing your isAuthenticated)
 const isAuthenticated = require("../middleware/auth");
 
-// Route for property listing form submission
-router.post("/list-property", isAuthenticated, propertyController.listProperty);
+// Route for property listing form submission with Cloudinary upload
+// Wrap to catch multer errors and return JSON
+router.post("/list-property", isAuthenticated, (req, res, next) => {
+  uploadProperties(req, res, (err) => {
+    if (err) {
+      // Multer error - return JSON instead of HTML
+      console.error("Multer error:", err.message);
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    }
+    // No multer error, continue to controller
+    next();
+  });
+}, propertyController.listProperty);
 
 router.delete("/:id", propertyController.deleteProperty);
 

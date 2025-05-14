@@ -106,7 +106,12 @@ const PropertyView = () => {
             <h3>Images</h3>
             <div className="image-gallery" style={{ maxWidth: '100%', overflowX: 'hidden' }}>
               {property.images.map((img, index) => (
-                <img key={index} src={img} alt="Property Image" style={{ maxWidth: '100%', margin: '10px' }} />
+                <img 
+                  key={index} 
+                  src={typeof img === 'string' ? img : img.url} 
+                  alt="Property Image" 
+                  style={{ maxWidth: '100%', margin: '10px' }} 
+                />
               ))}
             </div>
           </div>

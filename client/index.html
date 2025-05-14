@@ -9,35 +9,41 @@
   http-equiv="Content-Security-Policy"
   content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval';
-    style-src 
-      'self' 
-      'unsafe-inline' 
+    script-src 'self' 'unsafe-inline' 'unsafe-eval'
+      https://maps.googleapis.com
+      https://*.gstatic.com;
+    style-src 'self' 'unsafe-inline'
       https://fonts.googleapis.com
       https://cdnjs.cloudflare.com
       https://cdnjs.cloudflare.com/ajax/libs/font-awesome/;
-    font-src 
-      'self' 
+    font-src 'self'
       https://fonts.gstatic.com
       https://cdnjs.cloudflare.com
       https://cdnjs.cloudflare.com/ajax/libs/font-awesome/;
     img-src 'self' data: blob:
-      http://localhost:5000 
-      http://localhost:5173 
-      https://cdn-icons-png.flaticon.com 
-      https://*.flaticon.com 
-      https://www.homebazaar.com 
-      https://unitedsettlement.com 
-      https://encrypted-tbn0.gstatic.com 
-      https://*.googleusercontent.com 
-      https://maps.gstatic.com;
-    connect-src 'self' 
-      http://localhost:5000 
-      http://localhost:5173 
-      ws://localhost:5173;
-    frame-src 
-      https://maps.app.goo.gl 
-      https://www.google.com/maps 
+      http://localhost:5000
+      http://localhost:5173
+      https://res.cloudinary.com
+      https://cdn-icons-png.flaticon.com
+      https://*.flaticon.com
+      https://www.homebazaar.com
+      https://unitedsettlement.com
+      https://encrypted-tbn0.gstatic.com
+      https://*.googleusercontent.com
+      https://maps.gstatic.com
+      https://*.googleapis.com
+      https://*.ggpht.com
+      https://*.google.com;
+    connect-src 'self'
+      http://localhost:5000
+      http://localhost:5173
+      ws://localhost:5173
+      https://maps.googleapis.com
+      https://*.googleapis.com
+      https://*.gstatic.com;
+    frame-src
+      https://maps.app.goo.gl
+      https://www.google.com/maps
       https://maps.google.com;
     object-src 'none';
     base-uri 'self';

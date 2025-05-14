@@ -5,6 +5,10 @@ const session = require("express-session");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 require("dotenv").config();
+const passport = require("passport");
+const helmet = require("helmet");
+require("./passport");
+
 
 const Property = require("./models/property");
 const Tenant = require("./models/tenant");
@@ -18,7 +22,7 @@ const Rating = require("./models/rating");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
-const formidable = require("formidable");
+
 const fs = require("fs");
 
 const propertyRoutes = require("./routes/property");
@@ -65,9 +69,32 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: "15mb" }));
+
+// (new middleware)
+// ─── Body Parsing ───────────────────────────────────────────────
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: true, limit: '15mb' }));
+app.use(bodyParser.json({ limit: '15mb' }));
+
+// You can keep these too — they are not harmful, but body-parser is now primary
+// app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+// app.use(express.json({ limit: '15mb' }));
+
 app.use(express.static(path.join(__dirname, "public")));
+
+
+
+// ─── Security Headers (Helmet) ──────────────────────────────────
+app.use(helmet());
+app.use(helmet.hidePoweredBy());                        // Remove X-Powered-By header
+app.use(helmet.frameguard({ action: 'deny' }));         // Prevent clickjacking (X-Frame-Options: DENY)
+app.use(helmet.xssFilter());                            // Add X-XSS-Protection header (legacy but still used)
+app.use(helmet.noSniff());                              // Prevent MIME-type sniffing (X-Content-Type-Options: nosniff)
+app.use(helmet.ieNoOpen());                             // X-Download-Options for IE8+ (no open in browser)
+// app.use(helmet.hsts({ maxAge: 31536000 }));             // Strict-Transport-Security (1 year) — enable only if you have HTTPS!
+app.use(helmet.referrerPolicy({ policy: 'no-referrer' })); // Strict referrer policy
+
 
 app.use(
   session({
@@ -81,6 +108,17 @@ app.use(
     },
   })
 );
+
+// ─── Cookie Parser (needed for signed cookies & csurf) ──────────
+const cookieParser = require('cookie-parser');
+app.use(cookieParser(process.env.SESSION_SECRET || 'your_secret_key'));
+
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 
 const isAuthenticated = require("./middleware/auth");
 
@@ -112,6 +150,7 @@ function generateOtp() {
 }
 
 // OTP will be returned in response for development (no email service needed)
+
 
 // Routes
 app.use("/api/property", propertyRoutes);
@@ -236,6 +275,8 @@ app.get("/", (req, res) => {
 app.get("/forgot-password", (req, res) => {
   res.redirect("http://localhost:5173/forgot-password");
 });
+
+
 
 async function handleForgotPassword(req, res) {
   const { email } = req.body;
@@ -399,6 +440,33 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
+// Start Google login
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Google callback
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    // Create session user (IMPORTANT for your app)
+    req.session.user = {
+      _id: req.user._id.toString(),
+      userType: req.user.userType,
+      email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+    };
+
+    res.redirect("http://localhost:5173/google-auth-success");
+  }
+);
+
+
 
 app.post("/register", async (req, res) => {
   const {
@@ -1134,15 +1202,42 @@ app.get("/api/admin/message/:id", adminAuth, async (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: "Something went wrong!",
-    details: process.env.NODE_ENV === "development" ? err.message : {},
+// ─── 404 Not Found Handler ──────────────────────────────────────
+// Catch any route that doesn't exist → return proper 404 JSON
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    error: `Cannot ${req.method} ${req.originalUrl} - Route not found`
   });
 });
 
-// Start server
+// ─── Global Error Handler ───────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('ERROR:', {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    path: req.originalUrl,
+    message: err.message,
+    stack: err.stack ? err.stack.split('\n').slice(0, 8).join('\n') : undefined,
+  });
+
+  const status = err.status || 500;
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  let response = {
+    success: false,
+    error: isDev ? err.message : 'Internal Server Error - Please try again later',
+  };
+
+  // Extra info for admin routes in development
+  if (req.originalUrl.startsWith('/api/admin')) {
+    response.adminHint = isDev ? 'Check server logs for details' : undefined;
+    if (isDev) response.stack = err.stack?.split('\n').slice(0, 6);
+  }
+
+  res.status(status).json(response);
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

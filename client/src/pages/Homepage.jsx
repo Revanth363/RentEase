@@ -68,7 +68,7 @@ const HomePage = () => {
           type: property.subtype || "N/A",
           image:
             property.images && property.images.length > 0 && property.images[0]
-              ? property.images[0]
+              ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.url)
               : "/images/placeholder.jpg",
           price: property.price || 0,
           id: property._id || "",

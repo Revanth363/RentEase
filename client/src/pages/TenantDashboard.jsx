@@ -636,7 +636,7 @@ const TenantDashboard = () => {
                     <img
                       src={
                         currentProperty.images && currentProperty.images[0]
-                          ? currentProperty.images[0]
+                          ? (typeof currentProperty.images[0] === 'string' ? currentProperty.images[0] : currentProperty.images[0]?.url)
                           : "/images/default-property.jpg"
                       }
                       alt="Property"
@@ -943,7 +943,7 @@ const TenantDashboard = () => {
                     key={worker._id || index}
                   >
                     <img
-                      src={worker.image || "/resources/default-worker.jpg"}
+                      src={(typeof worker.image === 'string' ? worker.image : worker.image?.url) || "/resources/default-worker.jpg"}
                       alt="Worker"
                     />
                     <div className="tntd-worker-details">
@@ -1151,7 +1151,7 @@ const TenantDashboard = () => {
                     <img
                       src={
                         property.images && property.images[0]
-                          ? property.images[0]
+                          ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0]?.url)
                           : "/images/default-property.jpg"
                       }
                       alt="Property"

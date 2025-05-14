@@ -492,8 +492,11 @@ const OwnerDashboard = () => {
                   <div className="ownd-sc-image-container">
                     <img
                       src={
-                        (property.images && property.images[0]) ||
-                        "/images/default.jpg"
+                        property.images && Array.isArray(property.images) && property.images.length > 0
+                          ? (typeof property.images[0] === 'string' 
+                              ? property.images[0] 
+                              : property.images[0]?.url)
+                          : "/images/default.jpg"
                       }
                       className="ownd-sc-image"
                       alt={property.name}

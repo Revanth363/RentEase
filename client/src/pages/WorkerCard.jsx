@@ -117,7 +117,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
     if (error) return <main className={styles.root}><p className={styles.error}>{error}</p></main>;
     if (!worker) return <main className={styles.root}><p>No worker found</p></main>;
 
-    const img = worker.image || worker.photo || worker.photos?.[0] || '/images/default-worker.jpg';
+    const img = (typeof worker.image === 'string' ? worker.image : worker.image?.url) || worker.photo || worker.photos?.[0] || '/images/default-worker.jpg';
 
     const availabilityText =
       worker.serviceStatus === "Available" ? "Available" : "Unavailable";
@@ -205,7 +205,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
   const id = worker._id || worker.id;
   const fullName = `${worker.firstName || ''} ${worker.lastName || ''}`.trim();
-  const image = worker.image || worker.photo || worker.photos?.[0] || '/images/default-worker.jpg';
+  const image = (typeof worker.image === 'string' ? worker.image : worker.image?.url) || worker.photo || worker.photos?.[0] || '/images/default-worker.jpg';
   const location = worker.location || worker.city || '';
   const price = worker.price || worker.rate || worker.monthlyPrice || '';
   const rating = worker.ratingId?.average ?? worker.rating ?? 'N/A';

@@ -86,6 +86,10 @@ const Messages = () => {
     setSearchParams(params, { replace: true });
   };
 
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
   
 
   return (

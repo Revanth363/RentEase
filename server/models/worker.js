@@ -14,7 +14,11 @@ const workerSchema = new mongoose.Schema({
   rateUnit: String,
   availability: String,
   description: String,
-  image: String,
+  image: {
+  url: String,
+  publicId: String
+},
+
   password: {
     type: String,
     required: true,

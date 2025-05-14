@@ -227,6 +227,10 @@ const AdminDashboard = () => {
     { title: 'Available Workers', value: stats.workersAvailable || 0 },
   ];
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>Admin Dashboard</h1>

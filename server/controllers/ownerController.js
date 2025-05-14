@@ -42,8 +42,8 @@ exports.getOwnerDashboard = async (req, res) => {
       return res.status(404).json({ message: "Owner not found" });
     }
 
-    // Fetch properties by ownerId
-    const properties = await Property.find({ ownerId: objectId });
+    // Fetch properties by ownerId (include all fields including images)
+    const properties = await Property.find({ ownerId: objectId }).lean();
 
     // Fetch tenants by matching tenantId in properties
     const tenantIds = properties

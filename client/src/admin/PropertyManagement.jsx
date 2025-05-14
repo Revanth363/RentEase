@@ -150,6 +150,10 @@ const PropertyManagement = () => {
     }
   };
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   
 
   return (

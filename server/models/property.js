@@ -28,9 +28,21 @@ const propertySchema = new mongoose.Schema({
   floor: String,
   furnished: String,
   description: String,
-  images: [String],
+  images: [
+  {
+    url: String,
+    publicId: String
+  }
+],
+
   amenities: [String],
-  map: String,
+
+  // ── CHANGED: replaced map: String with precise coordinates ──
+  coordinates: {
+    lat: { type: Number },
+    lng: { type: Number }
+  },
+
   securityDeposit: Number,
   maintenance: Number,
   availableFrom: Date,

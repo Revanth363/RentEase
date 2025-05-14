@@ -4,12 +4,15 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { LoadingProvider } from "./LoadingContext";
 import Header from "./components/Header";
 
+
+
 // Pages
 
 import HomePage from "./pages/Homepage";
 import PropertySearch from "./pages/PropertySearch";
 import PropertyDetails from "./pages/PropertyDetails";
 import Auth from "./pages/Auth";
+import GoogleAuthSuccess from "./pages/GoogleAuthSuccess";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
@@ -78,7 +81,7 @@ const App = () => {
   }, [location.pathname, navigate]);
 
   // Hide Header on: Admin routes, Login, Register
-  const hideHeaderPaths = ["/login", "/register"];
+  const hideHeaderPaths = ["/login", "/register","/google-auth-success"];
 
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldHideHeader =
@@ -107,6 +110,12 @@ const App = () => {
           {/* Auth Routes — NO HEADER */}
           <Route path="/login" element={<Auth initial="login" />} />
           <Route path="/register" element={<Auth initial="register" />} />
+          {/* Google OAuth Redirect */}
+<Route
+  path="/google-auth-success"
+  element={<GoogleAuthSuccess />}
+/>
+
 
           {/* User Dashboards */}
           <Route

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const workerController = require("../controllers/workerController");
+const { uploadWorker } = require("../middleware/uploadCloudinary");
 // Only require controllers and express at the top. Do not require WorkerPayment here.
 
 // Route to render the worker dashboard
@@ -75,8 +76,19 @@ router.get(
 // API endpoint to get a specific worker by ID (mounted at /api/workers/:id)
 router.get("/:id", workerController.getWorkerById);
 
-// API endpoint to register/update a worker
-router.post("/register", workerController.registerWorker);
+// API endpoint to register/update a worker with Cloudinary image upload
+// Wrap to catch multer errors and return JSON
+router.post("/register", (req, res, next) => {
+  uploadWorker(req, res, (err) => {
+    if (err) {
+      // Multer error - return JSON instead of HTML
+      console.error("Multer error:", err.message);
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    }
+    // No multer error, continue to controller
+    next();
+  });
+}, workerController.registerWorker);
 
 // API endpoint to toggle worker availability
 router.post(

@@ -121,6 +121,10 @@ const WorkerPayments = () => {
     setSearchParams(params, { replace: true });
   };
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   
 
   return (
