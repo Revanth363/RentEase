@@ -74,25 +74,18 @@ morgan.format(
 // File logger middleware
 const fileLogger = morgan("timed", { stream: accessLogStream });
 
-// Console logger middleware (for development)
-const consoleLogger = morgan("timed");
+
 
 const logger = (req, res, next) => {
-
   fileLogger(req, res, (err) => {
     if (err) return next(err);
-
-    if (process.env.NODE_ENV !== "production") {
-      consoleLogger(req, res, next);
-    } else {
-      next();
-    }
+    next(); // no console logging
   });
 };
+
 
 module.exports = {
   logger,
   fileLogger,
-  consoleLogger,
   accessLogStream,
 };

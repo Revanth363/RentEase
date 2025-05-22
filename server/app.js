@@ -118,6 +118,10 @@ app.use(cookieParser(process.env.SESSION_SECRET || 'your_secret_key'));
 app.use(passport.initialize());
 app.use(passport.session());
 
+const { logger } = require("./middleware/logger");
+app.use(logger);
+
+
 
 
 const isAuthenticated = require("./middleware/auth");
