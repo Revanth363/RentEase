@@ -145,6 +145,11 @@ export default function Register() {
 
   const show = (key) => touched[key] && validate[key];
 
+  // 🔹 GOOGLE REGISTRATION HANDLER
+  const handleGoogleRegister = () => {
+    window.location.href = "http://localhost:5000/auth/google";
+  };
+
   return (
     <div className={styles.registerPageRoot}>
       <div className={styles.container}>
@@ -410,6 +415,24 @@ export default function Register() {
               {authError}
             </div>
           )}
+
+          {/* 🔹 GOOGLE REGISTRATION BUTTON */}
+          <div style={{ marginTop: "16px", textAlign: "center" }}>
+            <button
+              type="button"
+              onClick={handleGoogleRegister}
+              style={{
+                width: "100%",
+                padding: "10px",
+                backgroundColor: "#fff",
+                border: "1px solid #ddd",
+                cursor: "pointer",
+                fontWeight: 500,
+              }}
+            >
+              Sign Up with Google
+            </button>
+          </div>
         </form>
       </div>
     </div>
