@@ -8,42 +8,38 @@ const Notification = require('../models/notification');
 // Render booking form
 exports.getBookingForm = async (req, res) => {
   try {
-    console.log(`Attempting to render booking form, property ID: ${req.query.id || 'none'}, session user:`, req.session.user);
-    if (!req.session.user || req.session.user.userType !== 'tenant') {
-      console.warn(`Unauthorized access to booking form, tenant ID: ${req.session.user?._id || 'none'}`);
+    console.log(`Attempting to render booking form, property ID: ${req.query.id || 'none'}, user:`, req.user);
+    if (!req.user || req.user.userType !== 'tenant') {
+      console.warn(`Unauthorized access to booking form, tenant ID: ${req.user?.id || 'none'}`);
       return res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
     }
 
     const propertyId = req.query.id;
     if (!propertyId) {
-      console.warn(`Missing property ID, tenant ID: ${req.session.user._id}`);
-      req.session.error = 'Property ID is required';
+      console.warn(`Missing property ID, tenant ID: ${req.user.id}`);
       return res.redirect(`/property?id=${propertyId || ''}`);
     }
 
     // Fetch property to get _id (no validations)
     const property = await Property.findById(propertyId);
     if (!property) {
-      console.warn(`Property not found: ${propertyId}, tenant ID: ${req.session.user._id}`);
-      req.session.error = 'Property not found';
+      console.warn(`Property not found: ${propertyId}, tenant ID: ${req.user.id}`);
       return res.redirect(`/property?id=${propertyId}`);
     }
 
-    console.log(`Rendering book_property.ejs with propertyId: ${property._id.toString()}, tenant ID: ${req.session.user._id}`);
+    console.log(`Rendering book_property.ejs with propertyId: ${property._id.toString()}, tenant ID: ${req.user.id}`);
     res.render('pages/book_property', {
-      user: req.session.user,
+      user: req.user,
       propertyId: property._id.toString()
     }, (err, html) => {
       if (err) {
-        console.error(`Error rendering book_property.ejs, property ID: ${propertyId}, tenant ID: ${req.session.user._id}`, err);
-        req.session.error = 'Failed to load booking form';
+        console.error(`Error rendering book_property.ejs, property ID: ${propertyId}, tenant ID: ${req.user.id}`, err);
         return res.redirect(`/property?id=${propertyId}`);
       }
       res.send(html);
     });
   } catch (err) {
-    console.error(`Error in getBookingForm, property ID: ${req.query.id || 'none'}, tenant ID: ${req.session.user?._id || 'none'}`, err);
-    req.session.error = 'Server error occurred';
+    console.error(`Error in getBookingForm, property ID: ${req.query.id || 'none'}, tenant ID: ${req.user?.id || 'none'}`, err);
     res.redirect(`/property?id=${req.query.id || ''}`);
   }
 };
@@ -51,9 +47,9 @@ exports.getBookingForm = async (req, res) => {
 // Process booking form submission
 exports.createBooking = async (req, res) => {
   try {
-    console.log(`Processing booking submission, property ID: ${req.body.propertyId}, tenant ID: ${req.session.user?._id}, body:`, req.body);
-    if (!req.session.user || req.session.user.userType !== 'tenant') {
-      console.warn(`Unauthorized booking attempt, tenant ID: ${req.session.user?._id || 'none'}`);
+    console.log(`Processing booking submission, property ID: ${req.body.propertyId}, tenant ID: ${req.user?.id}, body:`, req.body);
+    if (!req.user || req.user.userType !== 'tenant') {
+      console.warn(`Unauthorized booking attempt, tenant ID: ${req.user?.id || 'none'}`);
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
@@ -61,18 +57,18 @@ exports.createBooking = async (req, res) => {
 
     // Minimal validation for required fields
     if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId)) {
-      console.warn(`Invalid property ID: ${propertyId}, tenant ID: ${req.session.user._id}`);
+      console.warn(`Invalid property ID: ${propertyId}, tenant ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Invalid property ID' });
     }
     if (!startDate || !leaseDuration) {
-      console.warn(`Missing startDate or leaseDuration, tenant ID: ${req.session.user._id}`);
+      console.warn(`Missing startDate or leaseDuration, tenant ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Start date and lease duration are required' });
     }
 
     // Fetch property
     const property = await Property.findById(propertyId);
     if (!property) {
-      console.warn(`Property not found: ${propertyId}, tenant ID: ${req.session.user._id}`);
+      console.warn(`Property not found: ${propertyId}, tenant ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Property not found' });
     }
 
@@ -85,11 +81,11 @@ exports.createBooking = async (req, res) => {
     // Get ownerId or fallback
     let ownerId = property.ownerId;
     if (!ownerId || !mongoose.Types.ObjectId.isValid(ownerId)) {
-      console.warn(`Property missing valid ownerId: ${propertyId}, tenant ID: ${req.session.user._id}`);
+      console.warn(`Property missing valid ownerId: ${propertyId}, tenant ID: ${req.user.id}`);
       // Fallback: Use first owner in database
       const fallbackOwner = await Owner.findOne().select('_id firstName lastName');
       if (!fallbackOwner) {
-        console.warn(`No owners found in database, tenant ID: ${req.session.user._id}`);
+        console.warn(`No owners found in database, tenant ID: ${req.user.id}`);
         return res.status(400).json({ success: false, message: 'No owners available' });
       }
       ownerId = fallbackOwner._id;
@@ -98,8 +94,8 @@ exports.createBooking = async (req, res) => {
 
     // Create booking
     const booking = new Booking({
-      tenantId: req.session.user._id,
-      userName: `${req.session.user.firstName || ''} ${req.session.user.lastName || ''}`.trim() || 'Tenant',
+      tenantId: req.user.id,
+      userName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Tenant',
       propertyId: propertyId,
       propertyName: property.name || 'Unknown Property',
       ownerId: ownerId,
@@ -116,7 +112,7 @@ exports.createBooking = async (req, res) => {
     // Fetch owner for notification
     const owner = await Owner.findById(ownerId);
     if (!owner) {
-      console.warn(`Owner not found for ownerId: ${ownerId}, tenant ID: ${req.session.user._id}`);
+      console.warn(`Owner not found for ownerId: ${ownerId}, tenant ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Owner not found' });
     }
 
@@ -125,7 +121,7 @@ exports.createBooking = async (req, res) => {
       recipient: ownerId,
       recipientType: 'Owner',
       type: 'Booking Request',
-      message: `New booking request for ${property.name || 'Unknown Property'} by ${req.session.user.firstName || ''} ${req.session.user.lastName || ''}`.trim() || 'Tenant',
+      message: `New booking request for ${property.name || 'Unknown Property'} by ${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Tenant',
       status: 'Pending',
       propertyName: property.name || 'Unknown Property',
       recipientName: `${owner.firstName || ''} ${owner.lastName || ''}`.trim() || 'Owner',
@@ -146,7 +142,7 @@ exports.createBooking = async (req, res) => {
     console.log(`Booking submitted successfully, booking ID: ${booking._id}, notification ID: ${notification._id}`);
     res.status(200).json({ success: true, message: 'Booking request submitted, awaiting owner approval' });
   } catch (err) {
-    console.error(`Error processing booking, property ID: ${req.body.propertyId || 'none'}, tenant ID: ${req.session.user?._id || 'none'}, error:`, err);
+    console.error(`Error processing booking, property ID: ${req.body.propertyId || 'none'}, tenant ID: ${req.user?.id || 'none'}, error:`, err);
     res.status(500).json({ success: false, message: `Server error: ${err.message}` });
   }
 };
@@ -167,29 +163,29 @@ exports.handleNotificationAction = async (req, res) => {
     }
 
     // Check if user is owner
-    if (!req.session.user || req.session.user.userType !== 'owner') {
-      console.warn(`Unauthorized notification action, owner ID: ${req.session.user?._id || 'none'}`);
+    if (!req.user || req.user.userType !== 'owner') {
+      console.warn(`Unauthorized notification action, owner ID: ${req.user?.id || 'none'}`);
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
     // Fetch notification and validate
     const notification = await Notification.findById(notificationId);
-    if (!notification || notification.recipient.toString() !== req.session.user._id.toString()) {
-      console.warn(`Invalid or unauthorized notification: ${notificationId}, owner ID: ${req.session.user._id}`);
+    if (!notification || notification.recipient.toString() !== req.user.id.toString()) {
+      console.warn(`Invalid or unauthorized notification: ${notificationId}, owner ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Invalid notification' });
     }
 
     // Fetch booking
     const booking = await Booking.findById(notification.bookingId);
     if (!booking) {
-      console.warn(`Booking not found for notification: ${notificationId}, owner ID: ${req.session.user._id}`);
+      console.warn(`Booking not found for notification: ${notificationId}, owner ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Booking not found' });
     }
 
     // Fetch tenant
     const tenant = await Tenant.findById(booking.tenantId);
     if (!tenant) {
-      console.warn(`Tenant not found for booking: ${booking._id}, owner ID: ${req.session.user._id}`);
+      console.warn(`Tenant not found for booking: ${booking._id}, owner ID: ${req.user.id}`);
       return res.status(400).json({ success: false, message: 'Tenant not found' });
     }
 
@@ -270,7 +266,7 @@ exports.handleNotificationAction = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Notification action completed' });
   } catch (err) {
-    console.error(`Error processing notification action, notification ID: ${req.body.notificationId || 'none'}, owner ID: ${req.session.user?._id || 'none'}`, err);
+    console.error(`Error processing notification action, notification ID: ${req.body.notificationId || 'none'}, owner ID: ${req.user?.id || 'none'}`, err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

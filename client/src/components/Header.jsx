@@ -9,34 +9,33 @@ const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // ← FIXED: add this state
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Fetch logged-in user
+  // Fetch logged-in user on mount and when location changes
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await axios.get("/api/check-session", {
+        const res = await axios.get("/api/me", {
           withCredentials: true,
         });
-        setUser(res.data.user);
+        setUser(res.data.user || null);
+        setIsAdmin(res.data.admin || false);
       } catch (err) {
+        console.error("Session check failed:", err);
         setUser(null);
         setIsAdmin(false);
       }
     };
+
     checkSession();
-  }, []);
+  }, []); // Removed location dependency — no need to re-check on every path change
 
   // Toggle mobile menu
-  const toggleNav = () => {
-    setIsNavOpen((prev) => !prev);
-  };
-
-  const closeNav = () => {
-    setIsNavOpen(false);
-  };
+  const toggleNav = () => setIsNavOpen((prev) => !prev);
+  const closeNav = () => setIsNavOpen(false);
 
   // Toggle user dropdown
   const toggleDropdown = (e) => {
@@ -45,7 +44,7 @@ const Header = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  // Close dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
     if (!isDropdownOpen) return;
     const handleClickOutside = () => setIsDropdownOpen(false);
@@ -59,11 +58,11 @@ const Header = () => {
     try {
       await axios.get("/api/logout", { withCredentials: true });
       setUser(null);
+      setIsAdmin(false);
       setIsDropdownOpen(false);
       navigate("/");
-      window.location.reload(); // Optional: force refresh
     } catch (err) {
-      console.error("Logout failed", err);
+      console.error("Logout failed:", err);
     }
   };
 
@@ -73,7 +72,7 @@ const Header = () => {
     return location.pathname.startsWith(path);
   };
 
-  // Close nav and dropdown on link click
+  // Close nav/dropdown on link click
   const handleLinkClick = () => {
     setIsNavOpen(false);
     setIsDropdownOpen(false);
@@ -104,56 +103,22 @@ const Header = () => {
 
       {/* Navigation Menu */}
       <nav className={`${styles.navMenu} ${isNavOpen ? styles.active : ""}`}>
-        <Link
-          to="/"
-          className={`${styles.navLink} ${isActive("/") ? styles.active : ""}`}
-          onClick={handleLinkClick}
-        >
+        <Link to="/" className={`${styles.navLink} ${isActive("/") ? styles.active : ""}`} onClick={handleLinkClick}>
           Home
         </Link>
-        <Link
-          to="/search"
-          className={`${styles.navLink} ${
-            isActive("/search") ? styles.active : ""
-          }`}
-          onClick={handleLinkClick}
-        >
+        <Link to="/search" className={`${styles.navLink} ${isActive("/search") ? styles.active : ""}`} onClick={handleLinkClick}>
           Properties
         </Link>
-        <Link
-          to="/workerDetails"
-          className={`${styles.navLink} ${
-            isActive("/workerDetails") ? styles.active : ""
-          }`}
-          onClick={handleLinkClick}
-        >
+        <Link to="/workerDetails" className={`${styles.navLink} ${isActive("/workerDetails") ? styles.active : ""}`} onClick={handleLinkClick}>
           Services
         </Link>
-        <Link
-          to="/about_us"
-          className={`${styles.navLink} ${
-            isActive("/about_us") ? styles.active : ""
-          }`}
-          onClick={handleLinkClick}
-        >
+        <Link to="/about_us" className={`${styles.navLink} ${isActive("/about_us") ? styles.active : ""}`} onClick={handleLinkClick}>
           About Us
         </Link>
-        <Link
-          to="/contact_us"
-          className={`${styles.navLink} ${
-            isActive("/contact_us") ? styles.active : ""
-          }`}
-          onClick={handleLinkClick}
-        >
+        <Link to="/contact_us" className={`${styles.navLink} ${isActive("/contact_us") ? styles.active : ""}`} onClick={handleLinkClick}>
           Contact Us
         </Link>
-        <Link
-          to="/faq"
-          className={`${styles.navLink} ${
-            isActive("/faq") ? styles.active : ""
-          }`}
-          onClick={handleLinkClick}
-        >
+        <Link to="/faq" className={`${styles.navLink} ${isActive("/faq") ? styles.active : ""}`} onClick={handleLinkClick}>
           FAQs
         </Link>
       </nav>
@@ -162,22 +127,12 @@ const Header = () => {
       <div className={styles.cta}>
         {user ? (
           <div className={styles.dropdown}>
-            <a
-              href="#"
-              className={styles.userGreeting}
-              onClick={toggleDropdown}
-            >
+            <a href="#" className={styles.userGreeting} onClick={toggleDropdown}>
               <span>Hi, {user.firstName}</span>
-              <FontAwesomeIcon
-                icon={faCircleChevronDown}
-                className={styles.icon}
-              />
+              <FontAwesomeIcon icon={faCircleChevronDown} className={styles.icon} />
             </a>
 
-            <div
-              className={styles.dropdownContent}
-              style={{ display: isDropdownOpen ? "block" : "none" }}
-            >
+            <div className={styles.dropdownContent} style={{ display: isDropdownOpen ? "block" : "none" }}>
               {user.userType === "tenant" && (
                 <Link to="/tenant/tenant_dashboard" onClick={handleLinkClick}>
                   Dashboard
@@ -193,13 +148,18 @@ const Header = () => {
                   Dashboard
                 </Link>
               )}
+              {isAdmin && (
+                <Link to="/admin" onClick={handleLinkClick}>
+                  Admin Panel
+                </Link>
+              )}
               <a href="#" onClick={handleLogout}>
                 Logout
               </a>
             </div>
           </div>
         ) : (
-          <Link to="/login" className={styles.loginBtn}>
+          <Link to="/login" className={styles.loginBtn} onClick={handleLinkClick}>
             Login/SignUp
           </Link>
         )}

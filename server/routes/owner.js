@@ -2,14 +2,15 @@ const express = require("express");
 const router = express.Router();
 const ownerController = require("../controllers/ownerController");
 const propertyController = require("../controllers/propertyController");
-const isAuthenticated = require("../middleware/auth");
+const { protect } = require("../middleware/auth");
+
 const UnrentRequest = require("../models/unrentRequest");
 
 // Get owner dashboard data (React API endpoint)
-router.get("/dashboard", ownerController.getOwnerDashboard);
+router.get("/dashboard", protect,ownerController.getOwnerDashboard);
 
 // Legacy route for backward compatibility
-router.get("/owner_dashboard", ownerController.getOwnerDashboard);
+router.get("/owner_dashboard", protect, ownerController.getOwnerDashboard);
 
 // Update maintenance request status
 router.post(
@@ -32,14 +33,16 @@ router.post("/owner/update-settings", ownerController.updateOwnerSettings);
 // Approve or reject unrent property requests
 router.post(
   "/approve-unrent-property",
-  isAuthenticated,
+  protect
+,
   ownerController.approveUnrentProperty
 );
 
 // Legacy route for backward compatibility
 router.post(
   "/approve-unrent-property",
-  isAuthenticated,
+  protect
+,
   ownerController.approveUnrentProperty
 );
 

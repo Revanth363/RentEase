@@ -309,7 +309,7 @@ const HomePage = () => {
   return (
     <div className={styles['home-container']}>
       <div className={styles['background-container']}>
-        <img src="/login.jpg" alt="Background Image" />
+        <img src="/Login.jpg" alt="Background Image" />
         <main className={styles['main-section']}>
           <div className={styles['main-overlay']}>
             <h1>Welcome to RentEase</h1>

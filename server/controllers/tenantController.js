@@ -18,11 +18,11 @@ const UnrentRequest = require("../models/unrentRequest");
 // Dashboard Controller
 exports.getDashboard = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to dashboard, redirecting to login");
       return res.redirect("/login?error=Please log in");
     }
-    const userId = req.session.user._id;
+    const userId = req.user.id;
     console.log("Fetching dashboard for tenant ID:", userId);
 
     const tenant = await Tenant.findById(userId)
@@ -163,12 +163,12 @@ exports.getDashboard = async (req, res) => {
 // JSON endpoint for React: returns the same data as the EJS render but as JSON
 exports.getDashboardData = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
-      console.log("Unauthorized access to dashboard-data");
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ success: false, message: "Please log in" });
     }
-    const userId = req.session.user._id;
+    const userId = req.user.id;
 
+    // Fetch tenant with populated arrays
     const tenant = await Tenant.findById(userId)
       .populate("savedListings")
       .populate({
@@ -180,84 +180,127 @@ exports.getDashboardData = async (req, res) => {
         path: "complaintIds",
         model: "Complaint",
         options: { sort: { dateSubmitted: -1 } },
-      });
+      })
+      .lean(); // ← lean for better performance & consistent serialization
 
-    if (!tenant)
-      return res
-        .status(404)
-        .json({ success: false, message: "Tenant not found" });
-
-    let domesticWorkers = [];
-    if (tenant.domesticWorkerId && tenant.domesticWorkerId.length > 0) {
-      domesticWorkers = await Worker.find({
-        _id: { $in: tenant.domesticWorkerId },
-      }).populate("ratingId");
+    if (!tenant) {
+      return res.status(404).json({ success: false, message: "Tenant not found" });
     }
 
-    const currentProperty = await Property.findOne({ tenantId: userId });
-    let propertyOwner = null;
-    if (currentProperty && currentProperty.ownerId)
-      propertyOwner = await Owner.findById(currentProperty.ownerId);
+    // Domestic workers
+    let domesticWorkers = [];
+    if (tenant.domesticWorkerId?.length > 0) {
+      domesticWorkers = await Worker.find({
+        _id: { $in: tenant.domesticWorkerId },
+      })
+        .populate("ratingId")
+        .lean();
+    }
 
+    // Current rented property (with .lean())
+    const currentPropertyRaw = await Property.findOne({ tenantId: userId }).lean();
+
+    let currentProperty = null;
+    let currentPropertyImages = [];
+
+    if (currentPropertyRaw) {
+      // Normalize images → array of usable strings (base64 or Cloudinary URL)
+      currentPropertyImages = (currentPropertyRaw.images || []).map(img => {
+        if (typeof img === "string") return img;               // base64
+        if (img && typeof img === "object" && img.url) return img.url; // Cloudinary
+        return null;
+      }).filter(Boolean);
+
+      currentProperty = {
+        ...currentPropertyRaw,
+        images: currentPropertyImages
+      };
+    }
+
+    // Property owner
+    let propertyOwner = null;
+    if (currentPropertyRaw?.ownerId) {
+      propertyOwner = await Owner.findById(currentPropertyRaw.ownerId).lean();
+    }
+
+    // Payments
     const payments = await Payment.find({ tenantId: userId })
       .sort({ paymentDate: -1 })
-      .limit(10);
+      .limit(10)
+      .lean();
+
     const nextPayment = await Payment.findOne({
       tenantId: userId,
       status: "Pending",
-    }).sort({ dueDate: 1 });
+    })
+      .sort({ dueDate: 1 })
+      .lean();
+
+    // Maintenance requests
     const activeMaintenanceRequests = await MaintenanceRequest.find({
       tenantId: userId,
       status: { $in: ["Pending", "In Progress"] },
-    }).sort({ dateReported: -1 });
+    })
+      .sort({ dateReported: -1 })
+      .lean();
+
     const completedMaintenanceRequests = await MaintenanceRequest.find({
       tenantId: userId,
       status: "Resolved",
     })
       .sort({ dateReported: -1 })
-      .limit(5);
-    const complaints = await Complaint.find({ tenantId: userId }).sort({
-      dateSubmitted: -1,
-    });
-    const rentalHistory = await RentalHistory.findOne({ tenantId: userId });
-    const ratings = await Rating.find({
-      tenantId: userId,
-      propertyId: { $exists: true },
-    }).populate("propertyId");
+      .limit(5)
+      .lean();
 
-    // Enrich rental history with property images and ratings
+    const complaints = await Complaint.find({ tenantId: userId })
+      .sort({ dateSubmitted: -1 })
+      .lean();
+
+    // Rental history with enriched property data
+    const rentalHistoryDoc = await RentalHistory.findOne({ tenantId: userId }).lean();
+
     let enrichedRentalHistory = [];
-    if (
-      rentalHistory &&
-      rentalHistory.propertyIds &&
-      rentalHistory.propertyIds.length > 0
-    ) {
+    if (rentalHistoryDoc?.propertyIds?.length > 0) {
       enrichedRentalHistory = await Promise.all(
-        rentalHistory.propertyIds.map(async (historyItem) => {
+        rentalHistoryDoc.propertyIds.map(async (historyItem) => {
           const propertyId = historyItem.property;
-          const property = await Property.findById(propertyId);
-          const propertyRating = ratings.find(
-            (r) =>
-              r.propertyId && String(r.propertyId._id) === String(propertyId)
-          );
+
+          const property = await Property.findById(propertyId).lean();
+
+          let propertyImages = [];
+          if (property?.images) {
+            propertyImages = property.images.map(img => {
+              if (typeof img === "string") return img;
+              if (img?.url) return img.url;
+              return null;
+            }).filter(Boolean);
+          }
+
+          const propertyRating = await Rating.findOne({
+            tenantId: userId,
+            propertyId: propertyId
+          }).lean();
 
           return {
-            ...historyItem.toObject(),
-            property: property ? property._id : propertyId,
+            ...historyItem,
             propertyName: property ? property.name : "Property",
-            propertyImages: property ? property.images : [],
-            rating: propertyRating ? propertyRating.rating : null,
-            review: propertyRating ? propertyRating.review : null,
+            propertyImages,                     // ← normalized array of strings
+            rating: propertyRating?.rating || null,
+            review: propertyRating?.review || null,
           };
         })
       );
     }
 
+    // Notifications
     const notificationsRaw = await Notification.find({
       recipient: userId,
       recipientType: "Tenant",
-    }).sort({ createdDate: -1 });
-    const notifications = notificationsRaw.map((n) => ({
+    })
+      .sort({ createdDate: -1 })
+      .lean();
+
+    const notifications = notificationsRaw.map(n => ({
       _id: n._id,
       type: n.type,
       message: n.message,
@@ -268,17 +311,20 @@ exports.getDashboardData = async (req, res) => {
       read: n.read,
     }));
 
+    // Worker payments
     const WorkerPayment = require("../models/workerPayment");
     const workerPaymentsRaw = await WorkerPayment.find({ tenantId: userId })
       .populate("workerId")
-      .sort({ paymentDate: -1 });
-    const workerPayments = workerPaymentsRaw.map((payment) => ({
+      .sort({ paymentDate: -1 })
+      .lean();
+
+    const workerPayments = workerPaymentsRaw.map(payment => ({
       _id: payment._id,
       paymentDate: payment.paymentDate,
       workerName: payment.workerId
         ? `${payment.workerId.firstName} ${payment.workerId.lastName}`
         : "N/A",
-      serviceType: payment.workerId ? payment.workerId.serviceType : "N/A",
+      serviceType: payment.workerId?.serviceType || "N/A",
       amount: payment.amount,
       paymentMethod: payment.paymentMethod,
       status: payment.status,
@@ -289,7 +335,7 @@ exports.getDashboardData = async (req, res) => {
     return res.json({
       success: true,
       user: tenant,
-      currentProperty,
+      currentProperty,                    // now with normalized images
       propertyOwner,
       payments,
       nextPayment,
@@ -297,30 +343,28 @@ exports.getDashboardData = async (req, res) => {
       completedMaintenanceRequests,
       complaints,
       workers: domesticWorkers,
-      rentalHistory: enrichedRentalHistory,
-      ratings,
+      rentalHistory: enrichedRentalHistory, // now with normalized propertyImages
+      ratings: await Rating.find({ tenantId: userId }).lean(), // optional: if you need them separately
       notifications,
       workerPayments,
     });
   } catch (error) {
     console.error("Dashboard-data error:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error: " + error.message });
+    res.status(500).json({ success: false, message: "Server error: " + error.message });
   }
 };
 
 // Maintenance Request Controller
 exports.submitMaintenanceRequest = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to maintenance request");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { issueType, description, location, preferredDate } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Submitting maintenance request for tenant ID:", tenantId, {
       issueType,
       description,
@@ -372,14 +416,14 @@ exports.submitMaintenanceRequest = async (req, res) => {
 // Complaint Controller
 exports.submitComplaint = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to complaint submission");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { category, subject, description } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Submitting complaint for tenant ID:", tenantId, {
       category,
       subject,
@@ -429,14 +473,14 @@ exports.submitComplaint = async (req, res) => {
 // Property Reviews Controller
 exports.submitPropertyReview = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to review submission");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { propertyId, rating, review } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Submitting review for tenant ID:", tenantId, {
       propertyId,
       rating,
@@ -509,14 +553,14 @@ exports.submitPropertyReview = async (req, res) => {
 // Update Profile Controller
 exports.updateProfile = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to profile update");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { firstName, lastName, email, phone, location } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Received profile update request for tenant ID:", tenantId, {
       firstName,
       lastName,
@@ -574,15 +618,7 @@ exports.updateProfile = async (req, res) => {
         .json({ success: false, message: "Tenant not found" });
     }
 
-    // Update session
-    req.session.user = {
-      ...req.session.user,
-      firstName: updatedTenant.firstName,
-      lastName: updatedTenant.lastName,
-      email: updatedTenant.email,
-      phone: updatedTenant.phone,
-      location: updatedTenant.location,
-    };
+    // Stateless JWT: do not update session; return updated user data in response
 
     console.log(
       "Profile updated successfully for tenant ID:",
@@ -611,14 +647,14 @@ exports.updateProfile = async (req, res) => {
 // Change Password Controller
 exports.changePassword = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to password change");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { currentPassword, newPassword } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Received password change request for tenant ID:", tenantId, {
       currentPassword,
       newPassword,
@@ -675,7 +711,7 @@ exports.changePassword = async (req, res) => {
 // Update Notification Preferences Controller
 exports.updateNotificationPreferences = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to notification preferences");
       return res
         .status(401)
@@ -688,7 +724,7 @@ exports.updateNotificationPreferences = async (req, res) => {
       maintenanceUpdates,
       newListings,
     } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log(
       "Received notification preferences update for tenant ID:",
       tenantId,
@@ -735,15 +771,7 @@ exports.updateNotificationPreferences = async (req, res) => {
         .json({ success: false, message: "Tenant not found" });
     }
 
-    // Update session
-    req.session.user = {
-      ...req.session.user,
-      emailNotifications: updatedTenant.emailNotifications,
-      smsNotifications: updatedTenant.smsNotifications,
-      rentReminders: updatedTenant.rentReminders,
-      maintenanceUpdates: updatedTenant.maintenanceUpdates,
-      newListings: updatedTenant.newListings,
-    };
+    // Stateless JWT: do not update session; return updated preferences
 
     console.log(
       "Notification preferences updated successfully for tenant ID:",
@@ -772,34 +800,24 @@ exports.updateNotificationPreferences = async (req, res) => {
 // Save/Remove Property Controller
 exports.toggleSavedProperty = async (req, res) => {
   try {
-    console.log("Received /saved-property request:", {
-      body: req.body,
-      sessionUser: req.session.user,
-    });
-    if (!req.session.user || !req.session.user._id) {
-      console.log("Unauthorized access to saved property, no session user");
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: Please log in" });
+    console.log("Received /saved-property request:", { body: req.body, user: req.user });
+    if (!req.user || !req.user.id) {
+      console.log("Unauthorized access to saved property, no user");
+      return res.status(401).json({ success: false, message: "Unauthorized: Please log in" });
     }
-    if (req.session.user.userType !== "tenant") {
+    if (req.user.userType !== "tenant") {
       console.log(
         "Non-tenant user attempted to save property, user ID:",
-        req.session.user._id,
+        req.user.id,
         "userType:",
-        req.session.user.userType
+        req.user.userType
       );
-      return res
-        .status(403)
-        .json({ success: false, message: "Only tenants can save properties" });
+      return res.status(403).json({ success: false, message: "Only tenants can save properties" });
     }
 
     const { propertyId, action } = req.body;
-    const tenantId = req.session.user._id;
-    console.log("Processing toggle saved property for tenant ID:", tenantId, {
-      propertyId,
-      action,
-    });
+    const tenantId = req.user.id;
+    console.log("Processing toggle saved property for tenant ID:", tenantId, { propertyId, action });
 
     // Validate inputs
     if (!propertyId) {
@@ -884,10 +902,7 @@ exports.toggleSavedProperty = async (req, res) => {
   } catch (error) {
     console.error(
       "Saved property error for tenant ID:",
-      req.session.user?._id,
-      "Property ID:",
-      req.body.propertyId,
-      error.message,
+      req.user?.id,
       error.stack
     );
     res.status(500).json({
@@ -899,14 +914,14 @@ exports.toggleSavedProperty = async (req, res) => {
 
 exports.markNotificationAsRead = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to mark notification as read");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { notificationId } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Marking notification as read for tenant ID:", tenantId, {
       notificationId,
     });
@@ -966,13 +981,13 @@ exports.markNotificationAsRead = async (req, res) => {
 
 exports.checkRecentPayment = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to check recent payment");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Checking recent payment for tenant ID:", tenantId);
 
     const property = await Property.findOne({ tenantId });
@@ -1017,14 +1032,14 @@ exports.checkRecentPayment = async (req, res) => {
 
 exports.submitPayment = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to payment submission");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { amount, paymentMethod, transactionId } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Submitting payment for tenant ID:", tenantId, {
       amount,
       paymentMethod,
@@ -1081,7 +1096,7 @@ exports.submitPayment = async (req, res) => {
     const newPayment = new Payment({
       tenantId,
       propertyId: property._id,
-      userName: `${req.session.user.firstName} ${req.session.user.lastName}`,
+      userName: `${req.user.firstName} ${req.user.lastName}`,
       amount,
       paymentDate: new Date(),
       dueDate: new Date(),
@@ -1145,13 +1160,13 @@ exports.submitPayment = async (req, res) => {
 
 exports.checkAccountStatus = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to check account status");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Checking account status for tenant ID:", tenantId);
 
     // Check for active property rental (ownerId is not null)
@@ -1202,14 +1217,14 @@ exports.checkAccountStatus = async (req, res) => {
 
 exports.deleteAccount = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       console.log("Unauthorized access to delete account");
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
     const { password } = req.body;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     console.log("Processing account deletion for tenant ID:", tenantId);
 
     // Validate input
@@ -1282,12 +1297,19 @@ exports.deleteAccount = async (req, res) => {
     // Delete tenant
     await Tenant.findByIdAndDelete(tenantId);
 
-    // Clear session
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Error destroying session:", err);
-      }
-    });
+    // Clear auth cookie for stateless JWT
+    try {
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+    } catch (err) {
+      console.error("Error clearing auth cookie:", err);
+    }
+
+    // Optionally clear in-memory user for this request
+    req.user = null;
 
     console.log("Account deleted successfully for tenant ID:", tenantId);
     return res.status(200).json({
@@ -1305,12 +1327,12 @@ exports.deleteAccount = async (req, res) => {
 // Handle worker payment from tenant dashboard
 exports.submitWorkerPayment = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     const { workerId, amount, paymentMethod, transactionId } = req.body;
     if (!workerId || !amount || !paymentMethod || !transactionId) {
       return res
@@ -1333,7 +1355,7 @@ exports.submitWorkerPayment = async (req, res) => {
     const newWorkerPayment = new WorkerPayment({
       tenantId,
       workerId: worker._id,
-      userName: `${req.session.user.firstName} ${req.session.user.lastName}`,
+      userName: `${req.user.firstName} ${req.user.lastName}`,
       amount,
       paymentDate: new Date(),
       paymentMethod,
@@ -1357,13 +1379,13 @@ exports.submitWorkerPayment = async (req, res) => {
 
 exports.requestUnrentProperty = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized: Please log in" });
     }
 
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     const property = await Property.findOne({ tenantId });
     if (!property) {
       return res
@@ -1420,8 +1442,8 @@ exports.requestUnrentProperty = async (req, res) => {
     // Create notification and link to UnrentRequest
     const notification = new Notification({
       type: "Unrent Request",
-      message: `Tenant ${req.session.user.firstName} ${
-        req.session.user.lastName
+      message: `Tenant ${req.user.firstName} ${
+        req.user.lastName
       } has requested to unrent property ${property.name || property._id}.`,
       recipient: owner._id,
       recipientType: "Owner",
@@ -1429,7 +1451,7 @@ exports.requestUnrentProperty = async (req, res) => {
       propertyId: property._id,
       propertyName: property.name || "N/A",
       tenantId,
-      tenantName: `${req.session.user.firstName} ${req.session.user.lastName}`,
+      tenantName: `${req.user.firstName} ${req.user.lastName}`,
       status: "Pending",
       createdDate: new Date(),
       read: false,
@@ -1461,7 +1483,7 @@ exports.requestUnrentProperty = async (req, res) => {
     console.error("Unrent property error:", {
       error: error.message,
       stack: error.stack,
-      tenantId: req.session.user?._id,
+      tenantId: req.user?.id,
     });
     res.status(500).json({
       success: false,
@@ -1484,7 +1506,8 @@ exports.login = async (req, res) => {
         .status(401)
         .render("pages/login", { error: "Incorrect password" });
     }
-    req.session.user = tenant.toObject();
+    // For JWT-based login, this endpoint should be handled in app.js or auth routes.
+    // Legacy EJS render endpoint; consider deprecating in favor of JSON API.
     res.redirect("/tenants/dashboard");
   } catch (err) {
     res.status(500).render("pages/login", { error: "Server error" });
@@ -1494,7 +1517,7 @@ exports.login = async (req, res) => {
 // Get work history for a tenant (given a worker)
 exports.getWorkerWorkHistory = async (req, res) => {
   try {
-    const tenantId = req.session.user._id;
+    const tenantId = req.user?.id;
     const { workerId } = req.params;
 
     if (!workerId) {

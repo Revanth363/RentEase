@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const tenantController = require("../controllers/tenantController");
-const isAuthenticated = require("../middleware/auth");
+const { protect } = require("../middleware/auth");
+
 
 // Worker payment submission
 router.post(
   "/worker-payment",
-  isAuthenticated,
+  protect,
   tenantController.submitWorkerPayment
 );
 
@@ -17,39 +18,39 @@ router.use((req, res, next) => {
 });
 
 // Tenant dashboard route
-router.get("/tenant_dashboard", isAuthenticated, tenantController.getDashboard);
+router.get("/tenant_dashboard", protect, tenantController.getDashboard);
 // New: dashboard JSON data for React frontend
 router.get(
   "/dashboard-data",
-  isAuthenticated,
+  protect,
   tenantController.getDashboardData
 );
 
 // Maintenance request submission
 router.post(
   "/maintenance",
-  isAuthenticated,
+  protect,
   tenantController.submitMaintenanceRequest
 );
 
 // Complaint submission
-router.post("/complaint", isAuthenticated, tenantController.submitComplaint);
+router.post("/complaint", protect, tenantController.submitComplaint);
 
 // Property review submission
-router.post("/review", isAuthenticated, tenantController.submitPropertyReview);
+router.post("/review", protect, tenantController.submitPropertyReview);
 
 // Profile update
-router.post("/profile", isAuthenticated, tenantController.updateProfile);
+router.post("/profile", protect, tenantController.updateProfile);
 
 // Password change
-router.post("/password", isAuthenticated, tenantController.changePassword);
+router.post("/password", protect, tenantController.changePassword);
 
 // Save/Remove Property
-router.post("/saved-property", isAuthenticated, (req, res, next) => {
+router.post("/saved-property", protect, (req, res, next) => {
   console.log("Reached /saved-property route:", {
     method: req.method,
     body: req.body,
-    session: req.session.user,
+    user: req.user,
   });
   tenantController.toggleSavedProperty(req, res, next);
 });
@@ -57,39 +58,39 @@ router.post("/saved-property", isAuthenticated, (req, res, next) => {
 // Notification preferences update
 router.post(
   "/notifications",
-  isAuthenticated,
+  protect,
   tenantController.updateNotificationPreferences
 );
 
 router.post(
   "/notification/read",
-  isAuthenticated,
+  protect,
   tenantController.markNotificationAsRead
 );
 router.post(
   "/check-recent-payment",
-  isAuthenticated,
+  protect,
   tenantController.checkRecentPayment
 );
-router.post("/payment", isAuthenticated, tenantController.submitPayment);
+router.post("/payment", protect, tenantController.submitPayment);
 
 router.post(
   "/check-account-status",
-  isAuthenticated,
+  protect,
   tenantController.checkAccountStatus
 );
-router.post("/delete-account", isAuthenticated, tenantController.deleteAccount);
+router.post("/delete-account", protect, tenantController.deleteAccount);
 // Unrent property request
 router.post(
   "/unrent-property",
-  isAuthenticated,
+  protect,
   tenantController.requestUnrentProperty
 );
 
 // Work tracking routes
 router.get(
   "/work-tracking/history/:workerId",
-  isAuthenticated,
+  protect,
   tenantController.getWorkerWorkHistory
 );
 

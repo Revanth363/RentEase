@@ -5,7 +5,7 @@ const cloudinary = require("../config/cloudinary");
 
 exports.listProperty = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ error: "Unauthorized: Please log in" });
     }
 
@@ -73,7 +73,7 @@ exports.listProperty = async (req, res) => {
 
     const property = new Property({
       name: `${type} in ${city}`,
-      ownerId: req.session.user._id,
+      ownerId: req.user.id,
       owner,
       location: city, // Use city only
       address: fullAddress, // Full address with all details
@@ -109,7 +109,7 @@ exports.listProperty = async (req, res) => {
     await property.save();
 
     // Update owner
-    await Owner.findByIdAndUpdate(req.session.user._id, {
+    await Owner.findByIdAndUpdate(req.user.id, {
       $push: { propertyIds: property._id },
       $inc: { numProperties: 1 }
     });

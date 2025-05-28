@@ -1,0 +1,110 @@
+/* src/assets/css/NotFound.css */
+
+/* Same font as Contact Us */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+
+/* Reset only inside this page */
+.notFound-wrapper *,
+.notFound-wrapper *::before,
+.notFound-wrapper *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.notFound-wrapper {
+  background-color: rgba(226, 194, 187, 0.445); /* same soft warm background */
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 60px; /* ← TOP padding increased to push content DOWN below header */
+}
+
+.notFound-whole-container {
+  width: 100%;
+  max-width: 1500px;
+}
+
+.notFound-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.12);
+  padding: 4rem 2.5rem;
+  text-align: center;
+}
+
+.notFound-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.notFound-visual {
+  margin-bottom: 3rem;
+}
+
+.notFound-error-code {
+  font-size: 9rem;
+  font-weight: 900;
+  color: #ffcc00; /* same golden yellow as Contact Us buttons */
+  line-height: 1;
+  margin: 0;
+}
+
+.notFound-error-icon {
+  font-size: 6.5rem;
+  margin-top: -1.5rem;
+}
+
+.notFound-message h2 {
+  font-size: 2.8rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.notFound-message p {
+  font-size: 1.25rem;
+  color: #555;
+  margin: 1rem 0;
+  line-height: 1.7;
+}
+
+/* Button – exact match to Contact Us .btn style */
+.notFound-btn {
+  display: inline-block;
+  padding: 0.95rem 2.8rem;
+  font-size: 1.15rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  margin-top: 2rem;
+}
+
+.notFound-primary-btn {
+  background: #ffcc00;
+  color: #000;
+}
+
+.notFound-primary-btn:hover {
+  background: #ffbb00;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(255, 204, 0, 0.35);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notFound-wrapper {
+    padding-top: 100px; /* slightly less on mobile */
+  }
+  .notFound-error-code {
+    font-size: 6.5rem;
+  }
+  .notFound-container {
+    padding: 3rem 1.8rem;
+  }
+}

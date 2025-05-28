@@ -7,12 +7,13 @@ const { uploadProperties } = require("../middleware/uploadCloudinary");
 const Property = require("../models/property"); // Adjust path as needed
 const Notification = require("../models/notification");
 
-// Authentication middleware (reusing your isAuthenticated)
-const isAuthenticated = require("../middleware/auth");
+// Authentication middleware (reusing your protect)
+const { protect } = require("../middleware/auth");
+
 
 // Route for property listing form submission with Cloudinary upload
 // Wrap to catch multer errors and return JSON
-router.post("/list-property", isAuthenticated, (req, res, next) => {
+router.post("/list-property", protect, (req, res, next) => {
   uploadProperties(req, res, (err) => {
     if (err) {
       // Multer error - return JSON instead of HTML

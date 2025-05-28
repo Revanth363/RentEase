@@ -3,6 +3,7 @@ import React from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { LoadingProvider } from "./LoadingContext";
 import Header from "./components/Header";
+import NotFound from "./pages/NotFound";
 
 
 
@@ -54,31 +55,39 @@ const App = () => {
 
   // Central guard: when user navigates to any dashboard route, verify session with server.
   React.useEffect(() => {
-    const checkDashboardAccess = async () => {
-      const path = location.pathname;
-      const mapping = {
-        "/worker_dashboard": "worker",
-        "/owner_dashboard": "owner",
-        "/tenant/tenant_dashboard": "tenant",
-      };
-      const required = mapping[path];
-      if (!required) return;
+  const checkDashboardAccess = async () => {
+    const path = location.pathname;
+    const mapping = {
+      "/worker_dashboard": "worker",
+      "/owner_dashboard": "owner",
+      "/tenant/tenant_dashboard": "tenant",
+    };
+    const required = mapping[path];
+    if (!required) return;
 
-      try {
-        const resp = await fetch("/api/check-session", {
-          credentials: "include",
-        });
-        const data = await resp.json();
-        if (!data.user || data.user.userType !== required) {
-          navigate("/login");
-        }
-      } catch (err) {
-        console.error("Session check failed:", err);
+    try {
+      const resp = await fetch("/api/check-session", {
+        credentials: "include",
+      });
+
+      if (!resp.ok) {
+        // 401 or other error → redirect to login
+        navigate("/login");
+        return;
+      }
+
+      const data = await resp.json();
+      if (!data.user || data.user.userType !== required) {
         navigate("/login");
       }
-    };
-    checkDashboardAccess();
-  }, [location.pathname, navigate]);
+    } catch (err) {
+      console.error("Session check failed:", err);
+      navigate("/login");
+    }
+  };
+
+  checkDashboardAccess();
+}, [location.pathname, navigate]);
 
   // Hide Header on: Admin routes, Login, Register
   const hideHeaderPaths = ["/login", "/register","/google-auth-success"];
@@ -278,6 +287,12 @@ const App = () => {
               </AdminRoute>
             }
           />
+        
+ 
+  
+      {/* Catch-all for unknown routes */}
+      <Route path="*" element={<NotFound />} />
+
         </Routes>
       </div>
     </LoadingProvider>

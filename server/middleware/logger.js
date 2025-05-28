@@ -28,21 +28,15 @@ const accessLogStream = rfs.createStream(
 
 // Custom Morgan tokens for user info
 morgan.token("username", (req) => {
-  return req.session && req.session.user
-    ? req.session.user.name || req.session.user.email || "anonymous"
-    : "guest";
+  return req.user ? req.user.name || req.user.email || "anonymous" : "guest";
 });
 
 morgan.token("usertype", (req) => {
-  return req.session && req.session.user
-    ? req.session.user.role || req.session.user.userType || "none"
-    : "none";
+  return req.user ? req.user.role || req.user.userType || "none" : "none";
 });
 
 morgan.token("userid", (req) => {
-  return req.session && req.session.user
-    ? req.session.user._id || req.session.user.id || "-"
-    : "-";
+  return req.user ? req.user._id || req.user.id || "-" : "-";
 });
 
 morgan.token("body", (req) => {

@@ -12,18 +12,18 @@ const UnrentRequest = require("../models/unrentRequest");
 
 exports.getOwnerDashboard = async (req, res) => {
   try {
-    // Log session user for debugging
-    console.log("Session user:", req.session.user);
+    // Log user for debugging (JWT-based, from middleware decode)
+    console.log("User:", req.user);
 
-    // Owner's ObjectId from session
-    const ownerId = req.session.user?._id;
+    // Owner's ObjectId from JWT/req.user
+    const ownerId = req.user?.id;
 
     // Validate ownerId
     if (!ownerId) {
-      console.error("No ownerId found in session");
+      console.error("No ownerId found in request");
       return res
         .status(401)
-        .json({ message: "Unauthorized: No user ID in session" });
+        .json({ message: "Unauthorized: No user ID in request" });
     }
 
     // Ensure ownerId is a valid ObjectId
@@ -350,11 +350,11 @@ exports.deleteProperty = async (req, res) => {
 exports.getNotifications = async (req, res) => {
   try {
     // Check if user is owner
-    if (!req.session.user || req.session.user.userType !== "owner") {
+    if (!req.user || req.user.userType !== "owner") {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const ownerId = req.session.user._id;
+    const ownerId = req.user.id;
     if (!mongoose.Types.ObjectId.isValid(ownerId)) {
       return res
         .status(400)
@@ -425,7 +425,7 @@ exports.updateMaintenanceRequestStatus = async (req, res) => {
 // Delete owner account if no tenants and no rented properties
 exports.deleteOwnerAccount = async (req, res) => {
   try {
-    const ownerId = req.session.user?._id;
+    const ownerId = req.user?.id;
     const { password } = req.body;
 
     // Validate ownerId
@@ -499,19 +499,20 @@ exports.deleteOwnerAccount = async (req, res) => {
     // Delete the owner account
     await Owner.findByIdAndDelete(ownerId);
 
-    // Clear session
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Error destroying session:", err);
-        return res.status(500).json({
-          success: false,
-          message: "Account deleted, but session could not be cleared",
-        });
-      }
-      return res.status(200).json({
-        success: true,
-        message: "Account and associated properties deleted successfully",
+    // Clear auth cookie for stateless JWT
+    try {
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
       });
+    } catch (err) {
+      console.error("Error clearing auth cookie:", err);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting owner account:", error);
@@ -525,7 +526,7 @@ exports.deleteOwnerAccount = async (req, res) => {
 // Update owner settings
 exports.updateOwnerSettings = async (req, res) => {
   try {
-    const ownerId = req.session.user._id;
+    const ownerId = req.user.id;
     const {
       firstName,
       lastName,
@@ -600,18 +601,7 @@ exports.updateOwnerSettings = async (req, res) => {
     // Save updated owner data
     await owner.save();
 
-    // Update session data
-    req.session.user = {
-      ...req.session.user,
-      firstName: owner.firstName,
-      lastName: owner.lastName,
-      email: owner.email,
-      phone: owner.phone,
-      location: owner.location,
-      accountNo: owner.accountNo,
-      upiid: owner.upiid,
-      numProperties: owner.numProperties,
-    };
+    // Stateless JWT: do not update session; return updated data in response
 
     return res.status(200).json({
       success: true,
@@ -631,7 +621,7 @@ exports.updateOwnerSettings = async (req, res) => {
 exports.approveUnrentProperty = async (req, res) => {
   try {
     const { unrentRequestId, action } = req.body;
-    const ownerId = req.session.user._id;
+    const ownerId = req.user.id;
     // Validate inputs
     if (!unrentRequestId || !action) {
       return res
@@ -780,8 +770,8 @@ exports.login = async (req, res) => {
         .status(401)
         .render("pages/login", { error: "Incorrect password" });
     }
-    // Set session and redirect as needed
-    req.session.user = owner.toObject();
+    // For JWT-based login, this endpoint should be handled in app.js or auth routes.
+    // Legacy EJS render endpoint; consider deprecating in favor of JSON API.
     res.redirect("/owners/dashboard");
   } catch (err) {
     res.status(500).render("pages/login", { error: "Server error" });

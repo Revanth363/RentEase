@@ -49,8 +49,8 @@ exports.searchWorkersByLocation = async (req, res) => {
     }
 
     // Exclude workers already booked by this tenant
-    if (req.session.user && req.session.user.userType === "tenant") {
-      const tenant = await Tenant.findById(req.session.user._id).select(
+    if (req.user && req.user.userType === "tenant") {
+      const tenant = await Tenant.findById(req.user.id).select(
         "domesticWorkerId"
       );
       if (
@@ -73,10 +73,10 @@ exports.searchWorkersByLocation = async (req, res) => {
 // Check if tenant can review a worker (must have completed booking)
 exports.canTenantReviewWorker = async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.userType !== "tenant") {
+    if (!req.user || req.user.userType !== "tenant") {
       return res.status(401).json({ canReview: false, reason: "Not a tenant" });
     }
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     const workerId = req.params.id;
     // Only allow review if tenant has an approved booking with this worker
     const booking = await WorkerBooking.findOne({
@@ -108,7 +108,7 @@ const workerBooking = require("../models/workerBooking");
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {
-  if (req.session && req.session.user) {
+  if (req.user) {
     return next();
   }
   res.redirect("/login?returnTo=/workers/worker_dashboard");
@@ -116,10 +116,10 @@ exports.isAuthenticated = (req, res, next) => {
 
 // Redirect to appropriate dashboard based on user type
 const redirectToDashboard = (req, res) => {
-  if (!req.session || !req.session.user) {
+  if (!req.user) {
     return res.redirect("/login?returnTo=/workers/worker_dashboard");
   }
-  const { userType } = req.session.user;
+  const { userType } = req.user;
   switch (userType) {
     case "owner":
       return res.redirect("/owner_dashboard");
@@ -135,19 +135,18 @@ const redirectToDashboard = (req, res) => {
 // Render the worker dashboard
 exports.renderWorkerDashboardSafer = async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.userType !== "worker") {
+    if (!req.user || req.user.userType !== "worker") {
       console.log("Unauthorized: No user session or not a worker");
       return res.redirect("/login");
     }
 
-    const worker = await Worker.findById(req.session.user._id);
+    const worker = await Worker.findById(req.user.id);
     if (!worker) {
       console.log("Worker not found");
       return res.redirect("/login?error=Account%20not%20found");
     }
 
     const user = worker.toObject();
-    req.session.user = user;
 
     user.clientIds = Array.isArray(user.clientIds) ? user.clientIds : [];
 
@@ -309,15 +308,14 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       transactions,
       reviews: formattedReviews,
       notifications: formattedNotifications,
-      successMessage: req.session.successMessage,
+      successMessage: null,
     });
 
-    req.session.successMessage = null;
   } catch (error) {
     console.error("Error rendering worker dashboard:", {
       message: error.message,
       stack: error.stack,
-      workerId: req.session.user?._id,
+      workerId: req.user?.id,
     });
     res.render("pages/error", { error: "Failed to load worker dashboard" });
   }
@@ -326,10 +324,10 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
 // Render the worker registration page
 exports.renderWorkerRegisterPage = async (req, res) => {
   try {
-    if (req.session.user.userType !== "worker") {
+    if (req.user?.userType !== "worker") {
       return redirectToDashboard(req, res);
     }
-    const user = req.session.user;
+    const user = req.user;
     if (user.location) {
       const locationParts = user.location.split(",");
       user.city = locationParts[0] ? locationParts[0].trim().toLowerCase() : "";
@@ -355,7 +353,7 @@ exports.renderWorkerDetailsPage = async (req, res) => {
     const workers = await Worker.find(filter);
 
     res.render("pages/workerDetails", {
-      user: req.session.user || null,
+      user: req.user || null,
       workers,
     });
   } catch (error) {
@@ -378,7 +376,7 @@ exports.renderServiceDetailsPage = async (req, res) => {
 
     res.render("pages/service_details", {
       user: worker.toObject(),
-      loggedInUser: req.session.user || null,
+      loggedInUser: req.user || null,
     });
   } catch (error) {
     console.error("Error rendering service details page:", error);
@@ -391,14 +389,14 @@ exports.renderServiceDetailsPage = async (req, res) => {
 // Render the edit service page
 exports.renderEditServicePage = async (req, res) => {
   try {
-    if (req.session.user.userType !== "worker") {
+    if (req.user?.userType !== "worker") {
       return redirectToDashboard(req, res);
     }
 
     const workerId = req.params.id;
     const worker = await Worker.findById(workerId);
 
-    if (!worker || worker._id.toString() !== req.session.user._id) {
+    if (!worker || worker._id.toString() !== req.user.id) {
       return res.redirect(
         "/workers/worker_dashboard?error=Unauthorized%20access"
       );
@@ -528,7 +526,7 @@ exports.registerWorker = async (req, res) => {
     }
 
     // Find and update worker
-    const worker = await Worker.findById(req.session.user._id);
+    const worker = await Worker.findById(req.user.id);
     if (!worker) {
       return res.status(404).json({ error: "Worker account not found" });
     }
@@ -571,8 +569,7 @@ exports.registerWorker = async (req, res) => {
 
     await worker.save();
 
-    // Update session
-    req.session.user = worker.toObject();
+    // Stateless JWT: do not update session; front-end will read updated data from API
 
     console.log("Worker profile updated successfully:", worker._id);
 
@@ -615,8 +612,8 @@ exports.getAllWorkers = async (req, res) => {
       filter["ratingId.average"] = { $gte: parseInt(rating) };
     }
 
-    if (req.session.user && req.session.user.userType === "tenant") {
-      const tenant = await Tenant.findById(req.session.user._id).select(
+    if (req.user && req.user.userType === "tenant") {
+      const tenant = await Tenant.findById(req.user.id).select(
         "domesticWorkerId"
       );
       if (
@@ -695,8 +692,8 @@ exports.filterWorkers = async (req, res) => {
       filter.isBooked = false;
     }
 
-    if (req.session.user && req.session.user.userType === "tenant") {
-      const tenant = await Tenant.findById(req.session.user._id).select(
+    if (req.user && req.user.userType === "tenant") {
+      const tenant = await Tenant.findById(req.user.id).select(
         "domesticWorkerId"
       );
       if (
@@ -720,13 +717,13 @@ exports.filterWorkers = async (req, res) => {
 exports.toggleWorkerAvailability = async (req, res) => {
   try {
     const worker = await Worker.findById(req.params.id);
-    if (!worker || worker._id.toString() !== req.session.user._id) {
+    if (!worker || worker._id.toString() !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     worker.serviceStatus =
       worker.serviceStatus === "Available" ? "Unavailable" : "Available";
     await worker.save();
-    req.session.user = worker.toObject();
+    // Stateless JWT: do not update session
     res.json({ success: true, serviceStatus: worker.serviceStatus });
   } catch (error) {
     console.error("Error toggling worker availability:", error);
@@ -737,8 +734,8 @@ exports.toggleWorkerAvailability = async (req, res) => {
 // Delete worker service details
 exports.deleteWorkerService = async (req, res) => {
   try {
-    const worker = await Worker.findById(req.session.user._id);
-    if (!worker || worker._id.toString() !== req.session.user._id) {
+    const worker = await Worker.findById(req.user.id);
+    if (!worker || worker._id.toString() !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -782,8 +779,6 @@ exports.deleteWorkerService = async (req, res) => {
     worker.image = null;
 
     await worker.save();
-    req.session.user = worker.toObject();
-
     res.json({
       success: true,
       message: "Service details deleted successfully",
@@ -804,7 +799,7 @@ exports.checkWorkerBookedStatus = async (req, res) => {
       return res.status(404).json({ error: "Worker not found" });
     }
 
-    if (worker._id.toString() !== req.session.user._id) {
+    if (worker._id.toString() !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -826,7 +821,7 @@ exports.deleteWorkerAccount = async (req, res) => {
       return res.status(404).json({ error: "Worker not found" });
     }
 
-    if (worker._id.toString() !== req.session.user._id) {
+    if (worker._id.toString() !== req.user.id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -852,11 +847,17 @@ exports.deleteWorkerAccount = async (req, res) => {
 
     await Worker.deleteOne({ _id: workerId });
 
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Error destroying session:", err);
-      }
-    });
+    // Clear JWT cookie instead of destroying session
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    };
+    try {
+      res.clearCookie("accessToken", cookieOptions);
+    } catch (e) {
+      console.error("Error clearing cookie:", e);
+    }
 
     res.json({ success: true, message: "Account deleted successfully" });
   } catch (error) {
@@ -868,12 +869,12 @@ exports.deleteWorkerAccount = async (req, res) => {
 // Book worker
 exports.bookWorkerCorrected = async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.userType !== "tenant") {
+    if (!req.user || req.user.userType !== "tenant") {
       return res.status(401).json({ error: "Please login as a tenant" });
     }
 
     const workerId = req.params.id;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
     const { serviceType } = req.body;
 
     if (!serviceType) {
@@ -943,7 +944,7 @@ exports.updateWorkerBookingStatus = async (req, res) => {
   try {
     const bookingId = req.params.id;
     const { status } = req.body;
-    const workerId = req.session.user._id;
+    const workerId = req.user.id;
 
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return res.status(400).json({ error: "Invalid booking ID format" });
@@ -1005,7 +1006,7 @@ exports.updateWorkerBookingStatus = async (req, res) => {
           console.log(`Worker clientIds after approval:`, worker.clientIds);
         }
 
-        req.session.user = worker.toObject();
+        // Stateless JWT: do not update session; front-end fetches updated data
       }
 
       // Send notification to tenant
@@ -1080,7 +1081,7 @@ const sendNotification = async (recipientId, recipientType, data) => {
 // Get worker bookings
 exports.getWorkerBookings = async (req, res) => {
   try {
-    const workerId = req.session.user._id;
+    const workerId = req.user.id;
     const bookings = await WorkerBooking.find({ workerId })
       .populate("tenantId", "firstName lastName location")
       .populate("workerId", "serviceType");
@@ -1112,7 +1113,7 @@ exports.getWorkerBookings = async (req, res) => {
 // Update worker settings
 exports.updateWorkerSettings = async (req, res) => {
   try {
-    const userId = req.session.user._id;
+    const userId = req.user.id;
 
     const {
       firstName,
@@ -1251,8 +1252,7 @@ exports.updateWorkerSettings = async (req, res) => {
 
     await worker.save();
 
-    // ✅ Update session with fresh worker data
-    req.session.user = worker.toObject();
+    // Stateless JWT: do not update session; front-end will fetch updated profile
 
     res.json({ success: true, message: "Settings updated successfully" });
   } catch (error) {
@@ -1263,14 +1263,14 @@ exports.updateWorkerSettings = async (req, res) => {
 
 exports.debookWorker = async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.userType !== "tenant") {
+    if (!req.user || req.user.userType !== "tenant") {
       return res
         .status(401)
         .json({ error: "Unauthorized: Please log in as a tenant" });
     }
 
     const workerId = req.params.id;
-    const tenantId = req.session.user._id;
+    const tenantId = req.user.id;
 
     const worker = await Worker.findById(workerId);
     if (!worker) {
@@ -1415,11 +1415,11 @@ exports.debookWorker = async (req, res) => {
 // Add this function to workerController.js
 exports.getDashboardDataAPI = async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.userType !== "worker") {
+    if (!req.user || req.user.userType !== "worker") {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const worker = await Worker.findById(req.session.user._id);
+    const worker = await Worker.findById(req.user.id);
     if (!worker) return res.status(404).json({ error: "Worker not found" });
 
     const user = worker.toObject();
@@ -1590,7 +1590,7 @@ exports.getDashboardDataAPI = async (req, res) => {
 exports.markNotificationAsRead = async (req, res) => {
   try {
     const notificationId = req.params.id;
-    const userId = req.session.user._id;
+    const userId = req.user.id;
 
     const notification = await Notification.findOneAndUpdate(
       { _id: notificationId, recipient: userId },
@@ -1612,7 +1612,7 @@ exports.markNotificationAsRead = async (req, res) => {
 // Generate OTP for work tracking
 exports.generateWorkOTP = async (req, res) => {
   try {
-    const workerId = req.session.user._id;
+    const workerId = req.user.id;
     const { tenantId, workDate } = req.body;
 
     if (!tenantId || !workDate) {
@@ -1677,7 +1677,7 @@ exports.generateWorkOTP = async (req, res) => {
 // Verify OTP and mark work as completed
 exports.verifyWorkOTP = async (req, res) => {
   try {
-    const workerId = req.session.user._id;
+    const workerId = req.user.id;
     const { tenantId, workDate, otp } = req.body;
 
     if (!tenantId || !workDate || !otp) {
@@ -1724,7 +1724,7 @@ exports.verifyWorkOTP = async (req, res) => {
 // Get work history for a worker (given a tenant)
 exports.getWorkHistory = async (req, res) => {
   try {
-    const workerId = req.session.user._id;
+    const workerId = req.user.id;
     const { tenantId } = req.params;
 
     if (!tenantId) {

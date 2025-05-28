@@ -3,38 +3,33 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // ============ ASYNC THUNKS (API Calls) ============
 
 // Login Thunk
+// Login thunk – don't expect token
 export const loginUser = createAsyncThunk(
-  'auth/loginUser',
+  "auth/login",
   async (credentials, { rejectWithValue }) => {
-    try {
-      const res = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
-      });
+    const res = await fetch("/login", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok && data.success) {
-        // Store token in localStorage for persistence
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-        }
-        localStorage.setItem('user', JSON.stringify(data.user || credentials));
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        return {
-          user: data.user || credentials,
-          token: data.token,
-          redirectUrl: data.redirectUrl,
-        };
-      } else {
-        return rejectWithValue(data.error || 'Login failed');
-      }
-    } catch (error) {
-      return rejectWithValue('Network error. Please try again.');
+    if (!res.ok || !data.success) {
+      return rejectWithValue(data.error || "Login failed");
     }
+
+    // After login → fetch current user
+    const meRes = await fetch("/api/me", { credentials: "include" });
+    if (!meRes.ok) throw new Error("Failed to get user");
+
+    const meData = await meRes.json();
+
+    return {
+      user: meData.user,
+      redirectUrl: data.redirectUrl,
+    };
   }
 );
 
@@ -43,7 +38,7 @@ export const signupUser = createAsyncThunk(
   'auth/signupUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const res = await fetch('http://localhost:5000/register', {
+      const res = await fetch('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

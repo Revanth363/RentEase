@@ -4,7 +4,7 @@ import axios from "axios";
 const API = "/api/workers";
 
 export const getDashboardData = async () => {
-  const res = await axios.get(`${API}/api/dashboard`, {
+  const res = await axios.get(`${API}/dashboard`, {
     withCredentials: true,
   });
   return res.data;

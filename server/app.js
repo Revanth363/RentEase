@@ -1,13 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
-const session = require("express-session");
+// express-session removed (migrated to JWT cookies)
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 require("dotenv").config();
 const passport = require("passport");
 const helmet = require("helmet");
 require("./passport");
+const { verifyToken, signToken } = require("./utils/jwt");
 
 
 const Property = require("./models/property");
@@ -56,19 +57,43 @@ const allowedOrigins = new Set(
     "http://127.0.0.1:5174",
   ].filter(Boolean)
 );
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.has(origin)) return callback(null, true);
-      // Allow any localhost port for development
-      if (/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin))
-        return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-  })
-);
+
+// ==============================================
+//           CORS – THIS IS THE CORRECT ONE
+// ==============================================
+
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',   // if you ever use another Vite port
+    // Add your production domain later, e.g. 'https://your-app.com'
+  ],
+  credentials: true,              // ← must be true for cookies (accessToken)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'Accept',
+    'X-Requested-With'
+  ],
+  optionsSuccessStatus: 204       // browsers expect 204 for OPTIONS
+}));
+
+// Optional but very helpful in dev: log CORS requests
+// You can remove this later
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    console.log(`OPTIONS ${req.originalUrl} from ${req.headers.origin}`);
+  }
+  next();
+});
+
+
+
+
+
+
 
 // (new middleware)
 // ─── Body Parsing ───────────────────────────────────────────────
@@ -96,18 +121,7 @@ app.use(helmet.ieNoOpen());                             // X-Download-Options fo
 app.use(helmet.referrerPolicy({ policy: 'no-referrer' })); // Strict referrer policy
 
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your_secret_key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    },
-  })
-);
+// express-session removed; using stateless JWT cookies instead
 
 // ─── Cookie Parser (needed for signed cookies & csurf) ──────────
 const cookieParser = require('cookie-parser');
@@ -116,7 +130,9 @@ app.use(cookieParser(process.env.SESSION_SECRET || 'your_secret_key'));
 
 
 app.use(passport.initialize());
-app.use(passport.session());
+
+const errorLogger = require("./middleware/errorLogger");
+app.use(errorLogger);
 
 const { logger } = require("./middleware/logger");
 app.use(logger);
@@ -124,15 +140,18 @@ app.use(logger);
 
 
 
-const isAuthenticated = require("./middleware/auth");
+const { protect, adminProtect } = require("./middleware/auth");
 
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+  res.locals.user = req.user || null;
   next();
 });
 
 // In-memory OTP store
 const otpStore = new Map();
+
+
+
 
 // Rate limiter for OTP requests with JSON response
 const forgotPasswordLimiter = rateLimit({
@@ -198,21 +217,52 @@ app.get("/api/slider-properties", async (req, res) => {
   }
 });
 
-app.get("/api/check-session", (req, res) => {
-  // Return both regular user session and admin session info
-  const user = req.session.user || null;
-  const isAdmin = !!req.session.adminId;
-  return res.json({ user, admin: isAdmin });
+// Return minimal current user info (JWT-based)
+app.get("/api/me", protect, async (req, res) => {
+  let user = null;
+
+  try {
+    if (req.user.userType === "admin") {
+      user = await Admin.findById(req.user.id).select("-password").lean();
+    } else if (req.user.userType === "tenant") {
+      user = await Tenant.findById(req.user.id).select("-password").lean();
+    } else if (req.user.userType === "owner") {
+      user = await Owner.findById(req.user.id).select("-password").lean();
+    } else if (req.user.userType === "worker") {
+      user = await Worker.findById(req.user.id).select("-password").lean();
+    }
+  } catch (err) {
+    // silent fail
+  }
+
+  const safeUser = user ? {
+    id: user._id.toString(),
+    email: user.email,
+    userType: req.user.userType,
+    firstName: user.firstName || "",
+    lastName: user.lastName || "",
+    phone: user.phone || "",
+    location: user.location || ""
+  } : null;
+
+  res.json({
+    success: true,
+    user: safeUser,
+    admin: req.user.userType === "admin"
+  });
 });
 
+// Backwards-compat: keep /api/check-session redirecting to /api/me
+app.get("/api/check-session", (req, res) => res.redirect("/api/me"));
+
 app.get("/api/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Session destroy error:", err);
-      return res.status(500).json({ error: "Logout failed" });
-    }
-    res.json({ success: true, redirectUrl: "/" });
-  });
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  };
+  res.clearCookie("accessToken", cookieOptions);
+  res.json({ success: true, redirectUrl: "/" });
 });
 
 app.get("/api/property", async (req, res) => {
@@ -373,7 +423,7 @@ app.post("/reset-password", handleResetPassword);
 app.post("/api/reset-password", handleResetPassword);
 
 app.get("/login", (req, res) => {
-  if (req.session.user) {
+  if (req.user) {
     return res.redirect("/api/dashboard");
   }
   res.redirect("http://localhost:5173/login");
@@ -384,66 +434,104 @@ app.post("/login", async (req, res) => {
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
+      return res.status(400).json({
+        success: false,
+        error: "Email and password required"
+      });
     }
 
-    // ADMIN LOGIN (email ends with @admin.com)
+    // ───── ADMIN LOGIN ─────
     if (email.toLowerCase().trim().endsWith("@admin.com")) {
       const admin = await Admin.findOne({
         email: email.toLowerCase().trim(),
       }).select("+password");
+
       if (!admin || admin.password !== password) {
-        return res.status(401).json({ error: "Invalid admin credentials" });
+        return res.status(401).json({
+          success: false,
+          error: "Invalid admin credentials"
+        });
       }
 
-      // Save admin session
-      req.session.adminId = admin._id.toString();
-      req.session.isAdmin = true;
+      const payload = {
+        id: admin._id.toString(),
+        userType: "admin",
+        email: admin.email,
+      };
+
+      const token = signToken(payload, { expiresIn: "1h" });
+
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: false,        // true only in production HTTPS
+        sameSite: "lax",      // ✅ FIX
+        maxAge: 60 * 60 * 1000,
+      });
 
       return res.json({
         success: true,
-        redirectUrl: "/admin",
-        message: "Admin login successful",
+        redirectUrl: "/admin"
       });
     }
 
-    // NORMAL USER LOGIN (tenant/owner/worker)
+    // ───── NORMAL USER LOGIN ─────
     if (!userType) {
-      return res.status(400).json({ error: "Please select role" });
+      return res.status(400).json({
+        success: false,
+        error: "Please select role"
+      });
     }
 
-    let Model =
-      userType === "tenant" ? Tenant : userType === "owner" ? Owner : Worker;
+    const Model =
+      userType === "tenant" ? Tenant :
+      userType === "owner"  ? Owner  :
+      userType === "worker" ? Worker : null;
+
+    if (!Model) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid user type"
+      });
+    }
+
     const user = await Model.findOne({ email }).select("+password");
 
     if (!user || user.password !== password) {
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(401).json({
+        success: false,
+        error: "Invalid email or password"
+      });
     }
 
-    req.session.user = {
-      _id: user._id.toString(),
+    const payload = {
+      id: user._id.toString(),
       userType,
       email: user.email,
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      phone: user.phone || "",
-      location: user.location || "",
-      emailNotifications: user.emailNotifications || false,
-      smsNotifications: user.smsNotifications || false,
-      rentReminders: user.rentReminders || false,
-      maintenanceUpdates: user.maintenanceUpdates || false,
-      newListings: user.newListings || false,
     };
 
-    res.json({
+    const token = signToken(payload, { expiresIn: "1h" });
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: false,        // true only in production HTTPS
+      sameSite: "lax",      // ✅ FIX
+      maxAge: 60 * 60 * 1000,
+    });
+
+    return res.json({
       success: true,
       redirectUrl: getDashboardUrl(userType),
     });
+
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ error: "Server error" });
+    return res.status(500).json({
+      success: false,
+      error: "Server error"
+    });
   }
 });
+
 
 
 // Start Google login
@@ -455,20 +543,38 @@ app.get(
 // Google callback
 app.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    // Create session user (IMPORTANT for your app)
-    req.session.user = {
-      _id: req.user._id.toString(),
-      userType: req.user.userType,
-      email: req.user.email,
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
-    };
+  passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+  (req, res, next) => {
+    try {
+      if (!req.user) {
+        const err = new Error("Google authentication failed");
+        err.status = 401;
+        return next(err);
+      }
 
-    res.redirect("http://localhost:5173/google-auth-success");
+      const payload = {
+        id: req.user._id.toString(),
+        userType: req.user.userType,
+        email: req.user.email,
+      };
+
+      const token = signToken(payload, { expiresIn: "1h" });
+
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",   // ✅ FIX
+        maxAge: 60 * 60 * 1000,
+      });
+
+      res.redirect("http://localhost:5173/google-auth-success");
+    } catch (err) {
+      err.status = 500;
+      next(err);
+    }
   }
 );
+
 
 
 
@@ -570,11 +676,25 @@ app.post("/register", async (req, res) => {
     await newUser.save();
     console.log("User saved successfully");
 
+    // Sign token for the new user and set cookie
+    const payload = {
+      id: newUser._id.toString(),
+      userType: newUser.userType,
+      email: newUser.email,
+    };
+    const token = signToken(payload, { expiresIn: "1h" });
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000,
+    };
+    res.cookie("accessToken", token, cookieOptions);
+
     return res.json({
       success: true,
       redirectUrl: getDashboardUrl(newUser.userType) || "/worker_register",
       message: "Registration successful",
-      user: req.session.user,
     });
   } catch (err) {
     console.error("Registration error:", err);
@@ -595,66 +715,21 @@ function getDashboardUrl(userType) {
   return "/login?error=Invalid user type";
 }
 
-app.get("/api/dashboard", isAuthenticated, (req, res) => {
-  const userType = req.session.user?.userType;
+app.get("/api/dashboard", protect, (req, res) => {
+  const userType = req.user?.userType;
   if (!userType) {
     return res.status(401).json({ error: "Please log in" });
   }
   res.json({ redirectUrl: getDashboardUrl(userType) });
 });
 
-app.get("/register", (req, res) => {
-  res.redirect("http://localhost:5173/register");
-});
 
-// GET /api/search - Fully Fixed & Working
+
+// Search properties endpoint
 app.get("/api/search", async (req, res) => {
   try {
-    const {
-      location,
-      "property-type": propertyType,
-      price,
-      "bedroom-no": bedrooms,
-      "bathroom-no": bathrooms,
-      furnishing,
-      amenities,
-    } = req.query;
-
-    // Base query: only verified & not rented properties
-    let query = {
-      $and: [
-        { $or: [{ isRented: false }, { isRented: { $exists: false } }] },
-        { isVerified: true },
-      ],
-    };
-
-    // Apply filters
-    if (location) {
-      query.location = { $regex: location.trim(), $options: "i" };
-    }
-
-    if (propertyType) {
-      query.$or = [
-        { type: { $regex: propertyType.trim(), $options: "i" } },
-        { subtype: { $regex: propertyType.trim(), $options: "i" } },
-      ];
-    }
-
-    if (price) {
-      query.price = { $lte: Number(price) };
-    }
-
-    if (bedrooms) {
-      query.beds = { $gte: Number(bedrooms) };
-    }
-
-    if (bathrooms) {
-      query.baths = { $gte: Number(bathrooms) };
-    }
-
-    if (furnishing) {
-      query.furnished = { $regex: furnishing.trim(), $options: "i" };
-    }
+    const { amenities } = req.query;
+    const query = {};
 
     if (amenities) {
       const amenitiesArray = amenities
@@ -663,23 +738,21 @@ app.get("/api/search", async (req, res) => {
         .filter(Boolean);
 
       if (amenitiesArray.length > 0) {
-        query.amenities = { $all: amenitiesArray }; // Exact match (recommended)
+        query.amenities = { $all: amenitiesArray };
       }
     }
 
     const properties = await Property.find(query).select("-__v").lean();
-
     res.json(properties);
   } catch (err) {
     console.error("Error in /api/search:", err);
     res.status(500).json({ error: "Failed to fetch properties" });
   }
 });
-app.get("/property_listing_page", isAuthenticated, (req, res) => {
-  if (req.session.user.userType !== "owner") {
-    return res.json({
-      redirectUrl: getDashboardUrl(req.session.user.userType),
-    });
+
+app.get("/property_listing_page", protect, (req, res) => {
+  if (req.user?.userType !== "owner") {
+    return res.json({ redirectUrl: getDashboardUrl(req.user?.userType) });
   }
   res.json({ message: "Owner property listing page" });
 });
@@ -710,17 +783,14 @@ app.get("/about_us", (req, res) => {
 
 // Admin Authentication Middleware (add this once at the top of your file)
 const adminAuth = (req, res, next) => {
-  if (req.session && req.session.adminId) {
-    return next(); // Admin is logged in → proceed
+  if (req.user && req.user.userType === "admin") {
+    return next();
   }
-  // Not admin → block access
-  return res
-    .status(401)
-    .json({ error: "Admin access required. Please login." });
+  return res.status(401).json({ error: "Admin access required. Please login." });
 };
 
 // PROTECTED ADMIN DASHBOARD ROUTE
-app.get("/api/admin", async (req, res) => {
+app.get("/api/admin", protect, adminProtect, async (req, res) => {
   try {
     // Your entire existing code — 100% unchanged (just wrapped in protection)
     const totalProperties = await Property.countDocuments();
@@ -1171,7 +1241,7 @@ app.get("/api/admin", async (req, res) => {
 });
 
 // PROTECTED ROUTE — Only logged-in admin can access
-app.get("/api/admin/message/:id", adminAuth, async (req, res) => {
+app.get("/api/admin/message/:id", protect, adminProtect, async (req, res) => {
   try {
     const submission = await Contact.findById(req.params.id).lean();
 
@@ -1205,9 +1275,9 @@ app.get("/api/admin/message/:id", adminAuth, async (req, res) => {
   }
 });
 
-// Error handling middleware
-// ─── 404 Not Found Handler ──────────────────────────────────────
-// Catch any route that doesn't exist → return proper 404 JSON
+
+
+// 404 handler (this will be logged as 404 in error log)
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -1215,31 +1285,17 @@ app.use((req, res, next) => {
   });
 });
 
-// ─── Global Error Handler ───────────────────────────────────────
+// ADD ERROR LOGGER HERE — after routes, before global error handler
+
+
+// Your existing global error handler (also logs to console)
 app.use((err, req, res, next) => {
-  console.error('ERROR:', {
-    timestamp: new Date().toISOString(),
-    method: req.method,
-    path: req.originalUrl,
-    message: err.message,
-    stack: err.stack ? err.stack.split('\n').slice(0, 8).join('\n') : undefined,
-  });
+  
 
-  const status = err.status || 500;
-  const isDev = process.env.NODE_ENV !== 'production';
-
-  let response = {
+  res.status(err.status || 500).json({
     success: false,
-    error: isDev ? err.message : 'Internal Server Error - Please try again later',
-  };
-
-  // Extra info for admin routes in development
-  if (req.originalUrl.startsWith('/api/admin')) {
-    response.adminHint = isDev ? 'Check server logs for details' : undefined;
-    if (isDev) response.stack = err.stack?.split('\n').slice(0, 6);
-  }
-
-  res.status(status).json(response);
+    error: "Internal Server Error"
+  });
 });
 
 app.listen(PORT, () => {

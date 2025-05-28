@@ -1,5 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+
 const Tenant = require("./models/tenant");
 const Owner = require("./models/owner");
 const Worker = require("./models/worker");
@@ -13,23 +14,28 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails[0].value;
-        const firstName = profile.name.givenName || "";
-        const lastName = profile.name.familyName || "";
+        // 🔐 Defensive email extraction
+        const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return done(new Error("Google account has no email"), null);
+        }
 
-        // Check existing user
+        const firstName = profile.name?.givenName || "";
+        const lastName = profile.name?.familyName || "";
+
+        // 🔍 Check across all user types
         let user =
           (await Tenant.findOne({ email })) ||
           (await Owner.findOne({ email })) ||
           (await Worker.findOne({ email }));
 
-        // Auto-create tenant if not exists
+        // ➕ Auto-create tenant if user does not exist
         if (!user) {
           user = await Tenant.create({
             firstName,
             lastName,
             email,
-            password: "google-auth",
+            password: "google-auth", // dummy password (never used)
             userType: "tenant",
           });
         }
@@ -42,19 +48,9 @@ passport.use(
   )
 );
 
-passport.serializeUser((user, done) => {
-  done(null, user._id);
-});
+/**
+ * ❌ DO NOT USE serializeUser / deserializeUser
+ * You are NOT using sessions — JWT only
+ */
 
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user =
-      (await Tenant.findById(id)) ||
-      (await Owner.findById(id)) ||
-      (await Worker.findById(id));
-
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
-});
+module.exports = passport;
