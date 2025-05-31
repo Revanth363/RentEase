@@ -28,7 +28,7 @@ const accessLogStream = rfs.createStream(
 
 // Custom Morgan tokens for user info
 morgan.token("username", (req) => {
-  return req.user ? req.user.name || req.user.email || "anonymous" : "guest";
+  return req.user ? req.user.firstName || req.user.email || "anonymous" : "guest";
 });
 
 morgan.token("usertype", (req) => {

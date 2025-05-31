@@ -48,9 +48,4 @@ passport.use(
   )
 );
 
-/**
- * ❌ DO NOT USE serializeUser / deserializeUser
- * You are NOT using sessions — JWT only
- */
-
 module.exports = passport;

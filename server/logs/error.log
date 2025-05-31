@@ -1,12 +1,8 @@
-2026-02-10T03:31:36.952Z | 404 | GET /random-page | 6.679ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /random-page - Route not found
-2026-02-10T03:37:02.163Z | 404 | GET /random-page | 4.034ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /random-page - Route not found
-2026-02-10T03:54:30.222Z | 401 | GET | /api/me | 12.513ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T03:55:23.571Z | 500 | GET | /auth/google/callback?code=4%2F0ASc3gC2NUePL1rwkA7mJDbERfG4dhlCAlziTJ4c6ReaCbN6kNnE7U4iriJUQ4pLv_lWQwg&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&authuser=0&prompt=none | 643.434ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
-2026-02-10T03:56:50.428Z | 401 | GET | /api/me | 0.604ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T03:56:50.444Z | 401 | GET | /api/me | 0.369ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T03:57:06.726Z | 401 | GET | /api/me | 0.477ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T03:57:06.742Z | 401 | GET | /api/me | 0.389ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T05:32:22.605Z | 401 | GET | /api/me | 0.292ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T05:32:22.613Z | 401 | GET | /api/me | 0.262ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T05:58:27.243Z | 401 | GET | /api/me | 4.585ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
-2026-02-10T05:58:27.265Z | 401 | GET | /api/me | 0.355ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:18.304Z | 401 | GET | /api/me | 0.599ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:18.314Z | 401 | GET | /api/me | 0.140ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:21.256Z | 401 | GET | /api/me | 0.165ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:21.264Z | 401 | GET | /api/me | 0.333ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:24.005Z | 401 | GET | /api/me | 0.208ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:24.013Z | 401 | GET | /api/me | 0.207ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:24.025Z | 401 | GET | /api/me | 0.241ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized
+2026-02-27T18:54:24.035Z | 401 | GET | /api/me | 0.364ms | User: guest | IP: ::1 | Body: - | Msg: Unauthorized

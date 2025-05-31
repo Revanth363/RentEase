@@ -47,16 +47,7 @@ mongoose
   .catch((err) => console.error("MongoDB Atlas connection error:", err));
 
 // Middleware
-// CORS: allow common localhost dev ports or configured CLIENT_URL
-const allowedOrigins = new Set(
-  [
-    process.env.CLIENT_URL || "",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-  ].filter(Boolean)
-);
+
 
 // ==============================================
 //           CORS – THIS IS THE CORRECT ONE
@@ -99,12 +90,9 @@ app.use((req, res, next) => {
 // ─── Body Parsing ───────────────────────────────────────────────
 const bodyParser = require('body-parser');
 
-app.use(bodyParser.urlencoded({ extended: true, limit: '15mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '15mb' }))
 app.use(bodyParser.json({ limit: '15mb' }));
 
-// You can keep these too — they are not harmful, but body-parser is now primary
-// app.use(express.urlencoded({ extended: true, limit: '15mb' }));
-// app.use(express.json({ limit: '15mb' }));
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -464,7 +452,7 @@ app.post("/login", async (req, res) => {
       res.cookie("accessToken", token, {
         httpOnly: true,
         secure: false,        // true only in production HTTPS
-        sameSite: "lax",      // ✅ FIX
+        sameSite: "lax",      
         maxAge: 60 * 60 * 1000,
       });
 
