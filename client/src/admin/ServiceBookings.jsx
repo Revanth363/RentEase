@@ -343,12 +343,7 @@ const ServiceBookings = () => {
                             <a href={b.type === 'property' ? `/admin/booking/${b.id}` : `/admin/worker-booking/${b.id}`}>
                               View
                             </a>
-                            {b.status === 'Pending' && (
-                              <>
-                                <button className={styles.success}>Approve</button>
-                                <button className={styles.danger}>Decline</button>
-                              </>
-                            )}
+                            
                           </div>
                         </td>
                       </tr>

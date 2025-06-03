@@ -1,6 +1,6 @@
 // src/components/AdminNavbar.jsx
-import { Link, useNavigate } from 'react-router-dom';
-import styles from '../assets/css/AdminDashboard.module.css';
+import { NavLink, useNavigate } from 'react-router-dom';
+import styles from '../assets/css/AdminNavbar.module.css';   // ← this path
 
 const AdminNavbar = () => {
   const navigate = useNavigate();
@@ -19,49 +19,90 @@ const AdminNavbar = () => {
 
   return (
     <nav className={styles.navbar}>
-      {/* Centered Navigation Links */}
-      <div className={styles['nav-links']}>
-        <Link to="/admin">Overview</Link>
-        <Link to="/admin/property-management">Properties</Link>
-        <Link to="/admin/user-management">Users</Link>
-        <Link to="/admin/service-bookings">Bookings</Link>
-        <Link to="/admin/payments">Payments</Link>
-        <Link to="/admin/worker-payments">Worker Payments</Link>
-        <Link to="/admin/notifications">Notifications</Link>
-        <Link to="/admin/maintenance-requests">Maintenance</Link>
-        <Link to="/admin/messages">Messages</Link>
-      </div>
+      <div className={styles.logo}>Operations Executive</div>
 
-      {/* LOGOUT BUTTON — Styled only here, no CSS file changes */}
-      <button
-        onClick={handleLogout}
-        style={{
-          marginLeft: 'auto',
-          padding: '7px 26px',
-          backgroundColor: '#dc3545',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontWeight: '600',
-          fontSize: '14.5px',
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(220, 53, 69, 0.35)',
-          transition: 'all 0.2s ease',
-          minWidth: '100px',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = '#c82333';
-          e.currentTarget.style.transform = 'translateY(-1px)';
-          e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 53, 69, 0.5)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = '#dc3545';
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.35)';
-        }}
-      >
-        Logout
-      </button>
+      <div className={styles.navLinks}>
+        
+
+        <NavLink
+          to="/admin/property-management"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Properties
+        </NavLink>
+
+        <NavLink
+          to="/admin/user-management"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Users
+        </NavLink>
+
+        <NavLink
+          to="/admin/service-bookings"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Bookings
+        </NavLink>
+
+        <NavLink
+          to="/admin/payments"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Payments
+        </NavLink>
+
+        <NavLink
+          to="/admin/worker-payments"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Worker Payments
+        </NavLink>
+
+        <NavLink
+          to="/admin/notifications"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Notifications
+        </NavLink>
+
+        <NavLink
+          to="/admin/maintenance-requests"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Maintenance
+        </NavLink>
+
+        <NavLink
+          to="/admin/messages"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          Messages
+        </NavLink>
+
+        <button 
+          onClick={handleLogout} 
+          className={styles.logoutBtn}
+        >
+          Logout
+        </button>
+      </div>
     </nav>
   );
 };

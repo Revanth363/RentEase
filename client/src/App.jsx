@@ -1,6 +1,6 @@
 // src/App.jsx — FINAL & CLEAN VERSION
 import React from "react";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate,Navigate } from "react-router-dom";
 import { LoadingProvider } from "./LoadingContext";
 import Header from "./components/Header";
 import NotFound from "./pages/NotFound";
@@ -145,7 +145,7 @@ const App = () => {
             path="/admin"
             element={
               <AdminRoute>
-                <AdminDashboard />
+                <Navigate to="/admin/property-management" replace />
               </AdminRoute>
             }
           />

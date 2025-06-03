@@ -8,6 +8,7 @@
   font-family: 'Poppins', Arial, sans-serif;
   background: #f4f4f4;
   padding: 20px;
+  margin-top: 50px;
 }
 
 /* Scope headings */
@@ -22,9 +23,10 @@
 }
 
 .container h1 {
-  text-align: center;
+  text-align: left;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  font-size:30px;
 }
 
 .container h2 {

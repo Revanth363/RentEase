@@ -1,0 +1,66 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background-color: #333;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  color: #ffc107;
+  font-size: 20px;
+  font-weight: 700;
+  margin-right: 48px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.navLink {
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.navLink:hover {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.navLink.active {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.logoutBtn {
+  margin-left: auto;
+  padding: 8px 20px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.logoutBtn:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
