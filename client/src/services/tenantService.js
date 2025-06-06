@@ -1,3 +1,15 @@
+export const updateMaintenanceStatus = async ({ requestId, status }) => {
+  const res = await axios.post(`${BASE}/maintenance/update-status`, { requestId, status }, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+export const confirmMaintenanceFixed = async ({ requestId, confirmation }) => {
+  const res = await axios.post(`${BASE}/maintenance/confirm`, { requestId, confirmation }, {
+    withCredentials: true,
+  });
+  return res.data;
+};
 import axios from "axios";
 
 const BASE = "/api/tenant";

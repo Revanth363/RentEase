@@ -1,9 +1,13 @@
 // src/App.jsx — FINAL & CLEAN VERSION
 import React from "react";
 import { Routes, Route, useLocation, useNavigate,Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { checkCurrentUser } from "./store/slices/authSlice";
 import { LoadingProvider } from "./LoadingContext";
 import Header from "./components/Header";
 import NotFound from "./pages/NotFound";
+import MaintenanceBanner from "./components/MaintenanceBanner";  
 
 
 
@@ -49,52 +53,52 @@ import WorkerPaymentView from "./admin/WorkerPaymentView";
 
 import AdminRoute from "./components/AdminRoute";
 
+// Super Admin Pages
+import SuperAdminLayout from "./superadmin/SuperAdminLayout";
+import Overview from "./superadmin/pages/Overview";
+import FinancialAnalytics from "./superadmin/pages/FinancialAnalytics";
+import OwnerEarnings from "./superadmin/pages/OwnerEarnings";
+import WorkerEarnings from "./superadmin/pages/WorkerEarnings";
+import Executives from "./superadmin/pages/Executives";
+import SystemSettings from "./superadmin/pages/SystemSettings";
+import AuditLogs from "./superadmin/pages/AuditLogs";
+
 const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // ← add this
 
-  // Central guard: when user navigates to any dashboard route, verify session with server.
-  React.useEffect(() => {
-  const checkDashboardAccess = async () => {
-    const path = location.pathname;
-    const mapping = {
-      "/worker_dashboard": "worker",
-      "/owner_dashboard": "owner",
-      "/tenant/tenant_dashboard": "tenant",
-    };
-    const required = mapping[path];
-    if (!required) return;
+  const [maintenance, setMaintenance] = React.useState({ mode: false, message: '' });
 
-    try {
-      const resp = await fetch("/api/check-session", {
-        credentials: "include",
-      });
-
-      if (!resp.ok) {
-        // 401 or other error → redirect to login
-        navigate("/login");
-        return;
-      }
-
-      const data = await resp.json();
-      if (!data.user || data.user.userType !== required) {
-        navigate("/login");
-      }
-    } catch (err) {
-      console.error("Session check failed:", err);
-      navigate("/login");
-    }
-  };
-
-  checkDashboardAccess();
-}, [location.pathname, navigate]);
+  // Run auth check once on app mount (using Redux slice)
+  useEffect(() => {
+    dispatch(checkCurrentUser()); // Loads user from cookie/token
+    // fetch public settings for maintenance
+    fetch('/api/public-settings')
+      .then((r) => r.json())
+      .then((data) => {
+        setMaintenance({
+          mode: data.maintenanceMode || false,
+          message: data.maintenanceMessage || ''
+        });
+      })
+      .catch((e) => console.warn('Failed to load public settings', e));
+  }, [dispatch]);
 
   // Hide Header on: Admin routes, Login, Register
   const hideHeaderPaths = ["/login", "/register","/google-auth-success"];
 
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isSuperAdminRoute = location.pathname.startsWith("/superadmin");
   const shouldHideHeader =
-    isAdminRoute || hideHeaderPaths.includes(location.pathname);
+    isAdminRoute || isSuperAdminRoute || hideHeaderPaths.includes(location.pathname);
+
+  const user = useSelector((state) => state.auth.user);
+
+  // if maintenance mode and not admin/superadmin, show notice
+  if (maintenance.mode && !isAdminRoute && !isSuperAdminRoute) {
+    return <MaintenanceBanner message={maintenance.message} />;
+  }
 
   return (
     <LoadingProvider>
@@ -287,6 +291,21 @@ const App = () => {
               </AdminRoute>
             }
           />
+
+          {/* superadmin section (layout handles protection) */}
+          <Route path="/superadmin/*" element={<SuperAdminLayout />}>                
+            {/* redirect bare /superadmin to overview */}
+            <Route index element={<Navigate to="/superadmin/overview" replace />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="financial-analytics" element={<FinancialAnalytics />} />
+            <Route path="owner-earnings" element={<OwnerEarnings />} />
+            <Route path="worker-earnings" element={<WorkerEarnings />} />
+            <Route path="executives" element={<Executives />} />
+            <Route path="system-settings" element={<SystemSettings />} />
+            <Route path="audit-logs" element={<AuditLogs />} />
+          </Route>
+
+      
         
  
   

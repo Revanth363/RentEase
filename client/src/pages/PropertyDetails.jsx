@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../assets/css/PropertyDetails.module.css";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 const PropertyDetails = () => {
   const [searchParams] = useSearchParams();
@@ -91,26 +94,7 @@ const PropertyDetails = () => {
     }
   };
 
-  // LAZY LOAD MAP
-  useEffect(() => {
-    if (!property?.map) return;
-    const timer = setTimeout(() => {
-      const container = document.getElementById("map-container");
-      const placeholder = document.getElementById("map-placeholder");
-      if (container?.querySelector("iframe")) return;
-
-      const iframe = document.createElement("iframe");
-      iframe.src = property.map;
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      iframe.style.border = "0";
-      iframe.allowFullscreen = true;
-      iframe.loading = "lazy";
-      iframe.onload = () => placeholder && (placeholder.style.display = "none");
-      container.appendChild(iframe);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [property]);
+  // No Google Maps. Map display handled in JSX below using react-leaflet and OpenStreetMap.
 
   if (loading)
     return <div className={styles.loading}>Loading property details...</div>;
@@ -260,10 +244,33 @@ const PropertyDetails = () => {
       {/* MAP */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Property Location</h2>
-        <div className={styles.mapContainer} id="map-container">
-          <div id="map-placeholder" className={styles.mapPlaceholder}>
-            Loading Map...
-          </div>
+        <div className={styles.mapContainer}>
+          {property?.coordinates && typeof property.coordinates.lat === "number" && typeof property.coordinates.lng === "number" ? (
+            <MapContainer
+              center={[property.coordinates.lat, property.coordinates.lng]}
+              zoom={16}
+              style={{ height: "350px", width: "100%" }}
+              scrollWheelZoom={false}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution="&copy; OpenStreetMap contributors"
+              />
+              <Marker
+                position={[property.coordinates.lat, property.coordinates.lng]}
+                icon={L.icon({
+                  iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                  popupAnchor: [1, -34],
+                  shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+                  shadowSize: [41, 41],
+                })}
+              />
+            </MapContainer>
+          ) : (
+            <div className={styles.mapPlaceholder}>No map location available.</div>
+          )}
         </div>
       </section>
 

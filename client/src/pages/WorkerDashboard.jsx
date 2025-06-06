@@ -26,7 +26,11 @@ const WorkerDashboard = () => {
   const { setIsLoading } = useLoading();
 
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState("services");
+  function getSectionFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("section") || "services";
+  }
+  const [activeSection, setActiveSection] = useState(getSectionFromUrl());
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [user, setUser] = useState({});
@@ -116,7 +120,22 @@ const WorkerDashboard = () => {
   };
 
   const showSection = (section) => {
-    setActiveSection(section);
+    // Map section to URL and force reload
+    const sectionToUrl = (s) => {
+      switch (s) {
+        case "services": return "/worker_dashboard?section=services";
+        case "bookings": return "/worker_dashboard?section=bookings";
+        case "clients": return "/worker_dashboard?section=clients";
+        case "earnings": return "/worker_dashboard?section=earnings";
+        case "transactions": return "/worker_dashboard?section=transactions";
+        case "reviews": return "/worker_dashboard?section=reviews";
+        case "notifications": return "/worker_dashboard?section=notifications";
+        case "settings": return "/worker_dashboard?section=settings";
+        default: return "/worker_dashboard";
+      }
+    };
+    window.location.href = sectionToUrl(section);
+    // setActiveSection(section); // no longer needed
     if (window.innerWidth <= 768) setSidebarOpen(false);
   };
 

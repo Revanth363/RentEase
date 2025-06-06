@@ -1,21 +1,22 @@
 // src/components/AdminRoute.jsx
-import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
+import {
+  selectUser,
+  selectAuthLoading,
+} from '../store/slices/authSlice';
 
 export default function AdminRoute({ children }) {
-  const [isAdmin, setIsAdmin] = useState(null);
+  const loading = useSelector(selectAuthLoading);
+  const user = useSelector(selectUser);
 
-  useEffect(() => {
-    fetch('http://localhost:5000/api/check-session', {
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => setIsAdmin(data.admin))
-      .catch(() => setIsAdmin(false));
-  }, []);
+  // wait while auth state initializes
+  if (loading) return <div>Loading...</div>;
 
-  if (isAdmin === null) return <div>Loading...</div>;
-  if (!isAdmin) return <Navigate to="/login" replace />;
+  // require only a normal admin; superadmin is not allowed here
+  if (!user || user.userType !== 'admin') {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 }

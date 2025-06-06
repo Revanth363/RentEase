@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  logoutUser,
+  selectUser,
+  selectIsAuthenticated,
+  selectAuthLoading,
+} from "../store/slices/authSlice"; // adjust path if needed
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleChevronDown } from "@fortawesome/free-solid-svg-icons";
 import styles from "../assets/css/Header.module.css";
@@ -8,30 +15,15 @@ import styles from "../assets/css/Header.module.css";
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false); // ← FIXED: add this state
 
-  const location = useLocation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Fetch logged-in user on mount and when location changes
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const res = await axios.get("/api/me", {
-          withCredentials: true,
-        });
-        setUser(res.data.user || null);
-        setIsAdmin(res.data.admin || false);
-      } catch (err) {
-        console.error("Session check failed:", err);
-        setUser(null);
-        setIsAdmin(false);
-      }
-    };
-
-    checkSession();
-  }, []); // Removed location dependency — no need to re-check on every path change
+  // Read auth state from Redux (single source of truth)
+  const user = useSelector(selectUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const loading = useSelector(selectAuthLoading);
 
   // Toggle mobile menu
   const toggleNav = () => setIsNavOpen((prev) => !prev);
@@ -52,13 +44,11 @@ const Header = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [isDropdownOpen]);
 
-  // Logout
+  // Logout using Redux action
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      await axios.get("/api/logout", { withCredentials: true });
-      setUser(null);
-      setIsAdmin(false);
+      await dispatch(logoutUser()).unwrap(); // unwrap to handle errors if needed
       setIsDropdownOpen(false);
       navigate("/");
     } catch (err) {
@@ -103,32 +93,58 @@ const Header = () => {
 
       {/* Navigation Menu */}
       <nav className={`${styles.navMenu} ${isNavOpen ? styles.active : ""}`}>
-        <Link to="/" className={`${styles.navLink} ${isActive("/") ? styles.active : ""}`} onClick={handleLinkClick}>
+        <Link
+          to="/"
+          className={`${styles.navLink} ${isActive("/") ? styles.active : ""}`}
+          onClick={handleLinkClick}
+        >
           Home
         </Link>
-        <Link to="/search" className={`${styles.navLink} ${isActive("/search") ? styles.active : ""}`} onClick={handleLinkClick}>
+        <Link
+          to="/search"
+          className={`${styles.navLink} ${isActive("/search") ? styles.active : ""}`}
+          onClick={handleLinkClick}
+        >
           Properties
         </Link>
-        <Link to="/workerDetails" className={`${styles.navLink} ${isActive("/workerDetails") ? styles.active : ""}`} onClick={handleLinkClick}>
+        <Link
+          to="/workerDetails"
+          className={`${styles.navLink} ${isActive("/workerDetails") ? styles.active : ""}`}
+          onClick={handleLinkClick}
+        >
           Services
         </Link>
-        <Link to="/about_us" className={`${styles.navLink} ${isActive("/about_us") ? styles.active : ""}`} onClick={handleLinkClick}>
+        <Link
+          to="/about_us"
+          className={`${styles.navLink} ${isActive("/about_us") ? styles.active : ""}`}
+          onClick={handleLinkClick}
+        >
           About Us
         </Link>
-        <Link to="/contact_us" className={`${styles.navLink} ${isActive("/contact_us") ? styles.active : ""}`} onClick={handleLinkClick}>
+        <Link
+          to="/contact_us"
+          className={`${styles.navLink} ${isActive("/contact_us") ? styles.active : ""}`}
+          onClick={handleLinkClick}
+        >
           Contact Us
         </Link>
-        <Link to="/faq" className={`${styles.navLink} ${isActive("/faq") ? styles.active : ""}`} onClick={handleLinkClick}>
+        <Link
+          to="/faq"
+          className={`${styles.navLink} ${isActive("/faq") ? styles.active : ""}`}
+          onClick={handleLinkClick}
+        >
           FAQs
         </Link>
       </nav>
 
       {/* CTA: Login or User Dropdown */}
       <div className={styles.cta}>
-        {user ? (
+        {loading ? (
+          <div className={styles.loginBtn}>Loading...</div>
+        ) : user && isAuthenticated ? (
           <div className={styles.dropdown}>
             <a href="#" className={styles.userGreeting} onClick={toggleDropdown}>
-              <span>Hi, {user.firstName}</span>
+              <span>Hi, {user.firstName || "User"}</span>
               <FontAwesomeIcon icon={faCircleChevronDown} className={styles.icon} />
             </a>
 
@@ -148,7 +164,7 @@ const Header = () => {
                   Dashboard
                 </Link>
               )}
-              {isAdmin && (
+              {(user.userType === "admin" || user.userType === "superadmin") && (
                 <Link to="/admin" onClick={handleLinkClick}>
                   Admin Panel
                 </Link>

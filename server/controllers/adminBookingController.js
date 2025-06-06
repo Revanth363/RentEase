@@ -84,11 +84,17 @@ exports.approveBooking = async (req, res) => {
     }
 
     // Create payment record
+    const { getCachedSettings } = require('./superadminsettingsController');
+    const settings = await getCachedSettings();
+    const rate = settings.commission || 20;
+    const commissionAmt = Math.round((booking.propertyId.price || 0) * rate / 100);
+
     const payment = new Payment({
       bookingId: id,
       user: booking.tenantId,
       property: booking.propertyId._id,
       amount: booking.propertyId.price,
+      commission: commissionAmt,
       status: 'Pending',
       paymentMethod: 'Online',
     });

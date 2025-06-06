@@ -1,3 +1,56 @@
+// Tenant updates maintenance request status
+exports.updateMaintenanceStatus = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, message: "Unauthorized: Please log in" });
+    }
+    const { requestId, status } = req.body;
+    const validStatuses = ["Pending", "In Progress", "Resolved"];
+    if (!requestId || !validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid request" });
+    }
+    const MaintenanceRequest = require('../models/MaintenanceRequest');
+    const maintenanceRequest = await MaintenanceRequest.findById(requestId);
+    if (!maintenanceRequest) {
+      return res.status(404).json({ success: false, message: "Maintenance request not found" });
+    }
+    if (maintenanceRequest.tenantId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Not authorized for this request" });
+    }
+    maintenanceRequest.status = status;
+    await maintenanceRequest.save();
+    return res.status(200).json({ success: true, message: "Status updated", status });
+  } catch (error) {
+    console.error("Error updating maintenance status:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+// Tenant confirms maintenance request is fixed
+exports.confirmMaintenanceFixed = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, message: "Unauthorized: Please log in" });
+    }
+    const { requestId, confirmation } = req.body; // confirmation: 'Confirmed' or 'Rejected'
+    if (!requestId || !['Confirmed', 'Rejected'].includes(confirmation)) {
+      return res.status(400).json({ success: false, message: "Invalid request" });
+    }
+    const maintenanceRequest = await require('../models/MaintenanceRequest').findById(requestId);
+    if (!maintenanceRequest) {
+      return res.status(404).json({ success: false, message: "Maintenance request not found" });
+    }
+    if (maintenanceRequest.tenantId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Not authorized for this request" });
+    }
+    maintenanceRequest.tenantConfirmation = confirmation;
+    maintenanceRequest.tenantConfirmationDate = new Date();
+    await maintenanceRequest.save();
+    return res.status(200).json({ success: true, message: "Confirmation updated", tenantConfirmation: confirmation });
+  } catch (error) {
+    console.error("Error confirming maintenance fix:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 const mongoose = require("mongoose");
 const Tenant = require("../models/tenant");
 const Property = require("../models/property");
@@ -1093,11 +1146,18 @@ exports.submitPayment = async (req, res) => {
     }
 
     // Create new payment
+    // compute commission based on current settings
+    const { getCachedSettings } = require('./superadminsettingsController');
+    const settings = await getCachedSettings();
+    const rate = settings.commission || 20;
+    const commissionAmt = Math.round((amount || 0) * rate / 100);
+
     const newPayment = new Payment({
       tenantId,
       propertyId: property._id,
       userName: `${req.user.firstName} ${req.user.lastName}`,
       amount,
+      commission: commissionAmt,
       paymentDate: new Date(),
       dueDate: new Date(),
       paymentMethod,

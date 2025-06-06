@@ -4,46 +4,66 @@ import "../assets/css/OwnerDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useLoading } from "../LoadingContext";
 
-const Sidebar = ({ onSelect, current }) => (
+const sectionToUrl = (section) => {
+  switch (section) {
+    case "properties": return "/owner_dashboard?section=properties";
+    case "tenants": return "/owner_dashboard?section=tenants";
+    case "payments": return "/owner_dashboard?section=payments";
+    case "maintenance": return "/owner_dashboard?section=maintenance";
+    case "complaints": return "/owner_dashboard?section=complaints";
+    case "rentUnrentRequests": return "/owner_dashboard?section=rentUnrentRequests";
+    case "reports": return "/owner_dashboard?section=reports";
+    case "notifications": return "/owner_dashboard?section=notifications";
+    case "settings": return "/owner_dashboard?section=settings";
+    default: return "/owner_dashboard";
+  }
+};
+const Sidebar = () => (
   <div className="ownd-sidebar" id="sidebar">
     <h2>Owner Dashboard</h2>
     <ul>
-      <li onClick={() => onSelect("properties")}>
+      <li onClick={() => window.location.href = sectionToUrl("properties")}> 
         <i className="fa-solid fa-house"></i> My Properties
       </li>
-      <li onClick={() => onSelect("tenants")}>
+      <li onClick={() => window.location.href = sectionToUrl("tenants")}> 
         <i className="fa-solid fa-user"></i> My Tenants
       </li>
-      <li onClick={() => onSelect("payments")}>
+      <li onClick={() => window.location.href = sectionToUrl("payments")}> 
         <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
       </li>
-      <li onClick={() => onSelect("maintenance")}>
+      <li onClick={() => window.location.href = sectionToUrl("maintenance")}> 
         <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance Requests
       </li>
-      <li onClick={() => onSelect("complaints")}>
+      <li onClick={() => window.location.href = sectionToUrl("complaints")}> 
         <i className="fa-solid fa-message"></i> Complaints
       </li>
-      <li onClick={() => onSelect("rentUnrentRequests")}>
+      <li onClick={() => window.location.href = sectionToUrl("rentUnrentRequests")}> 
         <i className="fa-solid fa-key"></i> Rent/Unrent Requests
       </li>
-      <li onClick={() => onSelect("reports")}>
+      <li onClick={() => window.location.href = sectionToUrl("reports")}> 
         <i className="fa-solid fa-chart-column"></i> Reports & Analytics
       </li>
-      <li onClick={() => onSelect("notifications")}>
+      <li onClick={() => window.location.href = sectionToUrl("notifications")}> 
         <i className="fa-solid fa-bell"></i> Notifications
       </li>
-      <li onClick={() => onSelect("settings")}>
+      <li onClick={() => window.location.href = sectionToUrl("settings")}> 
         <i className="fa-solid fa-gears"></i> Settings
       </li>
     </ul>
   </div>
 );
 
+
+function getSectionFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("section") || "properties";
+}
+
 const OwnerDashboard = () => {
   const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [section, setSection] = useState("properties");
+  const [section, setSection] = useState(getSectionFromUrl());
 
   // Modals/overlays
   const [showStatusUpdateOverlay, setShowStatusUpdateOverlay] = useState(false);
@@ -751,18 +771,7 @@ const OwnerDashboard = () => {
                     </p>
                   </div>
                   <div className="ownd-request-actions">
-                    <button
-                      className="ownd-update-sts"
-                      onClick={() => handleUpdateMaintenanceStatus(request._id)}
-                    >
-                      Update Status
-                    </button>
-                    <button
-                      className="ownd-update-sts"
-                      onClick={() => handleUpdateMaintenanceStatus(request._id)}
-                    >
-                      Mark Resolved
-                    </button>
+                    {/* Status label already shown in header, remove duplicate here */}
                   </div>
                 </div>
               ))

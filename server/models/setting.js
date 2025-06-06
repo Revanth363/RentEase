@@ -6,6 +6,8 @@ const settingSchema = new mongoose.Schema({
   platformFee: Number, // From first
   emailNotifications: Boolean, // From first
   maintenanceMode: Boolean, // From first
+  maintenanceMessage: { type: String, default: '' },
+  commission: { type: Number, default: 20 },
   paymentGateway: { provider: String, apiKey: String }, // From first
   currency: { type: String, default: "INR" }, // From first
 });

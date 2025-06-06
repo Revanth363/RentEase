@@ -2,6 +2,18 @@ const express = require("express");
 const router = express.Router();
 const tenantController = require("../controllers/tenantController");
 const { protect } = require("../middleware/auth");
+// Tenant updates maintenance request status
+router.post(
+  "/maintenance/update-status",
+  protect,
+  tenantController.updateMaintenanceStatus
+);
+// Tenant confirms maintenance request is fixed
+router.post(
+  "/maintenance/confirm",
+  protect,
+  tenantController.confirmMaintenanceFixed
+);
 
 
 // Worker payment submission

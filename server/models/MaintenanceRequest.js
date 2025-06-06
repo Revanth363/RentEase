@@ -9,6 +9,11 @@ const maintenanceRequestSchema = new mongoose.Schema({
   dateReported: Date,
   scheduledDate: Date,
   status: String,
+  tenantConfirmation: {
+    type: String, // 'Pending', 'Confirmed', 'Rejected'
+    default: 'Pending'
+  },
+  tenantConfirmationDate: Date,
 }, { timestamps: true });
 
 module.exports = mongoose.model('MaintenanceRequest', maintenanceRequestSchema);

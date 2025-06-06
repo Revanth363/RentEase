@@ -23,6 +23,7 @@ const Rating = require("./models/rating");
 const MaintenanceRequest = require("./models/MaintenanceRequest");
 const Admin = require("./models/admin");
 const WorkerPayment = require("./models/workerPayment");
+const SuperAdmin = require("./models/SuperAdmin");
 
 const fs = require("fs");
 
@@ -32,6 +33,7 @@ const TenantRoutes = require("./routes/tenant");
 const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/admin");
+const superadminRoutes = require("./routes/superadmin");
 
 require("dns").setDefaultResultOrder("ipv4first");
 
@@ -170,6 +172,7 @@ app.use("/api/tenant", TenantRoutes);
 app.use("/api/owner", ownerRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/superadmin", superadminRoutes);
 
 // API Routes for React Frontend
 app.get("/api/properties", async (req, res) => {
@@ -210,7 +213,10 @@ app.get("/api/me", protect, async (req, res) => {
   let user = null;
 
   try {
-    if (req.user.userType === "admin") {
+    if (req.user.userType === "superadmin") {
+      const SuperAdmin = require('./models/SuperAdmin');
+      user = await SuperAdmin.findById(req.user.id).select("-password").lean();
+    } else if (req.user.userType === "admin") {
       user = await Admin.findById(req.user.id).select("-password").lean();
     } else if (req.user.userType === "tenant") {
       user = await Tenant.findById(req.user.id).select("-password").lean();
@@ -227,27 +233,29 @@ app.get("/api/me", protect, async (req, res) => {
     id: user._id.toString(),
     email: user.email,
     userType: req.user.userType,
-    firstName: user.firstName || "",
-    lastName: user.lastName || "",
-    phone: user.phone || "",
-    location: user.location || ""
+    firstName: user.fullName?.split(' ')[0] || user.firstName || "",
+    lastName: user.fullName?.split(' ').slice(1).join(' ') || user.lastName || "",
+    isSuperAdmin: req.user.userType === "superadmin"
   } : null;
 
   res.json({
     success: true,
     user: safeUser,
-    admin: req.user.userType === "admin"
+    admin: req.user.userType === "admin" || req.user.userType === "superadmin"
   });
 });
+
 
 // Backwards-compat: keep /api/check-session redirecting to /api/me
 app.get("/api/check-session", (req, res) => res.redirect("/api/me"));
 
 app.get("/api/logout", (req, res) => {
+  // use same options as when the cookie was set so clearCookie matches
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production", // login sets secure=false in dev
+    sameSite: "lax",     // must match login sameSite
+    path: "/",          // explicit path
   };
   res.clearCookie("accessToken", cookieOptions);
   res.json({ success: true, redirectUrl: "/" });
@@ -428,47 +436,83 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    // ───── ADMIN LOGIN ─────
-    if (email.toLowerCase().trim().endsWith("@admin.com")) {
-      const admin = await Admin.findOne({
-        email: email.toLowerCase().trim(),
-      }).select("+password");
+    const normalizedEmail = email.toLowerCase().trim();
 
-      if (!admin || admin.password !== password) {
-        return res.status(401).json({
-          success: false,
-          error: "Invalid admin credentials"
-        });
-      }
+    // ───── 1. SUPERADMIN CHECK (separate collection) ─────
+    const SuperAdmin = require('./models/SuperAdmin');
+    const superAdmin = await SuperAdmin.findOne({ email: normalizedEmail });
 
+    if (superAdmin && superAdmin.password === password && superAdmin.isActive) {
       const payload = {
-        id: admin._id.toString(),
-        userType: "admin",
-        email: admin.email,
+        id: superAdmin._id.toString(),
+        email: superAdmin.email,
+        userType: "superadmin",          // ← new type
+        isSuperAdmin: true
       };
 
       const token = signToken(payload, { expiresIn: "1h" });
 
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: false,        // true only in production HTTPS
-        sameSite: "lax",      
+        secure: false,
+        sameSite: "lax",
         maxAge: 60 * 60 * 1000,
       });
 
       return res.json({
         success: true,
-        redirectUrl: "/admin"
+        // send them straight to the overview page
+        redirectUrl: "/superadmin/overview",
+        token,
       });
     }
 
-    // ───── NORMAL USER LOGIN ─────
+    // ───── 2. NORMAL ADMIN CHECK ─────
+    if (normalizedEmail.endsWith("@admin.com")) {
+      const admin = await Admin.findOne({ email: normalizedEmail });
+
+      if (!admin || admin.password !== password || admin.status !== 'Active') {
+        return res.status(401).json({
+          success: false,
+          error: "Invalid admin credentials or account inactive"
+        });
+      }
+
+      // update lastLogin timestamp for audit
+      admin.lastLogin = new Date();
+      await admin.save();
+
+      const payload = {
+        id: admin._id.toString(),
+        userType: "admin",
+        email: admin.email,
+        isSuperAdmin: false
+      };
+
+      const token = signToken(payload, { expiresIn: "1h" });
+
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000,
+      });
+
+      return res.json({
+        success: true,
+        redirectUrl: "/admin",
+        token,
+      });
+    }
+
+    // ───── 3. NORMAL USER (tenant/owner/worker) ─────
     if (!userType) {
       return res.status(400).json({
         success: false,
         error: "Please select role"
       });
     }
+
 
     const Model =
       userType === "tenant" ? Tenant :
@@ -482,7 +526,8 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    const user = await Model.findOne({ email }).select("+password");
+    // Always select password explicitly (in case schema excludes it by default)
+    const user = await Model.findOne({ email: normalizedEmail }).select("+password");
 
     if (!user || user.password !== password) {
       return res.status(401).json({
@@ -491,24 +536,29 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    // update lastLogin timestamp for audit
+    user.lastLogin = new Date();
+    await user.save();
+
     const payload = {
       id: user._id.toString(),
       userType,
-      email: user.email,
+      email: user.email
     };
 
     const token = signToken(payload, { expiresIn: "1h" });
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: false,        // true only in production HTTPS
-      sameSite: "lax",      // ✅ FIX
+      secure: false,
+      sameSite: "lax",
       maxAge: 60 * 60 * 1000,
     });
 
     return res.json({
       success: true,
       redirectUrl: getDashboardUrl(userType),
+      token,
     });
 
   } catch (err) {
@@ -521,6 +571,49 @@ app.post("/login", async (req, res) => {
 });
 
 
+
+// public endpoint for basic settings (used by frontend to detect maintenance mode)
+const settingsCtrl = require('./controllers/superadminsettingsController');
+app.get('/api/public-settings', async (req, res) => {
+  try {
+    const settings = await settingsCtrl.getCachedSettings();
+    const { maintenanceMode, maintenanceMessage } = settings;
+    res.json({ maintenanceMode, maintenanceMessage });
+  } catch (err) {
+    console.error('Error fetching public settings:', err);
+    res.status(500).json({ maintenanceMode: false, maintenanceMessage: '' });
+  }
+});
+
+// global maintenance middleware
+app.use(async (req, res, next) => {
+  try {
+    const settings = await settingsCtrl.getCachedSettings();
+    const { maintenanceMode, maintenanceMessage } = settings;
+    if (maintenanceMode) {
+      // allow superadmin and admin to continue
+      const userType = req.user?.userType;
+      if (userType === 'admin' || userType === 'superadmin') {
+        return next();
+      }
+      // API requests return JSON
+      if (req.path.startsWith('/api')) {
+        return res.status(503).json({ message: maintenanceMessage || 'Under maintenance' });
+      }
+      // otherwise serve a simple maintenance HTML message
+      return res.send(`
+        <html><head><title>Maintenance</title></head><body style="font-family:sans-serif; text-align:center; padding:2rem;">
+        <h1>Site Under Maintenance</h1>
+        <p>${maintenanceMessage || 'Sorry for the inconvenience, we will be back shortly.'}</p>
+        </body></html>
+      `);
+    }
+    next();
+  } catch (err) {
+    console.error('Maintenance middleware error:', err);
+    next();
+  }
+});
 
 // Start Google login
 app.get(
@@ -713,12 +806,18 @@ app.get("/api/dashboard", protect, (req, res) => {
 
 
 
-// Search properties endpoint
+// Search properties endpoint – only show verified & not-rented properties
 app.get("/api/search", async (req, res) => {
   try {
     const { amenities } = req.query;
-    const query = {};
 
+    // This is the only filter you want
+    const query = {
+      isRented: false,       // do NOT show rented properties
+      isVerified: true       // do NOT show unverified properties
+    };
+
+    // Keep your amenities filter (if user selected any)
     if (amenities) {
       const amenitiesArray = amenities
         .split(",")
@@ -730,7 +829,11 @@ app.get("/api/search", async (req, res) => {
       }
     }
 
-    const properties = await Property.find(query).select("-__v").lean();
+    const properties = await Property.find(query)
+      .select("-__v")          // exclude version key if you don't need it
+      .sort({ createdAt: -1 }) // newest first – change if you prefer different order
+      .lean();
+
     res.json(properties);
   } catch (err) {
     console.error("Error in /api/search:", err);

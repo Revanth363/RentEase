@@ -1,3 +1,4 @@
+// src/pages/Auth.jsx (or wherever Login is)
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "../assets/css/Login.module.css";
@@ -25,12 +26,15 @@ export default function Login({ onForgot }) {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState(initialErrors);
 
-  // Admin detection
-  const isAdmin = email.trim().toLowerCase().endsWith("@admin.com");
+  // Detect superadmin or normal admin
+  const normalizedEmail = email.trim().toLowerCase();
+  const isSuperAdmin = normalizedEmail === "superadmin@rentease.com";
+  const isNormalAdmin = normalizedEmail.endsWith("@admin.com");
+  const isAdmin = isSuperAdmin || isNormalAdmin;
 
   useEffect(() => {
     if (isAdmin) {
-      setUserType("");
+      setUserType(""); // no role needed
       setErrors((prev) => ({ ...prev, role: "" }));
     }
   }, [isAdmin]);
@@ -42,7 +46,7 @@ export default function Login({ onForgot }) {
   useEffect(() => {
     if (redirectUrl) {
       dispatch(clearRedirectUrl());
-      window.location.replace(redirectUrl);
+      window.location.href = redirectUrl; // or use navigate if using react-router
     }
   }, [redirectUrl, dispatch]);
 
@@ -61,6 +65,7 @@ export default function Login({ onForgot }) {
     e.preventDefault();
     if (!validate()) return;
 
+    // For superadmin and normal admin → no userType
     const payload = isAdmin
       ? { email, password }
       : { email, password, userType };
@@ -68,7 +73,6 @@ export default function Login({ onForgot }) {
     dispatch(loginUser(payload));
   };
 
-  // 🔹 GOOGLE LOGIN HANDLER (REDIRECT BASED)
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:5000/auth/google";
   };
@@ -76,10 +80,10 @@ export default function Login({ onForgot }) {
   return (
     <div className={styles.loginPageRoot}>
       <div className={styles.loginContainer}>
-        <h2>{isAdmin ? "Admin Login" : "Login"}</h2>
+        <h2>{isSuperAdmin ? "Superadmin Login" : isNormalAdmin ? "Admin Login" : "Login"}</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* ROLE SELECTOR */}
+          {/* ROLE SELECTOR — only show for normal users */}
           {!isAdmin && (
             <>
               <label>Select Role:</label>
@@ -93,9 +97,7 @@ export default function Login({ onForgot }) {
                 <option value="owner">Owner</option>
                 <option value="worker">Worker</option>
               </select>
-              {errors.role && (
-                <div className={styles.errorText}>{errors.role}</div>
-              )}
+              {errors.role && <div className={styles.errorText}>{errors.role}</div>}
             </>
           )}
 
@@ -105,14 +107,10 @@ export default function Login({ onForgot }) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={
-              isAdmin ? "admin@rentease.com" : "your@email.com"
-            }
+            placeholder={isSuperAdmin ? "superadmin@rentease.com" : isNormalAdmin ? "admin@rentease.com" : "your@email.com"}
             className={errors.email ? styles.errorInput : ""}
           />
-          {errors.email && (
-            <div className={styles.errorText}>{errors.email}</div>
-          )}
+          {errors.email && <div className={styles.errorText}>{errors.email}</div>}
 
           {/* PASSWORD */}
           <label>Password:</label>
@@ -127,43 +125,27 @@ export default function Login({ onForgot }) {
               className={styles.togglePassword}
               onClick={() => setShowPassword(!showPassword)}
             >
-              <i
-                className={`fa-solid ${
-                  showPassword ? "fa-eye-slash" : "fa-eye"
-                }`}
-              />
+              <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
             </span>
           </div>
-          {errors.password && (
-            <div className={styles.errorText}>{errors.password}</div>
-          )}
+          {errors.password && <div className={styles.errorText}>{errors.password}</div>}
 
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* REDUX ERROR */}
           {authError && (
-            <div
-              className={styles.errorText}
-              style={{ marginTop: "10px", textAlign: "center" }}
-            >
+            <div className={styles.errorText} style={{ marginTop: "10px", textAlign: "center" }}>
               {authError}
             </div>
           )}
 
-          {/* FORGOT PASSWORD */}
           <div className={styles.forgotWrapper}>
-            <button
-              type="button"
-              className={styles.forgotPassword}
-              onClick={onForgot}
-            >
+            <button type="button" className={styles.forgotPassword} onClick={onForgot}>
               Forgot Password?
             </button>
           </div>
 
-          {/* 🔹 GOOGLE LOGIN BUTTON */}
           <div style={{ marginTop: "16px", textAlign: "center" }}>
             <button
               type="button"

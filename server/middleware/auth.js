@@ -1,36 +1,82 @@
 // server/middleware/auth.js
 const { verifyToken } = require("../utils/jwt");
 
-function protect(req, res, next) {
+// Helper to extract and verify token (used by all middlewares)
+const getVerifiedUser = (req) => {
   const token = req.cookies?.accessToken;
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  try {
-    const decoded = verifyToken(token);
-    req.user = decoded;
-    return next();
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
-}
 
-function adminProtect(req, res, next) {
-  const token = req.cookies?.accessToken;
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  if (!token) {
+    throw new Error("No token provided");
+  }
+
   try {
     const decoded = verifyToken(token);
-    if (decoded.userType !== "admin") {
-      return res.status(403).json({ error: "Forbidden - admin only" });
-    }
-    req.user = decoded;
-    return next();
+    return decoded;
   } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" });
+    throw new Error("Invalid or expired token");
   }
-}
+};
+
+// Base protection: any logged-in user
+const protect = (req, res, next) => {
+  try {
+    req.user = getVerifiedUser(req);
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      error: err.message || "Unauthorized - please login"
+    });
+  }
+};
+
+// Admin or Superadmin protection
+const adminProtect = (req, res, next) => {
+  try {
+    const user = getVerifiedUser(req);
+
+    // Allow both "admin" and "superadmin"
+    if (user.userType !== "admin" && user.userType !== "superadmin") {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden - admin or superadmin access required"
+      });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      error: err.message || "Unauthorized - please login"
+    });
+  }
+};
+
+// Superadmin-only protection (strict)
+const superadminProtect = (req, res, next) => {
+  try {
+    const user = getVerifiedUser(req);
+
+    if (user.userType !== "superadmin") {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden - superadmin access only"
+      });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      error: err.message || "Unauthorized - please login"
+    });
+  }
+};
 
 module.exports = {
-  protect,
-  adminProtect
+  protect,           // any logged-in user
+  adminProtect,      // admin OR superadmin
+  superadminProtect  // only superadmin
 };

@@ -9,7 +9,7 @@ exports.listProperty = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized: Please log in" });
     }
 
-    // Extract fields from req.body (form data was parsed)
+    // Extract fields from req.body
     const {
       "property-type": type,
       "property-subtype": subtype,
@@ -23,7 +23,7 @@ exports.listProperty = async (req, res) => {
       pincode,
       landmark,
       "rent-amount": price,
-      "map-link": mapLink,
+      "map-link": mapLink,                // optional fallback
       "security-deposit": securityDeposit,
       maintenance,
       "available-from": availableFrom,
@@ -34,18 +34,43 @@ exports.listProperty = async (req, res) => {
       "contact-number": contactNumber,
       "alternative-number": alternativeNumber,
       "contact-email": contactEmail,
+      coordinates,                        // ← this is the JSON string from frontend
     } = req.body;
 
-    // Support multer.any() which produces req.files as an array
-    // Also accept other multer shapes (req.file, req.files.images)
+    // ── Parse coordinates safely ──
+    let parsedCoordinates = undefined;
+
+    if (coordinates) {
+      try {
+        const coordObj = JSON.parse(coordinates);
+
+        if (
+          typeof coordObj?.lat === "number" &&
+          typeof coordObj?.lng === "number" &&
+          !isNaN(coordObj.lat) &&
+          !isNaN(coordObj.lng) &&
+          Math.abs(coordObj.lat) <= 90 &&
+          Math.abs(coordObj.lng) <= 180
+        ) {
+          parsedCoordinates = {
+            lat: coordObj.lat,
+            lng: coordObj.lng,
+          };
+        } else {
+          console.warn("Invalid coordinate values received:", coordObj);
+        }
+      } catch (parseErr) {
+        console.warn("Failed to parse coordinates JSON:", parseErr.message, { received: coordinates });
+      }
+    }
+
+    // Handle uploaded images (your existing logic – kept almost unchanged)
     let uploadedFiles = [];
 
     if (Array.isArray(req.files)) {
-      // Filter files that were uploaded under the "images" field (or common variants)
       uploadedFiles = req.files.filter((f) =>
         ["images", "image", "property-photos", "photos"].includes(f.fieldname)
       );
-      // If nothing matched, assume all files are images
       if (uploadedFiles.length === 0) uploadedFiles = req.files;
     } else if (req.files && req.files.images) {
       uploadedFiles = req.files.images;
@@ -58,7 +83,6 @@ exports.listProperty = async (req, res) => {
       return res.status(400).json({ error: "At least one image is required" });
     }
 
-    // Map Cloudinary files to our schema format, robust to different storage engines
     const images = uploadedFiles.map((file) => ({
       url: file.secure_url || file.path || file.url || file.location || "",
       publicId: file.public_id || file.publicId || file.key || file.filename || "",
@@ -67,37 +91,38 @@ exports.listProperty = async (req, res) => {
     // Construct full address
     const addressParts = [address];
     if (landmark) addressParts.push(`Near ${landmark}`);
-    addressParts.push(city, state);
-    addressParts.push(pincode);
-    const fullAddress = addressParts.join(", ");
+    addressParts.push(city, state, pincode);
+    const fullAddress = addressParts.filter(Boolean).join(", ");
 
+    // Create property document
     const property = new Property({
       name: `${type} in ${city}`,
       ownerId: req.user.id,
       owner,
-      location: city, // Use city only
-      address: fullAddress, // Full address with all details
+      location: city,
+      address: fullAddress,
       type,
       subtype,
-      beds: parseInt(bedrooms),
-      baths: parseInt(bathrooms),
+      beds: parseInt(bedrooms) || undefined,
+      baths: parseInt(bathrooms) || undefined,
       furnished: furnishing || "unfurnished",
       description,
-      images, // Cloudinary URLs with publicIds
+      images,
       amenities: Array.isArray(amenities)
         ? amenities
         : amenities
         ? [amenities]
         : [],
-      map: mapLink || "", // Save map-link to map field
-      price: parseFloat(price),
+      map: mapLink || "",
+      coordinates: parsedCoordinates,          // ← now correctly saved
+      price: parseFloat(price) || undefined,
       status: "Pending",
       isRented: false,
       isVerified: false,
       rating: 0,
       reviews: 0,
-      securityDeposit: parseFloat(securityDeposit),
-      maintenance: parseFloat(maintenance),
+      securityDeposit: parseFloat(securityDeposit) || undefined,
+      maintenance: parseFloat(maintenance) || undefined,
       availableFrom: availableFrom ? new Date(availableFrom) : undefined,
       preferredTenants,
       leaseDuration,
@@ -106,20 +131,26 @@ exports.listProperty = async (req, res) => {
       contactEmail,
     });
 
+    // Optional: debug what is about to be saved
+    // console.log("Property before save:", property.toObject());
+
     await property.save();
 
-    // Update owner
+    // Update owner's property list
     await Owner.findByIdAndUpdate(req.user.id, {
       $push: { propertyIds: property._id },
-      $inc: { numProperties: 1 }
+      $inc: { numProperties: 1 },
     });
 
-    res.status(201).json({ message: "Property listed successfully", property });
+    res.status(201).json({
+      message: "Property listed successfully",
+      property,
+    });
   } catch (error) {
     console.error("Error listing property:", error);
-    res
-      .status(400)
-      .json({ error: error.message || "Server error while listing property" });
+    res.status(400).json({
+      error: error.message || "Server error while listing property",
+    });
   }
 };
 

@@ -13,6 +13,7 @@ const paymentSchema = new mongoose.Schema({
   status: { type: String, default: "Pending", enum: ["Pending", "Paid", "Overdue"] }, // From first
   receiptUrl: String, // From first
   transactionId: String, // From second
+  commission: { type: Number, default: 0 }, // platform commission amount
 }, { timestamps: true });
 
 module.exports = mongoose.model('Payment', paymentSchema);

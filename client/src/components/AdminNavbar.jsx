@@ -1,19 +1,22 @@
 // src/components/AdminNavbar.jsx
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from '../assets/css/AdminNavbar.module.css';   // ← this path
+import { logoutUser } from '../store/slices/authSlice';
 
 const AdminNavbar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:5000/api/logout', {
-        method: 'GET',
-        credentials: 'include',
-      });
-      navigate('/', { replace: true });
+      // Use centralized logout thunk so client-side auth state is cleared
+      await dispatch(logoutUser()).unwrap();
     } catch (err) {
-      console.error('Logout failed:', err);
+      // If the server logout fails, still navigate and ensure client state cleared
+      console.warn('Logout thunk failed, navigating anyway:', err);
+    } finally {
+      navigate('/', { replace: true });
     }
   };
 

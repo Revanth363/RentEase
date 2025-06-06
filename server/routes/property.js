@@ -94,7 +94,7 @@ router.get("/:id", async (req, res) => {
         ...property,
         _id: property._id.toString(), // String for React
         images: property.images || [],
-        map: property.map || "",
+        coordinates: property.coordinates || null,
         amenities: property.amenities || [],
         price: Number(property.price || 0),
         beds: Number(property.beds || 0),

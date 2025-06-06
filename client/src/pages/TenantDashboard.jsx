@@ -6,54 +6,67 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useLoading } from "../LoadingContext";
 import CalendarTiles from "../components/CalendarTiles";
 
-const Sidebar = ({ onSelect, current }) => (
+const sectionToUrl = (section) => {
+  // Map section keys to URLs (adjust as needed)
+  switch (section) {
+    case "home": return "/tenant/tenant_dashboard?section=home";
+    case "rentPayments": return "/tenant/tenant_dashboard?section=rentPayments";
+    case "maintenance": return "/tenant/tenant_dashboard?section=maintenance";
+    case "complaints": return "/tenant/tenant_dashboard?section=complaints";
+    case "movers": return "/tenant/tenant_dashboard?section=movers";
+    case "notifications": return "/tenant/tenant_dashboard?section=notifications";
+    case "savedListings": return "/tenant/tenant_dashboard?section=savedListings";
+    case "rentalHistory": return "/tenant/tenant_dashboard?section=rentalHistory";
+    case "settings": return "/tenant/tenant_dashboard?section=settings";
+    default: return "/tenant/tenant_dashboard";
+  }
+};
+const Sidebar = () => (
   <div className="tntd-sidebar" id="sidebar">
     <h2>Tenant Dashboard</h2>
     <ul>
-      <li onClick={() => onSelect("home")}>
+      <li onClick={() => window.location.href = sectionToUrl("home")}> 
         <i className="fa-solid fa-house"></i> Home
       </li>
-
-      <li onClick={() => onSelect("rentPayments")}>
+      <li onClick={() => window.location.href = sectionToUrl("rentPayments")}> 
         <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
       </li>
-
-      <li onClick={() => onSelect("maintenance")}>
+      <li onClick={() => window.location.href = sectionToUrl("maintenance")}> 
         <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance
       </li>
-
-      <li onClick={() => onSelect("complaints")}>
+      <li onClick={() => window.location.href = sectionToUrl("complaints")}> 
         <i className="fa-solid fa-comments"></i> Complaints
       </li>
-
-      <li onClick={() => onSelect("movers")}>
+      <li onClick={() => window.location.href = sectionToUrl("movers")}> 
         <i className="fa-solid fa-users"></i> Domestic Workers
       </li>
-
-      <li onClick={() => onSelect("notifications")}>
+      <li onClick={() => window.location.href = sectionToUrl("notifications")}> 
         <i className="fa-solid fa-bell"></i> Notifications
       </li>
-
-      <li onClick={() => onSelect("savedListings")}>
+      <li onClick={() => window.location.href = sectionToUrl("savedListings")}> 
         <i className="fa-solid fa-bookmark"></i> Saved Listings
       </li>
-
-      <li onClick={() => onSelect("rentalHistory")}>
+      <li onClick={() => window.location.href = sectionToUrl("rentalHistory")}> 
         <i className="fa-solid fa-star-half-stroke"></i> Rental History
       </li>
-
-      <li onClick={() => onSelect("settings")}>
+      <li onClick={() => window.location.href = sectionToUrl("settings")}> 
         <i className="fa-solid fa-gears"></i> Settings
       </li>
     </ul>
   </div>
 );
 
+
+function getSectionFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("section") || "home";
+}
+
 const TenantDashboard = () => {
   const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [section, setSection] = useState("home");
+  const [section, setSection] = useState(getSectionFromUrl());
 
   // Modals/forms visibility
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
@@ -809,7 +822,33 @@ const TenantDashboard = () => {
                     <strong>Assigned To:</strong>{" "}
                     {r.assignedTo || "Awaiting assignment"}
                   </p>
-                  <button className="tntd-small-button">Update</button>
+                  <div style={{ margin: '10px 0' }}>
+                    <label htmlFor={`status-select-${r._id}`}><strong>Status:</strong> </label>
+                    <select
+                      id={`status-select-${r._id}`}
+                      value={r.status}
+                      onChange={async (e) => {
+                        const newStatus = e.target.value;
+                        if (newStatus === r.status) return;
+                        const confirmed = window.confirm(`Are you sure you want to change status to '${newStatus}'?`);
+                        if (!confirmed) return;
+                        const res = await tenantService.updateMaintenanceStatus({ requestId: r._id, status: newStatus });
+                        if (res.success) {
+                          setDashboard((prev) => ({
+                            ...prev,
+                            activeMaintenanceRequests: prev.activeMaintenanceRequests.map((req) => req._id === r._id ? { ...req, status: newStatus } : req),
+                          }));
+                          alert('Status updated successfully.');
+                        } else {
+                          alert(res.message || 'Error updating status');
+                        }
+                      }}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Resolved">Resolved</option>
+                    </select>
+                  </div>
                 </div>
               ))}
             </div>
