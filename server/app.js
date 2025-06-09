@@ -34,8 +34,11 @@ const ownerRoutes = require("./routes/owner");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/admin");
 const superadminRoutes = require("./routes/superadmin");
+const verificationRoutes = require("./routes/verification");
+const adminUserVerificationsRoutes = require("./routes/adminUserVerifications");
 
 require("dns").setDefaultResultOrder("ipv4first");
+mongoose.set('debug', true);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -173,6 +176,8 @@ app.use("/api/owner", ownerRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/superadmin", superadminRoutes);
+app.use("/api/verification", verificationRoutes);
+app.use("/api/admin/verifications", adminUserVerificationsRoutes);
 
 // API Routes for React Frontend
 app.get("/api/properties", async (req, res) => {

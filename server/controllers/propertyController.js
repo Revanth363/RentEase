@@ -64,29 +64,44 @@ exports.listProperty = async (req, res) => {
       }
     }
 
-    // Handle uploaded images (your existing logic – kept almost unchanged)
-    let uploadedFiles = [];
 
+    // Separate property proof and images
+    let images = [];
+    let propertyProofFile = null;
     if (Array.isArray(req.files)) {
-      uploadedFiles = req.files.filter((f) =>
-        ["images", "image", "property-photos", "photos"].includes(f.fieldname)
-      );
-      if (uploadedFiles.length === 0) uploadedFiles = req.files;
+      for (const file of req.files) {
+        if (file.fieldname === 'propertyProof') {
+          propertyProofFile = file;
+        } else if (["images", "image", "property-photos", "photos"].includes(file.fieldname)) {
+          images.push(file);
+        }
+      }
+      if (images.length === 0) images = req.files.filter(f => f.fieldname !== 'propertyProof');
     } else if (req.files && req.files.images) {
-      uploadedFiles = req.files.images;
+      images = req.files.images;
     } else if (req.file) {
-      uploadedFiles = [req.file];
+      images = [req.file];
     }
 
-    if (!uploadedFiles || uploadedFiles.length === 0) {
+    if (!images || images.length === 0) {
       console.log("No images received", { filesPresent: !!req.files, file: !!req.file });
       return res.status(400).json({ error: "At least one image is required" });
     }
 
-    const images = uploadedFiles.map((file) => ({
+    const imageObjs = images.map((file) => ({
       url: file.secure_url || file.path || file.url || file.location || "",
       publicId: file.public_id || file.publicId || file.key || file.filename || "",
     }));
+
+    // Handle property proof
+    let propertyProof = null;
+    if (propertyProofFile) {
+      propertyProof = {
+        url: propertyProofFile.secure_url || propertyProofFile.path || propertyProofFile.url || propertyProofFile.location || "",
+        publicId: propertyProofFile.public_id || propertyProofFile.publicId || propertyProofFile.key || propertyProofFile.filename || "",
+        type: propertyProofFile.mimetype === 'application/pdf' ? 'pdf' : 'image'
+      };
+    }
 
     // Construct full address
     const addressParts = [address];
@@ -107,7 +122,8 @@ exports.listProperty = async (req, res) => {
       baths: parseInt(bathrooms) || undefined,
       furnished: furnishing || "unfurnished",
       description,
-      images,
+      images: imageObjs,
+      propertyProof,
       amenities: Array.isArray(amenities)
         ? amenities
         : amenities

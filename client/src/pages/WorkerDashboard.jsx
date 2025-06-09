@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import "../assets/css/workerDashboard.css";
 import CalendarTiles from "../components/CalendarTiles";
 import LoadingSpinner from "../components/LoadingSpinner";
+import VerificationStatus from "../components/VerificationStatus";
 import { useLoading } from "../LoadingContext";
 
 import {
@@ -22,6 +23,7 @@ import {
 } from "../services/workerService";
 
 const WorkerDashboard = () => {
+    const [verificationStatus, setVerificationStatus] = useState(null);
   const navigate = useNavigate();
   const { setIsLoading } = useLoading();
 
@@ -73,6 +75,20 @@ const WorkerDashboard = () => {
   });
 
   useEffect(() => {
+      // Fetch verification status on mount
+      useEffect(() => {
+        if (user && user._id) {
+          (async () => {
+            try {
+              const res = await fetch(`/api/verification/status?userId=${user._id}&userModel=worker`);
+              const data = await res.json();
+              setVerificationStatus(data.status);
+            } catch {
+              setVerificationStatus(null);
+            }
+          })();
+        }
+      }, [user]);
     loadDashboard();
   }, []);
 
@@ -507,58 +523,31 @@ const WorkerDashboard = () => {
         >
           <h3>My Services</h3>
           <div className="wrkd-prop-container">
-            {services.length > 0 ? (
-              services.map((service) => (
-                <div key={service._id || "1"} className="wrkd-gs-container">
-                  <div className="wrkd-sc-image-container">
-                    <img
-                      src={service.image || "/images/default_service.jpg"}
-                      alt={service.name}
-                      className="wrkd-sc-image"
-                    />
-                  </div>
-                  <div className="wrkd-main-sen">{service.name}</div>
-                  <div className="wrkd-sc-text">
-                    <ul>
-                      <li>
-                        <strong>Rate:</strong> ₹{service.price}{" "}
-                        {service.rateUnit}
-                      </li>
-                      <li>
-                        <strong>Experience:</strong> {service.experience} years
-                      </li>
-                      <li>
-                        <strong>Status:</strong> {service.serviceStatus}
-                      </li>
-                    </ul>
-                    <div className="wrkd-prop-view">
-                      <button onClick={() => navigate(`/worker/${user._id}`)}>
-                        Service Details
-                      </button>
-                      <button onClick={handleToggleAvailability}>
-                        Toggle Availability
-                      </button>
-                      <button onClick={handleDeleteService}>
-                        Delete Service
-                      </button>
-                    </div>
-                  </div>
+            {verificationStatus !== "approved" ? (
+              <div className="wrkd-dashboard-blocked">
+                <VerificationStatus userId={user._id} userModel="worker" />
+                <div className="wrkd-blocked-message">
+                  <h3>Your account is not verified.</h3>
+                  <p>Please upload your documents and wait for admin approval. Only settings and verification are available until approved.</p>
                 </div>
-              ))
+              </div>
             ) : (
-              <p>
-                No service registered.{" "}
-                <span
-                  style={{
-                    color: "blue",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                  onClick={() => navigate("/worker_register")}
-                >
-                  Add Service
-                </span>
-              </p>
+              services.length > 0 ? (
+                services.map((service) => (
+                  <div key={service._id || "1"} className="wrkd-gs-container">
+                    <div className="wrkd-sc-image-container">
+                      <img
+                        src={service.image || "/images/default_service.jpg"}
+                        alt={service.name}
+                        className="wrkd-sc-image"
+                      />
+                    </div>
+                    <div className="wrkd-main-sen">{service.name}</div>
+                  </div>
+                ))
+              ) : (
+                <p>No services found.</p>
+              )
             )}
           </div>
         </div>

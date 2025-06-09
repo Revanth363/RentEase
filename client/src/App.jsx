@@ -50,6 +50,7 @@ import PaymentView from "./admin/PaymentView";
 import PropertyView from "./admin/PropertyView";
 import UserView from "./admin/UserView";
 import WorkerPaymentView from "./admin/WorkerPaymentView";
+import AdminUserVerifications from "./admin/AdminUserVerifications";
 
 import AdminRoute from "./components/AdminRoute";
 
@@ -214,6 +215,15 @@ const App = () => {
             element={
               <AdminRoute>
                 <Messages />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin/user-verifications"
+            element={
+              <AdminRoute>
+                <AdminUserVerifications />
               </AdminRoute>
             }
           />

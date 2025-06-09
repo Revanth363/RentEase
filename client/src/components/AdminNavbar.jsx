@@ -99,6 +99,15 @@ const AdminNavbar = () => {
           Messages
         </NavLink>
 
+        <NavLink
+          to="/admin/user-verifications"
+          className={({ isActive }) => 
+            isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+          }
+        >
+          User Verifications
+        </NavLink>
+
         <button 
           onClick={handleLogout} 
           className={styles.logoutBtn}

@@ -16,11 +16,24 @@ const defaultMarkerIcon = L.icon({
 
 const PropertyListing = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
+    const [propertyProofFile, setPropertyProofFile] = useState(null);
   const [errors, setErrors] = useState({});
+    const [propertyProofError, setPropertyProofError] = useState(false);
   const [coordinates, setCoordinates] = useState(null); // { lat, lng }
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
+      const handlePropertyProofChange = (e) => {
+        const file = e.target.files[0];
+        if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+          setPropertyProofFile(file);
+          setPropertyProofError(false);
+        } else {
+          setPropertyProofFile(null);
+          setPropertyProofError(true);
+          alert('Only PDF or image files are allowed for property proof.');
+        }
+      };
     const files = Array.from(e.target.files);
     const validImageFiles = files.filter((file) => file.type.startsWith("image/"));
     const newFiles = validImageFiles.filter(
@@ -67,6 +80,12 @@ const PropertyListing = () => {
       newErrors.photos = true;
       isValid = false;
     }
+    // Property Proof
+    if (!propertyProofFile) {
+      setPropertyProofError(true);
+      isValid = false;
+      alert('Property proof document is required (PDF or image).');
+    }
 
     // Coordinates (location pin)
     if (!coordinates || typeof coordinates.lat !== "number" || typeof coordinates.lng !== "number") {
@@ -89,6 +108,9 @@ const PropertyListing = () => {
 
     // Append files & coordinates
     selectedFiles.forEach((file) => formData.append("images", file));
+    if (propertyProofFile) {
+      formData.append("propertyProof", propertyProofFile);
+    }
     if (coordinates) {
       formData.append("coordinates", JSON.stringify(coordinates));
     }
@@ -420,6 +442,27 @@ const PropertyListing = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* ── Property Proof ─*/}
+          <div className="pl-form-section">
+            <h2>Upload Property Proof (PDF or Image)</h2>
+            <div className={`pl-form-group ${propertyProofError ? "pl-error" : ""}`}>
+              <input
+                type="file"
+                accept=".pdf,image/*"
+                onChange={handlePropertyProofChange}
+                required
+              />
+              {propertyProofFile && (
+                <span style={{ color: '#2e7d32', marginLeft: 8 }}>
+                  ✓ {propertyProofFile.name}
+                </span>
+              )}
+              {propertyProofError && (
+                <span className="pl-error-message">Please upload a valid property proof (PDF or image).</span>
+              )}
             </div>
           </div>
 

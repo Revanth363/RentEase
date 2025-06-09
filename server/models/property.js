@@ -29,11 +29,17 @@ const propertySchema = new mongoose.Schema({
   furnished: String,
   description: String,
   images: [
-  {
+    {
+      url: String,
+      publicId: String
+    }
+  ],
+
+  propertyProof: {
     url: String,
-    publicId: String
-  }
-],
+    publicId: String,
+    type: { type: String, enum: ['pdf', 'image'], required: false }
+  },
 
   amenities: [String],
 

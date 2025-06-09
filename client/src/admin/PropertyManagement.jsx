@@ -628,6 +628,13 @@ const PropertyManagement = () => {
                           </span>
                         </td>
                         <td>
+                          {p.propertyProof && p.propertyProof.url && (
+                            <div style={{ marginBottom: 8 }}>
+                              <a href={p.propertyProof.url} target="_blank" rel="noopener noreferrer">
+                                Property Proof ({p.propertyProof.type === 'pdf' ? 'PDF' : 'Image'})
+                              </a>
+                            </div>
+                          )}
                           <div className={styles["action-buttons"]}>
                             <a
                               href={`/admin/property/${p._id}`}

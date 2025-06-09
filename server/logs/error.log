@@ -1,0 +1,19 @@
+2026-03-01T15:27:58.866Z | 401 | GET | /api/me | 5.391ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-01T15:27:58.882Z | 401 | GET | /api/me | 0.710ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-01T15:28:07.091Z | 401 | GET | /api/me | 0.428ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-01T15:28:07.102Z | 401 | GET | /api/me | 0.483ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-01T15:28:08.858Z | 500 | GET | /api/properties | 10020.812ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-01T15:28:08.889Z | 500 | GET | /api/slider-properties | 10036.895ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-01T15:28:08.902Z | 500 | GET | /api/public-settings | 10029.599ms | User: guest | IP: ::1 | Body: - | Msg: No error message
+2026-03-01T15:28:18.917Z | 500 | GET | /api/properties | 10008.048ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-01T15:28:18.920Z | 500 | GET | /api/slider-properties | 10010.028ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-01T15:28:18.925Z | 500 | GET | /api/public-settings | 10010.887ms | User: guest | IP: ::1 | Body: - | Msg: No error message
+2026-03-01T15:28:27.092Z | 500 | GET | /api/search | 20013.328ms | User: guest | IP: ::1 | Body: - | Msg: Failed to fetch properties
+2026-03-01T15:28:27.841Z | 401 | GET | /api/me | 0.661ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-01T15:28:27.852Z | 401 | GET | /api/me | 0.551ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-01T15:28:28.960Z | 500 | GET | /api/properties | 10014.676ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-01T15:28:28.969Z | 500 | GET | /api/slider-properties | 10021.353ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-01T15:28:38.402Z | 500 | GET | /api/properties | 10007.252ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-01T15:28:38.420Z | 500 | GET | /api/slider-properties | 10018.210ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-01T15:28:38.997Z | 500 | GET | /api/properties | 10016.973ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-01T15:28:39.000Z | 500 | GET | /api/slider-properties | 10018.267ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
