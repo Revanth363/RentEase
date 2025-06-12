@@ -1,10 +1,30 @@
 const Verification = require('../models/Verification');
+const Tenant = require('../models/tenant');
+const Owner  = require('../models/owner');
+const Worker = require('../models/worker');
+
+// Maps lowercase userModel values → actual mongoose models
+const MODEL_MAP = { tenant: Tenant, owner: Owner, worker: Worker };
+
+// Populate user field manually (handles lowercase refPath mismatch)
+const populateUsers = async (verifications) => {
+  return Promise.all(verifications.map(async (v) => {
+    const obj = v.toObject();
+    const Model = MODEL_MAP[v.userModel];
+    if (Model) {
+      obj.user = await Model.findById(v.user)
+        .select('firstName lastName email phone')
+        .lean();
+    }
+    return obj;
+  }));
+};
 
 // Get all pending verifications
 exports.getPendingVerifications = async (req, res) => {
   try {
-    const verifications = await Verification.find({ status: 'pending' }).populate('user');
-    res.json(verifications);
+    const verifications = await Verification.find({ status: 'pending' });
+    res.json(await populateUsers(verifications));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -45,8 +65,8 @@ exports.rejectVerification = async (req, res) => {
 // Get all verifications (for admin dashboard)
 exports.getAllVerifications = async (req, res) => {
   try {
-    const verifications = await Verification.find().populate('user');
-    res.json(verifications);
+    const verifications = await Verification.find().sort({ createdAt: -1 });
+    res.json(await populateUsers(verifications));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

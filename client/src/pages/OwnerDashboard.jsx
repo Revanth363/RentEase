@@ -16,6 +16,7 @@ const sectionToUrl = (section) => {
     case "reports": return "/owner_dashboard?section=reports";
     case "notifications": return "/owner_dashboard?section=notifications";
     case "settings": return "/owner_dashboard?section=settings";
+    case "verification": return "/owner_dashboard?section=verification";
     default: return "/owner_dashboard";
   }
 };
@@ -238,69 +239,97 @@ const OwnerDashboard = () => {
     );
   }
 
+  const effectiveSection = verificationStatus !== "approved"
+    ? (["settings", "verification"].includes(section) ? section : "verification")
+    : section;
+
   return (
     <>
-      {verificationStatus !== "approved" ? (
-        <div className="ownd-dashboard-blocked">
-          <VerificationStatus userId={dashboard?.user?._id} userModel="owner" />
-          <div className="ownd-blocked-message">
-            <h3>Your account is not verified.</h3>
-            <p>
-              Please upload your documents and wait for admin approval. Only settings and verification are available until approved.
-            </p>
+      <div
+        className="ownd-dashboard-container"
+        style={{ position: "relative", marginTop: "80px" }}
+      >
+        <button className="ownd-menu-toggle" onClick={handleToggleMenu}>
+          <strong>{" > "}</strong>
+        </button>
+        {verificationStatus !== "approved" ? (
+          <div className="ownd-sidebar ownd-restricted-sidebar" id="sidebar">
+            <h2>Owner Dashboard</h2>
+            <ul>
+              <li
+                className={effectiveSection === "verification" ? "ownd-sidebar-active-item" : ""}
+                onClick={() => window.location.href = sectionToUrl("verification")}
+              >
+                <i className="fa-solid fa-shield-halved"></i> Verification
+              </li>
+              <li
+                className={effectiveSection === "settings" ? "ownd-sidebar-active-item" : ""}
+                onClick={() => window.location.href = sectionToUrl("settings")}
+              >
+                <i className="fa-solid fa-gears"></i> Settings
+              </li>
+            </ul>
           </div>
-        </div>
-      ) : (
-        <>
-          <div
-            className="ownd-dashboard-container"
-            style={{ position: "relative", marginTop: "80px" }}
-          >
-            <button className="ownd-menu-toggle" onClick={handleToggleMenu}>
-              <strong>{" > "}</strong>
-            </button>
-            <Sidebar />
+        ) : (
+          <Sidebar />
+        )}
+      </div>
+
+      <div className="ownd-main-content">
+        {verificationStatus !== "approved" && (
+          <div className="ownd-unverified-banner">
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            <div>
+              <h3>Your account is not verified</h3>
+              <p>Please upload your documents and wait for admin approval to access all features.</p>
+            </div>
+          </div>
+        )}
+
+        {verificationStatus !== "approved" && (
+          <div className={`ownd-section ${effectiveSection === "verification" ? "ownd-active" : ""}`}>
+            <h3>Account Verification</h3>
             <VerificationStatus userId={dashboard?.user?._id} userModel="owner" />
           </div>
+        )}
 
-          <div className="ownd-main-content">
             {/* Properties Section */}
-            <div className={`ownd-section ${section === "properties" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "properties" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Tenants Section */}
-            <div className={`ownd-section ${section === "tenants" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "tenants" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Payments Section */}
-            <div className={`ownd-section ${section === "payments" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "payments" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Maintenance Section */}
-            <div className={`ownd-section ${section === "maintenance" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "maintenance" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Complaints Section */}
-            <div className={`ownd-section ${section === "complaints" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "complaints" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Rent/Unrent Requests Section */}
-            <div className={`ownd-section ${section === "rentUnrentRequests" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "rentUnrentRequests" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Reports Section */}
-            <div className={`ownd-section ${section === "reports" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "reports" ? "ownd-active" : ""}`}>
               {/* ...existing code... */}
             </div>
 
             {/* Settings Section */}
-            <div className={`ownd-section ${section === "settings" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "settings" ? "ownd-active" : ""}`}>
               <h3>Settings</h3>
               <form ref={settingsFormRef}>
                 <div className="ownd-settings-section">
@@ -399,7 +428,7 @@ const OwnerDashboard = () => {
             </div>
 
             {/* Notifications Section */}
-            <div className={`ownd-section ${section === "notifications" ? "ownd-active" : ""}`}>
+            <div className={`ownd-section ${effectiveSection === "notifications" ? "ownd-active" : ""}`}>
               <h3>Notifications</h3>
               <div className="ownd-notification-container">
                 {notifications &&
@@ -504,9 +533,7 @@ const OwnerDashboard = () => {
                 )}
               </div>
             </div>
-          </div>
-        </>
-      )}
+      </div>
 
       {/* Status Update Overlay */}
       {showStatusUpdateOverlay && (

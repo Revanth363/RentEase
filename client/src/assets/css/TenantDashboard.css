@@ -1334,3 +1334,63 @@ button:disabled:hover {
   color: #95a5a6;
   font-style: italic;
 }
+
+/* ============================================
+   UNVERIFIED ACCOUNT LAYOUT
+   ============================================ */
+
+.tntd-unverified-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: linear-gradient(135deg, #fff8e1, #fff3cd);
+  border: 1.5px solid #ffc107;
+  border-left: 6px solid #e67e00;
+  border-radius: 12px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.15);
+}
+
+.tntd-unverified-banner i {
+  font-size: 2.4rem;
+  color: #e67e00;
+  flex-shrink: 0;
+}
+
+.tntd-unverified-banner h3 {
+  margin: 0 0 6px 0;
+  color: #7d4900;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.tntd-unverified-banner p {
+  margin: 0;
+  color: #5a3200;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.tntd-restricted-sidebar {
+  height: 100vh !important;
+}
+
+.tntd-sidebar li.tntd-sidebar-active-item {
+  background: rgba(255, 193, 7, 0.18) !important;
+  border-radius: 6px;
+  color: #ffc107 !important;
+  font-weight: 600;
+  position: relative;
+}
+
+.tntd-sidebar li.tntd-sidebar-active-item::before {
+  content: "";
+  position: absolute;
+  left: -2vw;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #ffc107;
+  border-radius: 0 4px 4px 0;
+}

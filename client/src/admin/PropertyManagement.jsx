@@ -32,6 +32,7 @@ const PropertyManagement = () => {
   });
 
   const [appliedFilters, setAppliedFilters] = useState({ ...localFilters });
+  const [docModal, setDocModal] = useState(null); // property object whose docs are being viewed
 
   const fetchProperties = useCallback(async () => {
     setLoading(true);
@@ -630,9 +631,12 @@ const PropertyManagement = () => {
                         <td>
                           {p.propertyProof && p.propertyProof.url && (
                             <div style={{ marginBottom: 8 }}>
-                              <a href={p.propertyProof.url} target="_blank" rel="noopener noreferrer">
-                                Property Proof ({p.propertyProof.type === 'pdf' ? 'PDF' : 'Image'})
-                              </a>
+                              <button
+                                onClick={() => setDocModal(p)}
+                                style={{ padding: "6px 12px", background: "#6f42c1", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                              >
+                                View Docs ({p.propertyProof.type?.toUpperCase()})
+                              </button>
                             </div>
                           )}
                           <div className={styles["action-buttons"]}>
@@ -759,6 +763,124 @@ const PropertyManagement = () => {
           </div>
         </section>
       </div>
+      {/* ══════════════════════════════════════════
+          PROPERTY DOCUMENT VIEWER MODAL
+      ══════════════════════════════════════════ */}
+      {docModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setDocModal(null); }}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 9999, padding: "20px",
+          }}
+        >
+          <div style={{
+            background: "white", borderRadius: "14px", width: "100%", maxWidth: "720px",
+            maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            {/* Modal header */}
+            <div style={{
+              padding: "20px 24px", borderBottom: "1px solid #eaeded",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              background: "#232f3e", borderRadius: "14px 14px 0 0",
+            }}>
+              <div>
+                <h3 style={{ margin: 0, color: "white", fontSize: "18px" }}>
+                  {docModal.title || docModal.name || "Property"}
+                </h3>
+                <p style={{ margin: "4px 0 0", color: "#aaa", fontSize: "13px" }}>
+                  Owner: {docModal.owner?.firstName} {docModal.owner?.lastName}
+                  &nbsp;·&nbsp;
+                  <span style={{
+                    padding: "3px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "600",
+                    background: docModal.isVerified ? "#d4edda" : "#fff3cd",
+                    color: docModal.isVerified ? "#155724" : "#856404",
+                  }}>
+                    {docModal.isVerified ? "Verified" : "Unverified"}
+                  </span>
+                </p>
+              </div>
+              <button onClick={() => setDocModal(null)}
+                style={{ background: "transparent", border: "none", color: "white", fontSize: "24px", cursor: "pointer", lineHeight: 1 }}>
+                ×
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div style={{ padding: "24px" }}>
+              <h4 style={{ margin: "0 0 16px", color: "#232f3e" }}>Property Proof Document</h4>
+
+              {/* Document preview */}
+              <div style={{ border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "#fafafa" }}>
+                <div style={{
+                  padding: "12px 16px", background: "#f4f4f4", borderBottom: "1px solid #e0e0e0",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                }}>
+                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <span style={{ fontSize: "20px" }}>
+                      {docModal.propertyProof?.type === "pdf" ? "📄" : "🖼️"}
+                    </span>
+                    <strong style={{ fontSize: "14px" }}>
+                      {docModal.propertyProof?.type === "pdf" ? "PDF Document" : "Image Document"}
+                    </strong>
+                  </div>
+                  <a href={docModal.propertyProof?.url} target="_blank" rel="noopener noreferrer"
+                    style={{ padding: "6px 12px", background: "#0066cc", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "12px", fontWeight: "600" }}>
+                    Open ↗
+                  </a>
+                </div>
+
+                {docModal.propertyProof?.type === "image" ? (
+                  <div style={{ padding: "16px", textAlign: "center", background: "#fff" }}>
+                    <img
+                      src={docModal.propertyProof.url}
+                      alt="Property Proof"
+                      style={{ maxWidth: "100%", maxHeight: "380px", objectFit: "contain", borderRadius: "6px", border: "1px solid #e0e0e0" }}
+                    />
+                  </div>
+                ) : docModal.propertyProof?.type === "pdf" ? (
+                  <div style={{ padding: "16px" }}>
+                    <iframe
+                      src={docModal.propertyProof.url}
+                      width="100%" height="360"
+                      style={{ border: "none", borderRadius: "6px" }}
+                      title="Property Proof PDF"
+                    />
+                  </div>
+                ) : (
+                  <div style={{ padding: "20px", textAlign: "center", color: "#777" }}>
+                    <a href={docModal.propertyProof?.url} target="_blank" rel="noopener noreferrer">Open file ↗</a>
+                  </div>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div style={{
+                display: "flex", gap: "12px", marginTop: "24px",
+                paddingTop: "20px", borderTop: "1px solid #eee", justifyContent: "flex-end",
+              }}>
+                <button
+                  onClick={() => setDocModal(null)}
+                  style={{ padding: "10px 20px", border: "1px solid #d5d9d9", background: "white", borderRadius: "8px", cursor: "pointer", fontWeight: "500" }}
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => { handleVerify(docModal._id, docModal.isVerified); setDocModal(null); }}
+                  style={{
+                    padding: "10px 24px",
+                    background: docModal.isVerified ? "#dc3545" : "#28a745",
+                    color: "white", border: "none", borderRadius: "8px", fontWeight: "600", fontSize: "14px", cursor: "pointer"
+                  }}
+                >
+                  {docModal.isVerified ? "Unverify Property" : "Verify Property"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

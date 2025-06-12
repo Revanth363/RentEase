@@ -5,6 +5,7 @@ import "../assets/css/TenantDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useLoading } from "../LoadingContext";
 import CalendarTiles from "../components/CalendarTiles";
+import VerificationStatus from "../components/VerificationStatus";
 
 const sectionToUrl = (section) => {
   // Map section keys to URLs (adjust as needed)
@@ -18,6 +19,7 @@ const sectionToUrl = (section) => {
     case "savedListings": return "/tenant/tenant_dashboard?section=savedListings";
     case "rentalHistory": return "/tenant/tenant_dashboard?section=rentalHistory";
     case "settings": return "/tenant/tenant_dashboard?section=settings";
+    case "verification": return "/tenant/tenant_dashboard?section=verification";
     default: return "/tenant/tenant_dashboard";
   }
 };
@@ -67,6 +69,7 @@ const TenantDashboard = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState(getSectionFromUrl());
+  const [verificationStatus, setVerificationStatus] = useState(null);
 
   // Modals/forms visibility
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
@@ -121,6 +124,21 @@ const TenantDashboard = () => {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    const userId = dashboard?.user?._id;
+    if (userId) {
+      (async () => {
+        try {
+          const res = await fetch(`/api/verification/status?userId=${userId}&userModel=tenant`);
+          const data = await res.json();
+          setVerificationStatus(data.status);
+        } catch {
+          setVerificationStatus(null);
+        }
+      })();
+    }
+  }, [dashboard]);
 
   // Safe destructuring from dashboard
   const {
@@ -616,6 +634,10 @@ const TenantDashboard = () => {
   const handleStarHover = (r) => setSelectedRating(r);
   const handleStarClick = (r) => setSelectedRating(r);
 
+  const effectiveSection = verificationStatus !== "approved"
+    ? (["settings", "verification"].includes(section) ? section : "verification")
+    : section;
+
   return (
     <div>
       <div className="tntd-overlay" id="overlay"></div>
@@ -630,13 +652,53 @@ const TenantDashboard = () => {
         <strong>&gt;</strong>
       </button>
       <div className="tntd-dashboard-container">
-        <Sidebar onSelect={setSection} current={section} />
+        {verificationStatus !== "approved" ? (
+          <div className="tntd-sidebar tntd-restricted-sidebar" id="sidebar">
+            <h2>Tenant Dashboard</h2>
+            <ul>
+              <li
+                className={effectiveSection === "verification" ? "tntd-sidebar-active-item" : ""}
+                onClick={() => window.location.href = sectionToUrl("verification")}
+              >
+                <i className="fa-solid fa-shield-halved"></i> Verification
+              </li>
+              <li
+                className={effectiveSection === "settings" ? "tntd-sidebar-active-item" : ""}
+                onClick={() => window.location.href = sectionToUrl("settings")}
+              >
+                <i className="fa-solid fa-gears"></i> Settings
+              </li>
+            </ul>
+          </div>
+        ) : (
+          <Sidebar onSelect={setSection} current={section} />
+        )}
         <div className="tntd-main-content">
+          {verificationStatus !== "approved" && (
+            <div className="tntd-unverified-banner">
+              <i className="fa-solid fa-triangle-exclamation"></i>
+              <div>
+                <h3>Your account is not verified</h3>
+                <p>Please upload your documents and wait for admin approval to access all features.</p>
+              </div>
+            </div>
+          )}
+
+          {verificationStatus !== "approved" && (
+            <div
+              id="verification"
+              className={`tntd-section ${effectiveSection === "verification" ? "tntd-active" : ""}`}
+            >
+              <h3>Account Verification</h3>
+              <VerificationStatus userId={dashboard?.user?._id} userModel="tenant" />
+            </div>
+          )}
+
           {/* Home */}
           <div
             id="home"
             className={`tntd-section ${
-              section === "home" ? "tntd-active" : ""
+              effectiveSection === "home" ? "tntd-active" : ""
             }`}
           >
             <h3>
@@ -716,7 +778,7 @@ const TenantDashboard = () => {
           <div
             id="rentPayments"
             className={`tntd-section ${
-              section === "rentPayments" ? "tntd-active" : ""
+              effectiveSection === "rentPayments" ? "tntd-active" : ""
             }`}
           >
             <h3>Rent Payments</h3>
@@ -778,7 +840,7 @@ const TenantDashboard = () => {
           <div
             id="maintenance"
             className={`tntd-section ${
-              section === "maintenance" ? "tntd-active" : ""
+              effectiveSection === "maintenance" ? "tntd-active" : ""
             }`}
           >
             <h3>Maintenance Requests</h3>
@@ -886,7 +948,7 @@ const TenantDashboard = () => {
           <div
             id="complaints"
             className={`tntd-section ${
-              section === "complaints" ? "tntd-active" : ""
+              effectiveSection === "complaints" ? "tntd-active" : ""
             }`}
           >
             <h3>Submit a Query / Complaint</h3>
@@ -962,7 +1024,7 @@ const TenantDashboard = () => {
           <div
             id="movers"
             className={`tntd-section ${
-              section === "movers" ? "tntd-active" : ""
+              effectiveSection === "movers" ? "tntd-active" : ""
             }`}
           >
             <h4>Your Current Service Providers</h4>
@@ -1106,7 +1168,7 @@ const TenantDashboard = () => {
           <div
             id="notifications"
             className={`tntd-section ${
-              section === "notifications" ? "tntd-active" : ""
+              effectiveSection === "notifications" ? "tntd-active" : ""
             }`}
           >
             <h3>Notifications</h3>
@@ -1170,7 +1232,7 @@ const TenantDashboard = () => {
           <div
             id="savedListings"
             className={`tntd-section ${
-              section === "savedListings" ? "tntd-active" : ""
+              effectiveSection === "savedListings" ? "tntd-active" : ""
             }`}
           >
             <h3>Saved Listings</h3>
@@ -1253,7 +1315,7 @@ const TenantDashboard = () => {
           <div
             id="rentalHistory"
             className={`tntd-section ${
-              section === "rentalHistory" ? "tntd-active" : ""
+              effectiveSection === "rentalHistory" ? "tntd-active" : ""
             }`}
           >
             <h3>Rental History</h3>
@@ -1388,7 +1450,7 @@ const TenantDashboard = () => {
           <div
             id="ratings"
             className={`tntd-section ${
-              section === "ratings" ? "tntd-active" : ""
+              effectiveSection === "ratings" ? "tntd-active" : ""
             }`}
           >
             <h3>Reviews & Ratings</h3>
@@ -1466,7 +1528,7 @@ const TenantDashboard = () => {
           <div
             id="settings"
             className={`tntd-section ${
-              section === "settings" ? "tntd-active" : ""
+              effectiveSection === "settings" ? "tntd-active" : ""
             }`}
           >
             <h3>Account Settings</h3>

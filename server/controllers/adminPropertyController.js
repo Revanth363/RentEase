@@ -105,12 +105,14 @@ exports.getPropertyManagement = async (req, res) => {
       name: p.name,
       ownerName: p.ownerId ? `${p.ownerId.firstName} ${p.ownerId.lastName}`.trim() : 'Unknown',
       ownerId: p.ownerId?._id?.toString(),
+      owner: p.ownerId ? { firstName: p.ownerId.firstName, lastName: p.ownerId.lastName } : null,
       location: p.location,
       type: p.type,
       status: p.status || 'Available',
       isRented: !!p.isRented,
       price: p.price,
       isVerified: !!p.isVerified,
+      propertyProof: p.propertyProof || null,
       createdAt: p.createdAt,
     }));
 

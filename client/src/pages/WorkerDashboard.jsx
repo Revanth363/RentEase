@@ -75,22 +75,22 @@ const WorkerDashboard = () => {
   });
 
   useEffect(() => {
-      // Fetch verification status on mount
-      useEffect(() => {
-        if (user && user._id) {
-          (async () => {
-            try {
-              const res = await fetch(`/api/verification/status?userId=${user._id}&userModel=worker`);
-              const data = await res.json();
-              setVerificationStatus(data.status);
-            } catch {
-              setVerificationStatus(null);
-            }
-          })();
-        }
-      }, [user]);
     loadDashboard();
   }, []);
+
+  useEffect(() => {
+    if (user && user._id) {
+      (async () => {
+        try {
+          const res = await fetch(`/api/verification/status?userId=${user._id}&userModel=worker`);
+          const data = await res.json();
+          setVerificationStatus(data.status);
+        } catch {
+          setVerificationStatus(null);
+        }
+      })();
+    }
+  }, [user]);
 
   const loadDashboard = async () => {
     try {
@@ -147,6 +147,7 @@ const WorkerDashboard = () => {
         case "reviews": return "/worker_dashboard?section=reviews";
         case "notifications": return "/worker_dashboard?section=notifications";
         case "settings": return "/worker_dashboard?section=settings";
+        case "verification": return "/worker_dashboard?section=verification";
         default: return "/worker_dashboard";
       }
     };
@@ -471,6 +472,10 @@ const WorkerDashboard = () => {
     return <LoadingSpinner />;
   }
 
+  const effectiveSection = verificationStatus !== "approved"
+    ? (["settings", "verification"].includes(activeSection) ? activeSection : "verification")
+    : activeSection;
+
   return (
     <div className="wrkd-dashboard-container">
       <button className="wrkd-menu-toggle" onClick={toggleSidebar}>
@@ -490,49 +495,76 @@ const WorkerDashboard = () => {
           {user.firstName} {user.lastName}
         </h3>
         <ul>
-          <li onClick={() => showSection("services")}>
-            <i className="fas fa-rectangle-list"></i> My Services
-          </li>
-          <li onClick={() => showSection("bookings")}>
-            <i className="fas fa-clipboard-list"></i> Booking Requests
-          </li>
-          <li onClick={() => showSection("clients")}>
-            <i className="fas fa-users"></i> My Clients
-          </li>
-          <li onClick={() => showSection("earnings")}>
-            <i className="fas fa-hand-holding-dollar"></i> Earnings
-          </li>
-          <li onClick={() => showSection("reviews")}>
-            <i className="fas fa-star-half-stroke"></i> Reviews & Ratings
-          </li>
-          <li onClick={() => showSection("notifications")}>
-            <i className="fas fa-bell"></i> Notifications
-          </li>
-          <li onClick={() => showSection("settings")}>
-            <i className="fas fa-gears"></i> Settings
-          </li>
+          {verificationStatus !== "approved" ? (
+            <>
+              <li
+                className={effectiveSection === "verification" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("verification")}
+              >
+                <i className="fas fa-shield-halved"></i> Verification
+              </li>
+              <li
+                className={effectiveSection === "settings" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("settings")}
+              >
+                <i className="fas fa-gears"></i> Settings
+              </li>
+            </>
+          ) : (
+            <>
+              <li onClick={() => showSection("services")}>
+                <i className="fas fa-rectangle-list"></i> My Services
+              </li>
+              <li onClick={() => showSection("bookings")}>
+                <i className="fas fa-clipboard-list"></i> Booking Requests
+              </li>
+              <li onClick={() => showSection("clients")}>
+                <i className="fas fa-users"></i> My Clients
+              </li>
+              <li onClick={() => showSection("earnings")}>
+                <i className="fas fa-hand-holding-dollar"></i> Earnings
+              </li>
+              <li onClick={() => showSection("reviews")}>
+                <i className="fas fa-star-half-stroke"></i> Reviews & Ratings
+              </li>
+              <li onClick={() => showSection("notifications")}>
+                <i className="fas fa-bell"></i> Notifications
+              </li>
+              <li onClick={() => showSection("settings")}>
+                <i className="fas fa-gears"></i> Settings
+              </li>
+            </>
+          )}
         </ul>
       </div>
 
       <div className="wrkd-main-content">
+        {verificationStatus !== "approved" && (
+          <div className="wrkd-unverified-banner">
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            <div>
+              <h3>Your account is not verified</h3>
+              <p>Please upload your documents and wait for admin approval to access all features.</p>
+            </div>
+          </div>
+        )}
+
+        {verificationStatus !== "approved" && (
+          <div className={`wrkd-section ${effectiveSection === "verification" ? "wrkd-active" : ""}`}>
+            <h3>Account Verification</h3>
+            <VerificationStatus userId={user._id} userModel="worker" />
+          </div>
+        )}
+
         {/* MY SERVICES */}
         <div
           className={`wrkd-section ${
-            activeSection === "services" ? "wrkd-active" : ""
+            effectiveSection === "services" ? "wrkd-active" : ""
           }`}
         >
           <h3>My Services</h3>
           <div className="wrkd-prop-container">
-            {verificationStatus !== "approved" ? (
-              <div className="wrkd-dashboard-blocked">
-                <VerificationStatus userId={user._id} userModel="worker" />
-                <div className="wrkd-blocked-message">
-                  <h3>Your account is not verified.</h3>
-                  <p>Please upload your documents and wait for admin approval. Only settings and verification are available until approved.</p>
-                </div>
-              </div>
-            ) : (
-              services.length > 0 ? (
+            {services.length > 0 ? (
                 services.map((service) => (
                   <div key={service._id || "1"} className="wrkd-gs-container">
                     <div className="wrkd-sc-image-container">
@@ -545,9 +577,8 @@ const WorkerDashboard = () => {
                     <div className="wrkd-main-sen">{service.name}</div>
                   </div>
                 ))
-              ) : (
-                <p>No services found.</p>
-              )
+            ) : (
+              <p>No services found.</p>
             )}
           </div>
         </div>
@@ -555,7 +586,7 @@ const WorkerDashboard = () => {
         {/* BOOKINGS */}
         <div
           className={`wrkd-section ${
-            activeSection === "bookings" ? "wrkd-active" : ""
+            effectiveSection === "bookings" ? "wrkd-active" : ""
           }`}
         >
           <h3>My Bookings</h3>
@@ -615,7 +646,7 @@ const WorkerDashboard = () => {
         {/* CLIENTS */}
         <div
           className={`wrkd-section ${
-            activeSection === "clients" ? "wrkd-active" : ""
+            effectiveSection === "clients" ? "wrkd-active" : ""
           }`}
         >
           <h3>My Clients ({clients.length})</h3>
@@ -667,7 +698,7 @@ const WorkerDashboard = () => {
         {/* EARNINGS */}
         <div
           className={`wrkd-section ${
-            activeSection === "earnings" ? "wrkd-active" : ""
+            effectiveSection === "earnings" ? "wrkd-active" : ""
           }`}
         >
           <h3>My Earnings</h3>
@@ -710,7 +741,7 @@ const WorkerDashboard = () => {
         {/* REVIEWS */}
         <div
           className={`wrkd-section ${
-            activeSection === "reviews" ? "wrkd-active" : ""
+            effectiveSection === "reviews" ? "wrkd-active" : ""
           }`}
         >
           <h3>Reviews & Ratings</h3>
@@ -751,7 +782,7 @@ const WorkerDashboard = () => {
         {/* NOTIFICATIONS */}
         <div
           className={`wrkd-section ${
-            activeSection === "notifications" ? "wrkd-active" : ""
+            effectiveSection === "notifications" ? "wrkd-active" : ""
           }`}
         >
           <h3>Notifications</h3>
@@ -790,7 +821,7 @@ const WorkerDashboard = () => {
         {/* SETTINGS */}
         <div
           className={`wrkd-section ${
-            activeSection === "settings" ? "wrkd-active" : ""
+            effectiveSection === "settings" ? "wrkd-active" : ""
           }`}
         >
           <h3>Account Settings</h3>
