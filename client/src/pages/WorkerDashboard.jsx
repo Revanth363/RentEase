@@ -24,6 +24,7 @@ import {
 
 const WorkerDashboard = () => {
     const [verificationStatus, setVerificationStatus] = useState(null);
+  const [verificationLoading, setVerificationLoading] = useState(true);
   const navigate = useNavigate();
   const { setIsLoading } = useLoading();
 
@@ -87,10 +88,14 @@ const WorkerDashboard = () => {
           setVerificationStatus(data.status);
         } catch {
           setVerificationStatus(null);
+        } finally {
+          setVerificationLoading(false);
         }
       })();
+    } else if (!loading) {
+      setVerificationLoading(false);
     }
-  }, [user]);
+  }, [user, loading]);
 
   const loadDashboard = async () => {
     try {
@@ -468,11 +473,11 @@ const WorkerDashboard = () => {
       Swal.fire("Error", "Invalid OTP", "error");
     }
   };
-  if (loading) {
+  if (loading || verificationLoading) {
     return <LoadingSpinner />;
   }
 
-  const effectiveSection = verificationStatus !== "approved"
+  const effectiveSection = !verificationLoading && verificationStatus !== "approved"
     ? (["settings", "verification"].includes(activeSection) ? activeSection : "verification")
     : activeSection;
 

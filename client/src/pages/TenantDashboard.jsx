@@ -70,6 +70,7 @@ const TenantDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState(getSectionFromUrl());
   const [verificationStatus, setVerificationStatus] = useState(null);
+  const [verificationLoading, setVerificationLoading] = useState(true);
 
   // Modals/forms visibility
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
@@ -135,8 +136,12 @@ const TenantDashboard = () => {
           setVerificationStatus(data.status);
         } catch {
           setVerificationStatus(null);
+        } finally {
+          setVerificationLoading(false);
         }
       })();
+    } else if (dashboard !== null) {
+      setVerificationLoading(false);
     }
   }, [dashboard]);
 
@@ -634,7 +639,9 @@ const TenantDashboard = () => {
   const handleStarHover = (r) => setSelectedRating(r);
   const handleStarClick = (r) => setSelectedRating(r);
 
-  const effectiveSection = verificationStatus !== "approved"
+  if (loading || verificationLoading) return <LoadingSpinner />;
+
+  const effectiveSection = !verificationLoading && verificationStatus !== "approved"
     ? (["settings", "verification"].includes(section) ? section : "verification")
     : section;
 

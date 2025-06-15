@@ -24,9 +24,9 @@ const verificationSchema = new Schema({
       type: String,
       enum: [
         'aadhaar', 'pan', 'driving_license', 'college_id', 'other_proof',
-        'skill_certificate', 'property_proof'
+        'skill_certificate', 'property_proof', ''
       ],
-      required: true
+      required: false,
     },
     skillType: {
       type: String,

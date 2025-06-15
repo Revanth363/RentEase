@@ -64,6 +64,7 @@ function getSectionFromUrl() {
 const OwnerDashboard = () => {
 
   const [verificationStatus, setVerificationStatus] = useState(null);
+  const [verificationLoading, setVerificationLoading] = useState(true);
   const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -125,8 +126,13 @@ const OwnerDashboard = () => {
           setVerificationStatus(data.status);
         } catch {
           setVerificationStatus(null);
+        } finally {
+          setVerificationLoading(false);
         }
       })();
+    } else if (dashboard !== null) {
+      // dashboard loaded but no user
+      setVerificationLoading(false);
     }
   }, [dashboard]);
 
@@ -227,7 +233,7 @@ const OwnerDashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || verificationLoading) {
     return <LoadingSpinner />;
   }
 
@@ -239,7 +245,7 @@ const OwnerDashboard = () => {
     );
   }
 
-  const effectiveSection = verificationStatus !== "approved"
+  const effectiveSection = !verificationLoading && verificationStatus !== "approved"
     ? (["settings", "verification"].includes(section) ? section : "verification")
     : section;
 
