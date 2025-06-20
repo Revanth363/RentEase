@@ -4,6 +4,7 @@ const Tenant = require('../models/tenant');
 const Worker = require('../models/worker');
 const Property = require('../models/property');
 const Booking = require('../models/booking');
+const Verification = require('../models/Verification');
 
 exports.getUserDetails = async (req, res) => {
   try {
@@ -267,6 +268,11 @@ exports.getAllUsers = async (req, res) => {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 5);
 
+      const ids = users.map(u => u._id);
+      const verifications = await Verification.find({ user: { $in: ids } }).lean();
+      const vMap = {};
+      verifications.forEach(v => { vMap[v.user.toString()] = v.status; });
+
       const formatted = users.map(u => ({
         id: u._id.toString(),
         firstName: u.firstName,
@@ -277,6 +283,7 @@ exports.getAllUsers = async (req, res) => {
         address: u.location || 'N/A',
         status: u.status || 'Active',
         createdAt: u.createdAt,
+        verificationStatus: vMap[u._id.toString()] || null,
       }));
 
       return res.json({ users: formatted, total: formatted.length });
@@ -305,6 +312,11 @@ exports.getAllUsers = async (req, res) => {
     const total = allUsers.length;
     const paginated = allUsers.slice(skip, skip + currentLimit);
 
+    const paginatedIds = paginated.map(u => u._id);
+    const verifications2 = await Verification.find({ user: { $in: paginatedIds } }).lean();
+    const vMap2 = {};
+    verifications2.forEach(v => { vMap2[v.user.toString()] = v.status; });
+
     const formatted = paginated.map(u => ({
       id: u._id.toString(),
       firstName: u.firstName,
@@ -315,6 +327,7 @@ exports.getAllUsers = async (req, res) => {
       address: u.location || 'N/A',
       status: u.status || 'Active',
       createdAt: u.createdAt,
+      verificationStatus: vMap2[u._id.toString()] || null,
     }));
 
     res.json({ users: formatted, total });

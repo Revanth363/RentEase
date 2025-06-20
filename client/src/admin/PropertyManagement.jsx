@@ -629,16 +629,6 @@ const PropertyManagement = () => {
                           </span>
                         </td>
                         <td>
-                          {p.propertyProof && p.propertyProof.url && (
-                            <div style={{ marginBottom: 8 }}>
-                              <button
-                                onClick={() => setDocModal(p)}
-                                style={{ padding: "6px 12px", background: "#6f42c1", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
-                              >
-                                View Docs ({p.propertyProof.type?.toUpperCase()})
-                              </button>
-                            </div>
-                          )}
                           <div className={styles["action-buttons"]}>
                             <a
                               href={`/admin/property/${p._id}`}
@@ -666,6 +656,38 @@ const PropertyManagement = () => {
                             >
                               Site
                             </a>
+                            {p.propertyProof && p.propertyProof.url ? (
+                              <button
+                                onClick={() => setDocModal(p)}
+                                style={{
+                                  background: "#6f42c1",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  fontSize: "12px",
+                                  fontWeight: "600",
+                                  cursor: "pointer",
+                                  padding: "6px 10px",
+                                }}
+                              >
+                                Proof
+                              </button>
+                            ) : (
+                              <button
+                                disabled
+                                style={{
+                                  background: "#ccc",
+                                  color: "#888",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  fontSize: "12px",
+                                  padding: "6px 10px",
+                                  cursor: "not-allowed",
+                                }}
+                              >
+                                No Proof
+                              </button>
+                            )}
                             <button
                               onClick={() => handleVerify(p._id, p.isVerified)}
                               className={

@@ -473,7 +473,7 @@ if (loading) {
               <table
                 style={{
                   width: "100%",
-                  minWidth: "1400px",
+                  minWidth: "1550px",
                   tableLayout: "fixed",
                 }}
               >
@@ -487,6 +487,7 @@ if (loading) {
                     <th style={{ width: "160px" }}>Address</th>
                     <th style={{ width: "110px" }}>Registered</th>
                     <th style={{ width: "90px" }}>Status</th>
+                    <th style={{ width: "120px" }}>Verified</th>
                     <th style={{ width: "200px" }}>Actions</th>
                   </tr>
                 </thead>
@@ -494,13 +495,13 @@ if (loading) {
                   {users.length === 0 ? (
                     <tr>
                       <td
-                        colSpan="9"
-                        style={{
-                          textAlign: "center",
-                          padding: "60px",
-                          color: "#555",
-                        }}
-                      >
+                          colSpan="10"
+                          style={{
+                            textAlign: "center",
+                            padding: "60px",
+                            color: "#555",
+                          }}
+                        >
                         No users found matching your filters.
                       </td>
                     </tr>
@@ -557,6 +558,23 @@ if (loading) {
                           >
                             {u.status || "N/A"}
                           </span>
+                        </td>
+                        <td>
+                          {(() => {
+                            const vs = u.verificationStatus;
+                            const cfg = vs === "approved"
+                              ? { bg: "#d4edda", color: "#155724", label: "✓ Verified" }
+                              : vs === "pending"
+                              ? { bg: "#fff3cd", color: "#856404", label: "⏳ Pending" }
+                              : vs === "rejected"
+                              ? { bg: "#f8d7da", color: "#721c24", label: "✗ Rejected" }
+                              : { bg: "#e9ecef", color: "#6c757d", label: "Not Submitted" };
+                            return (
+                              <span style={{ padding: "4px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", background: cfg.bg, color: cfg.color }}>
+                                {cfg.label}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td>
                           <div className={styles["action-buttons"]}>

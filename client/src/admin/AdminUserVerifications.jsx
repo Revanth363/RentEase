@@ -420,8 +420,8 @@ const AdminUserVerifications = () => {
               ) : (
                 <div style={{ display: "grid", gap: "16px" }}>
                   {docModal.documents.map((doc, idx) => {
-                    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(doc.url) || doc.url?.includes("/image/");
-                    const isPdf   = /\.pdf$/i.test(doc.url) || doc.url?.includes("/raw/");
+                    const isPdf   = /\.pdf$/i.test(doc.url);
+                    const isImage = !isPdf && (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(doc.url) || doc.url?.includes("/image/") || doc.url?.includes("/upload/"));
                     return (
                       <div key={idx} style={{ border: "1px solid #e0e0e0", borderRadius: "10px", overflow: "hidden", background: "#fafafa" }}>
 

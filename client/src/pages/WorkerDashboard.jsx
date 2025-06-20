@@ -571,7 +571,7 @@ const WorkerDashboard = () => {
           <div className="wrkd-prop-container">
             {services.length > 0 ? (
                 services.map((service) => (
-                  <div key={service._id || "1"} className="wrkd-gs-container">
+                  <div key={service._id || "1"} className="wrkd-gs-container" style={{ padding: "16px", width: "100%", maxWidth: "480px" }}>
                     <div className="wrkd-sc-image-container">
                       <img
                         src={service.image || "/images/default_service.jpg"}
@@ -580,6 +580,33 @@ const WorkerDashboard = () => {
                       />
                     </div>
                     <div className="wrkd-main-sen">{service.name}</div>
+                    <ul style={{ listStyle: "none", padding: "0 0 8px", margin: 0, fontSize: "14px", color: "#555" }}>
+                      {service.price ? <li><strong>Price:</strong> ₹{service.price} / {service.rateUnit || "month"}</li> : null}
+                      {service.experience ? <li><strong>Experience:</strong> {service.experience} yr(s)</li> : null}
+                      <li>
+                        <strong>Status:</strong>{" "}
+                        <span style={{ color: service.serviceStatus === "Available" ? "#28a745" : "#e53935", fontWeight: 600 }}>
+                          {service.serviceStatus || "Available"}
+                        </span>
+                      </li>
+                      {service.description ? <li style={{ marginTop: 4, fontStyle: "italic", color: "#777" }}>{service.description}</li> : null}
+                    </ul>
+                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
+                      <button
+                        className="wrkd-update-sts"
+                        onClick={handleToggleAvailability}
+                        style={{ background: service.serviceStatus === "Available" ? "#e53935" : "#28a745" }}
+                      >
+                        {service.serviceStatus === "Available" ? "Mark Unavailable" : "Mark Available"}
+                      </button>
+                      <button
+                        className="wrkd-update-sts"
+                        onClick={handleDeleteService}
+                        style={{ background: "#757575" }}
+                      >
+                        Delete Service
+                      </button>
+                    </div>
                   </div>
                 ))
             ) : (

@@ -268,6 +268,7 @@ exports.getOwnerDashboard = async (req, res) => {
     res.json({
       success: true,
       user: {
+        _id: owner._id,
         firstName: owner.firstName,
         lastName: owner.lastName,
         email: owner.email,

@@ -2,12 +2,17 @@ const multer = require("multer");
 const CloudinaryStorage = require("multer-storage-cloudinary").CloudinaryStorage;
 const cloudinary = require("../config/cloudinary");
 
-// Configure Cloudinary storage for properties
+// Configure Cloudinary storage for property images AND proof (supports images + PDF)
 const propertyStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  folder: "rentease/properties",
-  allowedFormats: ["jpg", "jpeg", "png", "webp"],
-  maxFileSize: 5 * 1024 * 1024, // 5MB
+  params: async (req, file) => {
+    const isPdf = file.mimetype === "application/pdf";
+    return {
+      folder: "rentease/properties",
+      resource_type: isPdf ? "raw" : "image",
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+    };
+  },
 });
 
 // Configure Cloudinary storage for workers
@@ -21,12 +26,13 @@ const workerStorage = new CloudinaryStorage({
 // Multer instance for multiple property images with other form fields
 const uploadProperties = multer({
   storage: propertyStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file (PDFs can be larger)
   fileFilter: (req, file, cb) => {
-    if (["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) {
+    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only JPEG, PNG, and WEBP formats are allowed"));
+      cb(new Error("Only JPEG, PNG, WEBP, and PDF formats are allowed"));
     }
   },
 });
