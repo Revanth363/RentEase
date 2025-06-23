@@ -458,8 +458,16 @@ const AdminUserVerifications = () => {
                           </div>
                         ) : isPdf ? (
                           <div style={{ padding: "16px" }}>
-                            <iframe src={doc.url} width="100%" height="300"
-                              style={{ border: "none", borderRadius: "6px" }} title={`PDF Document ${idx + 1}`} />
+                            <iframe
+                              src={`https://docs.google.com/viewer?url=${encodeURIComponent(doc.url)}&embedded=true`}
+                              width="100%" height="320"
+                              style={{ border: "none", borderRadius: "6px" }}
+                              title={`PDF Document ${idx + 1}`}
+                            />
+                            <p style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "#777" }}>
+                              If the PDF does not load,{" "}
+                              <a href={doc.url} target="_blank" rel="noopener noreferrer">click here to open directly ↗</a>
+                            </p>
                           </div>
                         ) : (
                           <div style={{ padding: "16px", color: "#777", textAlign: "center" }}>

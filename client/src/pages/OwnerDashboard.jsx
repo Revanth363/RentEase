@@ -277,7 +277,7 @@ const OwnerDashboard = () => {
             </ul>
           </div>
         ) : (
-          <Sidebar />
+          <Sidebar onSelect={(s) => setSection(s)} current={section} />
         )}
       </div>
 

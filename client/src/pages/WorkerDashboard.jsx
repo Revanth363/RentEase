@@ -592,6 +592,15 @@ const WorkerDashboard = () => {
                       {service.description ? <li style={{ marginTop: 4, fontStyle: "italic", color: "#777" }}>{service.description}</li> : null}
                     </ul>
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
+                      <a
+                        href={`/worker/${user._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="wrkd-update-sts"
+                        style={{ background: "#0066cc", textDecoration: "none", color: "white", textAlign: "center" }}
+                      >
+                        My Service
+                      </a>
                       <button
                         className="wrkd-update-sts"
                         onClick={handleToggleAvailability}
@@ -610,7 +619,26 @@ const WorkerDashboard = () => {
                   </div>
                 ))
             ) : (
-              <p>No services found.</p>
+              <div style={{ textAlign: "center", padding: "40px 20px" }}>
+                <p style={{ color: "#777", marginBottom: "16px", fontSize: "15px" }}>
+                  You haven't registered a service yet.
+                </p>
+                <a
+                  href="/worker_register"
+                  style={{
+                    display: "inline-block",
+                    padding: "12px 28px",
+                    background: "#ff9900",
+                    color: "white",
+                    borderRadius: "8px",
+                    textDecoration: "none",
+                    fontWeight: "600",
+                    fontSize: "15px",
+                  }}
+                >
+                  Register Your Service
+                </a>
+              </div>
             )}
           </div>
         </div>

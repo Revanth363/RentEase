@@ -864,11 +864,15 @@ const PropertyManagement = () => {
                 ) : docModal.propertyProof?.type === "pdf" ? (
                   <div style={{ padding: "16px" }}>
                     <iframe
-                      src={docModal.propertyProof.url}
-                      width="100%" height="360"
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(docModal.propertyProof.url)}&embedded=true`}
+                      width="100%" height="400"
                       style={{ border: "none", borderRadius: "6px" }}
                       title="Property Proof PDF"
                     />
+                    <p style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "#777" }}>
+                      If the PDF does not load,{" "}
+                      <a href={docModal.propertyProof.url} target="_blank" rel="noopener noreferrer">click here to open directly ↗</a>
+                    </p>
                   </div>
                 ) : (
                   <div style={{ padding: "20px", textAlign: "center", color: "#777" }}>
