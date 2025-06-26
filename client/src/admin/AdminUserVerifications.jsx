@@ -46,7 +46,7 @@ const AdminUserVerifications = () => {
   const [loading, setLoading] = useState(true);
 
   const [localFilters, setLocalFilters] = useState({
-    status:    searchParams.get("status")    || "pending",
+    status:    searchParams.get("status")    || "",
     userModel: searchParams.get("userModel") || "",
     search:    searchParams.get("search")    || "",
     page:      Number(searchParams.get("page"))  || 1,
@@ -81,6 +81,10 @@ const AdminUserVerifications = () => {
         );
       }
 
+      // Sort: pending first, then approved, then rejected
+      const statusOrder = { pending: 0, approved: 1, rejected: 2 };
+      data.sort((a, b) => (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3));
+
       setTotal(data.length);
       const start = (appliedFilters.page - 1) * appliedFilters.limit;
       setVerifications(data.slice(start, start + appliedFilters.limit));
@@ -107,7 +111,7 @@ const AdminUserVerifications = () => {
   };
 
   const resetFilters = () => {
-    const reset = { status: "pending", userModel: "", search: "", page: 1, limit: 10 };
+    const reset = { status: "", userModel: "", search: "", page: 1, limit: 10 };
     setLocalFilters(reset);
     setAppliedFilters(reset);
     setSearchParams(new URLSearchParams(), { replace: true });
