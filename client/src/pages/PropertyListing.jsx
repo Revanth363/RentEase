@@ -22,18 +22,19 @@ const PropertyListing = () => {
   const [coordinates, setCoordinates] = useState(null); // { lat, lng }
   const fileInputRef = useRef(null);
 
+  const handlePropertyProofChange = (e) => {
+    const file = e.target.files[0];
+    if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
+      setPropertyProofFile(file);
+      setPropertyProofError(false);
+    } else {
+      setPropertyProofFile(null);
+      setPropertyProofError(true);
+      alert('Only PDF or image files are allowed for property proof.');
+    }
+  };
+
   const handleFileChange = (e) => {
-      const handlePropertyProofChange = (e) => {
-        const file = e.target.files[0];
-        if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
-          setPropertyProofFile(file);
-          setPropertyProofError(false);
-        } else {
-          setPropertyProofFile(null);
-          setPropertyProofError(true);
-          alert('Only PDF or image files are allowed for property proof.');
-        }
-      };
     const files = Array.from(e.target.files);
     const validImageFiles = files.filter((file) => file.type.startsWith("image/"));
     const newFiles = validImageFiles.filter(
