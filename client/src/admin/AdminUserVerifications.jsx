@@ -157,7 +157,7 @@ const AdminUserVerifications = () => {
 
       <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
 
-        {/* ── FILTER PANEL ── */}
+        {/* FILTER PANEL */}
         <aside style={{
           width: "260px", minWidth: "260px", background: "white", padding: "24px",
           borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
@@ -165,7 +165,6 @@ const AdminUserVerifications = () => {
         }}>
           <h3 style={{ margin: "0 0 20px", color: "#232f3e", fontSize: "18px" }}>Filters</h3>
           <div style={{ display: "grid", gap: "16px" }}>
-
             <div>
               <label style={{ display: "block", marginBottom: "6px", fontWeight: "500" }}>Search Name / Email</label>
               <input
@@ -218,7 +217,7 @@ const AdminUserVerifications = () => {
           </div>
         </aside>
 
-        {/* ── MAIN TABLE ── */}
+        {/* MAIN TABLE */}
         <section style={{ flex: 1, minWidth: "0" }}>
           <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", overflow: "hidden" }}>
 
@@ -301,16 +300,18 @@ const AdminUserVerifications = () => {
                               onClick={() => setDocModal(v)}
                               style={{ padding: "6px 12px", background: "#007bff", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
                             >View Docs</button>
-                            {v.status === "pending" && (<>
-                              <button
-                                onClick={() => handleApprove(v._id)}
-                                style={{ padding: "6px 12px", background: "#28a745", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
-                              >Approve</button>
-                              <button
-                                onClick={() => setRejectModal(v._id)}
-                                style={{ padding: "6px 12px", background: "#dc3545", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
-                              >Reject</button>
-                            </>)}
+                            {v.status === "pending" && (
+                              <>
+                                <button
+                                  onClick={() => handleApprove(v._id)}
+                                  style={{ padding: "6px 12px", background: "#28a745", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                                >Approve</button>
+                                <button
+                                  onClick={() => setRejectModal(v._id)}
+                                  style={{ padding: "6px 12px", background: "#dc3545", color: "white", border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                                >Reject</button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -357,9 +358,7 @@ const AdminUserVerifications = () => {
         </section>
       </div>
 
-      {/* ══════════════════════════════════════════
-          VIEW DOCUMENTS MODAL
-      ══════════════════════════════════════════ */}
+      {/* VIEW DOCUMENTS MODAL */}
       {docModal && (
         <div
           onClick={(e) => { if (e.target === e.currentTarget) setDocModal(null); }}
@@ -384,8 +383,7 @@ const AdminUserVerifications = () => {
                   {docModal.user?.firstName} {docModal.user?.lastName}
                 </h3>
                 <p style={{ margin: "4px 0 0", color: "#aaa", fontSize: "13px" }}>
-                  {docModal.user?.email}&nbsp;·&nbsp;
-                  <span style={{ textTransform: "capitalize" }}>{docModal.userModel}</span>
+                  {docModal.user?.email} · <span style={{ textTransform: "capitalize" }}>{docModal.userModel}</span>
                 </p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -422,7 +420,7 @@ const AdminUserVerifications = () => {
               {!docModal.documents?.length ? (
                 <p style={{ color: "#777" }}>No documents uploaded.</p>
               ) : (
-                <div style={{ display: "grid", gap: "16px" }}>
+                <div style={{ display: "grid", gap: "20px" }}>
                   {docModal.documents.map((doc, idx) => {
                     const isPdf   = /\.pdf$/i.test(doc.url);
                     const isImage = !isPdf && (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(doc.url) || doc.url?.includes("/image/") || doc.url?.includes("/upload/"));
@@ -449,34 +447,55 @@ const AdminUserVerifications = () => {
                             </div>
                           </div>
                           <a href={doc.url} target="_blank" rel="noopener noreferrer"
-                            style={{ padding: "6px 12px", background: "#0066cc", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "12px", fontWeight: "600" }}>
+                            style={{ padding: "8px 16px", background: "#0066cc", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "13px", fontWeight: "600" }}>
                             Open ↗
                           </a>
                         </div>
 
-                        {/* Preview */}
+                        {/* Preview area */}
                         {isImage ? (
                           <div style={{ padding: "16px", textAlign: "center", background: "#fff" }}>
-                            <img src={doc.url} alt={`Document ${idx + 1}`}
-                              style={{ maxWidth: "100%", maxHeight: "320px", objectFit: "contain", borderRadius: "6px", border: "1px solid #e0e0e0" }} />
+                            <img
+                              src={doc.url}
+                              alt={`Document ${idx + 1}`}
+                              style={{ maxWidth: "100%", maxHeight: "400px", objectFit: "contain", borderRadius: "6px", border: "1px solid #e0e0e0" }}
+                            />
                           </div>
                         ) : isPdf ? (
-                          <div style={{ padding: "16px" }}>
-                            <iframe
-                              src={`https://docs.google.com/viewer?url=${encodeURIComponent(doc.url)}&embedded=true`}
-                              width="100%" height="320"
-                              style={{ border: "none", borderRadius: "6px" }}
-                              title={`PDF Document ${idx + 1}`}
-                            />
-                            <p style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "#777" }}>
-                              If the PDF does not load,{" "}
-                              <a href={doc.url} target="_blank" rel="noopener noreferrer">click here to open directly ↗</a>
+                          <div style={{ padding: "40px 20px", textAlign: "center", background: "#fff" }}>
+                            <p style={{ marginBottom: "20px", color: "#444", fontSize: "15px", lineHeight: "1.5" }}>
+                              For security and compatibility reasons,<br />
+                              PDFs are best viewed in a new browser tab.
+                            </p>
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "inline-block",
+                                padding: "14px 36px",
+                                background: "#1e88e5",
+                                color: "white",
+                                borderRadius: "8px",
+                                textDecoration: "none",
+                                fontSize: "16px",
+                                fontWeight: "600",
+                                boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+                                transition: "all 0.2s"
+                              }}
+                            >
+                              Open PDF in New Tab ↗
+                            </a>
+                            <p style={{ marginTop: "20px", fontSize: "13px", color: "#777" }}>
+                              (You can also right-click → "Save link as..." to download)
                             </p>
                           </div>
                         ) : (
-                          <div style={{ padding: "16px", color: "#777", textAlign: "center" }}>
-                            Preview not available.{" "}
-                            <a href={doc.url} target="_blank" rel="noopener noreferrer">Open file ↗</a>
+                          <div style={{ padding: "40px 20px", textAlign: "center", color: "#777", background: "#fff" }}>
+                            Preview not available for this file type.<br />
+                            <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: "#0066cc" }}>
+                              Open file directly ↗
+                            </a>
                           </div>
                         )}
                       </div>
@@ -488,15 +507,15 @@ const AdminUserVerifications = () => {
               {/* Action buttons — only for pending */}
               {docModal.status === "pending" && (
                 <div style={{
-                  display: "flex", gap: "12px", marginTop: "24px",
-                  paddingTop: "20px", borderTop: "1px solid #eee", justifyContent: "flex-end",
+                  display: "flex", gap: "16px", marginTop: "32px",
+                  paddingTop: "24px", borderTop: "1px solid #eee", justifyContent: "flex-end",
                 }}>
                   <button disabled={actionLoading} onClick={() => setRejectModal(docModal._id)}
-                    style={{ padding: "10px 24px", background: "#dc3545", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+                    style={{ padding: "12px 32px", background: "#dc3545", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
                     Reject
                   </button>
                   <button disabled={actionLoading} onClick={() => handleApprove(docModal._id)}
-                    style={{ padding: "10px 28px", background: "#28a745", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+                    style={{ padding: "12px 40px", background: "#28a745", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", fontSize: "15px", cursor: "pointer" }}>
                     {actionLoading ? "Processing..." : "Approve"}
                   </button>
                 </div>
@@ -506,9 +525,7 @@ const AdminUserVerifications = () => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════
-          REJECT REASON MODAL
-      ══════════════════════════════════════════ */}
+      {/* REJECT REASON MODAL */}
       {rejectModal && (
         <div
           onClick={(e) => { if (e.target === e.currentTarget) { setRejectModal(null); setRejectReason(""); } }}
@@ -536,17 +553,17 @@ const AdminUserVerifications = () => {
                 resize: "vertical", boxSizing: "border-box",
               }}
             />
-            <div style={{ display: "flex", gap: "12px", marginTop: "16px", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: "12px", marginTop: "20px", justifyContent: "flex-end" }}>
               <button
                 onClick={() => { setRejectModal(null); setRejectReason(""); }}
-                style={{ padding: "10px 20px", border: "1px solid #d5d9d9", background: "white", borderRadius: "8px", cursor: "pointer", fontWeight: "500" }}>
+                style={{ padding: "12px 24px", border: "1px solid #d5d9d9", background: "white", borderRadius: "8px", cursor: "pointer", fontWeight: "500" }}>
                 Cancel
               </button>
               <button
                 disabled={actionLoading || !rejectReason.trim()}
                 onClick={handleReject}
                 style={{
-                  padding: "10px 24px", background: "#dc3545", color: "white",
+                  padding: "12px 32px", background: "#dc3545", color: "white",
                   border: "none", borderRadius: "8px", fontWeight: "600",
                   cursor: rejectReason.trim() ? "pointer" : "not-allowed",
                   opacity: rejectReason.trim() ? 1 : 0.6,
