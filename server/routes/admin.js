@@ -7,6 +7,7 @@ const adminNotificationController = require("../controllers/adminNotificationCon
 const adminMaintenanceController = require("../controllers/adminMaintenanceController");
 const adminPaymentController = require("../controllers/adminPaymentController");
 const adminWorkerPaymentController = require("../controllers/adminWorkerPaymentController");
+const adminContactUsController = require("../controllers/adminContactUsController");
 
 // View routes
 router.get("/user/:id/:userType", adminUserController.getUserDetails);
@@ -37,7 +38,7 @@ router.get(
   adminNotificationController.getNotificationDetails
 );
 router.post(
-  "/notification/complete/:id",
+  "/notification/:id/complete",
   adminNotificationController.completeNotification
 );
 
@@ -47,9 +48,13 @@ router.get(
   adminMaintenanceController.getMaintenanceDetails
 );
 router.post(
-  "/maintenance/complete/:id",
+  "/maintenance/:id/complete",
   adminMaintenanceController.completeMaintenance
 );
+
+// Contact / Messages routes
+router.get("/message/:id", adminContactUsController.getSubmissionById);
+router.get("/messages", adminContactUsController.getAllSubmissions);
 
 // Property Management
 router.post("/property/verify/:id", adminPropertyController.toggleVerify);

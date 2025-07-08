@@ -225,7 +225,7 @@ export const rejectBooking = async (id) => {
 export const refundPayment = async (id) => {
   try {
     const response = await axios.post(
-      `${API_URL}/admin/payment/refund/${id}`,
+      `${API_URL}/admin/payment/${id}/refund`,
       {},
       { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
     );
@@ -239,7 +239,7 @@ export const refundPayment = async (id) => {
 export const retryPayment = async (id) => {
   try {
     const response = await axios.post(
-      `${API_URL}/admin/payment/retry/${id}`,
+      `${API_URL}/admin/payment/${id}/retry`,
       {},
       { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
     );
@@ -253,7 +253,7 @@ export const retryPayment = async (id) => {
 export const completeTask = async (id) => {
   try {
     const response = await axios.post(
-      `${API_URL}/admin/notification/complete/${id}`,
+      `${API_URL}/admin/notification/${id}/complete`,
       {},
       { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
     );
@@ -267,7 +267,7 @@ export const completeTask = async (id) => {
 export const completeMaintenance = async (id) => {
   try {
     const response = await axios.post(
-      `${API_URL}/admin/maintenance/complete/${id}`,
+      `${API_URL}/admin/maintenance/${id}/complete`,
       {},
       { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
     );

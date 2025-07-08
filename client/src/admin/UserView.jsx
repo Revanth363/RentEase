@@ -18,6 +18,7 @@ const StatusBadge = ({ status }) => {
     Active: 'badge-green', Suspended: 'badge-red',
     approved: 'badge-green', pending: 'badge-yellow', rejected: 'badge-red',
     Available: 'badge-green', Booked: 'badge-blue', Offline: 'badge-gray',
+    Paid: 'badge-green', Overdue: 'badge-red', Failed: 'badge-red', Pending: 'badge-yellow',
   };
   return (
     <span className={`badge ${map[status] || 'badge-gray'}`}>
@@ -57,9 +58,33 @@ const SectionLink = ({ to, children }) => (
   <Link to={to} className="uv-link">{children}</Link>
 );
 
+const PayTable = ({ payments, getLabel, getSub, getLink }) => (
+  payments.length === 0 ? (
+    <p className="uv-empty">No payment records found.</p>
+  ) : (
+    <div className="uv-pay-list">
+      {payments.map((p) => (
+        <div key={p._id} className="uv-pay-item">
+          <div className="uv-pay-left">
+            <span className="uv-pay-title">{getLabel(p)}</span>
+            <span className="uv-pay-sub">{getSub ? getSub(p) : fmt(p.paymentDate)}</span>
+          </div>
+          <div className="uv-pay-right">
+            <span className="uv-pay-amount">{money(p.amount)}</span>
+            <StatusBadge status={p.status} />
+            {getLink && getLink(p) && (
+              <Link to={getLink(p)} className="uv-pay-view">View</Link>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+);
+
 /* ─── USER TYPE PANELS ─────────────────────────────────────── */
 
-const TenantPanel = ({ user, tenantProperty }) => (
+const TenantPanel = ({ user, tenantProperty, rentPayments = [], workerPmts = [] }) => (
   <>
     {/* Core Stats */}
     <Card title="Overview" accent="#ffc107">
@@ -153,10 +178,31 @@ const TenantPanel = ({ user, tenantProperty }) => (
         ))}
       </div>
     </Card>
+
+    {/* Rent Payments to Owner */}
+    <Card title={`Rent Payments (${rentPayments.length})`} accent="#ffc107">
+      <PayTable
+        payments={rentPayments}
+        getLabel={(p) => p.propertyName || '—'}
+        getSub={(p) => fmt(p.paymentDate)}
+        getLink={(p) => `/admin/payment/${p._id}`}
+      />
+    </Card>
+
+    {workerPmts.length > 0 && (
+      <Card title={`Worker Payments (${workerPmts.length})`} accent="#ffc107">
+        <PayTable
+          payments={workerPmts}
+          getLabel={(p) => p.workerName || '—'}
+          getSub={(p) => `${p.serviceType} · ${fmt(p.paymentDate)}`}
+          getLink={(p) => p.workerId ? `/admin/user/${p.workerId}/worker` : null}
+        />
+      </Card>
+    )}
   </>
 );
 
-const OwnerPanel = ({ user, ownerProperties }) => (
+const OwnerPanel = ({ user, ownerProperties, ownerPayments = [] }) => (
   <>
     {/* Stats */}
     <Card title="Overview" accent="#ffc107">
@@ -230,10 +276,20 @@ const OwnerPanel = ({ user, ownerProperties }) => (
         ))}
       </div>
     </Card>
+
+    {/* Payment History by Property */}
+    <Card title={`Payment History (${ownerPayments.length})`} accent="#ffc107">
+      <PayTable
+        payments={ownerPayments}
+        getLabel={(p) => p.propertyName || '—'}
+        getSub={(p) => `${p.tenantName} · ${fmt(p.paymentDate)}`}
+        getLink={(p) => `/admin/payment/${p._id}`}
+      />
+    </Card>
   </>
 );
 
-const WorkerPanel = ({ user, workerBookings }) => (
+const WorkerPanel = ({ user, workerBookings, receivedPayments = [] }) => (
   <>
     {/* Stats */}
     <Card title="Overview" accent="#ffc107">
@@ -291,6 +347,16 @@ const WorkerPanel = ({ user, workerBookings }) => (
         <p className="uv-empty">No active bookings.</p>
       )}
     </Card>
+
+    {/* Payments Received */}
+    <Card title={`Payments Received (${receivedPayments.length})`} accent="#ffc107">
+      <PayTable
+        payments={receivedPayments}
+        getLabel={(p) => p.tenantName || '—'}
+        getSub={(p) => `${user.serviceType || 'Service'} · ${fmt(p.paymentDate)}`}
+        getLink={(p) => `/admin/payment/${p._id}`}
+      />
+    </Card>
   </>
 );
 
@@ -299,9 +365,13 @@ const UserView = () => {
   const { id, userType } = useParams();
   const { setIsLoading } = useLoading();
   const [user, setUser]                 = useState(null);
-  const [tenantProperty, setTenantProperty]     = useState(null);
-  const [ownerProperties, setOwnerProperties]   = useState([]);
-  const [workerBookings, setWorkerBookings]      = useState([]);
+  const [tenantProperty, setTenantProperty]           = useState(null);
+  const [ownerProperties, setOwnerProperties]         = useState([]);
+  const [workerBookings, setWorkerBookings]            = useState([]);
+  const [ownerPayments, setOwnerPayments]              = useState([]);
+  const [tenantRentPayments, setTenantRentPayments]    = useState([]);
+  const [tenantWorkerPayments, setTenantWorkerPayments] = useState([]);
+  const [workerReceivedPayments, setWorkerReceivedPayments] = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
 
@@ -316,6 +386,10 @@ const UserView = () => {
         setTenantProperty(data.tenantProperty || null);
         setOwnerProperties(data.ownerProperties || []);
         setWorkerBookings(data.workerBookings || []);
+        setOwnerPayments(data.ownerPayments || []);
+        setTenantRentPayments(data.tenantRentPayments || []);
+        setTenantWorkerPayments(data.tenantWorkerPayments || []);
+        setWorkerReceivedPayments(data.workerPayments || []);
       } catch (err) {
         setError(
           err.response?.status === 404 ? 'User not found.'
@@ -463,9 +537,9 @@ const UserView = () => {
 
           {/* MAIN CONTENT – type-specific */}
           <main className="uv-main">
-            {isTenant && <TenantPanel user={user} tenantProperty={tenantProperty} />}
-            {isOwner  && <OwnerPanel  user={user} ownerProperties={ownerProperties} />}
-            {isWorker && <WorkerPanel user={user} workerBookings={workerBookings} />}
+            {isTenant && <TenantPanel user={user} tenantProperty={tenantProperty} rentPayments={tenantRentPayments} workerPmts={tenantWorkerPayments} />}
+            {isOwner  && <OwnerPanel  user={user} ownerProperties={ownerProperties} ownerPayments={ownerPayments} />}
+            {isWorker && <WorkerPanel user={user} workerBookings={workerBookings} receivedPayments={workerReceivedPayments} />}
           </main>
         </div>
       </div>
@@ -732,6 +806,17 @@ const CSS = `
 /* EMPTY / ERROR */
 .uv-empty { color: #aaa; font-style: italic; text-align: center; padding: 2rem 0; font-size: 0.9rem; }
 .uv-error { display: flex; align-items: center; justify-content: center; height: 60vh; font-size: 1rem; color: #f44336; font-weight: 500; }
+
+/* PAYMENT TABLE */
+.uv-pay-list { display:flex; flex-direction:column; gap:1px; background:#f5f5f5; border-radius:8px; overflow:hidden; }
+.uv-pay-item { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.9rem 1.1rem; background:#fff; flex-wrap:wrap; }
+.uv-pay-left { display:flex; flex-direction:column; gap:.2rem; min-width:0; flex:1; }
+.uv-pay-title { font-size:.95rem; font-weight:600; color:#333; }
+.uv-pay-sub { font-size:.82rem; color:#777; }
+.uv-pay-right { display:flex; align-items:center; gap:.6rem; flex-shrink:0; }
+.uv-pay-amount { font-size:1rem; font-weight:700; color:#333; }
+.uv-pay-view { font-size:.78rem; color:#ffc107; text-decoration:none; font-weight:600; padding:.2rem .55rem; border:1px solid #ffc107; border-radius:4px; transition:all .2s; }
+.uv-pay-view:hover { background:#ffc107; color:#333; }
 
 @media (max-width: 640px) {
   .uv-hero { padding: 1.25rem; }

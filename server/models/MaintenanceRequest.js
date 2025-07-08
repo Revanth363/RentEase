@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const maintenanceRequestSchema = new mongoose.Schema({
   tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant' },
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
+  assignedWorker: { type: mongoose.Schema.Types.ObjectId, ref: 'Worker' },
   issueType: String,
   description: String,
   location: String,
   dateReported: Date,
   scheduledDate: Date,
+  completionDate: Date,
   status: String,
   tenantConfirmation: {
     type: String, // 'Pending', 'Confirmed', 'Rejected'

@@ -7,7 +7,7 @@ const bookingSchema = new mongoose.Schema({
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property", required: true }, // From second, replaces 'property'
   propertyName: String, // From first
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner", required: true }, // From second
-  status: { type: String, enum: ["Active", "Pending", "Terminated"], default: "Active" }, // From second
+  status: { type: String, enum: ["Active", "Pending", "Terminated", "Approved", "Rejected"], default: "Pending" }, // From second
   bookingDate: Date, // From first
   startDate: { type: Date, required: true }, // From second
   endDate: Date, // From first

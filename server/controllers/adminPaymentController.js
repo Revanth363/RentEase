@@ -21,16 +21,21 @@ exports.getPaymentDetails = async (req, res) => {
     }
 
     const paymentData = {
+      _id: payment._id.toString(),
       id: payment._id.toString(),
       amount: payment.amount,
+      commission: payment.commission,
       status: payment.status,
       paymentDate: payment.paymentDate,
       paymentMethod: payment.paymentMethod,
       transactionId: payment.transactionId,
       dueDate: payment.dueDate,
       receiptUrl: payment.receiptUrl,
-      userName: payment.userName,
-      user: payment.tenantId
+      userName: payment.tenantId
+        ? `${payment.tenantId.firstName} ${payment.tenantId.lastName}`.trim()
+        : payment.userName || '—',
+      // tenantId as populated object for clickable link
+      tenantId: payment.tenantId
         ? {
             _id: payment.tenantId._id.toString(),
             firstName: payment.tenantId.firstName,
@@ -39,7 +44,8 @@ exports.getPaymentDetails = async (req, res) => {
             phone: payment.tenantId.phone,
           }
         : null,
-      booking: payment.bookingId
+      // bookingId as object for link
+      bookingId: payment.bookingId
         ? {
             _id: payment.bookingId._id.toString(),
             propertyName: payment.bookingId.propertyId?.name,
@@ -47,6 +53,14 @@ exports.getPaymentDetails = async (req, res) => {
             endDate: payment.bookingId.endDate,
           }
         : null,
+      // propertyId from booking for link
+      propertyId: payment.bookingId?.propertyId
+        ? {
+            _id: payment.bookingId.propertyId._id.toString(),
+            name: payment.bookingId.propertyId.name,
+          }
+        : null,
+      propertyName: payment.bookingId?.propertyId?.name || '—',
     };
 
     res.json(paymentData);

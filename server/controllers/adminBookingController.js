@@ -28,19 +28,29 @@ exports.getBookingDetails = async (req, res) => {
     }
 
     const bookingData = {
+      _id: booking._id.toString(),
       id: booking._id.toString(),
       status: booking.status,
       bookingDate: booking.createdAt,
       startDate: booking.startDate,
       endDate: booking.endDate,
       amount: booking.amount,
-      user: booking.tenantId
+      // tenant is the canonical field name used by view
+      tenant: booking.tenantId
         ? {
             _id: booking.tenantId._id.toString(),
             firstName: booking.tenantId.firstName,
             lastName: booking.tenantId.lastName,
             email: booking.tenantId.email,
             phone: booking.tenantId.phone,
+          }
+        : null,
+      // also expose as tenantId for compatibility
+      tenantId: booking.tenantId
+        ? {
+            _id: booking.tenantId._id.toString(),
+            firstName: booking.tenantId.firstName,
+            lastName: booking.tenantId.lastName,
           }
         : null,
       property: booking.propertyId
@@ -52,6 +62,8 @@ exports.getBookingDetails = async (req, res) => {
             price: booking.propertyId.price,
           }
         : null,
+      propertyId: booking.propertyId?._id?.toString() || null,
+      propertyName: booking.propertyId?.name || booking.propertyName || '—',
       assignedWorker: booking.assignedWorker
         ? {
             _id: booking.assignedWorker._id.toString(),
@@ -91,8 +103,8 @@ exports.approveBooking = async (req, res) => {
 
     const payment = new Payment({
       bookingId: id,
-      user: booking.tenantId,
-      property: booking.propertyId._id,
+      tenantId: booking.tenantId,
+      propertyId: booking.propertyId._id,
       amount: booking.propertyId.price,
       commission: commissionAmt,
       status: 'Pending',
@@ -342,6 +354,7 @@ exports.getWorkerBookingDetails = async (req, res) => {
     }
 
     const bookingData = {
+      _id: booking._id.toString(),
       id: booking._id.toString(),
       status: booking.status,
       bookingDate: booking.bookingDate,

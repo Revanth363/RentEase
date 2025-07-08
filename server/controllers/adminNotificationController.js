@@ -10,7 +10,7 @@ exports.getNotificationDetails = async (req, res) => {
 
     const notification = await Notification.findById(id)
       .populate('recipient')
-      .populate('worker', 'firstName lastName serviceType')
+      .populate('worker', 'firstName lastName serviceType phone')
       .lean();
 
     if (!notification) {
@@ -18,27 +18,37 @@ exports.getNotificationDetails = async (req, res) => {
     }
 
     const notificationData = {
+      _id: notification._id.toString(),
       id: notification._id.toString(),
+      type: notification.type || 'General',
+      message: notification.message,
+      status: notification.status,
+      priority: notification.priority,
+      propertyName: notification.propertyName,
+      createdAt: notification.createdAt,
       recipient: notification.recipient
         ? {
             _id: notification.recipient._id.toString(),
             firstName: notification.recipient.firstName,
             lastName: notification.recipient.lastName,
             email: notification.recipient.email,
-            userType: notification.recipientType.charAt(0).toLowerCase() + notification.recipientType.slice(1),
+            userType: notification.recipientType
+              ? notification.recipientType.charAt(0).toLowerCase() + notification.recipientType.slice(1)
+              : 'user',
           }
         : null,
+      recipientType: notification.recipientType,
       worker: notification.worker
         ? {
             _id: notification.worker._id.toString(),
             firstName: notification.worker.firstName,
             lastName: notification.worker.lastName,
             serviceType: notification.worker.serviceType,
+            phone: notification.worker.phone,
           }
         : null,
-      message: notification.message,
-      status: notification.status,
-      createdAt: notification.createdAt,
+      workerName: notification.workerName,
+      tenantName: notification.tenantName,
     };
 
     res.json(notificationData);

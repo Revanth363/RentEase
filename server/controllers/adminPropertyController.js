@@ -127,8 +127,9 @@ exports.getPropertyManagement = async (req, res) => {
 exports.getPropertyView = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
-      .populate('ownerId', 'firstName lastName email')
-      .populate('tenantId', 'firstName lastName email')
+      .populate('ownerId', 'firstName lastName email phone')
+      .populate('tenantId', 'firstName lastName email phone')
+      .populate('activeWorkers', 'firstName lastName serviceType')
       .lean();
 
     if (!property) {
@@ -136,6 +137,7 @@ exports.getPropertyView = async (req, res) => {
     }
 
     const propertyData = {
+      _id: property._id.toString(),
       id: property._id.toString(),
       name: property.name,
       owner: property.ownerId
@@ -144,16 +146,24 @@ exports.getPropertyView = async (req, res) => {
             firstName: property.ownerId.firstName,
             lastName: property.ownerId.lastName,
             email: property.ownerId.email,
+            phone: property.ownerId.phone || '—',
           }
         : null,
-      tenant: property.tenantId
+      tenantId: property.tenantId
         ? {
             _id: property.tenantId._id.toString(),
             firstName: property.tenantId.firstName,
             lastName: property.tenantId.lastName,
             email: property.tenantId.email,
+            phone: property.tenantId.phone || '—',
           }
         : null,
+      activeWorkers: (property.activeWorkers || []).map(w => ({
+        _id: w._id.toString(),
+        firstName: w.firstName,
+        lastName: w.lastName,
+        serviceType: w.serviceType || '—',
+      })),
       location: property.location,
       address: property.address,
       type: property.type,
@@ -161,6 +171,7 @@ exports.getPropertyView = async (req, res) => {
       status: property.status,
       isRented: property.isRented,
       isVerified: property.isVerified,
+      is_popular: property.is_popular,
       price: property.price,
       securityDeposit: property.securityDeposit,
       maintenance: property.maintenance,
@@ -168,6 +179,8 @@ exports.getPropertyView = async (req, res) => {
       leaseDuration: property.leaseDuration,
       beds: property.beds,
       baths: property.baths,
+      size: property.size,
+      floor: property.floor,
       furnished: property.furnished,
       amenities: property.amenities,
       description: property.description,
@@ -175,6 +188,11 @@ exports.getPropertyView = async (req, res) => {
       alternativeNumber: property.alternativeNumber,
       contactEmail: property.contactEmail,
       images: property.images,
+      propertyProof: property.propertyProof || null,
+      rating: property.rating,
+      reviews: property.reviews,
+      coordinates: property.coordinates,
+      preferredTenants: property.preferredTenants,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,
     };

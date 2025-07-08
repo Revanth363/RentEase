@@ -5,6 +5,8 @@ const Worker = require('../models/worker');
 const Property = require('../models/property');
 const Booking = require('../models/booking');
 const Verification = require('../models/Verification');
+const Payment = require('../models/payment');
+const WorkerPayment = require('../models/workerPayment');
 
 exports.getUserDetails = async (req, res) => {
   try {
@@ -34,20 +36,44 @@ exports.getUserDetails = async (req, res) => {
     let tenantProperty = null;
     let workerBookings = [];
     let ownerProperties = [];
+    let ownerPayments = [];
+    let tenantRentPayments = [];
+    let tenantWorkerPayments = [];
+    let workerPayments = [];
 
     if (userType === 'tenant') {
       tenantProperty = await Property.findOne({ tenantId: id })
         .populate('ownerId', 'firstName lastName email')
+        .lean();
+      tenantRentPayments = await Payment.find({ tenantId: id })
+        .populate('propertyId', 'name')
+        .sort({ paymentDate: -1 })
+        .lean();
+      tenantWorkerPayments = await WorkerPayment.find({ tenantId: id })
+        .populate('workerId', 'firstName lastName serviceType')
+        .sort({ paymentDate: -1 })
         .lean();
     } else if (userType === 'worker') {
       workerBookings = await Booking.find({ assignedWorker: id, status: 'Active' })
         .populate('tenantId', 'firstName lastName email')
         .populate('propertyId', 'name location')
         .lean();
+      workerPayments = await WorkerPayment.find({ workerId: id })
+        .populate('tenantId', 'firstName lastName')
+        .sort({ paymentDate: -1 })
+        .lean();
     } else if (userType === 'owner') {
       ownerProperties = await Property.find({ ownerId: id })
         .populate('tenantId', 'firstName lastName email')
         .lean();
+      const propertyIds = ownerProperties.map(p => p._id);
+      if (propertyIds.length > 0) {
+        ownerPayments = await Payment.find({ propertyId: { $in: propertyIds } })
+          .populate('tenantId', 'firstName lastName')
+          .populate('propertyId', 'name')
+          .sort({ paymentDate: -1 })
+          .lean();
+      }
     }
 
     const userData = {
@@ -107,6 +133,45 @@ exports.getUserDetails = async (req, res) => {
               email: property.tenantId.email,
             }
           : null,
+      })),
+      ownerPayments: ownerPayments.map(p => ({
+        _id: p._id.toString(),
+        amount: p.amount,
+        paymentDate: p.paymentDate,
+        status: p.status,
+        paymentMethod: p.paymentMethod,
+        propertyName: p.propertyId?.name || '—',
+        propertyId: p.propertyId?._id?.toString() || null,
+        tenantName: p.tenantId ? `${p.tenantId.firstName} ${p.tenantId.lastName}`.trim() : (p.userName || '—'),
+        tenantId: p.tenantId?._id?.toString() || null,
+      })),
+      tenantRentPayments: tenantRentPayments.map(p => ({
+        _id: p._id.toString(),
+        amount: p.amount,
+        paymentDate: p.paymentDate,
+        status: p.status,
+        paymentMethod: p.paymentMethod,
+        propertyName: p.propertyId?.name || '—',
+        propertyId: p.propertyId?._id?.toString() || null,
+      })),
+      tenantWorkerPayments: tenantWorkerPayments.map(p => ({
+        _id: p._id.toString(),
+        amount: p.amount,
+        paymentDate: p.paymentDate,
+        status: p.status,
+        paymentMethod: p.paymentMethod,
+        workerName: p.workerId ? `${p.workerId.firstName} ${p.workerId.lastName}`.trim() : (p.userName || '—'),
+        serviceType: p.workerId?.serviceType || '—',
+        workerId: p.workerId?._id?.toString() || null,
+      })),
+      workerPayments: workerPayments.map(p => ({
+        _id: p._id.toString(),
+        amount: p.amount,
+        paymentDate: p.paymentDate,
+        status: p.status,
+        paymentMethod: p.paymentMethod,
+        tenantName: p.tenantId ? `${p.tenantId.firstName} ${p.tenantId.lastName}`.trim() : (p.userName || '—'),
+        tenantId: p.tenantId?._id?.toString() || null,
       })),
     };
 

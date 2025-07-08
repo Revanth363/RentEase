@@ -9,7 +9,7 @@ exports.getWorkerPaymentDetails = async (req, res) => {
 
     const payment = await WorkerPayment.findById(id)
       .populate('tenantId', 'firstName lastName email phone')
-      .populate('workerId', 'firstName lastName email phone')
+      .populate('workerId', 'firstName lastName email phone serviceType')
       .lean();
 
     if (!payment) {
@@ -17,6 +17,7 @@ exports.getWorkerPaymentDetails = async (req, res) => {
     }
 
     const paymentData = {
+      _id: payment._id.toString(),
       id: payment._id.toString(),
       amount: payment.amount,
       status: payment.status,
@@ -24,8 +25,14 @@ exports.getWorkerPaymentDetails = async (req, res) => {
       paymentMethod: payment.paymentMethod,
       transactionId: payment.transactionId,
       receiptUrl: payment.receiptUrl,
-      userName: payment.userName,
-      paidBy: payment.tenantId
+      userName: payment.tenantId
+        ? `${payment.tenantId.firstName} ${payment.tenantId.lastName}`.trim()
+        : payment.userName || '—',
+      workerName: payment.workerId
+        ? `${payment.workerId.firstName} ${payment.workerId.lastName}`.trim()
+        : '—',
+      // tenantId as populated object (tenant who paid)
+      tenantId: payment.tenantId
         ? {
             _id: payment.tenantId._id.toString(),
             firstName: payment.tenantId.firstName,
@@ -34,13 +41,15 @@ exports.getWorkerPaymentDetails = async (req, res) => {
             phone: payment.tenantId.phone,
           }
         : null,
-      receivedBy: payment.workerId
+      // workerId as populated object (worker who received)
+      workerId: payment.workerId
         ? {
             _id: payment.workerId._id.toString(),
             firstName: payment.workerId.firstName,
             lastName: payment.workerId.lastName,
             email: payment.workerId.email,
             phone: payment.workerId.phone,
+            serviceType: payment.workerId.serviceType,
           }
         : null,
     };
