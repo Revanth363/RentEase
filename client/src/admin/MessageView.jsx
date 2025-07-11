@@ -93,7 +93,7 @@ const MessageView = () => {
       try {
         setLoading(true); setIsLoading(true);
         const res = await axios.get(`${API}/admin/message/${id}`, { withCredentials: true });
-        setMsg(res.data.submission || res.data.contact || res.data.message || res.data);
+        setMsg(res.data.submission || res.data.contact || res.data);
       } catch { setError('Failed to load message details.'); }
       finally { setLoading(false); setIsLoading(false); }
     };

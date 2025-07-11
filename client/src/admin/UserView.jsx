@@ -103,9 +103,6 @@ const TenantPanel = ({ user, tenantProperty, rentPayments = [], workerPmts = [] 
         <Field label="Total Paid" value={money(user.totalPaid)} />
         <Field label="Last Payment Date" value={fmt(user.lastPaymentDate)} />
         <Field label="Outstanding Dues" value={money(user.outstandingDues)} />
-        <Field label="Payment Status" value={user.paymentStatus ? <StatusBadge status={user.paymentStatus} /> : '—'} />
-        <Field label="Lease Start" value={fmt(user.leaseStart)} />
-        <Field label="Lease End" value={fmt(user.leaseEnd)} />
       </div>
     </Card>
 
@@ -298,7 +295,6 @@ const WorkerPanel = ({ user, workerBookings, receivedPayments = [] }) => (
         <StatBox label="Clients Served" value={user.clientIds?.length ?? 0} />
         <StatBox label="Active Now" value={workerBookings.length} />
         <StatBox label="Rating" value={user.avgRating ? `${user.avgRating}/5` : '—'} sub={user.ratingCount ? `${user.ratingCount} reviews` : ''} />
-        <StatBox label="Complaints" value={user.complaintsCount ?? 0} />
       </div>
     </Card>
 
@@ -307,9 +303,7 @@ const WorkerPanel = ({ user, workerBookings, receivedPayments = [] }) => (
       <div className="uv-grid-3">
         <Field label="Service Type" value={user.serviceType} />
         <Field label="Experience" value={user.experience ? `${user.experience} years` : '—'} />
-        <Field label="Rate" value={user.price ? `${money(user.price)} / ${user.rateUnit || 'unit'}` : '—'} />
         <Field label="Availability" value={user.availability || '—'} />
-        <Field label="Service Area" value={user.area || user.location || '—'} />
         <Field label="Booking Status" value={<StatusBadge status={user.isBooked ? 'Booked' : 'Available'} />} />
         <Field label="Service Status" value={<StatusBadge status={user.serviceStatus || 'Available'} />} />
       </div>
@@ -416,6 +410,18 @@ const UserView = () => {
 
   const typeAccent = "#ffc107";
 
+  const handleSuspend = async () => {
+    const newStatus = user.status === 'Active' ? 'Suspended' : 'Active';
+    const action = newStatus === 'Suspended' ? 'Suspend' : 'Reactivate';
+    if (!window.confirm(`${action} this account?`)) return;
+    try {
+      await axios.post(`${API_URL}/admin/user/status/${id}/${userType}`, { status: newStatus }, { withCredentials: true });
+      setUser(u => ({ ...u, status: newStatus }));
+    } catch {
+      alert('Failed to update account status.');
+    }
+  };
+
   return (
     <>
       <style>{CSS}</style>
@@ -428,7 +434,9 @@ const UserView = () => {
             Dashboard
           </Link>
           <div className="uv-topbar-actions">
-            <button className="uv-btn uv-btn-danger">Suspend Account</button>
+            <button className="uv-btn uv-btn-danger" onClick={handleSuspend}>
+              {user.status === 'Suspended' ? 'Reactivate Account' : 'Suspend Account'}
+            </button>
           </div>
         </div>
 
@@ -461,10 +469,7 @@ const UserView = () => {
               <span className="uv-hero-meta-label">Last Login</span>
               <span className="uv-hero-meta-val">{fmtDT(user.lastLogin)}</span>
             </div>
-            <div className="uv-hero-meta-item">
-              <span className="uv-hero-meta-label">User ID</span>
-              <span className="uv-hero-meta-val mono">{user._id}</span>
-            </div>
+
           </div>
         </div>
 
@@ -477,7 +482,6 @@ const UserView = () => {
               <div className="uv-field-stack">
                 <Field label="Phone" value={user.phone} />
                 <Field label="Location" value={user.location} />
-                {isWorker && <Field label="Service Area" value={user.area || '—'} />}
               </div>
             </Card>
 

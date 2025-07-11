@@ -203,7 +203,10 @@ const PaymentView = () => {
                 <Field label="Payment ID"    value={<span style={{fontFamily:'monospace',fontSize:'.8rem'}}>{payment._id||payment.id}</span>}/>
                 <Field label="Status"        value={<StatusBadge status={payment.status}/>}/>
                 <Field label="Amount"        value={money(payment.amount)}/>
-                {payment.commission != null && <Field label="Commission" value={money(payment.commission)}/>}
+                <Field label="Commission" value={payment.commissionPercent != null && payment.commission != null
+                  ? `${payment.commissionPercent}% = ${money(payment.commission)}`
+                  : money(payment.commission)
+                }/>
                 <Field label="Method"        value={payment.paymentMethod||'—'}/>
                 <Field label="Payment Date"  value={fmt(payment.paymentDate||payment.createdAt)}/>
                 <Field label="Due Date"      value={fmt(payment.dueDate)}/>
@@ -236,7 +239,10 @@ const PaymentView = () => {
             <Card title="Financial Overview">
               <div className="uv-stats-row">
                 <StatBox label="Amount"     value={money(payment.amount)}/>
-                <StatBox label="Commission" value={payment.commission != null ? money(payment.commission) : '—'}/>
+                <StatBox label="Commission" value={payment.commissionPercent != null && payment.commission != null
+                  ? `${payment.commissionPercent}% = ${money(payment.commission)}`
+                  : money(payment.commission)
+                }/>
                 <StatBox label="Status"     value={payment.status}/>
                 <StatBox label="Due Date"   value={fmt(payment.dueDate)}/>
               </div>
@@ -249,7 +255,7 @@ const PaymentView = () => {
                   <Field label="Name"    value={<ULink to={`/admin/user/${tenant._id}/tenant`}>{tenant.firstName} {tenant.lastName}</ULink>}/>
                   <Field label="Email"   value={tenant.email||'—'}/>
                   <Field label="Phone"   value={tenant.phone||'—'}/>
-                  <Field label="Address" value={tenant.address||tenant.location||'—'}/>
+                  <Field label="Address" value={tenant.location||'—'}/>
                 </div>
               ) : tenantName !== '—' ? (
                 <div className="uv-field-stack">

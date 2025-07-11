@@ -7,6 +7,7 @@ const Booking = require('../models/booking');
 const Verification = require('../models/Verification');
 const Payment = require('../models/payment');
 const WorkerPayment = require('../models/workerPayment');
+const Rating = require('../models/rating');
 
 exports.getUserDetails = async (req, res) => {
   try {
@@ -41,6 +42,12 @@ exports.getUserDetails = async (req, res) => {
     let tenantWorkerPayments = [];
     let workerPayments = [];
 
+    // Computed fields
+    let verificationStatus = null;
+    let tenantTotalPaid = 0, tenantLastPaymentDate = null, tenantOutstandingDues = 0;
+    let ownerTotalRevenue = 0, ownerLastPaymentDate = null, ownerPendingPayments = 0;
+    let workerAvgRating = null, workerRatingCount = 0;
+
     if (userType === 'tenant') {
       tenantProperty = await Property.findOne({ tenantId: id })
         .populate('ownerId', 'firstName lastName email')
@@ -53,6 +60,19 @@ exports.getUserDetails = async (req, res) => {
         .populate('workerId', 'firstName lastName serviceType')
         .sort({ paymentDate: -1 })
         .lean();
+      // Verification status
+      const verfDoc = await Verification.findOne({ user: id }).lean();
+      verificationStatus = verfDoc ? verfDoc.status : null;
+      // Payment totals
+      const paidRent = tenantRentPayments.filter(p => p.status === 'Paid').reduce((s, p) => s + (p.amount || 0), 0);
+      const paidWorker = tenantWorkerPayments.filter(p => p.status === 'Paid').reduce((s, p) => s + (p.amount || 0), 0);
+      tenantTotalPaid = paidRent + paidWorker;
+      const allPmts = [...tenantRentPayments, ...tenantWorkerPayments]
+        .filter(p => p.paymentDate)
+        .sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+      tenantLastPaymentDate = allPmts.length > 0 ? allPmts[0].paymentDate : null;
+      tenantOutstandingDues = [...tenantRentPayments, ...tenantWorkerPayments]
+        .filter(p => p.status === 'Overdue').reduce((s, p) => s + (p.amount || 0), 0);
     } else if (userType === 'worker') {
       workerBookings = await Booking.find({ assignedWorker: id, status: 'Active' })
         .populate('tenantId', 'firstName lastName email')
@@ -62,6 +82,12 @@ exports.getUserDetails = async (req, res) => {
         .populate('tenantId', 'firstName lastName')
         .sort({ paymentDate: -1 })
         .lean();
+      // Compute ratings
+      const ratingDocs = await Rating.find({ workerId: id }).lean();
+      if (ratingDocs.length > 0) {
+        workerRatingCount = ratingDocs.length;
+        workerAvgRating = Math.round((ratingDocs.reduce((s, r) => s + (r.rating || 0), 0) / ratingDocs.length) * 10) / 10;
+      }
     } else if (userType === 'owner') {
       ownerProperties = await Property.find({ ownerId: id })
         .populate('tenantId', 'firstName lastName email')
@@ -74,23 +100,70 @@ exports.getUserDetails = async (req, res) => {
           .sort({ paymentDate: -1 })
           .lean();
       }
+      // Compute revenue
+      ownerTotalRevenue = ownerPayments.filter(p => p.status === 'Paid').reduce((s, p) => s + (p.amount || 0), 0);
+      const ownerSortedPmts = ownerPayments.filter(p => p.paymentDate).sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+      ownerLastPaymentDate = ownerSortedPmts.length > 0 ? ownerSortedPmts[0].paymentDate : null;
+      ownerPendingPayments = ownerPayments.filter(p => p.status === 'Pending' || p.status === 'Overdue').reduce((s, p) => s + (p.amount || 0), 0);
     }
 
     const userData = {
+      _id: user._id.toString(),
       id: user._id.toString(),
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
       userType: userType,
       address: user.location,
+      location: user.location,
       phone: user.phone,
       status: user.status,
       createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
+      verificationStatus: verificationStatus,
+      // Tenant counts from model arrays
+      complaintsCount: user.complaintIds?.length || 0,
+      maintenanceCount: user.maintenanceRequestIds?.length || 0,
+      savedListings: user.savedListings || [],
+      domesticWorkerId: user.domesticWorkerId || [],
+      rentalHistoryIds: user.rentalHistoryIds || [],
+      // Owner counts
+      tenantIds: user.tenantIds || [],
+      rentalAgreementIds: user.rentalAgreementIds || [],
+      // Worker counts
+      bookingIds: user.bookingIds || [],
+      clientIds: user.clientIds || [],
+      avgRating: workerAvgRating,
+      ratingCount: workerRatingCount,
+      // Tenant payment computed
+      totalPaid: tenantTotalPaid || null,
+      lastPaymentDate: tenantLastPaymentDate || ownerLastPaymentDate,
+      outstandingDues: tenantOutstandingDues || null,
+      // Owner revenue computed
+      totalRevenue: ownerTotalRevenue || null,
+      pendingPayments: ownerPendingPayments || null,
+      // Owner banking
+      accountNo: user.accountNo,
+      upiid: user.upiid,
+      notifications: user.notifications,
+      // Worker service fields
+      serviceType: user.serviceType,
+      experience: user.experience,
+      price: user.price,
+      rateUnit: user.rateUnit,
+      availability: user.availability,
+      description: user.description,
+      area: user.area,
+      serviceStatus: user.serviceStatus,
+      isBooked: user.isBooked,
+      image: user.image,
       tenantProperty: tenantProperty
         ? {
             _id: tenantProperty._id.toString(),
             name: tenantProperty.name,
             location: tenantProperty.location,
+            price: tenantProperty.price,
+            type: tenantProperty.type,
             owner: tenantProperty.ownerId
               ? {
                   _id: tenantProperty.ownerId._id.toString(),
@@ -125,6 +198,7 @@ exports.getUserDetails = async (req, res) => {
         _id: property._id.toString(),
         name: property.name,
         location: property.location,
+        price: property.price,
         tenant: property.tenantId
           ? {
               _id: property.tenantId._id.toString(),

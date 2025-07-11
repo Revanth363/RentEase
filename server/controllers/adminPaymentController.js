@@ -3,13 +3,14 @@ const Payment = require('../models/payment');
 const Tenant = require('../models/tenant');
 const Booking = require('../models/booking');
 const Property = require('../models/property');
+const Setting = require('../models/setting');
 
 exports.getPaymentDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
     const payment = await Payment.findById(id)
-      .populate('tenantId', 'firstName lastName email phone')
+      .populate('tenantId', 'firstName lastName email phone location')
       .populate({
         path: 'bookingId',
         populate: { path: 'propertyId', select: 'name' },
@@ -20,11 +21,15 @@ exports.getPaymentDetails = async (req, res) => {
       return res.status(404).json({ error: 'Payment not found' });
     }
 
+    const settings = await Setting.findOne().lean();
+    const commissionPercent = settings?.commission ?? 20;
+
     const paymentData = {
       _id: payment._id.toString(),
       id: payment._id.toString(),
       amount: payment.amount,
       commission: payment.commission,
+      commissionPercent: commissionPercent,
       status: payment.status,
       paymentDate: payment.paymentDate,
       paymentMethod: payment.paymentMethod,
@@ -42,6 +47,7 @@ exports.getPaymentDetails = async (req, res) => {
             lastName: payment.tenantId.lastName,
             email: payment.tenantId.email,
             phone: payment.tenantId.phone,
+            location: payment.tenantId.location,
           }
         : null,
       // bookingId as object for link

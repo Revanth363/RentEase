@@ -206,7 +206,7 @@ const WorkerPaymentView = () => {
                   <Field label="Name"    value={<ULink to={`/admin/user/${tenant._id}/tenant`}>{tenant.firstName} {tenant.lastName}</ULink>}/>
                   <Field label="Email"   value={tenant.email||'—'}/>
                   <Field label="Phone"   value={tenant.phone||'—'}/>
-                  <Field label="Address" value={tenant.address||tenant.location||'—'}/>
+                  <Field label="Home Address" value={payment.tenantPropertyAddress || tenant.location || '—'}/>
                 </div>
               ) : tenantName !== '—' ? (
                 <Field label="Name" value={tenantName}/>

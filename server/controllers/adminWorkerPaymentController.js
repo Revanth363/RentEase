@@ -2,18 +2,28 @@
 const WorkerPayment = require('../models/workerPayment');
 const Tenant = require('../models/tenant');
 const Worker = require('../models/worker');
+const Property = require('../models/property');
 
 exports.getWorkerPaymentDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
     const payment = await WorkerPayment.findById(id)
-      .populate('tenantId', 'firstName lastName email phone')
+      .populate('tenantId', 'firstName lastName email phone location')
       .populate('workerId', 'firstName lastName email phone serviceType')
       .lean();
 
     if (!payment) {
       return res.status(404).json({ error: 'Worker Payment not found' });
+    }
+
+    // Look up the tenant's rented property for address; fall back to personal location
+    let tenantPropertyAddress = null;
+    if (payment.tenantId?._id) {
+      const rentedProp = await Property.findOne({ tenantId: payment.tenantId._id }).lean();
+      tenantPropertyAddress = rentedProp
+        ? (rentedProp.address || rentedProp.location || null)
+        : (payment.tenantId.location || null);
     }
 
     const paymentData = {
@@ -31,6 +41,7 @@ exports.getWorkerPaymentDetails = async (req, res) => {
       workerName: payment.workerId
         ? `${payment.workerId.firstName} ${payment.workerId.lastName}`.trim()
         : '—',
+      tenantPropertyAddress: tenantPropertyAddress,
       // tenantId as populated object (tenant who paid)
       tenantId: payment.tenantId
         ? {
@@ -39,6 +50,7 @@ exports.getWorkerPaymentDetails = async (req, res) => {
             lastName: payment.tenantId.lastName,
             email: payment.tenantId.email,
             phone: payment.tenantId.phone,
+            location: payment.tenantId.location,
           }
         : null,
       // workerId as populated object (worker who received)
