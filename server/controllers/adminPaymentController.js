@@ -12,6 +12,11 @@ exports.getPaymentDetails = async (req, res) => {
     const payment = await Payment.findById(id)
       .populate('tenantId', 'firstName lastName email phone location')
       .populate({
+        path: 'propertyId',
+        select: 'name location address ownerId',
+        populate: { path: 'ownerId', select: 'firstName lastName email phone' },
+      })
+      .populate({
         path: 'bookingId',
         populate: { path: 'propertyId', select: 'name' },
       })
@@ -59,14 +64,30 @@ exports.getPaymentDetails = async (req, res) => {
             endDate: payment.bookingId.endDate,
           }
         : null,
-      // propertyId from booking for link
-      propertyId: payment.bookingId?.propertyId
+      // propertyId — prefer direct field, fall back to booking's nested property
+      propertyId: payment.propertyId
         ? {
-            _id: payment.bookingId.propertyId._id.toString(),
-            name: payment.bookingId.propertyId.name,
+            _id: payment.propertyId._id.toString(),
+            name: payment.propertyId.name,
+            location: payment.propertyId.location,
+            address: payment.propertyId.address,
+          }
+        : (payment.bookingId?.propertyId
+          ? {
+              _id: payment.bookingId.propertyId._id.toString(),
+              name: payment.bookingId.propertyId.name,
+            }
+          : null),
+      ownerId: payment.propertyId?.ownerId
+        ? {
+            _id: payment.propertyId.ownerId._id.toString(),
+            firstName: payment.propertyId.ownerId.firstName,
+            lastName: payment.propertyId.ownerId.lastName,
+            email: payment.propertyId.ownerId.email,
+            phone: payment.propertyId.ownerId.phone,
           }
         : null,
-      propertyName: payment.bookingId?.propertyId?.name || '—',
+      propertyName: payment.propertyId?.name || payment.bookingId?.propertyId?.name || '—',
     };
 
     res.json(paymentData);

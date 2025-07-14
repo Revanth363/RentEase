@@ -489,16 +489,19 @@ const UserView = () => {
             <Card title="Verification" accent={typeAccent}>
               <div className="uv-field-stack">
                 <Field label="KYC Status" value={<StatusBadge status={user.verificationStatus || 'pending'} />} />
-                {user.documents?.length > 0 && (
+                {user.verificationRejectionReason && (
+                  <Field label="Rejection Reason" value={user.verificationRejectionReason} />
+                )}
+                {user.verificationDocuments?.length > 0 && (
                   <div className="uv-doc-list">
-                    {user.documents.map((doc) => (
+                    {user.verificationDocuments.map((doc) => (
                       <a key={doc._id || doc.url} href={doc.url} target="_blank" rel="noreferrer" className="uv-doc-link">
                         📄 {doc.type || 'Document'}
                       </a>
                     ))}
                   </div>
                 )}
-                {(!user.documents || user.documents.length === 0) && (
+                {(!user.verificationDocuments || user.verificationDocuments.length === 0) && (
                   <p className="uv-empty" style={{ padding: '0.5rem 0' }}>No documents uploaded.</p>
                 )}
               </div>

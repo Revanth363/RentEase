@@ -277,6 +277,17 @@ const PaymentView = () => {
               ) : <p className="uv-empty">No property information available.</p>}
             </Card>
 
+            {/* Owner */}
+            {payment.ownerId?._id && (
+              <Card title="Owner Information (Received By)">
+                <div className="uv-grid-3">
+                  <Field label="Name"  value={<ULink to={`/admin/user/${payment.ownerId._id}/owner`}>{payment.ownerId.firstName} {payment.ownerId.lastName}</ULink>}/>
+                  <Field label="Email" value={payment.ownerId.email||'—'}/>
+                  <Field label="Phone" value={payment.ownerId.phone||'—'}/>
+                </div>
+              </Card>
+            )}
+
             {/* Booking Reference */}
             {booking?._id && (
               <Card title="Booking Reference">

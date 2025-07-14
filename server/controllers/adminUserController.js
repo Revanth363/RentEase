@@ -44,6 +44,8 @@ exports.getUserDetails = async (req, res) => {
 
     // Computed fields
     let verificationStatus = null;
+    let verificationDocuments = [];
+    let verificationRejectionReason = null;
     let tenantTotalPaid = 0, tenantLastPaymentDate = null, tenantOutstandingDues = 0;
     let ownerTotalRevenue = 0, ownerLastPaymentDate = null, ownerPendingPayments = 0;
     let workerAvgRating = null, workerRatingCount = 0;
@@ -61,8 +63,10 @@ exports.getUserDetails = async (req, res) => {
         .sort({ paymentDate: -1 })
         .lean();
       // Verification status
-      const verfDoc = await Verification.findOne({ user: id }).lean();
+      const verfDoc = await Verification.findOne({ user: id, userModel: 'tenant' }).lean();
       verificationStatus = verfDoc ? verfDoc.status : null;
+      verificationDocuments = verfDoc?.documents || [];
+      verificationRejectionReason = verfDoc?.rejectionReason || null;
       // Payment totals
       const paidRent = tenantRentPayments.filter(p => p.status === 'Paid').reduce((s, p) => s + (p.amount || 0), 0);
       const paidWorker = tenantWorkerPayments.filter(p => p.status === 'Paid').reduce((s, p) => s + (p.amount || 0), 0);
@@ -88,6 +92,11 @@ exports.getUserDetails = async (req, res) => {
         workerRatingCount = ratingDocs.length;
         workerAvgRating = Math.round((ratingDocs.reduce((s, r) => s + (r.rating || 0), 0) / ratingDocs.length) * 10) / 10;
       }
+      // Verification status
+      const workerVerfDoc = await Verification.findOne({ user: id, userModel: 'worker' }).lean();
+      verificationStatus = workerVerfDoc ? workerVerfDoc.status : null;
+      verificationDocuments = workerVerfDoc?.documents || [];
+      verificationRejectionReason = workerVerfDoc?.rejectionReason || null;
     } else if (userType === 'owner') {
       ownerProperties = await Property.find({ ownerId: id })
         .populate('tenantId', 'firstName lastName email')
@@ -105,6 +114,11 @@ exports.getUserDetails = async (req, res) => {
       const ownerSortedPmts = ownerPayments.filter(p => p.paymentDate).sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
       ownerLastPaymentDate = ownerSortedPmts.length > 0 ? ownerSortedPmts[0].paymentDate : null;
       ownerPendingPayments = ownerPayments.filter(p => p.status === 'Pending' || p.status === 'Overdue').reduce((s, p) => s + (p.amount || 0), 0);
+      // Verification status
+      const ownerVerfDoc = await Verification.findOne({ user: id, userModel: 'owner' }).lean();
+      verificationStatus = ownerVerfDoc ? ownerVerfDoc.status : null;
+      verificationDocuments = ownerVerfDoc?.documents || [];
+      verificationRejectionReason = ownerVerfDoc?.rejectionReason || null;
     }
 
     const userData = {
@@ -121,6 +135,8 @@ exports.getUserDetails = async (req, res) => {
       createdAt: user.createdAt,
       lastLogin: user.lastLogin,
       verificationStatus: verificationStatus,
+      verificationDocuments: verificationDocuments,
+      verificationRejectionReason: verificationRejectionReason,
       // Tenant counts from model arrays
       complaintsCount: user.complaintIds?.length || 0,
       maintenanceCount: user.maintenanceRequestIds?.length || 0,
