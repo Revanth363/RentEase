@@ -88,7 +88,7 @@ export const fetchAdminBookings = async () => {
 
 export const fetchAdminPayments = async () => {
   try {
-    const response = await axios.get(`${API_URL}/admin`, { withCredentials: true });
+    const response = await axios.get(`${API_URL}/admin/payments`, { withCredentials: true });
     return response.data.payments || [];
   } catch (error) {
     console.error('Error fetching admin payments:', error);
@@ -98,17 +98,17 @@ export const fetchAdminPayments = async () => {
 
 export const fetchAdminWorkerPayments = async () => {
   try {
-    const response = await axios.get(`${API_URL}/admin`, { withCredentials: true });
-    return response.data.workerPayments || [];
+    const response = await axios.get(`${API_URL}/admin/worker-payments`, { withCredentials: true });
+    return response.data;
   } catch (error) {
     console.error('Error fetching admin worker payments:', error);
-    return [];
+    return {};
   }
 };
 
 export const fetchAdminNotifications = async () => {
   try {
-    const response = await axios.get(`${API_URL}/admin`, { withCredentials: true });
+    const response = await axios.get(`${API_URL}/admin/notifications`, { withCredentials: true });
     return response.data.notifications || [];
   } catch (error) {
     console.error('Error fetching admin notifications:', error);
@@ -118,7 +118,7 @@ export const fetchAdminNotifications = async () => {
 
 export const fetchAdminMaintenanceRequests = async () => {
   try {
-    const response = await axios.get(`${API_URL}/admin`, { withCredentials: true });
+    const response = await axios.get(`${API_URL}/admin/maintenance-requests`, { withCredentials: true });
     return response.data.maintenanceRequests || [];
   } catch (error) {
     console.error('Error fetching admin maintenance requests:', error);
@@ -128,7 +128,7 @@ export const fetchAdminMaintenanceRequests = async () => {
 
 export const fetchAdminMessages = async () => {
   try {
-    const response = await axios.get(`${API_URL}/admin`, { withCredentials: true });
+    const response = await axios.get(`${API_URL}/admin/messages`, { withCredentials: true });
     return response.data.contactSubmissions || [];
   } catch (error) {
     console.error('Error fetching admin messages:', error);

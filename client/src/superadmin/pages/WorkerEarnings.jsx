@@ -3,6 +3,8 @@ import styles from './WorkerEarnings.module.css';
 import { Search, Download, Filter } from 'lucide-react';
 import { getWorkerEarnings } from '../../services/superadminService';
 
+const fmt = (n) => `₹${(n || 0).toLocaleString('en-IN')}`;
+
 export default function WorkerEarnings() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterService, setFilterService] = useState('all');
@@ -22,7 +24,6 @@ export default function WorkerEarnings() {
         setLoading(false);
       }
     };
-
     fetchWorkers();
   }, []);
 
@@ -35,11 +36,7 @@ export default function WorkerEarnings() {
     return matchesSearch && matchesFilter;
   });
 
-  const serviceTypes = ['all', ...new Set(workers.map(w => w.serviceType || ''))];
-
-  const handleExport = () => {
-    alert('Export functionality coming soon');
-  };
+  const serviceTypes = ['all', ...new Set(workers.map(w => w.serviceType).filter(Boolean))];
 
   if (loading) return <div className={styles.container}>Loading worker earnings...</div>;
   if (error) return <div className={styles.container} style={{ color: '#dc3545' }}>{error}</div>;
@@ -73,7 +70,7 @@ export default function WorkerEarnings() {
               ))}
             </select>
           </div>
-          <button className={styles.exportBtn} onClick={handleExport}>
+          <button className={styles.exportBtn}>
             <Download size={18} />
             Export Data
           </button>
@@ -87,15 +84,17 @@ export default function WorkerEarnings() {
               <tr>
                 <th>Worker Name</th>
                 <th>Service Type</th>
-                <th>Monthly Earnings</th>
-                <th>Total Earnings (All Time)</th>
+                <th>Experience</th>
+                <th>Status</th>
+                <th>This Month</th>
+                <th>Total Earnings</th>
                 <th>Completed Services</th>
               </tr>
             </thead>
             <tbody>
               {filteredWorkers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
                     No workers found
                   </td>
                 </tr>
@@ -110,12 +109,14 @@ export default function WorkerEarnings() {
                         {worker.serviceType || 'N/A'}
                       </span>
                     </td>
-                    <td className={styles.currencyCell}>
-                      ₹{(worker.monthlyEarnings || 0).toLocaleString()}
+                    <td>{worker.experience ? `${worker.experience} yrs` : '—'}</td>
+                    <td>
+                      <span className={worker.status === 'Active' ? styles.badgeActive : styles.badgeSuspended}>
+                        {worker.status || 'Active'}
+                      </span>
                     </td>
-                    <td className={styles.currencyCell}>
-                      ₹{(worker.totalEarnings || 0).toLocaleString()}
-                    </td>
+                    <td className={styles.currencyCell}>{fmt(worker.monthlyEarnings)}</td>
+                    <td className={styles.currencyCell}>{fmt(worker.totalEarnings)}</td>
                     <td className={styles.serviceCount}>
                       {worker.completedServices || 0}
                     </td>

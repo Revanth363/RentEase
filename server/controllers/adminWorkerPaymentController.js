@@ -77,11 +77,35 @@ exports.getWorkerPaymentDetails = async (req, res) => {
 
 exports.getAllWorkerPayments = async (req, res) => {
   try {
-    const workerPayments = await WorkerPayment.find()
+    const {
+      status, paymentMethod, transactionId,
+      fromDate, toDate, page = 1, limit = 500
+    } = req.query;
+
+    const matchFilter = {};
+    if (status)        matchFilter.status = status;
+    if (paymentMethod) matchFilter.paymentMethod = paymentMethod;
+    if (transactionId) matchFilter.transactionId = { $regex: transactionId, $options: 'i' };
+    if (fromDate || toDate) {
+      matchFilter.paymentDate = {};
+      if (fromDate) matchFilter.paymentDate.$gte = new Date(fromDate);
+      if (toDate) {
+        const end = new Date(toDate);
+        end.setHours(23, 59, 59, 999);
+        matchFilter.paymentDate.$lte = end;
+      }
+    }
+
+    const total = await WorkerPayment.countDocuments(matchFilter);
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const workerPayments = await WorkerPayment.find(matchFilter)
+      .select('tenantId workerId userName amount status paymentMethod transactionId paymentDate createdAt')
       .populate('tenantId', 'firstName lastName')
       .populate('workerId', 'firstName lastName')
       .sort({ createdAt: -1 })
-      .limit(10)  // Only latest 10 payments
+      .skip(skip)
+      .limit(Number(limit))
       .lean();
 
     const formattedPayments = workerPayments.map(p => ({
@@ -104,9 +128,8 @@ exports.getAllWorkerPayments = async (req, res) => {
 
     res.json({
       workerPayments: formattedPayments,
-      total: formattedPayments.length  // will be ≤10
+      total,
     });
-
   } catch (error) {
     console.error('getAllWorkerPayments error:', error);
     res.status(500).json({ error: error.message });

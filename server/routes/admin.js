@@ -34,6 +34,10 @@ router.post(
 
 // Notification routes
 router.get(
+  "/notifications",
+  adminNotificationController.getAllNotifications
+);
+router.get(
   "/notification/:id",
   adminNotificationController.getNotificationDetails
 );
@@ -43,6 +47,10 @@ router.post(
 );
 
 // Maintenance routes
+router.get(
+  "/maintenance-requests",
+  adminMaintenanceController.getAllMaintenanceRequests
+);
 router.get(
   "/maintenance/:id",
   adminMaintenanceController.getMaintenanceDetails

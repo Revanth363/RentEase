@@ -33,7 +33,7 @@ const Messages = () => {
     if (appliedFilters.fromDate) params.set('fromDate', appliedFilters.fromDate);
     if (appliedFilters.toDate) params.set('toDate', appliedFilters.toDate);
 
-    const url = params.toString() ? `/api/admin?${params.toString()}` : '/api/admin';
+    const url = params.toString() ? `/api/admin/messages?${params.toString()}` : '/api/admin/messages';
 
     const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to fetch');

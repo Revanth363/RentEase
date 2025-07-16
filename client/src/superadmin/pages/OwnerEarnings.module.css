@@ -124,6 +124,116 @@
   color: #28a745;
 }
 
+.countCell {
+  font-weight: 600;
+  color: #6c757d;
+  text-align: center;
+}
+
+.expandCell {
+  width: 32px;
+  padding: 0.5rem 0.25rem !important;
+  text-align: center;
+  color: #6c757d;
+}
+
+.chevron {
+  display: block;
+  margin: auto;
+}
+
+.ownerRow td {
+  vertical-align: middle;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background: #fff8e1 !important;
+}
+
+.expandedRow td {
+  background: #f9fafb;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.expandedCell {
+  padding: 0 !important;
+}
+
+.propBreakdown {
+  padding: 1rem 2rem 1.25rem 3rem;
+}
+
+.propBreakdownTitle {
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.propTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.propTable th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  background: #e9ecef;
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.propTable td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+  color: #333;
+}
+
+.propTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badgeActive,
+.badgeSuspended,
+.badgeRented,
+.badgeVacant {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badgeActive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badgeSuspended {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badgeRented {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.badgeVacant {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;

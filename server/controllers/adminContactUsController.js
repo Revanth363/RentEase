@@ -3,9 +3,25 @@ const Contact = require("../models/contactus");
 
 exports.getAllSubmissions = async (req, res) => {
   try {
-    const submissions = await Contact.find()
+    const { fromDate, toDate, page = 1, limit = 500 } = req.query;
+
+    const matchFilter = {};
+    if (fromDate || toDate) {
+      matchFilter.submittedAt = {};
+      if (fromDate) matchFilter.submittedAt.$gte = new Date(fromDate);
+      if (toDate) {
+        const end = new Date(toDate);
+        end.setHours(23, 59, 59, 999);
+        matchFilter.submittedAt.$lte = end;
+      }
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const submissions = await Contact.find(matchFilter)
       .sort({ submittedAt: -1 })
-      .limit(10)                    // THIS LINE — ONLY LATEST 10
+      .skip(skip)
+      .limit(Number(limit))
       .lean();
 
     const formatted = submissions.map(s => ({
@@ -29,7 +45,7 @@ exports.getAllSubmissions = async (req, res) => {
         : 'N/A'
     }));
 
-    res.json(formatted);
+    res.json({ contactSubmissions: formatted });
   } catch (err) {
     console.error('Error:', err);
     res.status(500).json({ error: 'Server Error' });

@@ -17,6 +17,7 @@ export default function Navbar() {
   const navItems = [
     { path: '/superadmin', label: 'Overview' },
     { path: '/superadmin/financial-analytics', label: 'Financial Analytics' },
+    { path: '/superadmin/tenant-payments', label: 'Tenant Payments' },
     { path: '/superadmin/owner-earnings', label: 'Owner Earnings' },
     { path: '/superadmin/worker-earnings', label: 'Worker Earnings' },
     { path: '/superadmin/executives', label: 'Executives' },

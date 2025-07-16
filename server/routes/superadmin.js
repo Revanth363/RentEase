@@ -12,6 +12,7 @@ const workerCtrl = require('../controllers/superadminworkerController');
 const executivesCtrl = require('../controllers/superadminexecutivesController');
 const settingsCtrl = require('../controllers/superadminsettingsController');
 const auditCtrl = require('../controllers/superadminauditController');
+const tenantPaymentCtrl = require('../controllers/superadmintenantPaymentController');
 
 // Apply protection to ALL superadmin routes
 // protect: must be logged in
@@ -33,5 +34,6 @@ router.delete('/executives/:id', executivesCtrl.deleteExecutive);
 router.get('/settings', settingsCtrl.getSystemSettings);
 router.post('/settings', settingsCtrl.updateSystemSettings);
 router.get('/audit-logs', auditCtrl.getAuditLogs);
+router.get('/tenant-payments', tenantPaymentCtrl.getTenantPayments);
 
 module.exports = router;

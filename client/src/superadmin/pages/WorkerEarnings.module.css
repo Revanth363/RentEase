@@ -152,6 +152,25 @@
   color: #6c757d;
 }
 
+.badgeActive,
+.badgeSuspended {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badgeActive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badgeSuspended {
+  background: #f8d7da;
+  color: #721c24;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;

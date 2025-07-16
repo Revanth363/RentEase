@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import styles from './OwnerEarnings.module.css';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, ChevronDown, ChevronRight } from 'lucide-react';
 import { getOwnerEarnings } from '../../services/superadminService';
+
+const fmt = (n) => `₹${(n || 0).toLocaleString('en-IN')}`;
 
 export default function OwnerEarnings() {
   const [searchTerm, setSearchTerm] = useState('');
   const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
     const fetchOwners = async () => {
@@ -21,7 +24,6 @@ export default function OwnerEarnings() {
         setLoading(false);
       }
     };
-
     fetchOwners();
   }, []);
 
@@ -29,9 +31,8 @@ export default function OwnerEarnings() {
     `${owner.firstName} ${owner.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleExport = () => {
-    alert('Export functionality coming soon');
-  };
+  const toggleExpand = (id) =>
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
   if (loading) return <div className={styles.container}>Loading owner earnings...</div>;
   if (error) return <div className={styles.container} style={{ color: '#dc3545' }}>{error}</div>;
@@ -51,7 +52,7 @@ export default function OwnerEarnings() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className={styles.exportBtn} onClick={handleExport}>
+          <button className={styles.exportBtn}>
             <Download size={18} />
             Export Data
           </button>
@@ -63,9 +64,11 @@ export default function OwnerEarnings() {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th style={{ width: 32 }}></th>
                 <th>Owner Name</th>
+                <th>Status</th>
                 <th>Properties</th>
-                <th>Monthly Rent</th>
+                <th>Monthly Rent (Total)</th>
                 <th>Total Rent (All Time)</th>
                 <th>Last Payment Date</th>
               </tr>
@@ -73,30 +76,83 @@ export default function OwnerEarnings() {
             <tbody>
               {filteredOwners.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
                     No owners found
                   </td>
                 </tr>
               ) : (
-                filteredOwners.map((owner) => (
-                  <tr key={owner._id}>
-                    <td className={styles.nameCell}>
-                      {owner.firstName} {owner.lastName}
-                    </td>
-                    <td>{owner.numProperties || owner.propertyIds?.length || 0}</td>
-                    <td className={styles.currencyCell}>
-                      ₹{(owner.monthlyRent || 0).toLocaleString()}
-                    </td>
-                    <td className={styles.currencyCell}>
-                      ₹{(owner.totalRent || 0).toLocaleString()}
-                    </td>
-                    <td>
-                      {owner.lastPayment
-                        ? new Date(owner.lastPayment).toLocaleDateString()
-                        : '—'}
-                    </td>
-                  </tr>
-                ))
+                filteredOwners.map((owner) => {
+                  const isOpen = !!expanded[owner._id];
+                  const hasProps = owner.properties && owner.properties.length > 0;
+                  return (
+                    <React.Fragment key={owner._id}>
+                      <tr
+                        className={`${styles.ownerRow} ${hasProps ? styles.clickableRow : ''}`}
+                        onClick={() => hasProps && toggleExpand(owner._id)}
+                      >
+                        <td className={styles.expandCell}>
+                          {hasProps
+                            ? (isOpen
+                                ? <ChevronDown size={16} className={styles.chevron} />
+                                : <ChevronRight size={16} className={styles.chevron} />)
+                            : null}
+                        </td>
+                        <td className={styles.nameCell}>
+                          {owner.firstName} {owner.lastName}
+                        </td>
+                        <td>
+                          <span className={owner.status === 'Active' ? styles.badgeActive : styles.badgeSuspended}>
+                            {owner.status || 'Active'}
+                          </span>
+                        </td>
+                        <td className={styles.countCell}>{owner.numProperties || 0}</td>
+                        <td className={styles.currencyCell}>{fmt(owner.monthlyRent)}</td>
+                        <td className={styles.currencyCell}>{fmt(owner.totalRent)}</td>
+                        <td>
+                          {owner.lastPayment
+                            ? new Date(owner.lastPayment).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                            : '—'}
+                        </td>
+                      </tr>
+
+                      {isOpen && hasProps && (
+                        <tr className={styles.expandedRow}>
+                          <td colSpan="7" className={styles.expandedCell}>
+                            <div className={styles.propBreakdown}>
+                              <p className={styles.propBreakdownTitle}>Properties under {owner.firstName} {owner.lastName}</p>
+                              <table className={styles.propTable}>
+                                <thead>
+                                  <tr>
+                                    <th>#</th>
+                                    <th>Property Name</th>
+                                    <th>Location</th>
+                                    <th>Monthly Rent</th>
+                                    <th>Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {owner.properties.map((p, i) => (
+                                    <tr key={p._id}>
+                                      <td>{i + 1}</td>
+                                      <td>{p.name}</td>
+                                      <td>{p.location}</td>
+                                      <td className={styles.currencyCell}>{fmt(p.price)}</td>
+                                      <td>
+                                        <span className={p.isRented ? styles.badgeRented : styles.badgeVacant}>
+                                          {p.isRented ? 'Rented' : 'Vacant'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -155,6 +155,22 @@ export const getAuditLogs = async (silentOn401 = true) => {
 };
 
 /**
+ * Fetch all tenant payments for superadmin
+ * @param {Object} params - { status, search, page, limit }
+ */
+export const getTenantPayments = async (params = {}, silentOn401 = true) => {
+  try {
+    const response = await superadminApi.get('/tenant-payments', { params });
+    return response.data;
+  } catch (error) {
+    if (silentOn401 && error.response?.status === 401) {
+      return { stats: {}, payments: [], pagination: {} };
+    }
+    return handle401(error);
+  }
+};
+
+/**
  * Create a new executive
  */
 export const createExecutive = async (data) => {
@@ -205,4 +221,5 @@ export default {
   getSystemSettings,
   updateSystemSettings,
   getAuditLogs,
+  getTenantPayments,
 };

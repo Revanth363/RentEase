@@ -119,3 +119,62 @@ exports.completeMaintenance = async (req, res) => {
     res.status(500).json({ error: 'Failed to complete' });
   }
 };
+
+exports.getAllMaintenanceRequests = async (req, res) => {
+  try {
+    const { issueType, status, fromDate, toDate, page = 1, limit = 500 } = req.query;
+
+    const matchFilter = {};
+    if (issueType) matchFilter.issueType = { $regex: issueType, $options: 'i' };
+    if (status)    matchFilter.status = status;
+    if (fromDate || toDate) {
+      matchFilter.dateReported = {};
+      if (fromDate) matchFilter.dateReported.$gte = new Date(fromDate);
+      if (toDate) {
+        const end = new Date(toDate);
+        end.setHours(23, 59, 59, 999);
+        matchFilter.dateReported.$lte = end;
+      }
+    }
+
+    const total = await MaintenanceRequest.countDocuments(matchFilter);
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const requests = await MaintenanceRequest.find(matchFilter)
+      .select('issueType status description dateReported scheduledDate completionDate createdAt propertyId tenantId')
+      .populate({
+        path: 'propertyId',
+        select: 'name ownerId',
+        populate: { path: 'ownerId', select: 'firstName lastName' }
+      })
+      .populate('tenantId', 'firstName lastName')
+      .sort({ dateReported: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();
+
+    const formatted = requests.map(r => ({
+      id: r._id.toString(),
+      _id: r._id.toString(),
+      issueType: r.issueType || 'General',
+      status: r.status || 'Pending',
+      description: r.description || '',
+      propertyName: r.propertyId?.name || '—',
+      tenantName: r.tenantId
+        ? `${r.tenantId.firstName} ${r.tenantId.lastName}`.trim()
+        : 'Unknown',
+      ownerName: r.propertyId?.ownerId
+        ? `${r.propertyId.ownerId.firstName} ${r.propertyId.ownerId.lastName}`.trim()
+        : '—',
+      dateReported: r.dateReported || r.createdAt,
+      scheduledDate: r.scheduledDate || null,
+      completionDate: r.completionDate || null,
+      createdAt: r.createdAt,
+    }));
+
+    res.json({ maintenanceRequests: formatted, total });
+  } catch (error) {
+    console.error('getAllMaintenanceRequests error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

@@ -1,45 +1,61 @@
 // server/controllers/superadminworkerController.js
 const Worker = require('../models/worker');
 const WorkerPayment = require('../models/workerPayment');
-const Booking = require('../models/booking');
+const WorkerBooking = require('../models/workerBooking');
 
 exports.getWorkerEarnings = async (req, res) => {
   try {
-    const workers = await Worker.find({ status: 'Active' })
-      .select('firstName lastName serviceType experience')
+    // Include all workers so superadmin sees complete picture
+    const workers = await Worker.find({})
+      .select('firstName lastName serviceType experience status email phone')
       .lean();
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const enrichedWorkers = await Promise.all(
       workers.map(async (worker) => {
-        // Total earnings = sum of worker payments (from WorkerPayment collection)
-        const totalEarnings = await WorkerPayment.aggregate([
+        // Total earnings = sum of all paid worker payments
+        const totalEarningsResult = await WorkerPayment.aggregate([
           { $match: { status: 'Paid', workerId: worker._id } },
           { $group: { _id: null, total: { $sum: '$amount' } } }
-        ]).then(r => r[0]?.total || 0);
+        ]);
+        const totalEarnings = totalEarningsResult[0]?.total || 0;
 
-        // Monthly earnings = sum of payments within current month
-        const now = new Date();
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const monthlyEarnings = await WorkerPayment.aggregate([
-          { $match: { status: 'Paid', workerId: worker._id, createdAt: { $gte: monthStart } } },
+        // Monthly earnings = payments this calendar month (check both paymentDate and createdAt)
+        const monthlyEarningsResult = await WorkerPayment.aggregate([
+          {
+            $match: {
+              status: 'Paid',
+              workerId: worker._id,
+              $or: [
+                { paymentDate: { $gte: monthStart } },
+                { createdAt: { $gte: monthStart } }
+              ]
+            }
+          },
           { $group: { _id: null, total: { $sum: '$amount' } } }
-        ]).then(r => r[0]?.total || 0);
+        ]);
+        const monthlyEarnings = monthlyEarningsResult[0]?.total || 0;
 
-        // Completed services = count of completed bookings
-        const completedServices = await Booking.countDocuments({
-          assignedWorker: worker._id,
-          status: { $in: ['Completed', 'Finished'] }
+        // Completed services = count from WorkerBooking (has status 'Completed')
+        const completedServices = await WorkerBooking.countDocuments({
+          workerId: worker._id,
+          status: 'Completed'
         });
 
         return {
           _id: worker._id,
           firstName: worker.firstName,
           lastName: worker.lastName,
+          email: worker.email,
+          phone: worker.phone,
           serviceType: worker.serviceType,
           experience: worker.experience,
+          status: worker.status,
           monthlyEarnings,
           totalEarnings,
-          completedServices
+          completedServices,
         };
       })
     );

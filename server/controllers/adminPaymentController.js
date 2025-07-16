@@ -29,11 +29,17 @@ exports.getPaymentDetails = async (req, res) => {
     const settings = await Setting.findOne().lean();
     const commissionPercent = settings?.commission ?? 20;
 
+    // commission stored in DB (may be null/0 for older records) — compute from amount if missing
+    const storedCommission = payment.commission;
+    const commissionAmount = (storedCommission != null && storedCommission > 0)
+      ? storedCommission
+      : (payment.amount ? Math.round((commissionPercent / 100) * payment.amount * 100) / 100 : null);
+
     const paymentData = {
       _id: payment._id.toString(),
       id: payment._id.toString(),
       amount: payment.amount,
-      commission: payment.commission,
+      commission: commissionAmount,
       commissionPercent: commissionPercent,
       status: payment.status,
       paymentDate: payment.paymentDate,
@@ -140,22 +146,47 @@ exports.retryPayment = async (req, res) => {
 };
 
 // controllers/adminPaymentController.js
-
 exports.getAllPayments = async (req, res) => {
   try {
-    const payments = await Payment.find()
+    const {
+      status, method, transactionId, minAmount, maxAmount,
+      fromDate, toDate, page = 1, limit = 500
+    } = req.query;
+
+    const matchFilter = { propertyId: { $exists: true, $ne: null } };
+    if (status)      matchFilter.status = status;
+    if (method)      matchFilter.paymentMethod = method;
+    if (transactionId) matchFilter.transactionId = { $regex: transactionId, $options: 'i' };
+    if (minAmount || maxAmount) {
+      matchFilter.amount = {};
+      if (minAmount) matchFilter.amount.$gte = Number(minAmount);
+      if (maxAmount) matchFilter.amount.$lte = Number(maxAmount);
+    }
+    if (fromDate || toDate) {
+      matchFilter.paymentDate = {};
+      if (fromDate) matchFilter.paymentDate.$gte = new Date(fromDate);
+      if (toDate) {
+        const end = new Date(toDate);
+        end.setHours(23, 59, 59, 999);
+        matchFilter.paymentDate.$lte = end;
+      }
+    }
+
+    const total = await Payment.countDocuments(matchFilter);
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const payments = await Payment.find(matchFilter)
+      .select('tenantId userName amount status paymentMethod transactionId paymentDate dueDate createdAt bookingId')
       .populate('tenantId', 'firstName lastName')
-      .populate({
-        path: 'bookingId',
-        populate: { path: 'propertyId', select: 'name' }
-      })
-      .sort({ createdAt: -1 })   // newest first
-      .limit(10)                  // Only latest 10
+      .populate({ path: 'bookingId', select: 'propertyId', populate: { path: 'propertyId', select: 'name' } })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit))
       .lean();
 
     const formattedPayments = payments.map(p => ({
       _id: p._id.toString(),
-      id: p._id.toString(), // for frontend compatibility
+      id: p._id.toString(),
       userName: p.tenantId
         ? `${p.tenantId.firstName} ${p.tenantId.lastName}`.trim()
         : p.userName || 'Unknown',
@@ -166,16 +197,14 @@ exports.getAllPayments = async (req, res) => {
       transactionId: p.transactionId || null,
       paymentDate: p.paymentDate,
       dueDate: p.dueDate,
-      receiptUrl: p.receiptUrl,
       propertyName: p.bookingId?.propertyId?.name || '—',
       createdAt: p.createdAt,
     }));
 
-    res.json({ 
+    res.json({
       payments: formattedPayments,
-      total: formattedPayments.length  // will be 10 (or less if not enough)
+      total,
     });
-
   } catch (error) {
     console.error('getAllPayments error:', error);
     res.status(500).json({ error: error.message });

@@ -63,6 +63,7 @@ import WorkerEarnings from "./superadmin/pages/WorkerEarnings";
 import Executives from "./superadmin/pages/Executives";
 import SystemSettings from "./superadmin/pages/SystemSettings";
 import AuditLogs from "./superadmin/pages/AuditLogs";
+import TenantPayments from "./superadmin/pages/TenantPayments";
 
 const App = () => {
   const location = useLocation();
@@ -313,6 +314,7 @@ const App = () => {
             <Route path="executives" element={<Executives />} />
             <Route path="system-settings" element={<SystemSettings />} />
             <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="tenant-payments" element={<TenantPayments />} />
           </Route>
 
       
