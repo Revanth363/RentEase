@@ -141,10 +141,10 @@ exports.getAllMaintenanceRequests = async (req, res) => {
     const skip = (Number(page) - 1) * Number(limit);
 
     const requests = await MaintenanceRequest.find(matchFilter)
-      .select('issueType status description dateReported scheduledDate completionDate createdAt propertyId tenantId')
+      .select('issueType status description location dateReported scheduledDate completionDate createdAt propertyId tenantId')
       .populate({
         path: 'propertyId',
-        select: 'name ownerId',
+        select: 'name location ownerId',
         populate: { path: 'ownerId', select: 'firstName lastName' }
       })
       .populate('tenantId', 'firstName lastName')
@@ -160,12 +160,16 @@ exports.getAllMaintenanceRequests = async (req, res) => {
       status: r.status || 'Pending',
       description: r.description || '',
       propertyName: r.propertyId?.name || '—',
+      propertyIdStr: r.propertyId?._id?.toString() || null,
       tenantName: r.tenantId
         ? `${r.tenantId.firstName} ${r.tenantId.lastName}`.trim()
         : 'Unknown',
+      tenantIdStr: r.tenantId?._id?.toString() || null,
       ownerName: r.propertyId?.ownerId
         ? `${r.propertyId.ownerId.firstName} ${r.propertyId.ownerId.lastName}`.trim()
         : '—',
+      ownerIdStr: r.propertyId?.ownerId?._id?.toString() || null,
+      location: r.location || r.propertyId?.location || '—',
       dateReported: r.dateReported || r.createdAt,
       scheduledDate: r.scheduledDate || null,
       completionDate: r.completionDate || null,

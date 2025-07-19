@@ -2,10 +2,10 @@
 const Worker = require('../models/worker');
 const WorkerPayment = require('../models/workerPayment');
 const WorkerBooking = require('../models/workerBooking');
+const Tenant = require('../models/tenant');
 
 exports.getWorkerEarnings = async (req, res) => {
   try {
-    // Include all workers so superadmin sees complete picture
     const workers = await Worker.find({})
       .select('firstName lastName serviceType experience status email phone')
       .lean();
@@ -15,14 +15,12 @@ exports.getWorkerEarnings = async (req, res) => {
 
     const enrichedWorkers = await Promise.all(
       workers.map(async (worker) => {
-        // Total earnings = sum of all paid worker payments
         const totalEarningsResult = await WorkerPayment.aggregate([
           { $match: { status: 'Paid', workerId: worker._id } },
           { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
         const totalEarnings = totalEarningsResult[0]?.total || 0;
 
-        // Monthly earnings = payments this calendar month (check both paymentDate and createdAt)
         const monthlyEarningsResult = await WorkerPayment.aggregate([
           {
             $match: {
@@ -38,11 +36,48 @@ exports.getWorkerEarnings = async (req, res) => {
         ]);
         const monthlyEarnings = monthlyEarningsResult[0]?.total || 0;
 
-        // Completed services = count from WorkerBooking (has status 'Completed')
         const completedServices = await WorkerBooking.countDocuments({
           workerId: worker._id,
           status: 'Completed'
         });
+
+        // Active bookings = Approved or Pending (ongoing clients)
+        const activeBookings = await WorkerBooking.find({
+          workerId: worker._id,
+          status: { $in: ['Approved', 'Pending'] }
+        })
+          .populate('tenantId', 'firstName lastName email phone')
+          .sort({ bookingDate: -1 })
+          .lean();
+
+        // For each active booking check if tenant has an unpaid/paid worker payment
+        const tenants = await Promise.all(
+          activeBookings.map(async (booking) => {
+            const tenant = booking.tenantId;
+            if (!tenant) return null;
+
+            const latestPayment = await WorkerPayment.findOne({
+              workerId: worker._id,
+              tenantId: tenant._id,
+            })
+              .sort({ createdAt: -1 })
+              .select('status amount paymentDate createdAt')
+              .lean();
+
+            return {
+              tenantId: tenant._id.toString(),
+              tenantName: `${tenant.firstName} ${tenant.lastName}`.trim(),
+              tenantEmail: tenant.email || null,
+              tenantPhone: tenant.phone || null,
+              bookingStatus: booking.status,
+              bookingDate: booking.bookingDate || booking.createdAt,
+              serviceType: booking.serviceType,
+              paymentStatus: latestPayment?.status || 'Not Paid',
+              lastPaymentAmount: latestPayment?.amount || 0,
+              lastPaymentDate: latestPayment?.paymentDate || latestPayment?.createdAt || null,
+            };
+          })
+        );
 
         return {
           _id: worker._id,
@@ -56,14 +91,12 @@ exports.getWorkerEarnings = async (req, res) => {
           monthlyEarnings,
           totalEarnings,
           completedServices,
+          tenants: tenants.filter(Boolean),
         };
       })
     );
 
-    res.status(200).json({
-      success: true,
-      workers: enrichedWorkers
-    });
+    res.status(200).json({ success: true, workers: enrichedWorkers });
   } catch (error) {
     console.error('Worker earnings error:', error);
     res.status(500).json({

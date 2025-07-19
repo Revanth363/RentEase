@@ -171,6 +171,61 @@
   color: #721c24;
 }
 
+/* Expandable rows */
+.expandCell { width: 32px; padding: 0 0.5rem; }
+.chevron { color: #6c757d; transition: transform 0.2s; }
+.ownerRow { cursor: default; }
+.clickableRow { cursor: pointer; }
+.clickableRow:hover { background: #f0f4ff !important; }
+.expandedRow { background: #f8f9fa; }
+.expandedCell { padding: 1rem 1.5rem !important; }
+
+.propBreakdown { padding: 0.5rem 0; }
+.propBreakdownTitle {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+}
+.propTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.propTable th {
+  background: #e9ecef;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.propTable td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #333;
+}
+
+.badgeRented {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #d4edda;
+  color: #155724;
+}
+.badgeVacant {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #f8d7da;
+  color: #721c24;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;

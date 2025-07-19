@@ -462,15 +462,15 @@ const MaintenanceRequests = () => {
                           </a>
                         </td>
                         <td>
-                          {m.propertyId?.ownerId ? (
+                          {m.ownerIdStr ? (
                             <a
-                              href={`/admin/user/${m.propertyId.ownerId._id}/owner`}
+                              href={`/admin/user/${m.ownerIdStr}/owner`}
                               style={{ color: "#0066cc" }}
                             >
                               {m.ownerName}
                             </a>
                           ) : (
-                            "N/A"
+                            m.ownerName || "N/A"
                           )}
                         </td>
                         <td

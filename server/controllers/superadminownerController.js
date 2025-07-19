@@ -2,6 +2,8 @@
 const Owner = require('../models/owner');
 const Payment = require('../models/payment');
 const Property = require('../models/property');
+const Booking = require('../models/booking');
+const Tenant = require('../models/tenant');
 
 exports.getOwnerEarnings = async (req, res) => {
   try {
@@ -9,9 +11,11 @@ exports.getOwnerEarnings = async (req, res) => {
       .select('firstName lastName accountNo upiid status email phone')
       .lean();
 
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
     const enrichedOwners = await Promise.all(
       owners.map(async (owner) => {
-        // Query properties directly by ownerId (more reliable than owner.propertyIds array)
         const props = await Property.find({ ownerId: owner._id })
           .select('name price location address isRented')
           .lean();
@@ -20,14 +24,12 @@ exports.getOwnerEarnings = async (req, res) => {
         const numProperties = props.length;
         const monthlyRent = props.reduce((sum, p) => sum + (p.price || 0), 0);
 
-        // Total rent collected via payments for those properties
         const totalRentResult = await Payment.aggregate([
           { $match: { status: 'Paid', propertyId: { $in: propIds } } },
           { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
         const totalRent = totalRentResult[0]?.total || 0;
 
-        // Last payment date for these properties
         const lastPaymentDoc = await Payment.findOne({
           status: 'Paid',
           propertyId: { $in: propIds }
@@ -39,6 +41,64 @@ exports.getOwnerEarnings = async (req, res) => {
           ? (lastPaymentDoc.paymentDate || lastPaymentDoc.createdAt)
           : null;
 
+        // For each property, get tenant + this-month payment status
+        const propertiesWithTenant = await Promise.all(
+          props.map(async (p) => {
+            if (!p.isRented) {
+              return {
+                _id: p._id,
+                name: p.name || 'Unnamed Property',
+                price: p.price || 0,
+                location: p.address || p.location || '—',
+                isRented: false,
+                tenantName: null,
+                tenantId: null,
+                paidThisMonth: null,
+              };
+            }
+
+            // Find active booking for this property
+            const activeBooking = await Booking.findOne({
+              propertyId: p._id,
+              status: { $in: ['Active', 'Approved'] }
+            })
+              .populate('tenantId', 'firstName lastName')
+              .lean();
+
+            const tenant = activeBooking?.tenantId || null;
+            const tenantName = tenant
+              ? `${tenant.firstName} ${tenant.lastName}`.trim()
+              : null;
+            const tenantIdStr = tenant?._id?.toString() || null;
+
+            // Check if this tenant paid this month for this property
+            let paidThisMonth = false;
+            if (tenantIdStr) {
+              const thisMonthPayment = await Payment.findOne({
+                propertyId: p._id,
+                tenantId: tenant._id,
+                status: 'Paid',
+                $or: [
+                  { paymentDate: { $gte: monthStart } },
+                  { createdAt: { $gte: monthStart } }
+                ]
+              }).lean();
+              paidThisMonth = !!thisMonthPayment;
+            }
+
+            return {
+              _id: p._id,
+              name: p.name || 'Unnamed Property',
+              price: p.price || 0,
+              location: p.address || p.location || '—',
+              isRented: true,
+              tenantName,
+              tenantId: tenantIdStr,
+              paidThisMonth,
+            };
+          })
+        );
+
         return {
           _id: owner._id,
           firstName: owner.firstName,
@@ -47,13 +107,7 @@ exports.getOwnerEarnings = async (req, res) => {
           phone: owner.phone,
           status: owner.status,
           numProperties,
-          properties: props.map(p => ({
-            _id: p._id,
-            name: p.name || 'Unnamed Property',
-            price: p.price || 0,
-            location: p.address || p.location || '—',
-            isRented: p.isRented || false,
-          })),
+          properties: propertiesWithTenant,
           monthlyRent,
           totalRent,
           lastPayment,
@@ -63,10 +117,7 @@ exports.getOwnerEarnings = async (req, res) => {
       })
     );
 
-    res.status(200).json({
-      success: true,
-      owners: enrichedOwners
-    });
+    res.status(200).json({ success: true, owners: enrichedOwners });
   } catch (error) {
     console.error('Owner earnings error:', error);
     res.status(500).json({

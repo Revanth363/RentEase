@@ -10,7 +10,7 @@ export default function StatCard({ title, value, icon: Icon, trend, color }) {
       )}
       <div className={styles.statContent}>
         <h3 className={styles.statTitle}>{title}</h3>
-        <p className={styles.statValue}>{value || '—'}</p>
+        <p className={styles.statValue}>{value !== undefined && value !== null && value !== '' ? value : '—'}</p>
         {trend && (
           <span
             className={styles.statTrend}

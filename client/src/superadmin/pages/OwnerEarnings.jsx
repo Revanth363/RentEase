@@ -128,6 +128,8 @@ export default function OwnerEarnings() {
                                     <th>Location</th>
                                     <th>Monthly Rent</th>
                                     <th>Status</th>
+                                    <th>Tenant</th>
+                                    <th>Paid This Month</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -141,6 +143,14 @@ export default function OwnerEarnings() {
                                         <span className={p.isRented ? styles.badgeRented : styles.badgeVacant}>
                                           {p.isRented ? 'Rented' : 'Vacant'}
                                         </span>
+                                      </td>
+                                      <td>{p.tenantName || '—'}</td>
+                                      <td>
+                                        {!p.isRented ? '—' : (
+                                          <span className={p.paidThisMonth ? styles.badgeRented : styles.badgeVacant}>
+                                            {p.paidThisMonth ? 'Paid' : 'Not Paid'}
+                                          </span>
+                                        )}
                                       </td>
                                     </tr>
                                   ))}
