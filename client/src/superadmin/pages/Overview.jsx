@@ -69,12 +69,7 @@ export default function Overview() {
       icon: TrendingUp,
       color: '#ffc107',
     },
-    {
-      title: 'Active Properties',
-      value: stats.propertiesAvailable || stats.totalProperties || 0,
-      icon: Home,
-      color: '#17a2b8',
-    },
+    
     {
       title: 'Total Registered Users',
       value:

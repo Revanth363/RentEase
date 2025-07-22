@@ -564,81 +564,63 @@ const WorkerDashboard = () => {
         {/* MY SERVICES */}
         <div
           className={`wrkd-section ${
-            effectiveSection === "services" ? "wrkd-active" : ""
+            activeSection === "services" ? "wrkd-active" : ""
           }`}
         >
           <h3>My Services</h3>
           <div className="wrkd-prop-container">
             {services.length > 0 ? (
-                services.map((service) => (
-                  <div key={service._id || "1"} className="wrkd-gs-container" style={{ padding: "16px", width: "100%", maxWidth: "480px" }}>
-                    <div className="wrkd-sc-image-container">
-                      <img
-                        src={service.image || "/images/default_service.jpg"}
-                        alt={service.name}
-                        className="wrkd-sc-image"
-                      />
-                    </div>
-                    <div className="wrkd-main-sen">{service.name}</div>
-                    <ul style={{ listStyle: "none", padding: "0 0 8px", margin: 0, fontSize: "14px", color: "#555" }}>
-                      {service.price ? <li><strong>Price:</strong> ₹{service.price} / {service.rateUnit || "month"}</li> : null}
-                      {service.experience ? <li><strong>Experience:</strong> {service.experience} yr(s)</li> : null}
+              services.map((service) => (
+                <div key={service._id || "1"} className="wrkd-gs-container">
+                  <div className="wrkd-sc-image-container">
+                    <img
+                      src={service.image || "/images/default_service.jpg"}
+                      alt={service.name}
+                      className="wrkd-sc-image"
+                    />
+                  </div>
+                  <div className="wrkd-main-sen">{service.name}</div>
+                  <div className="wrkd-sc-text">
+                    <ul>
                       <li>
-                        <strong>Status:</strong>{" "}
-                        <span style={{ color: service.serviceStatus === "Available" ? "#28a745" : "#e53935", fontWeight: 600 }}>
-                          {service.serviceStatus || "Available"}
-                        </span>
+                        <strong>Rate:</strong> ₹{service.price}{" "}
+                        {service.rateUnit}
                       </li>
-                      {service.description ? <li style={{ marginTop: 4, fontStyle: "italic", color: "#777" }}>{service.description}</li> : null}
+                      <li>
+                        <strong>Experience:</strong> {service.experience} years
+                      </li>
+                      <li>
+                        <strong>Status:</strong> {service.serviceStatus}
+                      </li>
                     </ul>
-                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
-                      <a
-                        href={`/worker/${user._id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="wrkd-update-sts"
-                        style={{ background: "#0066cc", textDecoration: "none", color: "white", textAlign: "center" }}
-                      >
-                        My Service
-                      </a>
-                      <button
-                        className="wrkd-update-sts"
-                        onClick={handleToggleAvailability}
-                        style={{ background: service.serviceStatus === "Available" ? "#e53935" : "#28a745" }}
-                      >
-                        {service.serviceStatus === "Available" ? "Mark Unavailable" : "Mark Available"}
+                    <div className="wrkd-prop-view">
+                      <button onClick={() => navigate(`/worker/${user._id}`)}>
+                        Service Details
                       </button>
-                      <button
-                        className="wrkd-update-sts"
-                        onClick={handleDeleteService}
-                        style={{ background: "#757575" }}
-                      >
+                      <button onClick={handleToggleAvailability}>
+                        Toggle Availability
+                      </button>
+                      <button onClick={handleDeleteService}>
                         Delete Service
                       </button>
                     </div>
                   </div>
-                ))
+                </div>
+              ))
             ) : (
-              <div style={{ textAlign: "center", padding: "40px 20px" }}>
-                <p style={{ color: "#777", marginBottom: "16px", fontSize: "15px" }}>
-                  You haven't registered a service yet.
-                </p>
-                <a
-                  href="/worker_register"
+              <p>
+                No service registered.{" "}
+                <span
                   style={{
-                    display: "inline-block",
-                    padding: "12px 28px",
-                    background: "#ff9900",
-                    color: "white",
-                    borderRadius: "8px",
-                    textDecoration: "none",
-                    fontWeight: "600",
-                    fontSize: "15px",
+                    color: "blue",
+                    cursor: "pointer",
+                    textDecoration: "underline",
                   }}
+                  onClick={() => navigate("/worker_register")}
                 >
-                  Register Your Service
-                </a>
-              </div>
+                  Add Service
+                </span>
+              </p>
             )}
           </div>
         </div>
