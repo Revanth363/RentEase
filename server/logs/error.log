@@ -51,3 +51,53 @@
 2026-03-02T14:20:20.854Z | 401 | POST | /login | 79.200ms | User: guest | IP: ::1 | Body: {"email":"rahul@gmail.com","password":"[REDACTED]","userType":"tenant"} | Msg: Invalid email or password
 2026-03-04T16:09:21.680Z | 401 | GET | /api/me | 3.310ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
 2026-03-04T16:09:21.708Z | 401 | GET | /api/me | 0.510ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:12:26.865Z | 401 | GET | /api/me | 0.515ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:12:26.878Z | 401 | GET | /api/me | 0.567ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:12:38.043Z | 401 | GET | /api/me | 0.545ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:12:38.071Z | 401 | GET | /api/me | 0.407ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:08.003Z | 401 | GET | /api/me | 0.285ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:08.035Z | 401 | GET | /api/me | 0.304ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:10.492Z | 401 | GET | /api/me | 0.317ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:10.499Z | 401 | GET | /api/me | 0.330ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:12.119Z | 401 | GET | /api/me | 0.482ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:12.158Z | 401 | GET | /api/me | 0.408ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:16.925Z | 401 | GET | /api/me | 0.332ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:13:16.936Z | 401 | GET | /api/me | 0.413ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:33:26.999Z | 401 | GET | /api/me | 3.778ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:33:27.010Z | 401 | GET | /api/me | 0.297ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:34:24.712Z | 401 | GET | /api/me | 0.471ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:34:24.719Z | 401 | GET | /api/me | 0.397ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:37:02.315Z | 401 | GET | /api/me | 0.378ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:37:02.331Z | 401 | GET | /api/me | 0.432ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:37:08.213Z | 401 | GET | /api/me | 0.671ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:37:08.217Z | 401 | GET | /api/me | 0.396ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:46:27.810Z | 401 | GET | /api/me | 0.835ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:46:27.837Z | 401 | GET | /api/me | 1.034ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:47:45.694Z | 500 | GET | /api/properties | 77846.924ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-04T16:47:45.722Z | 500 | POST | /login | 69490.307ms | User: guest | IP: ::1 | Body: {"email":"ravi@gmail.com","password":"[REDACTED]","userType":"owner"} | Msg: Server error
+2026-03-04T16:47:45.722Z | 500 | GET | /api/slider-properties | 77906.380ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-04T16:48:15.619Z | 500 | GET | /api/properties | 87830.562ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-04T16:48:15.743Z | 500 | GET | /api/slider-properties | 87951.862ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-04T16:48:34.058Z | 500 | POST | /register | 30059.324ms | User: guest | IP: ::1 | Body: {"userType":"tenant","firstName":"Ganesh","lastName":"Reddy","email":"reddy@gmail.com","phone":"7095322509","location":"Sricity,Andhra Pradesh, India","password":"[REDACTED]"} | Msg: Registration failed: getaddrinfo ENOTFOUND ac-bk1quvt-shard-00-01.pjcw0o6.mongodb.net
+2026-03-04T16:50:31.618Z | 401 | GET | /api/me | 0.549ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:50:31.619Z | 401 | GET | /api/tenant/dashboard-data | 0.685ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:50:31.627Z | 401 | GET | /api/me | 0.273ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:50:31.634Z | 401 | GET | /api/tenant/dashboard-data | 0.649ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:50:34.925Z | 401 | GET | /api/me | 0.522ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T16:50:34.938Z | 401 | GET | /api/me | 0.327ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:02:35.364Z | 401 | GET | /api/me | 1.551ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:02:35.388Z | 401 | GET | /api/me | 6.103ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:02:51.489Z | 401 | GET | /api/me | 0.249ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:02:51.500Z | 401 | GET | /api/me | 0.408ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:02:57.262Z | 401 | GET | /api/me | 0.241ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:02:57.272Z | 401 | GET | /api/me | 0.320ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:05:23.162Z | 401 | GET | /api/me | 0.538ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:05:23.187Z | 401 | GET | /api/me | 0.589ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:05:43.097Z | 401 | GET | /api/me | 0.332ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:05:43.119Z | 401 | GET | /api/me | 0.892ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:06:27.908Z | 401 | GET | /api/me | 0.308ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:06:27.929Z | 401 | GET | /api/me | 0.460ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:07:20.946Z | 401 | GET | /api/me | 0.352ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:07:20.958Z | 401 | GET | /api/me | 0.475ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:07:28.983Z | 401 | GET | /api/me | 0.531ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-04T17:07:28.999Z | 401 | GET | /api/me | 0.333ms | User: guest | IP: ::1 | Body: - | Msg: No token provided

@@ -225,6 +225,139 @@ const OwnerDashboard = () => {
     }
   };
 
+  // Settings form submit handler (improved version)
+const handleSettingsSubmit = async (e) => {
+  e.preventDefault();
+  const form = settingsFormRef.current;
+
+  const formData = {
+    firstName: form["firstName"]?.value?.trim() || "",
+    lastName: form["lastName"]?.value?.trim() || "",
+    email: form["email"]?.value?.trim() || "",
+    phone: form["phone"]?.value?.trim() || "",
+    location: form["location"]?.value?.trim() || "",
+    accountNo: form["accountNo"]?.value?.trim() || "",
+    upiid: form["upiid"]?.value?.trim() || "",
+    numProperties: form["numProperties"]?.value?.trim() || "",
+    emailNotifications:
+      document.getElementById("emailNotifications")?.checked.toString() ||
+      "false",
+    smsNotifications:
+      document.getElementById("smsNotifications")?.checked.toString() ||
+      "false",
+    paymentReminders:
+      document.getElementById("paymentReminders")?.checked.toString() ||
+      "false",
+    complaintAlerts:
+      document.getElementById("complaintAlerts")?.checked.toString() ||
+      "false",
+    maintenanceAlerts:
+      document.getElementById("maintenanceAlerts")?.checked.toString() ||
+      "false",
+    currentPassword: form["currentPassword"]?.value || "",
+    newPassword: form["newPassword"]?.value || "",
+    confirmPassword: form["confirmPassword"]?.value || "",
+  };
+
+  // Validation
+  const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+  const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const phoneRegex = /^\d{10}$/;
+
+  if (!formData.firstName) {
+    alert("First name is required");
+    return;
+  }
+  if (!nameRegex.test(formData.firstName)) {
+    alert("First name must contain only letters");
+    return;
+  }
+
+  if (!formData.lastName) {
+    alert("Last name is required");
+    return;
+  }
+  if (!nameRegex.test(formData.lastName)) {
+    alert("Last name must contain only letters");
+    return;
+  }
+
+  if (!formData.email) {
+    alert("Email is required");
+    return;
+  }
+  if (!emailRegex.test(formData.email)) {
+    alert("Please enter a valid email address");
+    return;
+  }
+
+  if (!formData.phone) {
+    alert("Phone number is required");
+    return;
+  }
+  if (!phoneRegex.test(formData.phone)) {
+    alert("Phone number must be exactly 10 numerical digits");
+    return;
+  }
+
+  if (!formData.location) {
+    alert("Location is required");
+    return;
+  }
+
+  // Password validation (only if changing password)
+  if (formData.newPassword || formData.currentPassword) {
+    if (!formData.currentPassword) {
+      alert("Current password is required to change password");
+      return;
+    }
+    if (!formData.newPassword) {
+      alert("New password is required");
+      return;
+    }
+    if (formData.newPassword.length < 8) {
+      alert("New password must be at least 8 characters long");
+      return;
+    }
+    if (!/[A-Z]/.test(formData.newPassword)) {
+      alert("New password must contain at least one uppercase letter");
+      return;
+    }
+    if (!/[a-z]/.test(formData.newPassword)) {
+      alert("New password must contain at least one lowercase letter");
+      return;
+    }
+    if (!/[0-9]/.test(formData.newPassword)) {
+      alert("New password must contain at least one number");
+      return;
+    }
+    if (!formData.confirmPassword) {
+      alert("Confirm password is required");
+      return;
+    }
+    if (formData.newPassword !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+  }
+
+  try {
+    const res = await ownerService.updateOwnerSettings(formData);
+    if (res.success) {
+      alert("Settings updated successfully!");
+      setDashboard((prev) => ({
+        ...prev,
+        user: { ...prev.user, ...formData },
+      }));
+    } else {
+      alert(res.message || "Failed to update settings");
+    }
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    alert("An error occurred while updating settings.");
+  }
+};
+
   return (
     <>
       <div className="ownd-dashboard-container" style={{ position: "relative", marginTop: "80px" }}>
@@ -618,239 +751,210 @@ const OwnerDashboard = () => {
             </div>
           </div>
 
-          {/* Settings Section */}
-        <div
-          className={`ownd-section ${
-            section === "settings" ? "ownd-active" : ""
-          }`}
-        >
-          <h3>Account Settings</h3>
-          <form
-            id="settingsForm"
-            ref={settingsFormRef}
-            onSubmit={handleSettingsSubmit}
-          >
-            <div className="ownd-settings-container">
-              <div className="ownd-settings-section">
-                <h4>Personal Information</h4>
-                <div className="ownd-form-row">
-                  <div className="ownd-form-group">
-                    <label htmlFor="firstName">First Name</label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      placeholder="First name"
-                      defaultValue={user?.firstName || ""}
-                    />
-                  </div>
-                  <div className="ownd-form-group">
-                    <label htmlFor="lastName">Last Name</label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      placeholder="Last name"
-                      defaultValue={user?.lastName || ""}
-                    />
-                  </div>
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    defaultValue={user?.email || ""}
-                  />
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="phone">Phone Number</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    placeholder="Enter your phone number"
-                    defaultValue={user?.phone || ""}
-                  />
-                </div>
-              </div>
-
-              <div className="ownd-settings-section">
-                <h4>Owner Information</h4>
-                <div className="ownd-form-group">
-                  <label htmlFor="location">Primary Location</label>
-                  <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    placeholder="City, State, Country"
-                    defaultValue={user?.location || ""}
-                  />
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="numProperties">Number of Properties</label>
-                  <input
-                    type="text"
-                    id="numProperties"
-                    name="numProperties"
-                    placeholder="How many properties do you own?"
-                    defaultValue={user?.numProperties || ""}
-                  />
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="accountNo">Payment Information</label>
-                  <input
-                    type="text"
-                    id="accountNo"
-                    name="accountNo"
-                    placeholder="Bank Account Number"
-                    defaultValue={user?.accountNo || ""}
-                  />
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="upiid">UPI ID</label>
-                  <input
-                    type="text"
-                    id="upiid"
-                    name="upiid"
-                    placeholder="Your UPI ID"
-                    defaultValue={user?.upiid || ""}
-                  />
-                </div>
-              </div>
-
-              <div className="ownd-settings-section">
-                <h4>Change Password</h4>
-                <div className="ownd-form-group">
-                  <label htmlFor="currentPassword">Current Password</label>
-                  <input
-                    type="password"
-                    id="currentPassword"
-                    name="currentPassword"
-                    placeholder="Current password"
-                  />
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="newPassword">New Password</label>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    placeholder="New password"
-                  />
-                </div>
-                <div className="ownd-form-group">
-                  <label htmlFor="confirmPassword">Confirm New Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="Confirm new password"
-                  />
-                </div>
-              </div>
-
-              <div className="ownd-settings-section">
-                <h4>Notification Preferences</h4>
-                <div className="ownd-checkbox-group">
-                  <label htmlFor="emailNotifications">
-                    Email notifications
-                  </label>
-                  <input
-                    type="checkbox"
-                    id="emailNotifications"
-                    name="emailNotifications"
-                    defaultChecked={user?.notifications?.email || false}
-                  />
-                  <label
-                    htmlFor="emailNotifications"
-                    className="ownd-button"
-                  ></label>
-                </div>
-                <div className="ownd-checkbox-group">
-                  <label htmlFor="smsNotifications">SMS notifications</label>
-                  <input
-                    type="checkbox"
-                    id="smsNotifications"
-                    name="smsNotifications"
-                    defaultChecked={user?.notifications?.sms || false}
-                  />
-                  <label
-                    htmlFor="smsNotifications"
-                    className="ownd-button"
-                  ></label>
-                </div>
-                <div className="ownd-checkbox-group">
-                  <label htmlFor="paymentReminders">Payment reminders</label>
-                  <input
-                    type="checkbox"
-                    id="paymentReminders"
-                    name="paymentReminders"
-                    defaultChecked={user?.notifications?.payment || false}
-                  />
-                  <label
-                    htmlFor="paymentReminders"
-                    className="ownd-button"
-                  ></label>
-                </div>
-                <div className="ownd-checkbox-group">
-                  <label htmlFor="complaintAlerts">Complaint alerts</label>
-                  <input
-                    type="checkbox"
-                    id="complaintAlerts"
-                    name="complaintAlerts"
-                    defaultChecked={user?.notifications?.complaint || false}
-                  />
-                  <label
-                    htmlFor="complaintAlerts"
-                    className="ownd-button"
-                  ></label>
-                </div>
-                <div className="ownd-checkbox-group">
-                  <label htmlFor="maintenanceAlerts">Maintenance alerts</label>
-                  <input
-                    type="checkbox"
-                    id="maintenanceAlerts"
-                    name="maintenanceAlerts"
-                    defaultChecked={user?.notifications?.maintenance || false}
-                  />
-                  <label
-                    htmlFor="maintenanceAlerts"
-                    className="ownd-button"
-                  ></label>
-                </div>
-              </div>
-            </div>
-
-            <div className="ownd-button-container">
-              <button
-                type="submit"
-                id="saveSettingsBtn"
-                className="ownd-settings-button ownd-primary-button"
-              >
-                Save Changes
-              </button>
-              <button
-                type="button"
-                id="cancelSettingsBtn"
-                className="ownd-settings-button ownd-secondary-button"
-                onClick={() => settingsFormRef.current?.reset()}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                id="deleteAccountBtn"
-                className="ownd-settings-button ownd-delete-button"
-                onClick={() => setShowDeleteAccountOverlay(true)}
-              >
-                Delete Account
-              </button>
-            </div>
-          </form>
+          {/* Settings Section – full version */}
+<div className={`ownd-section ${effectiveSection === "settings" ? "ownd-active" : ""}`}>
+  <h3>Account Settings</h3>
+  <form
+    id="settingsForm"
+    ref={settingsFormRef}
+    onSubmit={handleSettingsSubmit}
+  >
+    <div className="ownd-settings-container">
+      <div className="ownd-settings-section">
+        <h4>Personal Information</h4>
+        <div className="ownd-form-row">
+          <div className="ownd-form-group">
+            <label htmlFor="firstName">First Name</label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              placeholder="First name"
+              defaultValue={user?.firstName || ""}
+            />
+          </div>
+          <div className="ownd-form-group">
+            <label htmlFor="lastName">Last Name</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              placeholder="Last name"
+              defaultValue={user?.lastName || ""}
+            />
+          </div>
         </div>
+        <div className="ownd-form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            defaultValue={user?.email || ""}
+          />
+        </div>
+        <div className="ownd-form-group">
+          <label htmlFor="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="Enter your phone number"
+            defaultValue={user?.phone || ""}
+          />
+        </div>
+      </div>
+
+      <div className="ownd-settings-section">
+        <h4>Owner Information</h4>
+        <div className="ownd-form-group">
+          <label htmlFor="location">Primary Location</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="City, State, Country"
+            defaultValue={user?.location || ""}
+          />
+        </div>
+        <div className="ownd-form-group">
+          <label htmlFor="numProperties">Number of Properties</label>
+          <input
+            type="text"
+            id="numProperties"
+            name="numProperties"
+            placeholder="How many properties do you own?"
+            defaultValue={user?.numProperties || ""}
+          />
+        </div>
+        <div className="ownd-form-group">
+          <label htmlFor="accountNo">Payment Information</label>
+          <input
+            type="text"
+            id="accountNo"
+            name="accountNo"
+            placeholder="Bank Account Number"
+            defaultValue={user?.accountNo || ""}
+          />
+        </div>
+        <div className="ownd-form-group">
+          <label htmlFor="upiid">UPI ID</label>
+          <input
+            type="text"
+            id="upiid"
+            name="upiid"
+            placeholder="Your UPI ID"
+            defaultValue={user?.upiid || ""}
+          />
+        </div>
+      </div>
+
+      <div className="ownd-settings-section">
+        <h4>Change Password</h4>
+        <div className="ownd-form-group">
+          <label htmlFor="currentPassword">Current Password</label>
+          <input
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            placeholder="Current password"
+          />
+        </div>
+        <div className="ownd-form-group">
+          <label htmlFor="newPassword">New Password</label>
+          <input
+            type="password"
+            id="newPassword"
+            name="newPassword"
+            placeholder="New password"
+          />
+        </div>
+        <div className="ownd-form-group">
+          <label htmlFor="confirmPassword">Confirm New Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="Confirm new password"
+          />
+        </div>
+      </div>
+
+      <div className="ownd-settings-section">
+        <h4>Notification Preferences</h4>
+        <div className="ownd-checkbox-group">
+          <label htmlFor="emailNotifications">Email notifications</label>
+          <input
+            type="checkbox"
+            id="emailNotifications"
+            name="emailNotifications"
+            defaultChecked={user?.notifications?.email || false}
+          />
+        </div>
+        <div className="ownd-checkbox-group">
+          <label htmlFor="smsNotifications">SMS notifications</label>
+          <input
+            type="checkbox"
+            id="smsNotifications"
+            name="smsNotifications"
+            defaultChecked={user?.notifications?.sms || false}
+          />
+        </div>
+        <div className="ownd-checkbox-group">
+          <label htmlFor="paymentReminders">Payment reminders</label>
+          <input
+            type="checkbox"
+            id="paymentReminders"
+            name="paymentReminders"
+            defaultChecked={user?.notifications?.payment || false}
+          />
+        </div>
+        <div className="ownd-checkbox-group">
+          <label htmlFor="complaintAlerts">Complaint alerts</label>
+          <input
+            type="checkbox"
+            id="complaintAlerts"
+            name="complaintAlerts"
+            defaultChecked={user?.notifications?.complaint || false}
+          />
+        </div>
+        <div className="ownd-checkbox-group">
+          <label htmlFor="maintenanceAlerts">Maintenance alerts</label>
+          <input
+            type="checkbox"
+            id="maintenanceAlerts"
+            name="maintenanceAlerts"
+            defaultChecked={user?.notifications?.maintenance || false}
+          />
+        </div>
+      </div>
+    </div>
+
+    <div className="ownd-button-container">
+      <button
+        type="submit"
+        className="ownd-settings-button ownd-primary-button"
+      >
+        Save Changes
+      </button>
+      <button
+        type="button"
+        className="ownd-settings-button ownd-secondary-button"
+        onClick={() => settingsFormRef.current?.reset()}
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        className="ownd-settings-button ownd-delete-button"
+        onClick={() => setShowDeleteAccountOverlay(true)}
+      >
+        Delete Account
+      </button>
+    </div>
+  </form>
+</div>
 
           {/* Notifications Section */}
           <div className={`ownd-section ${effectiveSection === "notifications" ? "ownd-active" : ""}`}>
