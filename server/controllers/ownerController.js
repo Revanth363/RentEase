@@ -223,6 +223,7 @@ exports.getOwnerDashboard = async (req, res) => {
         propertyId: request.propertyId,
         tenantId: request.tenantId,
         isUnrentRequest: true,
+        isNew: true,
         originalNotificationId: request.notificationId, // Keep track of the original notification
       });
     }
@@ -371,6 +372,36 @@ exports.getNotifications = async (req, res) => {
     res.status(200).json({ success: true, notifications });
   } catch (err) {
     console.error("Error fetching notifications:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Mark notification as read (set isNew to false)
+exports.markNotificationRead = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid notification ID" });
+    }
+
+    const notification = await Notification.findByIdAndUpdate(
+      notificationId,
+      { isNew: false, read: true },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notification not found" });
+    }
+
+    res.status(200).json({ success: true, notification });
+  } catch (err) {
+    console.error("Error marking notification as read:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

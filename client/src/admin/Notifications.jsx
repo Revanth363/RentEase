@@ -32,6 +32,9 @@ const Notifications = () => {
       const data = await fetchAdminNotifications();
       let list = data.notifications || data || [];
 
+      // Exclude OTP notifications from admin view
+      list = list.filter(n => n.type !== 'Work-OTP');
+
       if (appliedFilters.type) {
         list = list.filter(n => n.type === appliedFilters.type);
       }

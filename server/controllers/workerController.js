@@ -1624,8 +1624,8 @@ exports.generateWorkOTP = async (req, res) => {
     // Generate 4-digit random OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    // Calculate expiry time (5 minutes from now)
-    const expiresAt = new Date(Date.now() + 20 * 60 * 1000);
+    // Calculate expiry time (10 minutes from now)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // Save OTP to database
     const WorkTracking = require("../models/workTracking");

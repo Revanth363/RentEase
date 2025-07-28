@@ -84,6 +84,10 @@ exports.getAllNotifications = async (req, res) => {
     const { type, fromDate, toDate, page = 1, limit = 500 } = req.query;
 
     const matchFilter = {};
+    
+    // Exclude Work-OTP notifications from admin view
+    matchFilter.type = { $ne: 'Work-OTP' };
+    
     if (type) matchFilter.type = type;
     if (fromDate || toDate) {
       matchFilter.createdAt = {};

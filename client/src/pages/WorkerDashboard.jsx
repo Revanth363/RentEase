@@ -473,6 +473,30 @@ const WorkerDashboard = () => {
       Swal.fire("Error", "Invalid OTP", "error");
     }
   };
+
+  // Mark notifications as read when viewing the notifications section
+  useEffect(() => {
+    if (activeSection === "notifications" && notifications?.length > 0) {
+      const newNotifications = notifications.filter(n => n.isNew === true);
+      newNotifications.forEach(async (notification) => {
+        try {
+          await fetch(`/api/workers/notifications/${notification._id}/read`, {
+            method: "POST",
+          });
+        } catch (err) {
+          console.error("Error marking notification as read:", err);
+        }
+      });
+
+      // Update local state to mark as read
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.isNew === true ? { ...n, isNew: false, read: true } : n
+        )
+      );
+    }
+  }, [activeSection, notifications]);
+
   if (loading || verificationLoading) {
     return <LoadingSpinner />;
   }
@@ -517,25 +541,84 @@ const WorkerDashboard = () => {
             </>
           ) : (
             <>
-              <li onClick={() => showSection("services")}>
+              <li 
+                className={effectiveSection === "services" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("services")}
+              >
                 <i className="fas fa-rectangle-list"></i> My Services
               </li>
-              <li onClick={() => showSection("bookings")}>
+              <li 
+                className={effectiveSection === "bookings" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("bookings")}
+              >
                 <i className="fas fa-clipboard-list"></i> Booking Requests
+                {bookings?.filter(b => b.status === 'Pending' || b.isNew === true || b.read === false).length > 0 && (
+                  <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                    {bookings?.filter(b => b.status === 'Pending' || b.isNew === true || b.read === false).length > 99 ? '99+' : bookings?.filter(b => b.status === 'Pending' || b.isNew === true || b.read === false).length}
+                  </span>
+                )}
               </li>
-              <li onClick={() => showSection("clients")}>
+              <li 
+                className={effectiveSection === "clients" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("clients")}
+              >
                 <i className="fas fa-users"></i> My Clients
+                {clients?.filter(c => c.isNew === true || c.status === 'new').length > 0 && (
+                  <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                    {clients?.filter(c => c.isNew === true || c.status === 'new').length > 99 ? '99+' : clients?.filter(c => c.isNew === true || c.status === 'new').length}
+                  </span>
+                )}
               </li>
-              <li onClick={() => showSection("earnings")}>
+              <li 
+                className={effectiveSection === "earnings" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("earnings")}
+              >
                 <i className="fas fa-hand-holding-dollar"></i> Earnings
+                {transactions?.filter(t => t.isNew === true || t.read === false).length > 0 && (
+                  <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                    {transactions?.filter(t => t.isNew === true || t.read === false).length > 99 ? '99+' : transactions?.filter(t => t.isNew === true || t.read === false).length}
+                  </span>
+                )}
               </li>
-              <li onClick={() => showSection("reviews")}>
+              <li 
+                className={effectiveSection === "reviews" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("reviews")}
+              >
                 <i className="fas fa-star-half-stroke"></i> Reviews & Ratings
+                {reviews?.items?.filter(r => r.isNew === true || r.read === false).length > 0 && (
+                  <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                    {reviews?.items?.filter(r => r.isNew === true || r.read === false).length > 99 ? '99+' : reviews?.items?.filter(r => r.isNew === true || r.read === false).length}
+                  </span>
+                )}
               </li>
-              <li onClick={() => showSection("notifications")}>
+              <li 
+                className={effectiveSection === "notifications" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("notifications")}
+              >
                 <i className="fas fa-bell"></i> Notifications
+                {notifications?.filter(n => n.isNew === true).length > 0 && (
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '24px',
+                    height: '24px',
+                    background: '#dc3545',
+                    color: 'white',
+                    borderRadius: '50%',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    marginLeft: '8px',
+                    minWidth: '24px'
+                  }}>
+                    {notifications?.filter(n => n.isNew === true).length > 99 ? '99+' : notifications?.filter(n => n.isNew === true).length}
+                  </span>
+                )}
               </li>
-              <li onClick={() => showSection("settings")}>
+              <li 
+                className={effectiveSection === "settings" ? "wrkd-sidebar-active-item" : ""}
+                onClick={() => showSection("settings")}
+              >
                 <i className="fas fa-gears"></i> Settings
               </li>
             </>
@@ -594,13 +677,13 @@ const WorkerDashboard = () => {
                       </li>
                     </ul>
                     <div className="wrkd-prop-view">
-                      <button onClick={() => navigate(`/worker/${user._id}`)}>
+                      <button className="wrkd-prop-button" onClick={() => navigate(`/worker/${user._id}`)}>
                         Service Details
                       </button>
-                      <button onClick={handleToggleAvailability}>
+                      <button className="wrkd-primary-button" onClick={handleToggleAvailability}>
                         Toggle Availability
                       </button>
-                      <button onClick={handleDeleteService}>
+                      <button className="wrkd-danger-button" onClick={handleDeleteService}>
                         Delete Service
                       </button>
                     </div>

@@ -130,15 +130,15 @@ export default function Login({ onForgot }) {
           </div>
           {errors.password && <div className={styles.errorText}>{errors.password}</div>}
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-
           {authError && (
-            <div className={styles.errorText} style={{ marginTop: "10px", textAlign: "center" }}>
+            <div className={styles.errorText} style={{ marginBottom: "15px", textAlign: "center" }}>
               {authError}
             </div>
           )}
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
 
           <div className={styles.forgotWrapper}>
             <button type="button" className={styles.forgotPassword} onClick={onForgot}>

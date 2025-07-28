@@ -22,7 +22,8 @@ const notificationSchema = new mongoose.Schema({
   priority: String,
   createdDate: Date,
   bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" },
-  read: { type: Boolean, default: false }
+  read: { type: Boolean, default: false },
+  isNew: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Notification", notificationSchema);

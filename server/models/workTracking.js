@@ -30,13 +30,12 @@ const workTrackingSchema = new mongoose.Schema(
     },
     expiresAt: {
       type: Date,
-      default: () => new Date(Date.now() + 20 * 60 * 1000), // 5 minutes from now
+      default: () => new Date(Date.now() + 10 * 60 * 1000), // 10 minutes for OTP validity
     },
   },
   { timestamps: true }
 );
 
-// Index for auto-deleting expired OTPs (TTL)
-workTrackingSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Note: TTL index removed - work records are now stored permanently for salary tracking
 
 module.exports = mongoose.model("WorkTracking", workTrackingSchema);

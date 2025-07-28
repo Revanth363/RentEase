@@ -23,35 +23,80 @@ const sectionToUrl = (section) => {
     default: return "/tenant/tenant_dashboard";
   }
 };
-const Sidebar = () => (
+const Sidebar = ({ unreadNotificationCount = 0, section = "home" }) => (
   <div className="tntd-sidebar" id="sidebar">
     <h2>Tenant Dashboard</h2>
     <ul>
-      <li onClick={() => window.location.href = sectionToUrl("home")}> 
+      <li 
+        className={section === "home" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("home")}
+      > 
         <i className="fa-solid fa-house"></i> Home
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("rentPayments")}> 
+      <li 
+        className={section === "rentPayments" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("rentPayments")}
+      > 
         <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("maintenance")}> 
-        <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance
+      <li 
+        className={section === "maintenance" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("maintenance")}
+      > 
+        <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance Requests
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("complaints")}> 
+      <li 
+        className={section === "complaints" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("complaints")}
+      > 
         <i className="fa-solid fa-comments"></i> Complaints
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("movers")}> 
+      <li 
+        className={section === "movers" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("movers")}
+      > 
         <i className="fa-solid fa-users"></i> Domestic Workers
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("notifications")}> 
+      <li 
+        className={section === "notifications" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("notifications")}
+      > 
         <i className="fa-solid fa-bell"></i> Notifications
+        {unreadNotificationCount > 0 && (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px',
+            background: '#dc3545',
+            color: 'white',
+            borderRadius: '50%',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            marginLeft: '8px',
+            minWidth: '24px'
+          }}>
+            {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+          </span>
+        )}
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("savedListings")}> 
+      <li 
+        className={section === "savedListings" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("savedListings")}
+      > 
         <i className="fa-solid fa-bookmark"></i> Saved Listings
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("rentalHistory")}> 
+      <li 
+        className={section === "rentalHistory" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("rentalHistory")}
+      > 
         <i className="fa-solid fa-star-half-stroke"></i> Rental History
       </li>
-      <li onClick={() => window.location.href = sectionToUrl("settings")}> 
+      <li 
+        className={section === "settings" ? "tntd-sidebar-active-item" : ""}
+        onClick={() => window.location.href = sectionToUrl("settings")}
+      > 
         <i className="fa-solid fa-gears"></i> Settings
       </li>
     </ul>
@@ -65,6 +110,7 @@ function getSectionFromUrl() {
 }
 
 const TenantDashboard = () => {
+  const navigate = useNavigate();
   const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -326,6 +372,18 @@ const TenantDashboard = () => {
       console.error(err);
     }
   };
+
+  // Mark unread notifications as read when viewing the notifications section
+  useEffect(() => {
+    if (section === "notifications" && dashboard?.notifications?.length > 0) {
+      const unreadNotifications = dashboard.notifications.filter(
+        (n) => n.status === "Pending" && n.read === false
+      );
+      unreadNotifications.forEach(async (notification) => {
+        await handleMarkNotificationRead(notification._id);
+      });
+    }
+  }, [section, dashboard?.notifications]);
 
   const handleRemoveSavedProperty = async (propertyId) => {
     try {
@@ -678,7 +736,10 @@ const TenantDashboard = () => {
             </ul>
           </div>
         ) : (
-          <Sidebar onSelect={setSection} current={section} />
+          <Sidebar 
+            unreadNotificationCount={notifications?.filter(n => n.status === 'Pending' && n.read === false).length || 0}
+            section={section}
+          />
         )}
         <div className="tntd-main-content">
           {verificationStatus !== "approved" && (
@@ -713,8 +774,8 @@ const TenantDashboard = () => {
             </h3>
             {currentProperty ? (
               <div className="tntd-property-summary">
-                <div className="tntd-property-card" id="home_property_card">
-                  <div className="tntd-img_container">
+                <div className="tntd-property-card" id="home_property_card" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                  <div className="tntd-img_container" style={{ flex: '0 0 250px', height: '200px', overflow: 'hidden', borderRadius: '8px' }}>
                     <img
                       src={
                         currentProperty.images && currentProperty.images[0]
@@ -722,39 +783,43 @@ const TenantDashboard = () => {
                           : "/images/default-property.jpg"
                       }
                       alt="Property"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </div>
-                  <div className="tntd-property-details">
-                    <p>
-                      <strong>Property:</strong> {currentProperty.subtype || ""}{" "}
-                      {currentProperty.name || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Address:</strong>{" "}
-                      {currentProperty.address || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Owner:</strong>{" "}
-                      {propertyOwner
-                        ? `${propertyOwner.firstName} ${propertyOwner.lastName}`
-                        : "N/A"}
-                    </p>
-                    <p>
-                      <strong>Contact:</strong>{" "}
-                      {propertyOwner ? propertyOwner.email : "N/A"}
-                    </p>
-                    <p>
-                      <strong>Monthly Rent:</strong> ₹
-                      {currentProperty.price || "N/A"}
-                    </p>
+                  <div className="tntd-property-details" style={{ flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <p>
+                        <strong>Property:</strong> {currentProperty.subtype || ""}{" "}
+                        {currentProperty.name || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Address:</strong>{" "}
+                        {currentProperty.address || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Owner:</strong>{" "}
+                        {propertyOwner
+                          ? `${propertyOwner.firstName} ${propertyOwner.lastName}`
+                          : "N/A"}
+                      </p>
+                      <p>
+                        <strong>Contact:</strong>{" "}
+                        {propertyOwner ? propertyOwner.email : "N/A"}
+                      </p>
+                      <p>
+                        <strong>Monthly Rent:</strong> ₹
+                        {currentProperty.price || "N/A"}
+                      </p>
+                    </div>
+                    <button
+                      id="unrent-btn"
+                      className="tntd-unrent-btn"
+                      onClick={() => setShowUnrentModal(true)}
+                      style={{ alignSelf: 'flex-start', marginTop: '12px' }}
+                    >
+                      Request Unrent
+                    </button>
                   </div>
-                  <button
-                    id="unrent-btn"
-                    className="tntd-unrent-btn"
-                    onClick={() => setShowUnrentModal(true)}
-                  >
-                    Request Unrent
-                  </button>
                 </div>
               </div>
             ) : (
@@ -1055,45 +1120,67 @@ const TenantDashboard = () => {
                       alt="Worker"
                     />
                     <div className="tntd-worker-details">
+                      {/* Worker Name as Link */}
                       <h5 className="tntd-worker-name">
-                        {worker.firstName} {worker.lastName}
+                        <a
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            navigate(`/worker/${worker._id}`);
+                          }}
+                          style={{ cursor: 'pointer', color: 'inherit', textDecoration: 'none' }}
+                          onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                        >
+                          {worker.firstName} {worker.lastName}
+                        </a>
                       </h5>
-                      <p>
-                        <strong>Service:</strong>{" "}
-                        <span className="tntd-worker-service">
-                          {worker.serviceType || "N/A"}
-                        </span>
-                      </p>
-                      <p>
-                        <strong>Schedule:</strong>{" "}
-                        <span className="tntd-worker-schedule">
-                          {worker.availability || "N/A"}
-                        </span>
-                      </p>
-                      <p>
-                        <strong>Fee:</strong> ₹
-                        <span className="tntd-worker-fee">
-                          {worker.price || "N/A"}
-                        </span>
-                        <span className="tntd-worker-rate-unit">
-                          {worker.rateUnit ? "/" + worker.rateUnit : ""}
-                        </span>
-                      </p>
-                      <p>
-                        <strong>Experience:</strong>{" "}
-                        <span className="tntd-worker-experience">
-                          {worker.experience
-                            ? worker.experience + " years"
-                            : "N/A"}
-                        </span>
-                      </p>
-                      <p>
-                        <strong>Phone:</strong>{" "}
-                        <span className="tntd-worker-phone">
-                          {worker.phone || "N/A"}
-                        </span>
-                      </p>
-                      <div className="tntd-rating">
+
+                      {/* Service Information */}
+                      <div style={{ marginBottom: '12px' }}>
+                        <p>
+                          <strong>Service:</strong>{" "}
+                          <span className="tntd-worker-service">
+                            {worker.serviceType || "N/A"}
+                          </span>
+                        </p>
+                        <p>
+                          <strong>Schedule:</strong>{" "}
+                          <span className="tntd-worker-schedule">
+                            {worker.availability || "N/A"}
+                          </span>
+                        </p>
+                        <p>
+                          <strong>Fee:</strong> ₹
+                          <span className="tntd-worker-fee">
+                            {worker.price || "N/A"}
+                          </span>
+                          <span className="tntd-worker-rate-unit">
+                            {worker.rateUnit ? "/" + worker.rateUnit : ""}
+                          </span>
+                        </p>
+                      </div>
+
+                      {/* Experience & Contact */}
+                      <div style={{ marginBottom: '12px' }}>
+                        <p>
+                          <strong>Experience:</strong>{" "}
+                          <span className="tntd-worker-experience">
+                            {worker.experience
+                              ? worker.experience + " years"
+                              : "N/A"}
+                          </span>
+                        </p>
+                        <p>
+                          <strong>Phone:</strong>{" "}
+                          <span className="tntd-worker-phone">
+                            {worker.phone || "N/A"}
+                          </span>
+                        </p>
+                      </div>
+
+                      {/* Rating */}
+                      <div className="tntd-rating" style={{ marginBottom: '12px' }}>
                         {worker.ratingId && worker.ratingId.average ? (
                           <span className="tntd-worker-rating">
                             {"⭐".repeat(Math.round(worker.ratingId.average))}{" "}
@@ -1105,8 +1192,9 @@ const TenantDashboard = () => {
                           </span>
                         )}
                       </div>
-                      <div className="tntd-worker-payment-section">
-                        <h6>Payment</h6>
+
+                      {/* Action Buttons */}
+                      <div className="tntd-worker-payment-section" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                         <button
                           className="tntd-pay-worker-btn"
                           onClick={() => openWorkerPaymentPopup(worker)}
@@ -1134,7 +1222,9 @@ const TenantDashboard = () => {
                 ))
               )}
             </div>
-            <h4>Worker Payment History</h4>
+
+            {/* Worker Payment History */}
+            <h4 style={{ marginTop: '24px' }}>Worker Payment History</h4>
             <table className="tntd-payment-history-table">
               <thead>
                 <tr>

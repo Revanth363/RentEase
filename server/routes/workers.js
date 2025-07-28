@@ -62,6 +62,9 @@ router.post("/work-tracking/generate-otp", protect, workerController.generateWor
 router.post("/work-tracking/verify-otp", protect, workerController.verifyWorkOTP);
 router.get("/work-tracking/history/:tenantId", protect, workerController.getWorkHistory);
 
+// Mark notification as read
+router.post("/notifications/:notificationId/read", protect, workerController.markNotificationAsRead);
+
 // ────────────────────────────────────────────────
 // Booking Routes
 // ────────────────────────────────────────────────

@@ -382,30 +382,55 @@ const handleSettingsSubmit = async (e) => {
                   onClick={() => window.location.href = sectionToUrl("tenants")}
                 >
                   <i className="fa-solid fa-user"></i> My Tenants
+                  {dashboard?.tenants?.filter(t => t.isNew === true || t.status === 'new').length > 0 && (
+                    <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                      {dashboard?.tenants?.filter(t => t.isNew === true || t.status === 'new').length > 99 ? '99+' : dashboard?.tenants?.filter(t => t.isNew === true || t.status === 'new').length}
+                    </span>
+                  )}
                 </li>
                 <li
                   className={effectiveSection === "payments" ? "ownd-sidebar-active-item" : ""}
                   onClick={() => window.location.href = sectionToUrl("payments")}
                 >
                   <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
+                  {dashboard?.payments?.filter(p => p.status === 'Pending' || p.isNew === true).length > 0 && (
+                    <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                      {dashboard?.payments?.filter(p => p.status === 'Pending' || p.isNew === true).length > 99 ? '99+' : dashboard?.payments?.filter(p => p.status === 'Pending' || p.isNew === true).length}
+                    </span>
+                  )}
                 </li>
                 <li
                   className={effectiveSection === "maintenance" ? "ownd-sidebar-active-item" : ""}
                   onClick={() => window.location.href = sectionToUrl("maintenance")}
                 >
                   <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance Requests
+                  {dashboard?.activeMaintenanceRequests?.filter(m => m.status === 'Pending' || m.isNew === true).length > 0 && (
+                    <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                      {dashboard?.activeMaintenanceRequests?.filter(m => m.status === 'Pending' || m.isNew === true).length > 99 ? '99+' : dashboard?.activeMaintenanceRequests?.filter(m => m.status === 'Pending' || m.isNew === true).length}
+                    </span>
+                  )}
                 </li>
                 <li
                   className={effectiveSection === "complaints" ? "ownd-sidebar-active-item" : ""}
                   onClick={() => window.location.href = sectionToUrl("complaints")}
                 >
                   <i className="fa-solid fa-message"></i> Complaints
+                  {dashboard?.complaints?.filter(c => c.status === 'Pending' || c.isNew === true).length > 0 && (
+                    <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                      {dashboard?.complaints?.filter(c => c.status === 'Pending' || c.isNew === true).length > 99 ? '99+' : dashboard?.complaints?.filter(c => c.status === 'Pending' || c.isNew === true).length}
+                    </span>
+                  )}
                 </li>
                 <li
                   className={effectiveSection === "rentUnrentRequests" ? "ownd-sidebar-active-item" : ""}
                   onClick={() => window.location.href = sectionToUrl("rentUnrentRequests")}
                 >
                   <i className="fa-solid fa-key"></i> Rent/Unrent Requests
+                  {(dashboard?.rentUnrentRequests?.filter(r => r.status === 'Pending').length || 0) + (dashboard?.unrentRequests?.filter(u => u.status === 'Pending' || u.isNew === true).length || 0) > 0 && (
+                    <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
+                      {((dashboard?.rentUnrentRequests?.filter(r => r.status === 'Pending').length || 0) + (dashboard?.unrentRequests?.filter(u => u.status === 'Pending' || u.isNew === true).length || 0)) > 99 ? '99+' : ((dashboard?.rentUnrentRequests?.filter(r => r.status === 'Pending').length || 0) + (dashboard?.unrentRequests?.filter(u => u.status === 'Pending' || u.isNew === true).length || 0))}
+                    </span>
+                  )}
                 </li>
                 <li
                   className={effectiveSection === "reports" ? "ownd-sidebar-active-item" : ""}
@@ -418,6 +443,24 @@ const handleSettingsSubmit = async (e) => {
                   onClick={() => window.location.href = sectionToUrl("notifications")}
                 >
                   <i className="fa-solid fa-bell"></i> Notifications
+                  {notifications?.filter(n => n.isNew === true).length > 0 && (
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '24px',
+                      height: '24px',
+                      background: '#dc3545',
+                      color: 'white',
+                      borderRadius: '50%',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      marginLeft: '8px',
+                      minWidth: '24px'
+                    }}>
+                      {notifications?.filter(n => n.isNew === true).length > 99 ? '99+' : notifications?.filter(n => n.isNew === true).length}
+                    </span>
+                  )}
                 </li>
                 <li
                   className={effectiveSection === "settings" ? "ownd-sidebar-active-item" : ""}

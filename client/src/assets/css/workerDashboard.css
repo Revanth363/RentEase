@@ -773,29 +773,26 @@
   animation: slideIn 0.3s ease-out;
 }
 
-/* Scroll styling for notification container */
+/* Notification container - no scrollbar */
 .wrkd-notification-container {
-  max-height: 600px;
-  overflow-y: auto;
+  overflow: visible;
   padding-right: 10px;
 }
 
 .wrkd-notification-container::-webkit-scrollbar {
-  width: 8px;
+  display: none;
 }
 
 .wrkd-notification-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  display: none;
 }
 
 .wrkd-notification-container::-webkit-scrollbar-thumb {
-  background: #bdc3c7;
-  border-radius: 4px;
+  display: none;
 }
 
 .wrkd-notification-container::-webkit-scrollbar-thumb:hover {
-  background: #95a5a6;
+  display: none;
 }
 
 /* Additional Client Details Styling */

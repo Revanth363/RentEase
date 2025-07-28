@@ -49,4 +49,7 @@ router.post(
 // Get notifications
 router.get("/notifications", ownerController.getNotifications);
 
+// Mark notification as read
+router.post("/notifications/:notificationId/read", ownerController.markNotificationRead);
+
 module.exports = router;
