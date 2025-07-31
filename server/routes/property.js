@@ -27,9 +27,7 @@ router.post("/list-property", protect, (req, res, next) => {
 
 router.delete("/:id", propertyController.deleteProperty);
 
-console.log('Contact route registered'); // Debug log
 router.post('/:propertyId/contact', async (req, res) => {
-  console.log('Contact route hit!', req.params.propertyId); // Debug log
   try {
     const { name, phone, email, query } = req.body;
     const propertyId = req.params.propertyId;

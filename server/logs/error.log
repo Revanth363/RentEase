@@ -144,3 +144,61 @@
 2026-03-13T08:51:35.413Z | 401 | GET | /api/me | 0.262ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
 2026-03-13T08:51:46.955Z | 401 | GET | /api/me | 0.255ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
 2026-03-13T08:51:46.964Z | 401 | GET | /api/me | 0.458ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T08:30:55.460Z | 401 | GET | /api/me | 3.436ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T08:30:55.475Z | 401 | GET | /api/me | 0.456ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T08:31:16.956Z | 404 | GET | /register | 1.337ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /register - Route not found
+2026-03-19T08:31:59.132Z | 401 | GET | /api/me | 0.326ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T08:31:59.140Z | 401 | GET | /api/me | 0.407ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T09:18:51.142Z | 401 | POST | /login | 78.983ms | User: guest | IP: ::1 | Body: {"email":"revanthkumardompaka@gmail.com","password":"[REDACTED]","userType":"tenant"} | Msg: Invalid email or password
+2026-03-19T09:44:42.763Z | 401 | GET | /api/workers/dashboard | 0.854ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T09:44:42.769Z | 401 | GET | /api/me | 0.361ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T09:44:42.782Z | 401 | GET | /api/workers/dashboard | 0.433ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T09:44:42.792Z | 401 | GET | /api/me | 0.491ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T09:46:09.888Z | 401 | GET | /api/workers/dashboard | 2.104ms | User: shyam@gmail.com (tenant, ID: 68ebc4ee4a70547de07f5203) | IP: ::1 | Body: - | Msg: Unauthorized
+2026-03-19T09:46:09.968Z | 401 | GET | /api/workers/dashboard | 9.150ms | User: shyam@gmail.com (tenant, ID: 68ebc4ee4a70547de07f5203) | IP: ::1 | Body: - | Msg: Unauthorized
+2026-03-19T09:47:01.981Z | 404 | GET | /api/tenant/dashboard-data | 49.528ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:02.078Z | 404 | GET | /api/tenant/dashboard-data | 48.293ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:06.770Z | 404 | GET | /api/tenant/dashboard-data | 42.480ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:06.837Z | 404 | GET | /api/tenant/dashboard-data | 44.716ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:08.914Z | 404 | GET | /api/tenant/dashboard-data | 45.965ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:08.982Z | 404 | GET | /api/tenant/dashboard-data | 41.429ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:20.689Z | 404 | GET | /api/tenant/dashboard-data | 39.530ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:47:20.754Z | 404 | GET | /api/tenant/dashboard-data | 43.349ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: No error message
+2026-03-19T09:48:33.509Z | 400 | POST | /api/workers/debook/68ebb11513fb46399a5c8e7d | 195.094ms | User: shyam@gmail.com (tenant, ID: 68ebc4ee4a70547de07f5203) | IP: ::1 | Body: - | Msg: Payment pending for current billing cycle
+2026-03-19T10:02:59.788Z | 400 | POST | /api/workers/debook/68ebb11513fb46399a5c8e7d | 168.943ms | User: shyam@gmail.com (tenant, ID: 68ebc4ee4a70547de07f5203) | IP: ::1 | Body: - | Msg: Payment pending for current billing cycle
+2026-03-19T10:18:36.425Z | 401 | GET | /api/owner/dashboard | 0.193ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:31:49.127Z | 401 | GET | /api/me | 0.723ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:31:49.140Z | 401 | GET | /api/me | 0.186ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:33:34.741Z | 401 | GET | /api/me | 0.231ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:33:34.753Z | 401 | GET | /api/me | 0.227ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:33:39.554Z | 401 | GET | /api/me | 0.211ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:33:39.560Z | 401 | GET | /api/me | 0.230ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:33:39.566Z | 401 | GET | /api/me | 0.222ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:33:39.573Z | 401 | GET | /api/me | 0.222ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T10:36:32.050Z | 401 | POST | /login | 67.667ms | User: guest | IP: ::1 | Body: {"email":"revanthkumardompaka@gmail.com","password":"[REDACTED]","userType":"tenant"} | Msg: Invalid email or password
+2026-03-19T11:01:37.354Z | 404 | GET | /favicon.ico | 48.150ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-03-19T11:02:08.968Z | 401 | GET | /api/me | 0.582ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T11:02:08.974Z | 401 | GET | /api/me | 0.362ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-19T11:24:34.529Z | 404 | GET | /api-docs/Users | 1.030ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api-docs/Users - Route not found
+2026-03-19T11:28:57.996Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.491ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:30:24.780Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.394ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:30:36.997Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.245ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:32:28.651Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.282ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:33:38.735Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.286ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:34:26.822Z | 404 | GET | /api-docs/api/test | 0.633ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api-docs/api/test - Route not found
+2026-03-19T11:34:26.877Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.307ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:34:36.653Z | 404 | GET | /api/test | 0.346ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/test - Route not found
+2026-03-19T11:34:36.694Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.319ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:34:39.061Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.367ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:34:39.632Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.240ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:34:39.646Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.269ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:35:53.406Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.297ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-19T11:45:16.239Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.195ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-03-21T17:54:25.945Z | 404 | GET | /favicon.ico | 66.810ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-03-22T08:45:33.697Z | 404 | GET | /favicon.ico | 49.271ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-03-22T08:46:50.991Z | 401 | GET | /api/me | 0.668ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-22T08:46:51.002Z | 401 | GET | /api/me | 0.261ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-22T08:47:31.612Z | 404 | POST | /api/login | 0.880ms | User: guest | IP: ::1 | Body: {"email":"revanthkumardompaka@gmail.com","password":"[REDACTED]","userType":"owner"} | Msg: Cannot POST /api/login - Route not found
+2026-03-22T08:57:06.813Z | 404 | POST | /api/login | 56.203ms | User: guest | IP: ::1 | Body: {"email":"revanthkumardompaka@gmail.com","password":"[REDACTED]","userType":"owner"} | Msg: Cannot POST /api/login - Route not found
+2026-03-22T08:57:10.867Z | 404 | POST | /api/login | 1.402ms | User: guest | IP: ::1 | Body: {"email":"revanthkumardompaka@gmail.com","password":"[REDACTED]","userType":"owner"} | Msg: Cannot POST /api/login - Route not found
+2026-03-22T09:04:50.697Z | 401 | GET | /api/owner/notifications?limit=20&skip=0 | 0.793ms | User: guest | IP: ::1 | Body: - | Msg: No error message

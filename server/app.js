@@ -37,8 +37,12 @@ const superadminRoutes = require("./routes/superadmin");
 const verificationRoutes = require("./routes/verification");
 const adminUserVerificationsRoutes = require("./routes/adminUserVerifications");
 
+// Swagger Setup
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
+
 require("dns").setDefaultResultOrder("ipv4first");
-mongoose.set('debug', true);
+mongoose.set('debug', false);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -140,6 +144,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// ============================================
+// SWAGGER UI SETUP
+// ============================================
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayOperationId: true,
+    displayRequestDuration: true,
+  }
+}));
+
 // In-memory OTP store
 const otpStore = new Map();
 
@@ -179,7 +195,67 @@ app.use("/api/superadmin", superadminRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/admin/verifications", adminUserVerificationsRoutes);
 
+// TEST ENDPOINT - Remove after testing
+/**
+ * @swagger
+ * /api/test:
+ *   get:
+ *     summary: Test Endpoint
+ *     description: Simple test endpoint to verify Swagger is working
+ *     tags:
+ *       - Test
+ *     responses:
+ *       200:
+ *         description: Test successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Swagger is working
+ */
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Swagger is working!" });
+});
+
 // API Routes for React Frontend
+
+/**
+ * @swagger
+ * /api/properties:
+ *   get:
+ *     summary: Get featured properties
+ *     description: Fetch popular verified properties that are available for rent (displayed on homepage)
+ *     tags:
+ *       - Properties
+ *     responses:
+ *       200:
+ *         description: List of featured properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   location:
+ *                     type: string
+ *                   subtype:
+ *                     type: string
+ *                   price:
+ *                     type: number
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *       500:
+ *         description: Server error
+ */
+
 app.get("/api/properties", async (req, res) => {
   try {
     const propertiesData = await Property.find({
@@ -197,6 +273,38 @@ app.get("/api/properties", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/slider-properties:
+ *   get:
+ *     summary: Get slider properties
+ *     description: Fetch verified available properties for homepage slider/carousel
+ *     tags:
+ *       - Properties
+ *     responses:
+ *       200:
+ *         description: List of slider properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *       500:
+ *         description: Server error
+ */
+
 app.get("/api/slider-properties", async (req, res) => {
   try {
     const sliderPropertiesData = await Property.find({
@@ -212,6 +320,33 @@ app.get("/api/slider-properties", async (req, res) => {
     res.status(500).json({ error: "Failed to load slider properties" });
   }
 });
+
+/**
+ * @swagger
+ * /api/me:
+ *   get:
+ *     summary: Get current logged-in user
+ *     description: Retrieve the current user's information from the JWT token. Requires authentication.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CurrentUserResponse'
+ *       401:
+ *         description: Unauthorized - No valid JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
 
 // Return minimal current user info (JWT-based)
 app.get("/api/me", protect, async (req, res) => {
@@ -254,6 +389,32 @@ app.get("/api/me", protect, async (req, res) => {
 // Backwards-compat: keep /api/check-session redirecting to /api/me
 app.get("/api/check-session", (req, res) => res.redirect("/api/me"));
 
+/**
+ * @swagger
+ * /api/logout:
+ *   get:
+ *     summary: Logout user
+ *     description: Clear the JWT authentication cookie and logout the user.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 redirectUrl:
+ *                   type: string
+ *                   example: "/"
+ *       500:
+ *         description: Server error
+ */
+
 app.get("/api/logout", (req, res) => {
   // use same options as when the cookie was set so clearCookie matches
   const cookieOptions = {
@@ -265,6 +426,39 @@ app.get("/api/logout", (req, res) => {
   res.clearCookie("accessToken", cookieOptions);
   res.json({ success: true, redirectUrl: "/" });
 });
+
+/**
+ * @swagger
+ * /api/property:
+ *   get:
+ *     summary: Get single property details
+ *     description: Fetch full details of a single property by ID
+ *     tags:
+ *       - Properties
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID (MongoDB ObjectId)
+ *         example: "507f1f77bcf86cd799439016"
+ *     responses:
+ *       200:
+ *         description: Property details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       404:
+ *         description: Property not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
 
 app.get("/api/property", async (req, res) => {
   const propertyId = req.query.id;
@@ -279,6 +473,65 @@ app.get("/api/property", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+/**
+ * @swagger
+ * /api/submit-form:
+ *   post:
+ *     summary: Submit contact form
+ *     description: Submit a contact form message. Phone must be 10 digits, email must be Gmail
+ *     tags:
+ *       - Public
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - subject
+ *               - message
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Must be a Gmail address
+ *                 example: "john@gmail.com"
+ *               phone:
+ *                 type: string
+ *                 description: Optional - must be 10 digits if provided
+ *                 example: "9876543210"
+ *               subject:
+ *                 type: string
+ *                 example: "Inquiry about properties"
+ *               message:
+ *                 type: string
+ *                 example: "I am interested in learning more about your properties"
+ *     responses:
+ *       200:
+ *         description: Form submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Form submitted successfully"
+ *       400:
+ *         description: Invalid input (missing fields, invalid email, invalid phone)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
 
 app.post("/api/submit-form", async (req, res) => {
   try {
@@ -331,7 +584,59 @@ app.get("/forgot-password", (req, res) => {
   res.redirect("http://localhost:5173/forgot-password");
 });
 
-
+/**
+ * @swagger
+ * /api/forgot-password:
+ *   post:
+ *     summary: Request password reset OTP
+ *     description: Generates a 6-digit OTP and sends it for password reset (Dev mode returns OTP in response)
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: tenant@example.com
+ *     responses:
+ *       200:
+ *         description: OTP generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "OTP generated (dev mode - check console)"
+ *                 otp:
+ *                   type: string
+ *                   example: "123456"
+ *       400:
+ *         description: Email not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       429:
+ *         description: Too many OTP requests
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 
 async function handleForgotPassword(req, res) {
   const { email } = req.body;
@@ -368,6 +673,55 @@ async function handleForgotPassword(req, res) {
 app.post("/forgot-password", forgotPasswordLimiter, handleForgotPassword);
 app.post("/api/forgot-password", forgotPasswordLimiter, handleForgotPassword);
 
+/**
+ * @swagger
+ * /api/verify-otp:
+ *   post:
+ *     summary: Verify OTP
+ *     description: Verify the OTP sent to user's email. OTP expires in 10 minutes.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: tenant@example.com
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "OTP verified"
+ *       400:
+ *         description: Invalid or expired OTP
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
+
 function handleVerifyOtp(req, res) {
   const { email, otp } = req.body;
   try {
@@ -387,6 +741,57 @@ function handleVerifyOtp(req, res) {
 }
 app.post("/verify-otp", handleVerifyOtp);
 app.post("/api/verify-otp", handleVerifyOtp);
+
+/**
+ * @swagger
+ * /api/reset-password:
+ *   post:
+ *     summary: Reset password with OTP
+ *     description: Reset user password after verifying OTP. Password must be at least 8 characters.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: tenant@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 8
+ *                 example: "NewPassword123"
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Password reset successful"
+ *       400:
+ *         description: Invalid email, weak password, or OTP not verified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
 
 async function handleResetPassword(req, res) {
   const { email, password } = req.body;
@@ -423,12 +828,62 @@ async function handleResetPassword(req, res) {
 app.post("/reset-password", handleResetPassword);
 app.post("/api/reset-password", handleResetPassword);
 
-app.get("/login", (req, res) => {
-  if (req.user) {
-    return res.redirect("/api/dashboard");
-  }
-  res.redirect("http://localhost:5173/login");
-});
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: User login
+ *     description: Authenticate users (tenant, owner, worker, admin, or superadmin). JWT token is set in httpOnly cookie.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: tenant@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "Password123"
+ *               userType:
+ *                 type: string
+ *                 enum:
+ *                   - tenant
+ *                   - owner
+ *                   - worker
+ *                 description: Required for normal users. Not needed for admin/superadmin.
+ *                 example: "tenant"
+ *     responses:
+ *       200:
+ *         description: Login successful. JWT token set in httpOnly cookie.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Missing required fields or invalid user type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Invalid credentials or account inactive
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
 
 app.post("/login", async (req, res) => {
   const { email, password, userType } = req.body;
@@ -577,6 +1032,32 @@ app.post("/login", async (req, res) => {
 
 
 
+/**
+ * @swagger
+ * /api/public-settings:
+ *   get:
+ *     summary: Get public platform settings
+ *     description: Fetch public settings like maintenance mode status (no authentication required)
+ *     tags:
+ *       - Public
+ *     responses:
+ *       200:
+ *         description: Public settings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 maintenanceMode:
+ *                   type: boolean
+ *                   example: false
+ *                 maintenanceMessage:
+ *                   type: string
+ *                   example: "Platform under maintenance. Please try again later."
+ *       500:
+ *         description: Server error (returns default maintenance mode = false)
+ */
+
 // public endpoint for basic settings (used by frontend to detect maintenance mode)
 const settingsCtrl = require('./controllers/superadminsettingsController');
 app.get('/api/public-settings', async (req, res) => {
@@ -661,8 +1142,83 @@ app.get(
   }
 );
 
-
-
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: User registration
+ *     description: Register a new user (tenant, owner, or worker). Automatically logs in and sets JWT cookie.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userType
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - password
+ *             properties:
+ *               userType:
+ *                 type: string
+ *                 enum:
+ *                   - tenant
+ *                   - owner
+ *                   - worker
+ *                 example: "tenant"
+ *               firstName:
+ *                 type: string
+ *                 example: "Raj"
+ *               lastName:
+ *                 type: string
+ *                 example: "Kumar"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "newtenant@example.com"
+ *               phone:
+ *                 type: string
+ *                 example: "9876543210"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 8
+ *                 example: "SecurePass123"
+ *               location:
+ *                 type: string
+ *                 example: "Bangalore"
+ *               serviceType:
+ *                 type: string
+ *                 description: Required for workers only. Type of service provided (e.g., Electrician, Plumber)
+ *                 example: "Electrician"
+ *               experience:
+ *                 type: string
+ *                 description: Required for workers only
+ *                 example: "5 years"
+ *               numProperties:
+ *                 type: integer
+ *                 description: For property owners - number of properties
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Registration successful. User automatically logged in.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Missing required fields, invalid email, or weak password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Registration failed
+ */
 
 app.post("/register", async (req, res) => {
   const {
@@ -810,6 +1366,37 @@ app.get("/api/dashboard", protect, (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /api/search:
+ *   get:
+ *     summary: Search properties with filters
+ *     description: Search for available verified properties. Can filter by amenities (comma-separated).
+ *     tags:
+ *       - Properties
+ *     parameters:
+ *       - in: query
+ *         name: amenities
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of amenities to filter by
+ *         example: "WiFi,AC,Parking"
+ *     responses:
+ *       200:
+ *         description: List of matching properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Property'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 
 // Search properties endpoint – only show verified & not-rented properties
 app.get("/api/search", async (req, res) => {
@@ -884,6 +1471,88 @@ const adminAuth = (req, res, next) => {
   }
   return res.status(401).json({ error: "Admin access required. Please login." });
 };
+
+/**
+ * @swagger
+ * /api/admin:
+ *   get:
+ *     summary: Get admin dashboard statistics
+ *     description: Retrieve comprehensive dashboard statistics for admin. Admin or SuperAdmin authentication required. 🔒
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Admin dashboard statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     totalProperties:
+ *                       type: integer
+ *                       example: 150
+ *                     totalRenters:
+ *                       type: integer
+ *                       example: 200
+ *                     totalOwners:
+ *                       type: integer
+ *                       example: 50
+ *                     totalWorkers:
+ *                       type: integer
+ *                       example: 80
+ *                     activeRentals:
+ *                       type: integer
+ *                       example: 120
+ *                     pendingBookings:
+ *                       type: integer
+ *                       example: 15
+ *                     cancelledBookings:
+ *                       type: integer
+ *                       example: 5
+ *                     activeUsers:
+ *                       type: integer
+ *                       example: 300
+ *                     totalRevenue:
+ *                       type: number
+ *                       example: 500000
+ *                     revenueDaily:
+ *                       type: number
+ *                       example: 5000
+ *                     revenueWeekly:
+ *                       type: number
+ *                       example: 35000
+ *                     revenueMonthly:
+ *                       type: number
+ *                       example: 150000
+ *                     propertiesActive:
+ *                       type: integer
+ *                       example: 120
+ *                     propertiesPending:
+ *                       type: integer
+ *                       example: 10
+ *                     propertiesAvailable:
+ *                       type: integer
+ *                       example: 30
+ *                     workersAvailable:
+ *                       type: integer
+ *                       example: 75
+ *                     userGrowth:
+ *                       type: integer
+ *                       example: 45
+ *       401:
+ *         description: Unauthorized - Must be admin or superadmin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Server error
+ */
 
 // PROTECTED ADMIN DASHBOARD ROUTE
 app.get("/api/admin", protect, adminProtect, async (req, res) => {

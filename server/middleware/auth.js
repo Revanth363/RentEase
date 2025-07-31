@@ -21,6 +21,7 @@ const getVerifiedUser = (req) => {
 const protect = (req, res, next) => {
   try {
     req.user = getVerifiedUser(req);
+    console.log('\nUser:', req.user);
     next();
   } catch (err) {
     return res.status(401).json({
