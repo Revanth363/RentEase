@@ -1094,4 +1094,89 @@ router.get(
   adminWorkerPaymentController.getWorkerPaymentDetails
 );
 
+/**
+ * @swagger
+ * /api/admin/property/{id}/toggle-popular:
+ *   put:
+ *     summary: Toggle property popular status
+ *     description: Admin can mark/unmark a property as popular (only for verified, non-rented properties)
+ *     tags:
+ *       - Admin - Properties
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *         example: "5f7a1234567890abcdef1234"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               is_popular:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Property popularity status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 is_popular:
+ *                   type: boolean
+ *       400:
+ *         description: Cannot mark rented or unverified property as popular
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Property not found
+ *       500:
+ *         description: Server error
+ */
+router.put("/property/:id/toggle-popular", async (req, res) => {
+  const { id } = req.params;
+  const { is_popular } = req.body;
+
+  try {
+    const Property = require("../models/property");
+    
+    // Find the property
+    const property = await Property.findById(id);
+    if (!property) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    // Check if property can be marked as popular (only if verified and not rented)
+    if (is_popular && (property.isRented || !property.isVerified)) {
+      return res.status(400).json({ 
+        error: property.isRented 
+          ? "Cannot mark rented property as popular" 
+          : "Property must be verified first"
+      });
+    }
+
+    // Update the property
+    property.is_popular = is_popular;
+    await property.save();
+
+    res.json({ 
+      success: true, 
+      is_popular: property.is_popular 
+    });
+  } catch (error) {
+    console.error("Error toggling property popularity:", error);
+    res.status(500).json({ error: "Failed to update property popularity" });
+  }
+});
+
 module.exports = router;

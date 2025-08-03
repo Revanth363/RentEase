@@ -263,10 +263,19 @@ app.get("/api/properties", async (req, res) => {
       isVerified: true,
       is_popular: true,
     })
-      .select("_id location subtype price images")
-      .limit(10)
+      .select("_id name type subtype location price images")
+      .limit(6)
       .lean();
-    res.json(propertiesData);
+    
+    // Transform images array to simple string format for first image
+    const transformedData = propertiesData.map(prop => ({
+      ...prop,
+      id: prop._id,
+      place: prop.name,
+      image: prop.images && prop.images.length > 0 ? prop.images[0].url || prop.images[0] : null
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error("Error fetching properties:", error);
     res.status(500).json({ error: "Failed to load properties" });
@@ -311,13 +320,145 @@ app.get("/api/slider-properties", async (req, res) => {
       isRented: false,
       isVerified: true,
     })
-      .select("name description images _id")
-      .limit(10)
+      .select("name description images _id location subtype")
+      .limit(6)
       .lean();
-    res.json(sliderPropertiesData);
+    
+    // Transform images array - extract URL from objects
+    const transformedData = sliderPropertiesData.map(prop => ({
+      ...prop,
+      images: prop.images && prop.images.length > 0 
+        ? prop.images.map(img => typeof img === 'object' ? img.url : img)
+        : []
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error("Error fetching slider properties:", error);
     res.status(500).json({ error: "Failed to load slider properties" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/locations:
+ *   get:
+ *     summary: Get all unique property locations
+ *     description: Fetch list of unique verified property locations for search filter dropdown
+ *     tags:
+ *       - Properties
+ *     responses:
+ *       200:
+ *         description: List of unique locations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               example: ["Mumbai", "Bangalore", "Hyderabad", "Visakhapatnam"]
+ *       500:
+ *         description: Server error
+ */
+app.get("/api/locations", async (req, res) => {
+  try {
+    const properties = await Property.find({
+      isRented: false,
+      isVerified: true,
+      location: { $ne: null, $ne: "" }
+    })
+      .select("location")
+      .lean();
+    
+    // Create a map with normalized keys to deduplicate (handling spelling variations)
+    const locationsMap = new Map();
+    properties.forEach((p) => {
+      if (p.location && p.location.trim()) {
+        const original = p.location.trim();
+        
+        // Normalize for comparison: handle common spelling variations
+        let normalized = original
+          .toLowerCase()
+          .replace(/\s+/g, "") // Remove all spaces
+          .replace(/[^a-z0-9]/g, ""); // Remove special chars
+        
+        // Handle common Indian city spelling variations
+        normalized = normalized
+          .replace(/visakhapatnam|viskahapatnam|visg|vizag/g, "visakhapatnam")
+          .replace(/hydrabad|hyderbad/g, "hyderabad")
+          .replace(/banglore|bangalore/g, "bangalore")
+          .replace(/bombay|mumbai/g, "mumbai")
+          .replace(/kolkata|calcutta/g, "kolkata");
+        
+        // Store only if not already present (preserves first occurrence's original casing)
+        if (!locationsMap.has(normalized)) {
+          locationsMap.set(normalized, original);
+        }
+      }
+    });
+
+    const uniqueLocations = Array.from(locationsMap.values()).sort();
+    res.json(uniqueLocations);
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    res.status(500).json({ error: "Failed to load locations" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/property-types:
+ *   get:
+ *     summary: Get all unique property types
+ *     description: Fetch list of unique verified property subtypes for search filter dropdown
+ *     tags:
+ *       - Properties
+ *     responses:
+ *       200:
+ *         description: List of unique property types
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               example: ["2BHK", "3BHK", "1BHK", "Villa"]
+ *       500:
+ *         description: Server error
+ */
+app.get("/api/property-types", async (req, res) => {
+  try {
+    const properties = await Property.find({
+      isRented: false,
+      isVerified: true,
+      subtype: { $ne: null, $ne: "" }
+    })
+      .select("subtype")
+      .lean();
+    
+    // Create a map with normalized keys to deduplicate
+    const typesMap = new Map();
+    properties.forEach((p) => {
+      if (p.subtype && p.subtype.trim()) {
+        const original = p.subtype.trim();
+        
+        // Normalize: lowercase + remove spaces and special chars
+        const normalized = original
+          .toLowerCase()
+          .replace(/\s+/g, "") // Remove all spaces
+          .replace(/[^a-z0-9]/g, ""); // Remove special chars
+        
+        if (!typesMap.has(normalized)) {
+          typesMap.set(normalized, original);
+        }
+      }
+    });
+
+    const uniqueTypes = Array.from(typesMap.values()).sort();
+    res.json(uniqueTypes);
+  } catch (error) {
+    console.error("Error fetching property types:", error);
+    res.status(500).json({ error: "Failed to load property types" });
   }
 });
 
@@ -1398,32 +1539,51 @@ app.get("/api/dashboard", protect, (req, res) => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-// Search properties endpoint – only show verified & not-rented properties
+// Search properties endpoint – filter by optional location, property-type, and amenities
 app.get("/api/search", async (req, res) => {
   try {
-    const { amenities } = req.query;
+    const { location, "property-type": propertyType, amenities, query: searchQuery } = req.query;
 
-    // This is the only filter you want
-    const query = {
+    // Build dynamic filter query
+    const filter = {
       isRented: false,       // do NOT show rented properties
       isVerified: true       // do NOT show unverified properties
     };
 
-    // Keep your amenities filter (if user selected any)
-    if (amenities) {
+    // Optional filter: location (case-insensitive)
+    if (location && location.trim() !== "") {
+      filter.location = { $regex: location, $options: "i" };
+    }
+
+    // Optional filter: property type/subtype (case-insensitive)
+    if (propertyType && propertyType.trim() !== "" && propertyType !== "all") {
+      filter.subtype = { $regex: propertyType, $options: "i" };
+    }
+
+    // Optional filter: search query in name/description
+    if (searchQuery && searchQuery.trim() !== "") {
+      filter.$or = [
+        { name: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } },
+        { address: { $regex: searchQuery, $options: "i" } }
+      ];
+    }
+
+    // Optional filter: amenities
+    if (amenities && amenities.trim() !== "") {
       const amenitiesArray = amenities
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean);
 
       if (amenitiesArray.length > 0) {
-        query.amenities = { $all: amenitiesArray };
+        filter.amenities = { $all: amenitiesArray };
       }
     }
 
-    const properties = await Property.find(query)
-      .select("-__v")          // exclude version key if you don't need it
-      .sort({ createdAt: -1 }) // newest first – change if you prefer different order
+    const properties = await Property.find(filter)
+      .select("-__v")          // exclude version key
+      .sort({ createdAt: -1 }) // newest first
       .lean();
 
     res.json(properties);
