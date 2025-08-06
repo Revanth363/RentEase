@@ -875,7 +875,7 @@ exports.bookWorkerCorrected = async (req, res) => {
 
     const workerId = req.params.id;
     const tenantId = req.user.id;
-    const { serviceType } = req.body;
+    const { serviceType, preferredDate, description } = req.body;
 
     if (!serviceType) {
       return res.status(400).json({ error: "Service type is required" });
@@ -921,6 +921,8 @@ exports.bookWorkerCorrected = async (req, res) => {
       workerId,
       serviceType,
       status: "Pending",
+      preferredDate: preferredDate || null,
+      description: description || null,
       tenantName: `${tenant.firstName} ${tenant.lastName}`,
       tenantAddress:
         rentedProperty.address || tenant.location || "Not provided",

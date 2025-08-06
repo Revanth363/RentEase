@@ -42,12 +42,9 @@ const OwnerDashboard = () => {
   // Form refs
   const settingsFormRef = useRef();
 
-  // Maintenance status update
-  const [currentRequestId, setCurrentRequestId] = useState(null);
+  // Status update modal state
+  const [currentComplaintId, setCurrentComplaintId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
-
-  // Delete property
-  const [propertyToDelete, setPropertyToDelete] = useState(null);
 
   // Delete account
   const [deleteAccountPassword, setDeleteAccountPassword] = useState("");
@@ -106,6 +103,39 @@ const OwnerDashboard = () => {
     console.log("Current section:", section);
   }, [section]);
 
+  // Decide which section to show (calculate early for useEffect)
+  const isApproved = verificationStatus === "approved";
+  const effectiveSection = isApproved
+    ? section
+    : ["settings", "verification"].includes(section) ? section : "verification";
+
+  // Mark all notifications as read when notifications section is opened
+  useEffect(() => {
+    if (effectiveSection === "notifications" && dashboard?.notifications) {
+      const markNotificationsAsRead = async () => {
+        try {
+          // Mark each unread notification as read
+          const unreadNotifications = dashboard.notifications.filter(n => n.isNew === true);
+          for (const notification of unreadNotifications) {
+            await fetch(`/api/owner/notifications/${notification._id}/read`, {
+              method: "POST"
+            });
+          }
+          // Refresh dashboard to update notification counts
+          if (unreadNotifications.length > 0) {
+            const res = await ownerService.getOwnerDashboard();
+            if (res && (res.user || res.success)) {
+              setDashboard(res);
+            }
+          }
+        } catch (err) {
+          console.error("Error marking notifications as read:", err);
+        }
+      };
+      markNotificationsAsRead();
+    }
+  }, [effectiveSection]);
+
   if (loading || verificationLoading) {
     return <LoadingSpinner />;
   }
@@ -117,12 +147,6 @@ const OwnerDashboard = () => {
       </div>
     );
   }
-
-  // Decide which section to show
-  const isApproved = verificationStatus === "approved";
-  const effectiveSection = isApproved
-    ? section
-    : ["settings", "verification"].includes(section) ? section : "verification";
 
   // Destructure dashboard data
   const {
@@ -167,25 +191,6 @@ const OwnerDashboard = () => {
     }
   };
 
-  // Maintenance status update
-  const handleConfirmUpdateStatus = async () => {
-    if (!currentRequestId || !selectedStatus) return;
-    try {
-      const res = await fetch(`/api/owner/maintenance/${currentRequestId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: selectedStatus }),
-      });
-      if (res.ok) {
-        setShowStatusUpdateOverlay(false);
-        setCurrentRequestId(null);
-        setSelectedStatus("");
-      }
-    } catch (err) {
-      console.error("Error updating maintenance status:", err);
-    }
-  };
-
   // Delete property
   const handleDeleteProperty = async () => {
     if (!propertyToDelete) return;
@@ -222,6 +227,33 @@ const OwnerDashboard = () => {
       }
     } catch (err) {
       console.error("Error deleting account:", err);
+    }
+  };
+
+  // Handle complaint status update
+  const handleComplaintStatusUpdate = async () => {
+    if (!currentComplaintId || !selectedStatus) return;
+    try {
+      const res = await fetch(`/api/owner/complaints/${currentComplaintId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: selectedStatus }),
+      });
+      if (res.ok) {
+        setShowStatusUpdateOverlay(false);
+        setCurrentComplaintId(null);
+        setSelectedStatus("");
+        // Refresh dashboard
+        const dashboardRes = await ownerService.getOwnerDashboard();
+        if (dashboardRes && (dashboardRes.user || dashboardRes.success)) {
+          setDashboard(dashboardRes);
+        }
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (err) {
+      console.error("Error updating complaint status:", err);
+      alert("Error updating status");
     }
   };
 
@@ -595,6 +627,7 @@ const handleSettingsSubmit = async (e) => {
                       <li><strong>PROPERTY:</strong> <a href={`/property?id=${tenant.propid}`}>{tenant.property || "N/A"}</a></li>
                       <li><strong>Contact:</strong> {tenant.phone || "N/A"}</li>
                       <li><strong>Email:</strong> {tenant.email || "N/A"}</li>
+                      <li><strong>Rental Started:</strong> {tenant.rentalStartDate ? new Date(tenant.rentalStartDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : "—"}</li>
                     </ul>
                     <button className="ownd-msg-button" onClick={() => {
                       if (tenant.phone) window.location.href = `tel:${tenant.phone.replace(/[^0-9]/g, '')}`;
@@ -677,21 +710,10 @@ const handleSettingsSubmit = async (e) => {
                     <div className="ownd-request-details">
                       <p><strong>Property:</strong> {request.propertyName || "N/A"}</p>
                       <p><strong>Tenant:</strong> {request.tenantName || "N/A"}</p>
-                      <p><strong>Date Submitted:</strong> {request.scheduledDate ? new Date(request.scheduledDate).toLocaleDateString() : "N/A"}</p>
+                      <p><strong>Preferred Date:</strong> {request.scheduledDate ? new Date(request.scheduledDate).toLocaleDateString() : "N/A"}</p>
                       <p><strong>Description:</strong> {request.description || "N/A"}</p>
                     </div>
-                    <div className="ownd-request-actions">
-                      <button
-                        className="ownd-update-sts"
-                        onClick={() => {
-                          setCurrentRequestId(request._id);
-                          setSelectedStatus(request.status?.toLowerCase().replace(" ", "-") || "pending");
-                          setShowStatusUpdateOverlay(true);
-                        }}
-                      >
-                        Update Status
-                      </button>
-                    </div>
+
                   </div>
                 ))
               ) : (
@@ -716,7 +738,11 @@ const handleSettingsSubmit = async (e) => {
                         <li><strong>Current Status:</strong> {complaint.status || "N/A"}</li>
                       </ul>
                     </ul>
-                    <button className="ownd-update-sts">Update Current Status</button>
+                    <button className="ownd-update-sts" onClick={() => {
+                      setCurrentComplaintId(complaint._id);
+                      setSelectedStatus(complaint.status?.toLowerCase() || "pending");
+                      setShowStatusUpdateOverlay(true);
+                    }}>Update Current Status</button>
                     <button className="ownd-update-sts" onClick={() => {
                       if (complaint.phone) window.location.href = `tel:${complaint.phone.replace(/[^0-9]/g, '')}`;
                     }}>
@@ -1051,11 +1077,35 @@ const handleSettingsSubmit = async (e) => {
 
       {/* ─── OVERLAYS ─────────────────────────────────────── */}
 
+      {/* Delete Property Overlay */}
+      {showDeletePropertyOverlay && (
+        <div className="ownd-popup-overlay" style={{ display: "flex" }}>
+          <div className="ownd-delete-popup-container">
+            <h4>Delete Property?</h4>
+            <p>Are you sure? This action cannot be undone.</p>
+            <div className="ownd-delete-popup-buttons">
+              <button
+                className="ownd-delete-cancel-button"
+                onClick={() => {
+                  setShowDeletePropertyOverlay(false);
+                  setPropertyToDelete(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button className="ownd-delete-confirm-button" onClick={handleDeleteProperty}>
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Status Update Overlay */}
       {showStatusUpdateOverlay && (
         <div className="ownd-popup-overlay" style={{ display: "flex" }}>
           <div className="ownd-popup-container">
-            <h4>Update Status</h4>
+            <h4>Update Complaint Status</h4>
             <div className="ownd-status-options">
               <p>Select new status:</p>
               {["pending", "in-progress", "resolved"].map((val) => (
@@ -1078,32 +1128,8 @@ const handleSettingsSubmit = async (e) => {
               <button className="ownd-cancel-button" onClick={() => setShowStatusUpdateOverlay(false)}>
                 Cancel
               </button>
-              <button className="ownd-confirm-button" onClick={handleConfirmUpdateStatus}>
+              <button className="ownd-confirm-button" onClick={handleComplaintStatusUpdate}>
                 Yes, Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Property Overlay */}
-      {showDeletePropertyOverlay && (
-        <div className="ownd-popup-overlay" style={{ display: "flex" }}>
-          <div className="ownd-delete-popup-container">
-            <h4>Delete Property?</h4>
-            <p>Are you sure? This action cannot be undone.</p>
-            <div className="ownd-delete-popup-buttons">
-              <button
-                className="ownd-delete-cancel-button"
-                onClick={() => {
-                  setShowDeletePropertyOverlay(false);
-                  setPropertyToDelete(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button className="ownd-delete-confirm-button" onClick={handleDeleteProperty}>
-                Yes, Delete
               </button>
             </div>
           </div>

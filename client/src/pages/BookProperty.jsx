@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import styles from "../assets/css/BookProperty.module.css";
 
-export default function BookProperty() {
+const BookProperty = () => {
   const [searchParams] = useSearchParams();
   const propertyId = searchParams.get("id");
 
@@ -63,125 +64,89 @@ export default function BookProperty() {
 
   return (
     <div
-      style={styles.overlay}
+      className={styles.overlay}
       onClick={() => navigate(`/property?id=${propertyId}`)}
     >
       <div
-        style={styles.popup}
-        onClick={(e) => e.stopPropagation()} // prevent closing when clicking popup
+        className={styles.popup}
+        onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ textAlign: "center", marginBottom: 20 }}>Book Property</h3>
+        <div className={styles.header}>
+          <h3 className={styles.title}>Book Property</h3>
+          <button
+            className={styles.closeBtn}
+            onClick={() => navigate(`/property?id=${propertyId}`)}
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           {/* FULL NAME */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Full Name</label>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Full Name</label>
             <input
               type="text"
+              className={styles.input}
               value={`${user.firstName} ${user.lastName}`}
               readOnly
-              style={styles.input}
             />
           </div>
 
           {/* EMAIL */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email</label>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Email</label>
             <input
               type="email"
+              className={styles.input}
               value={user.email}
               readOnly
-              style={styles.input}
             />
           </div>
 
           {/* PHONE */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Phone Number</label>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Phone Number</label>
             <input
-              type="text"
-              value={user.phone}
-              readOnly
-              style={styles.input}
+              type="tel"
+              className={styles.input}
+              placeholder="Enter your phone number"
+              value={user.phone || ""}
+              onChange={(e) => setUser({ ...user, phone: e.target.value })}
             />
           </div>
 
           {/* BUTTONS */}
-          <div style={styles.buttons}>
+          <div className={styles.buttons}>
             <button
               type="button"
-              style={styles.cancel}
+              className={styles.cancelBtn}
               onClick={() => navigate(`/property?id=${propertyId}`)}
             >
               Cancel
             </button>
 
-            <button type="submit" style={styles.submit}>
+            <button type="submit" className={styles.submitBtn}>
               Submit Booking
             </button>
           </div>
         </form>
 
         {submitMessage && (
-          <p style={{ color: "green", textAlign: "center" }}>{submitMessage}</p>
+          <div className={`${styles.messageContainer} ${styles.successMessage}`}>
+            {submitMessage}
+          </div>
         )}
         {errorMessage && (
-          <p style={{ color: "red", textAlign: "center" }}>{errorMessage}</p>
+          <div className={`${styles.messageContainer} ${styles.errorMessage}`}>
+            {errorMessage}
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-// CSS Styles
-const styles = {
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  popup: {
-    background: "white",
-    width: "90%",
-    maxWidth: 420,
-    padding: 20,
-    borderRadius: 8,
-    boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-  },
-  formGroup: { marginBottom: 15 },
-  label: { fontWeight: "bold", marginBottom: 5, display: "block" },
-  input: {
-    width: "100%",
-    padding: 10,
-    borderRadius: 6,
-    border: "1px solid #ccc",
-    background: "#f0f0f0",
-  },
-  buttons: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  cancel: {
-    padding: "10px 20px",
-    background: "#ccc",
-    borderRadius: 6,
-    border: "none",
-    cursor: "pointer",
-  },
-  submit: {
-    padding: "10px 20px",
-    background: "#ffc107",
-    borderRadius: 6,
-    border: "none",
-    cursor: "pointer",
-    color: "black",
-    fontWeight: "600",
-  },
-};
+export default BookProperty;

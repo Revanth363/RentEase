@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 const ownerController = require('../controllers/ownerController'); // Add this import
+const { protect } = require('../middleware/auth'); // Import protect middleware
 
 /**
  * @swagger
@@ -116,7 +117,7 @@ router.get('/book-property', bookingController.getBookingForm);
  *       500:
  *         description: Server error
  */
-router.post('/book-property', bookingController.createBooking);
+router.post('/book-property', protect, bookingController.createBooking);
 
 /**
  * @swagger

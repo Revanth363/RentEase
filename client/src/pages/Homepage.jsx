@@ -17,6 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import styles from "../assets/css/Homepage.module.css";
 import { fetchProperties, fetchSliderProperties } from "../services/api";
 
@@ -39,12 +40,15 @@ const HomePage = () => {
   const [touchStartY, setTouchStartY] = useState(0);
   const [touchEndY, setTouchEndY] = useState(0);
   const [lastScrollTime1, setLastScrollTime1] = useState(0);
+  const [dynamicLocations, setDynamicLocations] = useState([]);
+  const [dynamicCategories, setDynamicCategories] = useState([]);
   const sliderRef = useRef(null);
   const articlesGridRef = useRef(null);
   const navigate = useNavigate();
   const { setIsLoading } = useLoading();
 
-  const locations = [
+  // Fallback locations and categories
+  const fallbackLocations = [
     "Chennai",
     "Kolkata",
     "Visakhapatnam",
@@ -53,7 +57,7 @@ const HomePage = () => {
     "Bangalore",
     "Delhi",
   ];
-  const categories = [
+  const fallbackCategories = [
     { value: "all", label: "All" },
     { value: "house", label: "House" },
     { value: "flat", label: "Flat" },
@@ -92,17 +96,49 @@ const HomePage = () => {
       try {
         setLoading(true);
         setIsLoading(true);
-        const [properties, sliderProperties] = await Promise.all([
+        
+        const [properties, sliderProperties, locationsRes, propertyTypesRes] = await Promise.all([
           fetchProperties(),
           fetchSliderProperties(),
+          axios.get('/api/locations', { withCredentials: true }).catch(err => {
+            console.error("Error fetching locations:", err);
+            return { data: [] };
+          }),
+          axios.get('/api/property-types', { withCredentials: true }).catch(err => {
+            console.error("Error fetching property types:", err);
+            return { data: [] };
+          }),
         ]);
-        console.log("Properties:", properties);
-        console.log("Slider Properties:", sliderProperties);
+        
+        const locationsData = locationsRes.data || [];
+        const propertyTypesData = propertyTypesRes.data || [];
+      
         setPropertiesData(properties || []);
         setSliderPropertiesData(sliderProperties || []);
+        
+        // Use locations from backend API (already deduplicated on backend)
+        if (locationsData && locationsData.length > 0) {
+          setDynamicLocations(locationsData);
+        } else {
+          setDynamicLocations(fallbackLocations);
+        }
+        
+        // Map property types to select option format
+        if (propertyTypesData && propertyTypesData.length > 0) {
+          const categoryOptions = propertyTypesData.map((type) => ({
+            value: type.toLowerCase(),
+            label: type.charAt(0).toUpperCase() + type.slice(1),
+          }));
+          setDynamicCategories([{ value: "all", label: "All" }, ...categoryOptions]);
+        } else {
+          setDynamicCategories(fallbackCategories);
+        }
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load properties. Please try again later.");
+        // Use fallback values on error
+        setDynamicLocations(fallbackLocations);
+        setDynamicCategories(fallbackCategories);
       } finally {
         setLoading(false);
         setIsLoading(false);
@@ -286,14 +322,24 @@ const HomePage = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const location = formData.get("location");
-    const query = formData.get("query");
-    const category = formData.get("category");
-    const params = new URLSearchParams({
-      location,
-      query,
-      "property-type": category,
-    });
+    const location = formData.get("location")?.trim();
+    const query = formData.get("query")?.trim();
+    const category = formData.get("category")?.trim();
+    
+    // Build search params - only include non-empty values (optional fields)
+    const params = new URLSearchParams();
+    
+    if (location && location !== "") {
+      params.set("location", location.toLowerCase());
+    }
+    if (query && query !== "") {
+      params.set("query", query);
+    }
+    if (category && category !== "" && category !== "all") {
+      params.set("property-type", category);
+    }
+    
+    // Navigate with optional parameters
     navigate(`/search?${params.toString()}`);
   };
 
@@ -334,16 +380,10 @@ const HomePage = () => {
                   name="location"
                   id="location"
                   className={styles['location-select']}
-                  required
                   defaultValue=""
                 >
-                  <option value="" disabled hidden>
-                    Location ▼
-                  </option>
-                  <option value="" disabled>
-                    Top Cities
-                  </option>
-                  {locations.map((location) => (
+                  <option value="">Location</option>
+                  {(dynamicLocations.length > 0 ? dynamicLocations : fallbackLocations).map((location) => (
                     <option key={location} value={location.toLowerCase()}>
                       {location}
                     </option>
@@ -352,8 +392,7 @@ const HomePage = () => {
                 <input
                   type="text"
                   name="query"
-                  placeholder="Search for places..."
-                  required
+                  placeholder="Search for places ..."
                 />
               </div>
               <div className={styles.filters}>
@@ -361,13 +400,10 @@ const HomePage = () => {
                   name="category"
                   id="category"
                   className={styles['category-select']}
-                  required
-                  defaultValue=""
+                  defaultValue="all"
                 >
-                  <option value="" disabled>
-                    Select Category
-                  </option>
-                  {categories.map((category) => (
+                  <option value="all">Property Type</option>
+                  {(dynamicCategories.length > 0 ? dynamicCategories : fallbackCategories).map((category) => (
                     <option key={category.value} value={category.value}>
                       {category.label}
                     </option>
@@ -386,7 +422,7 @@ const HomePage = () => {
             <h2>Comprehensive Home Solutions</h2>
           </div>
           <div className={styles['features-grid']}>
-            <div className={styles['feature-card']} onClick={() => navigate("/search")}>
+            <div className={styles['feature-card']}>
               <div className={styles['feature-icon']}>
                 <FontAwesomeIcon icon={faHome} />
               </div>
@@ -398,7 +434,7 @@ const HomePage = () => {
             </div>
             <div
               className={styles['feature-card']}
-              onClick={() => navigate("/property_listing_page")}
+              
             >
               <div className={styles['feature-icon']}>
                 <FontAwesomeIcon icon={faList} />
@@ -411,7 +447,7 @@ const HomePage = () => {
             </div>
             <div
               className={styles['feature-card']}
-              onClick={() => navigate("/workerDetails")}
+              
             >
               <div className={styles['feature-icon']}>
                 <FontAwesomeIcon icon={faBroom} />
@@ -424,7 +460,7 @@ const HomePage = () => {
             </div>
             <div
               className={styles['feature-card']}
-              onClick={() => navigate("/tenant_dashboard")}
+              
             >
               <div className={styles['feature-icon']}>
                 <FontAwesomeIcon icon={faHandHoldingDollar} />
@@ -438,6 +474,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+      
 
       <div className={`${styles['hidden-section']} ${styles.listings}`}>
         <h2 className={styles['side-heading']}>Popular Listings</h2>
@@ -460,9 +497,12 @@ const HomePage = () => {
             <img
               id="property-image"
               src={
-                properties[currentIndex1]?.image || "/images/placeholder.jpg"
+                properties[currentIndex1]?.image ? properties[currentIndex1].image : "/images/placeholder.jpg"
               }
               alt="Property Image"
+              onError={(e) => {
+                e.target.src = "/images/placeholder.jpg";
+              }}
             />
           </div>
           <div className={styles['price-container']}>
@@ -512,9 +552,12 @@ const HomePage = () => {
                   style={{
                     backgroundImage: `url(${
                       property.images && property.images.length > 0
-                        ? property.images[0]
+                        ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
                         : "/images/placeholder.jpg"
                     })`,
+                  }}
+                  onError={(e) => {
+                    e.target.style.backgroundImage = "url('/images/placeholder.jpg')";
                   }}
                 ></div>
                 <div className={styles.content}>
@@ -564,7 +607,7 @@ const HomePage = () => {
           <h2>Latest News</h2>
         </div>
         <div className={styles['news-content']}>
-          <marquee behavior="scroll" direction="left" scrollamount="5">
+          <div className={styles['scrolling-news']}>
             <span className={styles['news-item']}>
               🌟 New properties added in Hyderabad! Check them out now. 🌟
             </span>
@@ -577,7 +620,7 @@ const HomePage = () => {
             <span className={styles['news-item']}>
               🎉 Pay your rent online and win exciting prizes! 🎉
             </span>
-          </marquee>
+          </div>
         </div>
       </div>
 

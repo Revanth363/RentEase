@@ -197,7 +197,7 @@ exports.handleNotificationAction = async (req, res) => {
       // Update property
       await Property.updateOne(
         { _id: booking.propertyId },
-        { isRented: true, tenantId: booking.tenantId }
+        { isRented: true, tenantId: booking.tenantId, rentalStartDate: booking.startDate }
       );
 
       // Update tenant
@@ -238,7 +238,7 @@ exports.handleNotificationAction = async (req, res) => {
       // Update property
       await Property.updateOne(
         { _id: booking.propertyId },
-        { isRented: false, tenantId: null }
+        { isRented: false, tenantId: null, rentalStartDate: null }
       );
 
       // Update notification

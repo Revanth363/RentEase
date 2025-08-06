@@ -508,7 +508,7 @@ const WorkerDashboard = () => {
   return (
     <div className="wrkd-dashboard-container">
       <button className="wrkd-menu-toggle" onClick={toggleSidebar}>
-        <strong>{sidebarOpen ? "Close" : "Menu"}</strong>
+        <strong>{sidebarOpen ? "<" : ">"}</strong>
       </button>
 
       {sidebarOpen && (
@@ -736,6 +736,12 @@ const WorkerDashboard = () => {
                     </li>
                     <li>
                       <strong>Time:</strong> {booking.time}
+                    </li>
+                    <li>
+                      <strong>Service Start Date:</strong>{" "}
+                      {booking.preferredDate
+                        ? new Date(booking.preferredDate).toLocaleDateString()
+                        : "Not specified"}
                     </li>
                     <li>
                       <strong>Status:</strong> {booking.status}

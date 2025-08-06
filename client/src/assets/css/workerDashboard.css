@@ -60,6 +60,7 @@
   left: 0%;
   top: 10%; /* Adjust based on header height */
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 .wrkd-sidebar h2 {
@@ -110,6 +111,7 @@
   padding: 1% 1% 1% 0%;
   flex: 1;
   margin-right: 0%;
+  z-index: 1;
 }
 
 /* Sections (Initially Hidden) */

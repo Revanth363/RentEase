@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../LoadingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import axios from 'axios';
 import { fetchPropertyDetails, toggleVerify, deleteProperty } from '../services/api';
 
 const fmt   = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -138,6 +139,21 @@ const PropertyView = () => {
     finally { setIsLoading(false); }
   };
 
+  const handleTogglePopular = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.put(`/api/admin/property/${id}/toggle-popular`, 
+        { is_popular: !property.is_popular }, 
+        { withCredentials: true }
+      );
+      setProperty(p => ({ ...p, is_popular: response.data.is_popular }));
+      alert(response.data.is_popular ? 'Property marked as popular!' : 'Property removed from popular list.');
+    } catch (err) { 
+      alert(err.response?.data?.error || 'Failed to update popularity.'); 
+    }
+    finally { setIsLoading(false); }
+  };
+
   const handleDelete = async () => {
     if (!window.confirm('Delete this property? This cannot be undone.')) return;
     try { setIsLoading(true); await deleteProperty(id); window.location.href = '/admin/property-management'; }
@@ -164,6 +180,14 @@ const PropertyView = () => {
             Property Management
           </Link>
           <div className="uv-topbar-actions">
+            <button 
+              className="uv-btn uv-btn-success" 
+              onClick={handleTogglePopular}
+              disabled={property.isRented || !property.isVerified}
+              title={property.isRented ? 'Cannot mark rented property as popular' : !property.isVerified ? 'Property must be verified first' : ''}
+            >
+              {property.is_popular ? '⭐ Remove from Popular' : '☆ Make Popular'}
+            </button>
             <button className={`uv-btn ${property.isVerified ? 'uv-btn-danger' : 'uv-btn-success'}`} onClick={handleVerify}>
               {property.isVerified ? 'Unverify' : 'Verify Listing'}
             </button>
@@ -242,6 +266,7 @@ const PropertyView = () => {
                   <Field label="Name"  value={<ULink to={`/admin/user/${property.tenantId._id}/tenant`}>{property.tenantId.firstName} {property.tenantId.lastName}</ULink>}/>
                   <Field label="Email" value={property.tenantId.email||'—'}/>
                   <Field label="Phone" value={property.tenantId.phone||'—'}/>
+                  <Field label="Rental Started" value={fmt(property.rentalStartDate)}/>
                 </div>
               ) : <p className="uv-empty">Property is currently vacant.</p>}
             </Card>

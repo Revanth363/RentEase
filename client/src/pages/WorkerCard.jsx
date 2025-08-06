@@ -15,6 +15,13 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
   // 🔥 added: logged in user
   const [loggedInUser, setLoggedInUser] = useState(null);
+  
+  // 🔥 Booking confirmation modal state
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState({
+    preferredDate: '',
+  });
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     // fetch session user
@@ -62,9 +69,9 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
 
   /* ===========================================================
-        BOOK WORKER LOGIC (Only addition, UI unchanged)
+        BOOK WORKER LOGIC - CONFIRMATION FLOW
   ============================================================ */
-  const handleBook = async (e) => {
+  const handleBookClick = (e) => {
     e.preventDefault();
 
     if (!loggedInUser) {
@@ -77,27 +84,47 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
       return;
     }
 
+    // Show confirmation modal
+    setShowBookingModal(true);
+  };
+
+  const handleConfirmBooking = async (e) => {
+    e.preventDefault();
+    setBookingLoading(true);
+
     try {
       const res = await fetch(`/api/workers/${worker._id}/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ serviceType: worker.serviceType }),
+        body: JSON.stringify({ 
+          serviceType: worker.serviceType,
+          preferredDate: bookingDetails.preferredDate,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error);
+        alert(data.error || "Failed to book worker");
+        setBookingLoading(false);
         return;
       }
 
       alert("Booking request sent successfully!");
+      setShowBookingModal(false);
+      setBookingDetails({ preferredDate: '', description: '' });
       navigate("/tenant/tenant_dashboard");
 
     } catch (err) {
       alert("Server error while booking");
+      setBookingLoading(false);
     }
+  };
+
+  const handleCancelBooking = () => {
+    setShowBookingModal(false);
+    setBookingDetails({ preferredDate: '', description: '' });
   };
 
 
@@ -151,7 +178,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
                 </div>
                 <div style={{ fontSize: 13, color: '#999' }}>per day</div>
               </div>
-
+Click
               <div>
                 <div style={{ fontSize: 24, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ color: '#ffc107' }}>★</span> {worker.rating ?? 'N/A'}
@@ -172,7 +199,7 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
               <a
                 className={styles.bookBtn}
                 href="#"
-                onClick={handleBook}
+                onClick={handleBookClick}
               >
                 Book Now
               </a>
@@ -193,6 +220,94 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
             </div>
           </div>
         </div>
+
+        {/* 🔥 BOOKING CONFIRMATION MODAL */}
+        {showBookingModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '40px',
+              maxWidth: '450px',
+              width: '90%',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: '20px' }}>Confirm Booking</h2>
+              <p style={{ color: '#666', marginBottom: '25px' }}>
+                You're about to book <strong>{worker.firstName} {worker.lastName}</strong> for <strong>{worker.serviceType}</strong>
+              </p>
+
+              <form onSubmit={handleConfirmBooking}>
+                <div style={{ marginBottom: '25px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
+                    Service Start Date / Joining Date (Optional)
+                  </label>
+                  <input
+                    type="date"
+                    value={bookingDetails.preferredDate}
+                    onChange={(e) => setBookingDetails({ ...bookingDetails, preferredDate: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={handleCancelBooking}
+                    disabled={bookingLoading}
+                    style={{
+                      padding: '10px 20px',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      backgroundColor: '#f5f5f5',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      opacity: bookingLoading ? 0.6 : 1,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={bookingLoading}
+                    style={{
+                      padding: '10px 20px',
+                      border: 'none',
+                      borderRadius: '6px',
+                      backgroundColor: '#ffc107',
+                      color: 'black',
+                      cursor: bookingLoading ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      opacity: bookingLoading ? 0.6 : 1,
+                    }}
+                  >
+                    {bookingLoading ? 'Booking...' : 'Confirm Booking'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     );
   }

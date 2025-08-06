@@ -8,6 +8,7 @@ const Complaint = require("../models/complaint");
 const Agreement = require("../models/Agreement");
 const Notification = require("../models/notification");
 const UnrentRequest = require("../models/unrentRequest");
+const bookingController = require("./bookingController");
 // bcrypt removed; plain-text password comparisons are used per requirement
 
 exports.getOwnerDashboard = async (req, res) => {
@@ -44,6 +45,11 @@ exports.getOwnerDashboard = async (req, res) => {
 
     // Fetch properties by ownerId (include all fields including images)
     const properties = await Property.find({ ownerId: objectId }).lean();
+    
+    console.log("Properties found:", {
+      count: properties.length,
+      propertiesWithTenants: properties.filter(p => p.tenantId).length
+    });
 
     // Fetch tenants by matching tenantId in properties
     const tenantIds = properties
@@ -63,37 +69,55 @@ exports.getOwnerDashboard = async (req, res) => {
       );
       tenant.property = property ? property.name : "N/A";
       tenant.propid = property ? property._id : "N/A";
+      tenant.rentalStartDate = property ? property.rentalStartDate : null;
       tenant.leaseDuration = tenant.leaseDuration || "N/A";
       tenant.occupation = tenant.occupation || "N/A";
     });
 
-    // Fetch other data
-    const payments = await Payment.find({ tenantId: { $in: tenantIds } });
-
-    // Create a map of property IDs to names
-    const propertyIdsForPayments = payments
-      .filter(
-        (payment) =>
-          payment.propertyId &&
-          mongoose.Types.ObjectId.isValid(payment.propertyId)
-      )
-      .map((payment) => payment.propertyId);
-
-    const propertiesForPayments = await Property.find({
-      _id: { $in: propertyIdsForPayments },
-    })
-      .select("name")
+    // Fetch other data - fetch payments by property (not tenant) to include historical payments  
+    const propertyIds = properties.map(p => p._id);
+    const payments = await Payment.find({ propertyId: { $in: propertyIds } })
+      .populate('tenantId', 'firstName lastName')
+      .populate('propertyId', 'name')
+      .sort({ paymentDate: -1 })
       .lean();
-
-    const propertyMapForPayments = new Map();
-    propertiesForPayments.forEach((property) => {
-      propertyMapForPayments.set(property._id.toString(), property.name);
+    
+    console.log("Payment enrichment debug:", {
+      totalProperties: properties.length,
+      paymentsFound: payments.length,
+      paymentSample: payments.length > 0 ? {
+        _id: payments[0]._id,
+        tenantId: payments[0].tenantId,
+        propertyId: payments[0].propertyId,
+        userName: payments[0].userName,
+        amount: payments[0].amount
+      } : null
     });
 
-    // Attach property name to each payment
+    // Enrich payments with tenant and property names from populated data
     payments.forEach((payment) => {
-      payment.property =
-        propertyMapForPayments.get(payment.propertyId?.toString()) || "N/A";
+      // Use tenant firstName + lastName if populated, fallback to stored userName
+      if (payment.tenantId && payment.tenantId.firstName) {
+        payment.userName = `${payment.tenantId.firstName} ${payment.tenantId.lastName}`;
+      } else if (!payment.userName) {
+        payment.userName = "Unknown";
+      }
+      // Use property name if populated
+      if (payment.propertyId && payment.propertyId.name) {
+        payment.property = payment.propertyId.name;
+      } else {
+        payment.property = "Unknown Property";
+      }
+    });
+    
+    console.log("After enrichment:", {
+      paymentsCount: payments.length,
+      enrichedSample: payments.length > 0 ? {
+        _id: payments[0]._id,
+        userName: payments[0].userName,
+        property: payments[0].property,
+        amount: payments[0].amount
+      } : null
     });
 
     const maintenanceRequests = await MaintenanceRequest.find({
@@ -402,6 +426,143 @@ exports.markNotificationRead = async (req, res) => {
     res.status(200).json({ success: true, notification });
   } catch (err) {
     console.error("Error marking notification as read:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Approve notification - delegates to bookingController if booking-related, otherwise simple update
+exports.approveNotification = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid notification ID" });
+    }
+
+    // Fetch the notification first
+    const notification = await Notification.findById(notificationId);
+    if (!notification) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notification not found" });
+    }
+
+    // If it's a booking request, use full booking controller logic
+    if (notification.type === "Booking Request" && notification.bookingId) {
+      if (!req.body) req.body = {};
+      req.body.notificationId = notificationId;
+      req.body.action = "approve";
+      req.body.reason = req.body.reason || "";
+      return await bookingController.handleNotificationAction(req, res);
+    }
+
+    // If it's an unrent request, use full unrent logic
+    if (notification.type === "Unrent Request" && notification.unrentRequestId) {
+      if (!req.body) req.body = {};
+      req.body.unrentRequestId = notification.unrentRequestId;
+      req.body.action = "approve";
+      return await exports.approveUnrentProperty(req, res);
+    }
+
+    // For other notification types, just update status
+    const updated = await Notification.findByIdAndUpdate(
+      notificationId,
+      { status: "Approved", isNew: false, read: true },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, notification: updated });
+  } catch (err) {
+    console.error("Error approving notification:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+};
+
+// Reject notification - delegates to bookingController if booking-related, otherwise simple update
+exports.rejectNotification = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid notification ID" });
+    }
+
+    // Fetch the notification first
+    const notification = await Notification.findById(notificationId);
+    if (!notification) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notification not found" });
+    }
+
+    // If it's a booking request, use full booking controller logic
+    if (notification.type === "Booking Request" && notification.bookingId) {
+      if (!req.body) req.body = {};
+      req.body.notificationId = notificationId;
+      req.body.action = "reject";
+      req.body.reason = req.body.reason || "";
+      return await bookingController.handleNotificationAction(req, res);
+    }
+
+    // If it's an unrent request, use full unrent logic
+    if (notification.type === "Unrent Request" && notification.unrentRequestId) {
+      if (!req.body) req.body = {};
+      req.body.unrentRequestId = notification.unrentRequestId;
+      req.body.action = "reject";
+      return await exports.approveUnrentProperty(req, res);
+    }
+
+    // For other notification types, just update status
+    const updated = await Notification.findByIdAndUpdate(
+      notificationId,
+      { status: "Rejected", isNew: false, read: true },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, notification: updated });
+  } catch (err) {
+    console.error("Error rejecting notification:", err);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+};
+
+// Update complaint status
+exports.updateComplaintStatus = async (req, res) => {
+  try {
+    const { complaintId } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(complaintId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid complaint ID" });
+    }
+
+    if (!status) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Status is required" });
+    }
+
+    const complaint = await Complaint.findByIdAndUpdate(
+      complaintId,
+      { status: status.charAt(0).toUpperCase() + status.slice(1) },
+      { new: true }
+    );
+
+    if (!complaint) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint not found" });
+    }
+
+    res.status(200).json({ success: true, complaint });
+  } catch (err) {
+    console.error("Error updating complaint status:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -717,6 +878,7 @@ exports.approveUnrentProperty = async (req, res) => {
         property.status = "Available";
         property.isRented = false;
         property.lastRentedDate = null;
+        property.rentalStartDate = null;
         await property.save();
       }
       // Update tenant - add rentalHistoryIds reference and remove propertyId

@@ -11,6 +11,7 @@ const propertySchema = new mongoose.Schema({
   subtype: String,
   status: { type: String, default: "Pending" },
   isRented: { type: Boolean, default: false },
+  rentalStartDate: { type: Date, default: null },
 
   tenant: String,
   activeWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],

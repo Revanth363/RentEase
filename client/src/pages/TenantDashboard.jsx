@@ -602,13 +602,19 @@ const TenantDashboard = () => {
       } else alert(res.message || "Error");
     } catch (err) {
       console.error(err);
-      // Show server-provided message (e.g., "Please pay this month's rent before requesting to unrent.")
-      const serverMessage =
+      // Show server-provided message with better context
+      let serverMessage =
         err && err.response && err.response.data && err.response.data.message
           ? err.response.data.message
           : err && err.message
           ? err.message
           : "Network error";
+      
+      // Add additional context for active workers error
+      if (err.response?.data?.code === "ACTIVE_WORKERS" && err.response?.data?.activeBookings) {
+        serverMessage += `\n\nActive bookings found: ${err.response.data.activeBookings.length}`;
+      }
+      
       alert(serverMessage);
     }
   };
@@ -809,6 +815,12 @@ const TenantDashboard = () => {
                       <p>
                         <strong>Monthly Rent:</strong> ₹
                         {currentProperty.price || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Rental Started:</strong>{" "}
+                        {currentProperty.rentalStartDate
+                          ? new Date(currentProperty.rentalStartDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : "—"}
                       </p>
                     </div>
                     <button
@@ -1412,7 +1424,7 @@ const TenantDashboard = () => {
           <div
             id="rentalHistory"
             className={`tntd-section ${
-              effectiveSection === "rentalHistory" ? "tntd-active" : ""
+              section === "rentalHistory" ? "tntd-active" : ""
             }`}
           >
             <h3>Rental History</h3>
@@ -1547,7 +1559,7 @@ const TenantDashboard = () => {
           <div
             id="ratings"
             className={`tntd-section ${
-              effectiveSection === "ratings" ? "tntd-active" : ""
+              section === "ratings" ? "tntd-active" : ""
             }`}
           >
             <h3>Reviews & Ratings</h3>

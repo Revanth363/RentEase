@@ -86,6 +86,7 @@
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+  margin-left:8px;
 }
 
 .home-container button:hover {
@@ -415,9 +416,6 @@
 .home-container .features-section {
   padding: 5rem 0;
   background-color: var(--light-color);
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 .home-container .features-section .container {
@@ -425,12 +423,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 1rem;
-  box-sizing: border-box;
-  margin: 0 auto;
-  overflow-x: hidden;
 }
 
 .home-container .section-header {
@@ -466,13 +458,11 @@
 
 .home-container .features-grid {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: space-between;
   gap: 1.5rem;
-  padding: 0;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0;
+  overflow-x: auto;
+  padding: 0.5rem;
 }
 
 .home-container .feature-card {
@@ -516,8 +506,7 @@
 
   .home-container .section-header h2 {
     font-size: 1.75rem;
-    width: 100%;
-    box-sizing: border-box;
+    width: 100vw;
   }
 
   .home-container .features-grid {
@@ -528,8 +517,6 @@
 
   .home-container .feature-card {
     width: 80%;
-    max-width: 400px;
-    margin: 0 auto;
     margin-bottom: 1rem;
   }
 
@@ -1089,6 +1076,7 @@
   overflow: hidden;
   margin-bottom: 25px;
   padding-bottom: 12px;
+  width: 100%;
 }
 
 .home-container marquee {
@@ -1096,6 +1084,24 @@
   color: #333;
   font-weight: 500;
   padding: 10px;
+  width: 100%;
+  display: block;
+}
+
+.home-container .scrolling-news {
+  display: flex;
+  animation: scroll-left 30s linear infinite;
+  width: 100%;
+  padding: 10px 0;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .home-container .news-item {
@@ -1104,6 +1110,8 @@
   background-color: #ffc109;
   color: black;
   border-radius: 0px;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 /* Call-to-Action Section */

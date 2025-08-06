@@ -6,6 +6,8 @@ const workerBookingSchema = new mongoose.Schema({
   serviceType: { type: String, required: true },
   status: { type: String, enum: ["Pending", "Approved", "Declined", "Completed"], default: "Pending" },
   bookingDate: { type: Date, default: Date.now },
+  preferredDate: { type: Date },
+  description: { type: String },
   tenantName: { type: String },
   tenantAddress: { type: String }
 }, {

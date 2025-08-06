@@ -337,4 +337,187 @@ router.get("/notifications", protect, ownerController.getNotifications);
 // Mark notification as read
 router.post("/notifications/:notificationId/read", protect, ownerController.markNotificationRead);
 
+/**
+ * @swagger
+ * /api/owner/notifications/{notificationId}/approve:
+ *   post:
+ *     summary: Approve notification
+ *     description: Approve a notification (e.g., booking request, unrent request)
+ *     tags:
+ *       - Owner
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: notificationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the notification to approve
+ *     responses:
+ *       200:
+ *         description: Notification approved successfully
+ *       400:
+ *         description: Invalid notification ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/notifications/:notificationId/approve", protect, ownerController.approveNotification);
+
+/**
+ * @swagger
+ * /api/owner/notifications/{notificationId}/reject:
+ *   post:
+ *     summary: Reject notification
+ *     description: Reject a notification (e.g., booking request, unrent request)
+ *     tags:
+ *       - Owner
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: notificationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the notification to reject
+ *     responses:
+ *       200:
+ *         description: Notification rejected successfully
+ *       400:
+ *         description: Invalid notification ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/notifications/:notificationId/reject", protect, ownerController.rejectNotification);
+
+/**
+ * @swagger
+ * /api/owner/complaints/{complaintId}/status:
+ *   put:
+ *     summary: Update complaint status
+ *     description: Update the status of a complaint (pending, in-progress, resolved)
+ *     tags:
+ *       - Owner
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: complaintId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the complaint to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum:
+ *                   - pending
+ *                   - in-progress
+ *                   - resolved
+ *                 example: "resolved"
+ *     responses:
+ *       200:
+ *         description: Complaint status updated successfully
+ *       400:
+ *         description: Invalid complaint ID or status
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Complaint not found
+ *       500:
+ *         description: Server error
+ */
+router.put("/complaints/:complaintId/status", protect, ownerController.updateComplaintStatus);
+
+/**
+ * @swagger
+ * /api/owner/unrent-requests/{unrentRequestId}/approve:
+ *   post:
+ *     summary: Approve unrent request
+ *     description: Approve a tenant's unrent request
+ *     tags:
+ *       - Owner
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: unrentRequestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the unrent request
+ *     responses:
+ *       200:
+ *         description: Unrent request approved successfully
+ *       400:
+ *         description: Invalid request ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Request not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/unrent-requests/:unrentRequestId/approve", protect, (req, res) => {
+  // Direct approval of unrent request
+  if (!req.body) req.body = {};
+  req.body.unrentRequestId = req.params.unrentRequestId;
+  req.body.action = "approve";
+  return ownerController.approveUnrentProperty(req, res);
+});
+
+/**
+ * @swagger
+ * /api/owner/unrent-requests/{unrentRequestId}/reject:
+ *   post:
+ *     summary: Reject unrent request
+ *     description: Reject a tenant's unrent request
+ *     tags:
+ *       - Owner
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: unrentRequestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the unrent request
+ *     responses:
+ *       200:
+ *         description: Unrent request rejected successfully
+ *       400:
+ *         description: Invalid request ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Request not found
+ *       500:
+ *         description: Server error
+ */
+router.post("/unrent-requests/:unrentRequestId/reject", protect, (req, res) => {
+  // Direct rejection of unrent request
+  if (!req.body) req.body = {};
+  req.body.unrentRequestId = req.params.unrentRequestId;
+  req.body.action = "reject";
+  return ownerController.approveUnrentProperty(req, res);
+});
+
 module.exports = router;

@@ -1465,19 +1465,29 @@ exports.requestUnrentProperty = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please pay this month's rent before requesting to unrent.",
+        code: "RENT_NOT_PAID",
       });
     }
-    // Check for active worker bookings
+    // Check for active worker bookings (only "Approved" status)
     const WorkerBooking = require("../models/workerBooking");
     const activeBookings = await WorkerBooking.find({
       tenantId,
-      status: { $in: ["Pending", "Approved"] },
+      status: "Approved",
     });
+    
+    console.log("Unrent validation - Worker bookings check:", {
+      tenantId,
+      activeBookingsFound: activeBookings.length,
+      bookings: activeBookings.map(b => ({ _id: b._id, status: b.status, workerId: b.workerId })),
+    });
+    
     if (activeBookings.length > 0) {
       return res.status(400).json({
         success: false,
         message:
-          "Please debook all active domestic workers before requesting to unrent.",
+          "Please cancel all active domestic worker bookings before requesting to unrent.",
+        code: "ACTIVE_WORKERS",
+        activeBookings: activeBookings.map(b => ({ _id: b._id, workerId: b.workerId, status: b.status })),
       });
     }
     // Find owner
