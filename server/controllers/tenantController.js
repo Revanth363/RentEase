@@ -64,6 +64,7 @@ const RentalHistory = require("../models/rentalhistory");
 const Notification = require("../models/notification");
 const WorkerBooking = require("../models/workerBooking");
 const UnrentRequest = require("../models/unrentRequest");
+const Booking = require("../models/booking");
 // bcrypt removed; plain-text password comparisons are used per requirement
 
 // Dashboard Controller
@@ -289,6 +290,38 @@ exports.getDashboardData = async (req, res) => {
       .sort({ dueDate: 1 })
       .lean();
 
+    // If nextPayment exists but has null dueDate, calculate it based on booking
+    let nextPaymentForDisplay = nextPayment;
+    if (nextPayment && !nextPayment.dueDate) {
+      // Calculate due date: 30 days from today (standard monthly rent)
+      const calculatedDueDate = new Date();
+      calculatedDueDate.setDate(calculatedDueDate.getDate() + 30);
+      nextPaymentForDisplay = {
+        ...nextPayment,
+        dueDate: calculatedDueDate,
+      };
+    } else if (!nextPayment && currentPropertyRaw) {
+      // No pending payment found, create a virtual one based on booking
+      const booking = await Booking.findOne({
+        tenantId: userId,
+        propertyId: currentPropertyRaw._id,
+        status: "Active",
+      }).lean();
+
+      if (booking) {
+        // Calculate next due date: 30 days from today
+        const calculatedDueDate = new Date();
+        calculatedDueDate.setDate(calculatedDueDate.getDate() + 30);
+        
+        nextPaymentForDisplay = {
+          _id: null,
+          amount: currentPropertyRaw.price,
+          dueDate: calculatedDueDate,
+          status: "Pending",
+        };
+      }
+    }
+
     // Maintenance requests
     const activeMaintenanceRequests = await MaintenanceRequest.find({
       tenantId: userId,
@@ -391,7 +424,7 @@ exports.getDashboardData = async (req, res) => {
       currentProperty,                    // now with normalized images
       propertyOwner,
       payments,
-      nextPayment,
+      nextPayment: nextPaymentForDisplay,
       activeMaintenanceRequests,
       completedMaintenanceRequests,
       complaints,

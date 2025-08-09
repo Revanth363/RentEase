@@ -3,6 +3,7 @@ import * as ownerService from "../services/ownerService";
 import "../assets/css/OwnerDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
+import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
 import { useLoading } from "../LoadingContext";
 
 const sectionToUrl = (section) => {
@@ -286,9 +287,9 @@ const handleSettingsSubmit = async (e) => {
     maintenanceAlerts:
       document.getElementById("maintenanceAlerts")?.checked.toString() ||
       "false",
-    currentPassword: form["currentPassword"]?.value || "",
-    newPassword: form["newPassword"]?.value || "",
-    confirmPassword: form["confirmPassword"]?.value || "",
+    currentPassword: form["currentPassword"]?.value?.trim() || "",
+    newPassword: form["newPassword"]?.value?.trim() || "",
+    confirmPassword: form["confirmPassword"]?.value?.trim() || "",
   };
 
   // Validation
@@ -337,14 +338,12 @@ const handleSettingsSubmit = async (e) => {
     return;
   }
 
-  // Password validation (only if changing password)
-  if (formData.newPassword || formData.currentPassword) {
+  // Password validation (only if BOTH currentPassword AND newPassword are provided)
+  // If only one is provided, ignore password change
+  if (formData.currentPassword && formData.newPassword) {
+    // Both fields have values, so validate the password change
     if (!formData.currentPassword) {
       alert("Current password is required to change password");
-      return;
-    }
-    if (!formData.newPassword) {
-      alert("New password is required");
       return;
     }
     if (formData.newPassword.length < 8) {
@@ -371,6 +370,10 @@ const handleSettingsSubmit = async (e) => {
       alert("Passwords do not match");
       return;
     }
+  } else if (formData.currentPassword || formData.newPassword || formData.confirmPassword) {
+    // User partially filled password fields - ask them to complete or leave empty
+    alert("To change password, please fill in Current Password and New Password fields. Or leave all password fields empty to just update other information.");
+    return;
   }
 
   try {
@@ -650,47 +653,11 @@ const handleSettingsSubmit = async (e) => {
 
             <div className="ownd-payment-table-container">
               <h4>Recent Transactions</h4>
-              <table className="ownd-payment-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Tenant</th>
-                    <th>Property</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.length > 0 ? (
-                    payments.map((payment) => (
-                      <tr key={payment._id}>
-                        <td>{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "N/A"}</td>
-                        <td>{payment.userName || "N/A"}</td>
-                        <td>{payment.property || "N/A"}</td>
-                        <td>₹{(payment.amount || 0).toLocaleString()}</td>
-                        <td><span className="ownd-status-paid">{payment.status || "N/A"}</span></td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr><td colSpan="5">No transactions available.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="ownd-payment-summary">
-              <div className="ownd-summary-card">
-                <h4>Total Revenue</h4>
-                <p className="ownd-amount">₹{(paymentSummary?.totalRevenue || 0).toLocaleString()}</p>
-              </div>
-              <div className="ownd-summary-card">
-                <h4>Website Commission</h4>
-                <p className="ownd-amount">₹{(paymentSummary?.commission || 0).toLocaleString()}</p>
-              </div>
-              <div className="ownd-summary-card">
-                <h4>Net Income</h4>
-                <p className="ownd-amount">₹{(paymentSummary?.netIncome || 0).toLocaleString()}</p>
-              </div>
+              <RazorpayPaymentHistory
+                historyType="owner-rent"
+                className="ownd-payment-table"
+                showSummary={true}
+              />
             </div>
           </div>
 

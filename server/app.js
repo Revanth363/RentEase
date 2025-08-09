@@ -4,7 +4,11 @@ const path = require("path");
 // express-session removed (migrated to JWT cookies)
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
+// Suppress dotenv tips
+const originalLog = console.log;
+console.log = () => {};
 require("dotenv").config();
+console.log = originalLog;
 const passport = require("passport");
 const helmet = require("helmet");
 require("./passport");
@@ -36,6 +40,7 @@ const adminRoutes = require("./routes/admin");
 const superadminRoutes = require("./routes/superadmin");
 const verificationRoutes = require("./routes/verification");
 const adminUserVerificationsRoutes = require("./routes/adminUserVerifications");
+const razorpayRoutes = require("./routes/razorpay");
 
 // Swagger Setup
 const swaggerUi = require('swagger-ui-express');
@@ -190,10 +195,11 @@ app.use("/api/workers", workerRoutes);
 app.use("/api/tenant", TenantRoutes);
 app.use("/api/owner", ownerRoutes);
 app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", protect, adminProtect, adminRoutes);
 app.use("/api/superadmin", superadminRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/admin/verifications", adminUserVerificationsRoutes);
+app.use("/api/razorpay", razorpayRoutes);
 
 // TEST ENDPOINT - Remove after testing
 /**
@@ -2225,4 +2231,11 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+
+  // Initialize payment cleanup job (runs every 24 hours silently)
+  const razorpayController = require('./controllers/razorpayPaymentController');
+  razorpayController.cleanupCancelledPayments();
+  setInterval(() => {
+    razorpayController.cleanupCancelledPayments();
+  }, 24 * 60 * 60 * 1000);
 });

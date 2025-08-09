@@ -15,7 +15,7 @@ const adminContactUsController = require("../controllers/adminContactUsControlle
  * /api/admin/user/{id}/{userType}:
  *   get:
  *     summary: Get user details
- *     description: Retrieve detailed information about a specific user (tenant, owner, or worker)
+ *     description: '**Admin Only** - Retrieve detailed information about a specific user (tenant, owner, or worker). Requires admin or superadmin authorization.'
  *     tags:
  *       - Admin
  *     security:
@@ -40,7 +40,9 @@ const adminContactUsController = require("../controllers/adminContactUsControlle
  *       200:
  *         description: User details retrieved successfully
  *       401:
- *         description: Unauthorized - admin required
+ *         description: Unauthorized - authentication required
+ *       403:
+ *         description: Forbidden - admin or superadmin access required
  *       404:
  *         description: User not found
  *       500:
@@ -730,7 +732,7 @@ router.get("/property/:id", adminPropertyController.getPropertyView);
  * /api/admin/user/status/{id}/{userType}:
  *   post:
  *     summary: Change user status
- *     description: Admin changes the status of a user (activate, deactivate, suspend, etc.)
+ *     description: '**Admin Only** - Change the status of a user (activate, deactivate, suspend, verify, etc.). Requires admin or superadmin authorization.'
  *     tags:
  *       - Admin - Users
  *     security:
@@ -784,7 +786,7 @@ router.post("/user/status/:id/:userType", adminUserController.changeUserStatus);
  * /api/admin/user/delete/{id}/{userType}:
  *   delete:
  *     summary: Delete user
- *     description: Admin permanently deletes a user account from the platform
+ *     description: '**Admin Only** - Permanently delete a user account from the platform. This action cannot be undone. Requires admin or superadmin authorization.'
  *     tags:
  *       - Admin - Users
  *     security:
@@ -821,8 +823,8 @@ router.delete("/user/delete/:id/:userType", adminUserController.deleteUser);
  * @swagger
  * /api/admin/users:
  *   get:
- *     summary: Get all users
- *     description: Retrieve list of all users (tenants, owners, workers) for admin management
+ *     summary: Get all users (Verified & Unverified)
+ *     description: '**Admin Only** - Retrieve complete list of all users (tenants, owners, workers) including both verified and unverified users in a single request. When no filters are applied, shows the 5 most recent users. With filters, returns all matching users with pagination support. Each user includes verification status. Requires admin or superadmin authorization.'
  *     tags:
  *       - Admin - Users
  *     security:
@@ -859,9 +861,11 @@ router.delete("/user/delete/:id/:userType", adminUserController.deleteUser);
  *           example: 0
  *     responses:
  *       200:
- *         description: Users retrieved successfully
+ *         description: Users retrieved successfully with verification status for each user (both verified and unverified included)
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized - authentication required
+ *       403:
+ *         description: Forbidden - admin or superadmin access required
  *       500:
  *         description: Server error
  */

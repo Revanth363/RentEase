@@ -366,3 +366,89 @@
 2026-03-22T12:41:42.768Z | 401 | GET | /api/tenant/dashboard-data | 2.921ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
 2026-03-22T13:03:57.357Z | 401 | GET | /api/me | 0.299ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
 2026-03-22T13:03:57.371Z | 401 | GET | /api/me | 0.289ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:23.337Z | 401 | GET | /api/me | 2.518ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:23.348Z | 401 | GET | /api/me | 0.439ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:40.889Z | 401 | GET | /api/me | 0.643ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:40.903Z | 401 | GET | /api/me | 0.342ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:56.130Z | 401 | GET | /api/me | 0.271ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:56.143Z | 401 | GET | /api/me | 0.360ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:59.052Z | 401 | GET | /api/me | 0.599ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:59.066Z | 401 | GET | /api/me | 0.333ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:59.098Z | 401 | GET | /api/me | 0.324ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:40:59.112Z | 401 | GET | /api/me | 0.360ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:41:09.341Z | 404 | GET | /favicon.ico | 0.891ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-03-29T18:43:16.420Z | 401 | GET | /api/me | 10.070ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-29T18:44:17.169Z | 401 | GET | /api/me | 1.413ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:26:23.203Z | 401 | GET | /api/me | 0.974ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:26:23.217Z | 401 | GET | /api/me | 0.457ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:27:03.965Z | 500 | GET | /api/properties | 40772.058ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load properties
+2026-03-31T03:27:04.008Z | 500 | GET | /api/slider-properties | 40805.896ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-31T03:27:04.080Z | 500 | GET | /api/property-types | 40848.653ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load property types
+2026-03-31T03:27:04.112Z | 500 | GET | /api/locations | 40913.361ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load locations
+2026-03-31T03:27:04.134Z | 500 | GET | /api/public-settings | 40924.047ms | User: guest | IP: ::1 | Body: - | Msg: No error message
+2026-03-31T03:27:14.662Z | 500 | GET | /api/slider-properties | 30017.969ms | User: guest | IP: ::1 | Body: - | Msg: Failed to load slider properties
+2026-03-31T03:27:53.786Z | 401 | GET | /api/me | 0.560ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:27:53.815Z | 401 | GET | /api/me | 0.520ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:39.364Z | 401 | GET | /api/me | 0.387ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:39.376Z | 401 | GET | /api/me | 0.472ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:42.415Z | 401 | GET | /api/me | 0.343ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:42.433Z | 401 | GET | /api/me | 0.335ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:47.069Z | 401 | GET | /api/me | 0.351ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:47.079Z | 401 | GET | /api/me | 0.521ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:52.122Z | 401 | GET | /api/me | 0.326ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:28:52.149Z | 401 | GET | /api/me | 0.312ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:29:02.316Z | 401 | GET | /api/me | 0.243ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T03:29:02.324Z | 401 | GET | /api/me | 0.427ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T04:50:57.026Z | 401 | GET | /api/me | 16.409ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T04:50:57.138Z | 401 | GET | /api/me | 0.873ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T04:51:30.956Z | 401 | POST | /login | 151.642ms | User: guest | IP: ::1 | Body: {"email":"ravikumar@gmail.com","password":"[REDACTED]","userType":"owner"} | Msg: Invalid email or password
+2026-03-31T04:53:11.088Z | 400 | POST | /api/workers/debook/68ebb11513fb46399a5c8e7d | 574.874ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: - | Msg: Payment pending for current billing cycle
+2026-03-31T04:55:08.362Z | 404 | POST | /api/razorpay/initiate-rent-payment | 115.389ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T04:55:29.822Z | 404 | POST | /api/razorpay/initiate-rent-payment | 106.536ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T05:02:24.403Z | 500 | POST | /api/razorpay/initiate-rent-payment | 1603.275ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T05:02:39.662Z | 500 | POST | /api/razorpay/initiate-rent-payment | 1138.702ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T05:02:47.507Z | 500 | POST | /api/razorpay/initiate-rent-payment | 986.287ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T05:05:31.940Z | 500 | POST | /api/razorpay/initiate-rent-payment | 2608.007ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T05:06:49.905Z | 500 | POST | /api/razorpay/initiate-rent-payment | 1624.655ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"68efea0dea5c34c199c634c0","amount":25000} | Msg: No error message
+2026-03-31T05:22:20.572Z | 500 | GET | /api/tenant/dashboard-data | 30024.659ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: - | Msg: No error message
+2026-03-31T05:43:54.776Z | 500 | GET | /auth/google/callback?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0Aci98E8k6upOTJlLT_BcaxcMLu3OuhxVOEcAFgW-yhXC14t7UaGJHiR_57n2m_eKi766Ug&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=2&prompt=consent | 1747.565ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-03-31T05:43:55.296Z | 404 | GET | /favicon.ico | 1.660ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-03-31T05:44:17.463Z | 500 | GET | /auth/google/callback?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0Aci98E_aOQAW5AcVOIKoH6kn0fZlbBjXlJvAas-tu3arUMPnxaJkq8yYwdrhFTaJmK8TJw&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&authuser=2&prompt=none | 588.807ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-03-31T05:45:16.920Z | 401 | GET | /api/me | 0.371ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:16.942Z | 401 | GET | /api/me | 0.540ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:22.623Z | 401 | GET | /api/me | 2.901ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:22.635Z | 401 | GET | /api/me | 0.378ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:29.446Z | 401 | GET | /api/me | 0.325ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:29.466Z | 401 | GET | /api/me | 0.256ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:29.935Z | 401 | GET | /api/me | 0.505ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:45:29.958Z | 401 | GET | /api/me | 0.632ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-03-31T05:56:01.709Z | 400 | POST | /api/owner/update-settings | 45.223ms | User: ravi@gmail.com (owner, ID: 68ebaa825f1138dd80d095bf) | IP: ::1 | Body: {"firstName":"Ravi","lastName":"Kumar","email":"ravi@gmail.com","phone":"8976543213","location":"chennai","accountNo":"","upiid":"","numProperties":"3","emailNotifications":"false","smsNotifications":"false","paymentReminders":"false","complaintAlerts":"false","maintenanceAlerts":"false","currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmPassword":"Ravi@123"} | Msg: No error message
+2026-03-31T06:08:08.405Z | 403 | GET | /api/superadmin/financial-analytics?startDate=2024-01-01&endDate=2024-03-31 | 52.560ms | User: ravi@gmail.com (owner, ID: 68ebaa825f1138dd80d095bf) | IP: ::1 | Body: - | Msg: Forbidden - superadmin access only
+2026-03-31T06:15:10.614Z | 403 | GET | /api/admin/users?limit=20&skip=0 | 5.705ms | User: ravi@gmail.com (owner, ID: 68ebaa825f1138dd80d095bf) | IP: ::1 | Body: - | Msg: Forbidden - admin or superadmin access required
+2026-03-31T06:15:26.158Z | 403 | GET | /api/admin | 2.224ms | User: ravi@gmail.com (owner, ID: 68ebaa825f1138dd80d095bf) | IP: ::1 | Body: - | Msg: Forbidden - admin or superadmin access required
+2026-04-01T16:36:02.591Z | 404 | GET | /favicon.ico | 51.728ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-04-01T16:36:36.264Z | 401 | GET | /api/me | 1.590ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-04-01T16:36:36.311Z | 401 | GET | /api/me | 0.582ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-04-01T16:45:50.892Z | 400 | POST | /api/workers/debook/68ebb11513fb46399a5c8e7d | 174.858ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: - | Msg: Payment pending for current billing cycle
+2026-04-01T16:46:00.021Z | 400 | POST | /api/workers/debook/68ebb11513fb46399a5c8e7d | 154.613ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: - | Msg: Payment pending for current billing cycle
+2026-04-01T16:48:42.171Z | 400 | POST | /api/razorpay/verify-rent-payment | 1.694ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"razorpayOrderId":"order_SYIcyHR965x7Lu","razorpayPaymentId":"pay_SYIepiLS2fXFJe","razorpaySignature":"d3984dea8425de316cedee860f6cb1b5774a36bd12964d457e308411601d3a75"} | Msg: No error message
+2026-04-01T16:54:37.757Z | 400 | POST | /api/bookings/book-property | 150.324ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"propertyId":"5f7a1234567890abcdef1234","checkInDate":"2024-04-15","checkOutDate":"2024-04-20","totalGuests":4,"specialRequests":"High floor preferred","paymentMethod":"credit_card"} | Msg: No error message
+2026-04-01T16:59:45.610Z | 400 | POST | /api/razorpay/verify-rent-payment | 3.749ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"razorpayOrderId":"order_SYIohFJQBTnLOD","razorpayPaymentId":"pay_SYIqesJ0rp22Mi","razorpaySignature":"23a5e38d0dd2a5557d6a806bc68461acf260709a23d411060d57975dfbea2421"} | Msg: No error message
+2026-04-01T17:03:30.164Z | 400 | POST | /api/razorpay/verify-rent-payment | 9.614ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"razorpayOrderId":"order_SYIuKPVE291IFv","razorpayPaymentId":"pay_SYIueIC94ovP91","razorpaySignature":"871994008c4841d0a47c8147acaa033e6cb61ece73d8fa055ab8f705978900fb"} | Msg: No error message
+2026-04-01T17:04:52.653Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 19.599ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:04:52.711Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 19.143ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:04:52.735Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 15.777ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:04:52.766Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 9.016ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:06:13.194Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 7.774ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:06:13.411Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 17.519ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:06:13.458Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 17.221ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:06:13.470Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 5.947ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:07:42.629Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 67.964ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:07:42.672Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 5.419ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:07:42.720Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 14.107ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:07:42.777Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 43.398ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:10:07.101Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 4.731ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:10:07.109Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 4.165ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:10:07.120Z | 500 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 3.438ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:10:07.127Z | 500 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 3.088ms | User: guest | IP: ::1 | Body: - | Msg: Internal Server Error
+2026-04-01T17:12:11.686Z | 500 | POST | /api/razorpay/cancel-rent-payment | 108.641ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"orderId":"order_SYJ3lJ8JuKwWwV"} | Msg: Notification validation failed: status: `unread` is not a valid enum value for path `status`.

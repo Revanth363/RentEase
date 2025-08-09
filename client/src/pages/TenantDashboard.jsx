@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import * as tenantService from "../services/tenantService";
 import "../assets/css/TenantDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useLoading } from "../LoadingContext";
 import CalendarTiles from "../components/CalendarTiles";
 import VerificationStatus from "../components/VerificationStatus";
+import RazorpayPaymentModal from "../components/RazorpayPaymentModal";
+import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
 
 const sectionToUrl = (section) => {
   // Map section keys to URLs (adjust as needed)
@@ -122,8 +125,9 @@ const TenantDashboard = () => {
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [showWorkerPaymentPopup, setShowWorkerPaymentPopup] = useState(false);
-  const [selectedWorkerForPayment, setSelectedWorkerForPayment] =
-    useState(null);
+  const [selectedWorkerForPayment, setSelectedWorkerForPayment] = useState(null);
+  const [razorpayPaymentType, setRazorpayPaymentType] = useState(null);
+  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
   const [showUnrentModal, setShowUnrentModal] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [showWorkTrackingModal, setShowWorkTrackingModal] = useState(false);
@@ -266,8 +270,15 @@ const TenantDashboard = () => {
     }
   };
 
-  const openPaymentPopup = () => setShowPaymentPopup(true);
-  const closePaymentPopup = () => setShowPaymentPopup(false);
+  const openPaymentPopup = () => {
+    setRazorpayPaymentType('rent');
+    setShowRazorpayModal(true);
+  };
+  const closePaymentPopup = () => {
+    setShowPaymentPopup(false);
+    setShowRazorpayModal(false);
+    setRazorpayPaymentType(null);
+  };
 
   const handleSubmitPayment = async (e) => {
     e.preventDefault();
@@ -317,7 +328,8 @@ const TenantDashboard = () => {
         calculatedDays: numberOfDays,
         calculatedAmount: calculatedAmount,
       });
-      setShowWorkerPaymentPopup(true);
+      setRazorpayPaymentType('worker');
+      setShowRazorpayModal(true);
     } catch (err) {
       console.error("Error fetching work history:", err);
       alert("Failed to load work history. Please try again.");
@@ -326,6 +338,8 @@ const TenantDashboard = () => {
   const closeWorkerPaymentPopup = () => {
     setShowWorkerPaymentPopup(false);
     setSelectedWorkerForPayment(null);
+    setShowRazorpayModal(false);
+    setRazorpayPaymentType(null);
   };
 
   const handleWorkerPayment = async (e) => {
@@ -619,14 +633,134 @@ const TenantDashboard = () => {
     }
   };
 
-  const handleCheckRecentPayment = async () => {
+  const handlePayRent = async () => {
+    if (!currentProperty) {
+      alert("No property selected");
+      return;
+    }
+
     try {
-      const res = await tenantService.checkRecentPayment();
-      if (res.success && !res.recentPayment) {
-        setShowPaymentPopup(true);
-      } else alert(res.message || "You have already paid this month");
+      // Step 1: Initiate Razorpay order
+      const initiateRes = await fetch("/api/razorpay/initiate-rent-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          propertyId: currentProperty._id,
+          amount: currentProperty.price,
+          // Don't send dueDate - let backend calculate it (30 days from today)
+        }),
+      });
+
+      const initiateData = await initiateRes.json();
+
+      if (!initiateData.success) {
+        alert(initiateData.message || "Failed to initiate payment");
+        return;
+      }
+
+      // Step 2: Open Razorpay Checkout
+      if (!window.Razorpay) {
+        alert("Razorpay is not loaded. Please refresh the page.");
+        return;
+      }
+
+      const options = {
+        key: initiateData.payment.razorpayKeyId,
+        amount: initiateData.payment.amount * 100,
+        currency: "INR",
+        order_id: initiateData.payment.orderId,
+        name: "FFSD Rental Platform",
+        description: `Rent payment to ${propertyOwner?.firstName} ${propertyOwner?.lastName}`,
+        handler: async (response) => {
+          // Step 3: Verify Payment
+          try {
+            const verifyRes = await fetch("/api/razorpay/verify-rent-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              Swal.fire({
+                icon: "success",
+                title: "Payment Successful!",
+                text: "Rent payment completed successfully",
+                confirmButtonColor: "#3399cc",
+              });
+              // Refresh dashboard
+              window.location.reload();
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Payment Failed",
+                text: verifyData.message || "Failed to verify payment",
+              });
+            }
+          } catch (err) {
+            console.error("Error verifying payment:", err);
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Failed to verify payment",
+            });
+          }
+        },
+        prefill: {
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          contact: user.phone,
+        },
+        theme: { color: "#3399cc" },
+        modal: {
+          ondismiss: async () => {
+            // When user closes the payment modal without completing payment
+            console.log("Payment cancelled by user");
+            try {
+              const cancelRes = await fetch("/api/razorpay/cancel-rent-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  orderId: initiateData.payment.orderId,
+                }),
+              });
+
+              const cancelData = await cancelRes.json();
+
+              if (cancelData.success) {
+                Swal.fire({
+                  icon: "info",
+                  title: "Payment Cancelled",
+                  text: "Your payment has been cancelled. You can initiate a new payment anytime.",
+                  confirmButtonColor: "#3399cc",
+                });
+              } else {
+                console.error("Failed to cancel payment:", cancelData.message);
+              }
+            } catch (err) {
+              console.error("Error cancelling payment:", err);
+            }
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (err) {
-      console.error(err);
+      console.error("Error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to process payment",
+      });
     }
   };
 
@@ -871,14 +1005,20 @@ const TenantDashboard = () => {
                 {nextPayment ? (
                   <p>
                     Next Rent Due: <strong>₹{nextPayment.amount}</strong> on{" "}
-                    {new Date(nextPayment.dueDate).toLocaleDateString()}
+                    {nextPayment.dueDate 
+                      ? new Date(nextPayment.dueDate).toLocaleDateString('en-IN', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })
+                      : "Not set"}
                   </p>
                 ) : (
                   <p>No rent due date available.</p>
                 )}
                 <button
                   className="tntd-pay-buttons"
-                  onClick={handleCheckRecentPayment}
+                  onClick={handlePayRent}
                 >
                   Pay Rent
                 </button>
@@ -888,36 +1028,11 @@ const TenantDashboard = () => {
             )}
 
             <h4>Payment History</h4>
-            <table className="tntd-payment-history">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Method</th>
-                  <th>Status</th>
-                  <th>Receipt</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(payments || []).map((p) => (
-                  <tr key={p._id}>
-                    <td>
-                      {p.paymentDate
-                        ? new Date(p.paymentDate).toLocaleDateString()
-                        : "N/A"}
-                    </td>
-                    <td>₹{p.amount}</td>
-                    <td>{p.paymentMethod}</td>
-                    <td className={(p.status || "").toLowerCase()}>
-                      {p.status}
-                    </td>
-                    <td>
-                      <a href={p.receiptUrl || "#"}>View</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <RazorpayPaymentHistory
+              historyType="tenant-rent"
+              className="tntd-payment-history"
+              showSummary={false}
+            />
           </div>
 
           {/* Maintenance */}
@@ -1237,40 +1352,11 @@ const TenantDashboard = () => {
 
             {/* Worker Payment History */}
             <h4 style={{ marginTop: '24px' }}>Worker Payment History</h4>
-            <table className="tntd-payment-history-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Worker</th>
-                  <th>Service</th>
-                  <th>Amount</th>
-                  <th>Payment Method</th>
-                  <th>Status</th>
-                  <th>Receipt</th>
-                </tr>
-              </thead>
-              <tbody id="worker-payment-history-body">
-                {(workerPayments || []).map((p) => (
-                  <tr key={p._id}>
-                    <td>
-                      {p.paymentDate
-                        ? new Date(p.paymentDate).toLocaleDateString()
-                        : "N/A"}
-                    </td>
-                    <td>{p.workerName}</td>
-                    <td>{p.serviceType}</td>
-                    <td>₹{p.amount}</td>
-                    <td>{p.paymentMethod}</td>
-                    <td className={(p.status || "").toLowerCase()}>
-                      {p.status}
-                    </td>
-                    <td>
-                      <a href={p.receiptUrl || "#"}>View</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <RazorpayPaymentHistory
+              historyType="tenant-worker"
+              className="tntd-payment-history-table"
+              showSummary={false}
+            />
           </div>
 
           {/* Notifications */}
@@ -1898,6 +1984,27 @@ const TenantDashboard = () => {
           </form>
         </div>
       </div>
+
+      {/* Razorpay Payment Modal */}
+      <RazorpayPaymentModal
+        isOpen={showRazorpayModal}
+        onClose={closePaymentPopup}
+        paymentType={razorpayPaymentType}
+        propertyId={currentProperty?._id}
+        ownerId={propertyOwner?._id}
+        workerId={selectedWorkerForPayment?._id}
+        workingDays={selectedWorkerForPayment?.calculatedDays}
+        dailyRate={selectedWorkerForPayment?.price}
+        amount={razorpayPaymentType === 'rent' ? currentProperty?.price : selectedWorkerForPayment?.calculatedAmount}
+        recipientName={razorpayPaymentType === 'rent' ? propertyOwner?.firstName + ' ' + propertyOwner?.lastName : selectedWorkerForPayment?.firstName + ' ' + selectedWorkerForPayment?.lastName}
+        onPaymentSuccess={() => {
+          setDashboard((prev) => ({
+            ...prev,
+            payments: razorpayPaymentType === 'rent' ? [...(prev.payments || [])] : prev.payments,
+            workerPayments: razorpayPaymentType === 'worker' ? [...(prev.workerPayments || [])] : prev.workerPayments,
+          }));
+        }}
+      />
 
       {/* Payment popup */}
       <div

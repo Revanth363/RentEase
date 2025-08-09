@@ -7,6 +7,7 @@ import "../assets/css/workerDashboard.css";
 import CalendarTiles from "../components/CalendarTiles";
 import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
+import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
 import { useLoading } from "../LoadingContext";
 
 import {
@@ -833,40 +834,11 @@ const WorkerDashboard = () => {
           }`}
         >
           <h3>My Earnings</h3>
-          <p>
-            This Month's Earnings: <strong>₹{earnings.monthly || 0}</strong>
-          </p>
-          <p>
-            Pending Payments: <strong>₹{earnings.pending || 0}</strong>
-          </p>
-          <div className="wrkd-complaint-container">
-            {transactions.length === 0 ? (
-              <p>No transactions yet.</p>
-            ) : (
-              transactions.map((tx) => (
-                <div key={tx._id} className="wrkd-res-complaint">
-                  <strong>{tx.title || "Payment"}</strong>
-                  <ul>
-                    <li>
-                      <strong>Service:</strong> {tx.serviceName}
-                    </li>
-                    <li>
-                      <strong>Client:</strong> {tx.clientName || "N/A"}
-                    </li>
-                    <li>
-                      <strong>Date:</strong> {tx.date}
-                    </li>
-                    <li>
-                      <strong>Amount:</strong> ₹{tx.amount}
-                    </li>
-                    <li>
-                      <strong>Status:</strong> {tx.status}
-                    </li>
-                  </ul>
-                </div>
-              ))
-            )}
-          </div>
+          <RazorpayPaymentHistory
+            historyType="worker-payments"
+            className="wrkd-earnings-table"
+            showSummary={true}
+          />
         </div>
 
         {/* REVIEWS */}

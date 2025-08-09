@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verificationController = require('../controllers/verificationController');
+const { protect } = require('../middleware/auth');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../config/cloudinary');
@@ -71,7 +72,7 @@ const uploadVerification = multer({
  *       500:
  *         description: Server error
  */
-router.get('/status', verificationController.getVerificationStatus);
+router.get('/status', protect, verificationController.getVerificationStatus);
 
 /**
  * @swagger

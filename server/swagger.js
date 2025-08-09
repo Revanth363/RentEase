@@ -28,15 +28,7 @@ const options = {
         
         **Authentication:** JWT Bearer Token (set in Authorization header)
       `,
-      contact: {
-        name: 'RentEase Development Team',
-        email: 'support@rentease.com',
-        url: 'https://rentease.com'
-      },
-      license: {
-        name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
+      
     },
     servers: [
       {

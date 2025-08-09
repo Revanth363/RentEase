@@ -1,15 +1,47 @@
 const Verification = require('../models/Verification');
 
-// Get verification status for a user
+// Get verification status for authenticated user
 exports.getVerificationStatus = async (req, res) => {
-  const { userId, userModel } = req.query;
-  if (!userId || userId === 'undefined') return res.json({ status: null });
   try {
+    // Use authenticated user's ID
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Unauthorized: Please log in',
+        status: null 
+      });
+    }
+
+    const userId = req.user.id;
+    const userModel = req.user.userType ? req.user.userType.toLowerCase() : 'tenant'; // Default to tenant if userType not specified
+
+    console.log('🔍 Checking verification status for:', { userId, userModel });
+
     const verification = await Verification.findOne({ user: userId, userModel });
-    if (!verification) return res.json({ status: null });
-    res.json({ status: verification.status, documents: verification.documents, rejectionReason: verification.rejectionReason });
+    
+    if (!verification) {
+      console.log('❌ No verification record found');
+      return res.json({ 
+        success: true,
+        status: null, 
+        message: 'No verification record found'
+      });
+    }
+
+    console.log('✅ Verification found:', { status: verification.status });
+    res.json({ 
+      success: true,
+      status: verification.status, 
+      documents: verification.documents, 
+      rejectionReason: verification.rejectionReason 
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('❌ Error getting verification status:', err.message);
+    res.status(500).json({ 
+      success: false,
+      error: err.message,
+      status: null
+    });
   }
 };
 
