@@ -754,10 +754,6 @@ const options = {
         description: 'Property owner operations'
       },
       {
-        name: 'Users',
-        description: 'User profile and account management'
-      },
-      {
         name: 'Admin',
         description: 'Admin dashboard and statistics'
       },

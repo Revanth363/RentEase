@@ -638,7 +638,10 @@ exports.getAllWorkers = async (req, res) => {
 exports.getWorkerById = async (req, res) => {
   try {
     const workerId = req.params.id;
+    console.log("Fetching worker with ID:", workerId);
+    
     const worker = await Worker.findById(workerId);
+    console.log("Worker query result:", worker ? "Found" : "Not found");
 
     if (!worker) {
       return res.status(404).json({ error: "Worker not found" });
@@ -646,8 +649,9 @@ exports.getWorkerById = async (req, res) => {
 
     res.json(worker);
   } catch (error) {
-    console.error("Error fetching worker details:", error);
-    res.status(500).json({ error: "Error fetching worker details" });
+    console.error("Error fetching worker details:", error.message);
+    console.error("Stack:", error.stack);
+    res.status(500).json({ error: "Error fetching worker details", details: error.message });
   }
 };
 

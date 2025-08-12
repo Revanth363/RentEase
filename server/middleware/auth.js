@@ -3,7 +3,16 @@ const { verifyToken } = require("../utils/jwt");
 
 // Helper to extract and verify token (used by all middlewares)
 const getVerifiedUser = (req) => {
-  const token = req.cookies?.accessToken;
+  // Try cookie first, then Bearer token
+  let token = req.cookies?.accessToken;
+  
+  if (!token) {
+    // Check for Bearer token in Authorization header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.slice(7); // Remove 'Bearer ' prefix
+    }
+  }
 
   if (!token) {
     throw new Error("No token provided");

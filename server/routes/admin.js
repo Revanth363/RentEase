@@ -81,76 +81,6 @@ router.get("/user/:id/:userType", adminUserController.getUserDetails);
  */
 router.get("/booking/:id", adminBookingController.getBookingDetails);
 
-/**
- * @swagger
- * /api/admin/booking/approve/{id}:
- *   post:
- *     summary: Approve property booking
- *     description: Admin approves a property booking request
- *     tags:
- *       - Admin - Bookings
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Booking ID to approve
- *         example: "5f7a1234567890abcdef1234"
- *     responses:
- *       200:
- *         description: Booking approved successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Booking not found
- *       500:
- *         description: Server error
- */
-router.post("/booking/approve/:id", adminBookingController.approveBooking);
-
-/**
- * @swagger
- * /api/admin/booking/reject/{id}:
- *   post:
- *     summary: Reject property booking
- *     description: Admin rejects a property booking request
- *     tags:
- *       - Admin - Bookings
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Booking ID to reject
- *         example: "5f7a1234567890abcdef1234"
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               reason:
- *                 type: string
- *                 example: "Invalid booking dates"
- *     responses:
- *       200:
- *         description: Booking rejected successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Booking not found
- *       500:
- *         description: Server error
- */
-router.post("/booking/reject/:id", adminBookingController.rejectBooking);
-
 // Worker/Service Booking Routes
 /**
  * @swagger
@@ -226,82 +156,6 @@ router.get(
   adminBookingController.getWorkerBookingDetails
 );
 
-/**
- * @swagger
- * /api/admin/worker-booking/approve/{id}:
- *   post:
- *     summary: Approve worker booking
- *     description: Admin approves a worker service booking request
- *     tags:
- *       - Admin - Worker Bookings
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Worker booking ID to approve
- *         example: "5f7a1234567890abcdef1234"
- *     responses:
- *       200:
- *         description: Worker booking approved successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Worker booking not found
- *       500:
- *         description: Server error
- */
-router.post(
-  "/worker-booking/approve/:id",
-  adminBookingController.approveWorkerBooking
-);
-
-/**
- * @swagger
- * /api/admin/worker-booking/decline/{id}:
- *   post:
- *     summary: Decline worker booking
- *     description: Admin declines a worker service booking request
- *     tags:
- *       - Admin - Worker Bookings
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Worker booking ID to decline
- *         example: "5f7a1234567890abcdef1234"
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               reason:
- *                 type: string
- *                 example: "Worker not available"
- *     responses:
- *       200:
- *         description: Worker booking declined successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Worker booking not found
- *       500:
- *         description: Server error
- */
-router.post(
-  "/worker-booking/decline/:id",
-  adminBookingController.declineWorkerBooking
-);
-
 // Notification routes
 /**
  * @swagger
@@ -368,39 +222,6 @@ router.get(
 router.get(
   "/notification/:id",
   adminNotificationController.getNotificationDetails
-);
-
-/**
- * @swagger
- * /api/admin/notification/{id}/complete:
- *   post:
- *     summary: Mark notification as complete
- *     description: Admin marks a notification as completed or resolved
- *     tags:
- *       - Admin - Notifications
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Notification ID to mark complete
- *         example: "5f7a1234567890abcdef1234"
- *     responses:
- *       200:
- *         description: Notification marked as complete
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Notification not found
- *       500:
- *         description: Server error
- */
-router.post(
-  "/notification/:id/complete",
-  adminNotificationController.completeNotification
 );
 
 // Maintenance routes
@@ -481,44 +302,6 @@ router.get(
   adminMaintenanceController.getMaintenanceDetails
 );
 
-/**
- * @swagger
- * /api/admin/maintenance/{id}/complete:
- *   post:
- *     summary: Mark maintenance as complete
- *     description: Admin marks a maintenance request as completed
- *     tags:
- *       - Admin - Maintenance
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Maintenance request ID to complete
- *         example: "5f7a1234567890abcdef1234"
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               completionNotes:
- *                 type: string
- *                 example: "Maintenance work completed successfully"
- *     responses:
- *       200:
- *         description: Maintenance marked as complete
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Maintenance request not found
- *       500:
- *         description: Server error
- */
 router.post(
   "/maintenance/:id/complete",
   adminMaintenanceController.completeMaintenance
