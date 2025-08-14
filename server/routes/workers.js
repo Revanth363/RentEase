@@ -320,129 +320,11 @@ router.post("/work-tracking/verify-otp", protect, workerController.verifyWorkOTP
  */
 router.get("/work-tracking/history/:tenantId", protect, workerController.getWorkHistory);
 
-/**
- * @swagger
- * /api/workers/notifications/:notificationId/read:
- *   post:
- *     summary: Mark notification as read
- *     description: Update notification read status
- *     tags:
- *       - Workers
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: notificationId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Notification marked as read
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-// Mark notification as read
-router.post("/notifications/:notificationId/read", protect, workerController.markNotificationAsRead);
 
-/**
- * @swagger
- * /api/workers/register:
- *   post:
- *     summary: Register as a worker
- *     description: Worker registration with profile image upload
- *     tags:
- *       - Workers
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - serviceType
- *               - experience
- *             properties:
- *               serviceType:
- *                 type: string
- *                 example: "Electrician"
- *               experience:
- *                 type: string
- *                 example: "5 years"
- *               profileImage:
- *                 type: string
- *                 format: binary
- *               certifications:
- *                 type: string
- *               ratePerHour:
- *                 type: number
- *                 example: 500
- *     responses:
- *       201:
- *         description: Worker registered successfully
- *       400:
- *         description: Registration validation failed
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-router.post(
-  "/register",
-  protect,
-  (req, res, next) => {
-    uploadWorker(req, res, (err) => {
-      if (err) {
-        console.error("Multer error:", err.message);
-        return res.status(400).json({ error: `Upload error: ${err.message}` });
-      }
-      next();
-    });
-  },
-  workerController.registerWorker
-);
 
 // ────────────────────────────────────────────────
 // Routes with specific :id sub-paths
 // ────────────────────────────────────────────────
-
-/**
- * @swagger
- * /api/workers/{id}/can-review:
- *   get:
- *     summary: Check if tenant can review worker
- *     description: Verify if the current tenant can submit a review for a specific worker
- *     tags:
- *       - Workers
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Worker ID (MongoDB ObjectId)
- *         example: "692f3c5aa78300baead49602"
- *     responses:
- *       200:
- *         description: Review eligibility status
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 canReview:
- *                   type: boolean
- *       404:
- *         description: Worker not found
- *       500:
- *         description: Server error
- */
-// Check if tenant can review a specific worker
-router.get("/:id/can-review", workerController.canTenantReviewWorker);
 
 /**
  * @swagger
@@ -775,33 +657,6 @@ router.post("/work-tracking/verify-otp", protect, workerController.verifyWorkOTP
  */
 router.get("/work-tracking/history/:tenantId", protect, workerController.getWorkHistory);
 
-/**
- * @swagger
- * /api/workers/notifications/:notificationId/read:
- *   post:
- *     summary: Mark notification as read
- *     description: Update notification read status
- *     tags:
- *       - Workers
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: notificationId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Notification marked as read
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-// Mark notification as read
-router.post("/notifications/:notificationId/read", protect, workerController.markNotificationAsRead);
-
 // ────────────────────────────────────────────────
 // Booking Routes
 // ────────────────────────────────────────────────
@@ -910,65 +765,6 @@ router.post("/bookings/:id/status", protect, workerController.updateWorkerBookin
 // ────────────────────────────────────────────────
 // Worker Registration / Upload (protected + multer)
 // ────────────────────────────────────────────────
-
-/**
- * @swagger
- * /api/workers/register:
- *   post:
- *     summary: Register as a worker
- *     description: Worker registration with profile image upload
- *     tags:
- *       - Workers
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - serviceType
- *               - experience
- *             properties:
- *               serviceType:
- *                 type: string
- *                 example: "Electrician"
- *               experience:
- *                 type: string
- *                 example: "5 years"
- *               profileImage:
- *                 type: string
- *                 format: binary
- *               certifications:
- *                 type: string
- *               ratePerHour:
- *                 type: number
- *                 example: 500
- *     responses:
- *       201:
- *         description: Worker registered successfully
- *       400:
- *         description: Registration validation failed
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-router.post(
-  "/register",
-  protect,
-  (req, res, next) => {
-    uploadWorker(req, res, (err) => {
-      if (err) {
-        console.error("Multer error:", err.message);
-        return res.status(400).json({ error: `Upload error: ${err.message}` });
-      }
-      next();
-    });
-  },
-  workerController.registerWorker
-);
 
 /**
  * @swagger
