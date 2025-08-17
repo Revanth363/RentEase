@@ -4,3 +4,10 @@
 2026-04-01T18:45:37.528Z | 500 | POST | /api/workers/:id/toggle | 14.165ms | User: sujata@gmail.com (worker, ID: 692f3c5aa78300baead49602) | IP: ::1 | Body: {"available":true} | Msg: Error toggling worker availability
 2026-04-01T18:47:11.131Z | 500 | GET | /api/workers/check-booked/:id | 89.487ms | User: sujata@gmail.com (worker, ID: 692f3c5aa78300baead49602) | IP: ::1 | Body: - | Msg: Error checking booked status
 2026-04-01T19:02:41.462Z | 403 | GET | /api/superadmin/executives?limit=20&skip=0 | 8.554ms | User: rentease@admin.com (admin, ID: 69a2e76f29f80176147333d6) | IP: ::1 | Body: - | Msg: Forbidden - superadmin access only
+2026-04-01T19:11:17.967Z | 403 | GET | /api/workers/check-booked/692f3c5aa78300baead49602 | 140.021ms | User: revanthkumardompaka@gmail.com (owner, ID: 68eb99d49d34a83fba0cca8a) | IP: ::1 | Body: - | Msg: Unauthorized
+2026-04-01T19:21:12.976Z | 404 | GET | /api/tenant/dashboard-data | 47.667ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/tenant/dashboard-data - Route not found
+2026-04-01T19:21:12.989Z | 404 | GET | /api/tenant/dashboard-data | 2.196ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/tenant/dashboard-data - Route not found
+2026-04-01T19:21:26.888Z | 404 | GET | /api/tenant/dashboard-data | 0.528ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/tenant/dashboard-data - Route not found
+2026-04-01T19:21:26.902Z | 404 | GET | /api/tenant/dashboard-data | 0.971ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/tenant/dashboard-data - Route not found
+2026-04-01T19:30:14.457Z | 500 | GET | /api/tenant/tenant_dashboard | 1108.537ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: - | Msg: No error message
+2026-04-01T19:36:08.565Z | 404 | GET | /api/owner/dashboard | 65.250ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: - | Msg: No error message

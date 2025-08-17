@@ -126,33 +126,6 @@ router.post(
   tenantController.submitWorkerPayment
 );
 
-// Debug log for tenant routes
-router.use((req, res, next) => {
-  console.log(`Tenant route: ${req.method} ${req.url}`);
-  next();
-});
-
-/**
- * @swagger
- * /api/tenant/tenant_dashboard:
- *   get:
- *     summary: Get tenant dashboard
- *     description: Retrieve tenant dashboard view (HTML or data)
- *     tags:
- *       - Tenants
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Dashboard data
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-// Tenant dashboard route
-router.get("/tenant_dashboard", protect, tenantController.getDashboard);
-
 /**
  * @swagger
  * /api/tenant/dashboard-data:
@@ -427,56 +400,7 @@ router.post("/password", protect, tenantController.changePassword);
  *         description: Server error
  */
 // Save/Remove Property
-router.post("/saved-property", protect, (req, res, next) => {
-  console.log("Reached /saved-property route:", {
-    method: req.method,
-    body: req.body,
-    user: req.user,
-  });
-  tenantController.toggleSavedProperty(req, res, next);
-});
-
-/**
- * @swagger
- * /api/tenant/notifications:
- *   post:
- *     summary: Update notification preferences
- *     description: Update tenant notification settings and preferences
- *     tags:
- *       - Tenants
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: boolean
- *               sms:
- *                 type: boolean
- *               payment:
- *                 type: boolean
- *               complaint:
- *                 type: boolean
- *               maintenance:
- *                 type: boolean
- *     responses:
- *       200:
- *         description: Notification preferences updated
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-// Notification preferences update
-router.post(
-  "/notifications",
-  protect,
-  tenantController.updateNotificationPreferences
-);
+router.post("/saved-property", protect, tenantController.toggleSavedProperty);
 
 /**
  * @swagger
@@ -511,39 +435,6 @@ router.post(
   "/notification/read",
   protect,
   tenantController.markNotificationAsRead
-);
-
-/**
- * @swagger
- * /api/tenant/check-recent-payment:
- *   post:
- *     summary: Check recent payment status
- *     description: Verify if tenant has made recent payment
- *     tags:
- *       - Tenants
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               bookingId:
- *                 type: string
- *     responses:
- *       200:
- *         description: Payment status
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-router.post(
-  "/check-recent-payment",
-  protect,
-  tenantController.checkRecentPayment
 );
 
 /**
@@ -676,7 +567,7 @@ router.post(
 
 /**
  * @swagger
- * /api/tenant/work-tracking/history/:workerId:
+ * /api/tenant/work-tracking/history/{workerId}:
  *   get:
  *     summary: Get worker work history
  *     description: Retrieve work history and tracking for a specific worker

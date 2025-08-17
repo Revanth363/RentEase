@@ -50,59 +50,6 @@ router.get("/dashboard", protect, ownerController.getOwnerDashboard);
 
 /**
  * @swagger
- * /api/owner/maintenance-request/status:
- *   post:
- *     summary: Update maintenance request status
- *     description: Update the status of a maintenance request (e.g., approved, rejected, completed)
- *     tags:
- *       - Owner
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - maintenanceRequestId
- *               - status
- *             properties:
- *               maintenanceRequestId:
- *                 type: string
- *                 example: "5f7a1234567890abcdef1234"
- *               status:
- *                 type: string
- *                 enum:
- *                   - pending
- *                   - approved
- *                   - rejected
- *                   - completed
- *                   - in-progress
- *                 example: "completed"
- *               notes:
- *                 type: string
- *                 example: "Maintenance work completed successfully"
- *     responses:
- *       200:
- *         description: Maintenance request status updated successfully
- *       400:
- *         description: Invalid request parameters
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Maintenance request not found
- *       500:
- *         description: Server error
- */
-// Update maintenance request status
-router.post(
-  "/maintenance-request/status",
-  ownerController.updateMaintenanceRequestStatus
-);
-
-/**
- * @swagger
  * /api/owner/delete-account:
  *   delete:
  *     summary: Delete owner account
