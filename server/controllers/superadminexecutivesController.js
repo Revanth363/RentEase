@@ -44,6 +44,9 @@ exports.createExecutive = async (req, res) => {
       });
     }
 
+    // Generate username from email (part before @)
+    const username = email.split('@')[0];
+
     const existing = await Admin.findOne({ email });
     if (existing) {
       return res.status(400).json({
@@ -53,6 +56,7 @@ exports.createExecutive = async (req, res) => {
     }
 
     const newExecutive = new Admin({
+      username,
       firstName,
       lastName,
       email,
@@ -69,6 +73,7 @@ exports.createExecutive = async (req, res) => {
       message: 'Executive created successfully',
       executive: {
         _id: newExecutive._id,
+        username,
         firstName,
         lastName,
         email,
