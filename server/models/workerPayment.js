@@ -47,4 +47,12 @@ const workerPaymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ============================================
+// WORKER PAYMENT INDEXES FOR PERFORMANCE
+// ============================================
+workerPaymentSchema.index({ workerId: 1 }); // P1: Worker's payments
+workerPaymentSchema.index({ tenantId: 1 }); // P1: Tenant payment tracking
+workerPaymentSchema.index({ workerId: 1, tenantId: 1 }); // P1: Worker-tenant payment history
+workerPaymentSchema.index({ status: 1 }); // P2: Payment status filtering
+
 module.exports = mongoose.model("WorkerPayment", workerPaymentSchema);

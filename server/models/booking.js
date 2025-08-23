@@ -16,4 +16,12 @@ const bookingSchema = new mongoose.Schema({
   workerName: String, // From first
 }, { timestamps: true });
 
+// ============================================
+// BOOKING INDEXES FOR PERFORMANCE
+// ============================================
+bookingSchema.index({ tenantId: 1, status: 1 }); // P0: Tenant booking queries with status
+bookingSchema.index({ propertyId: 1 }); // P0: Property booking lookups
+bookingSchema.index({ status: 1 }); // P1: Status-based filtering
+bookingSchema.index({ ownerId: 1 }); // P1: Owner's bookings
+
 module.exports = mongoose.model("Booking", bookingSchema);

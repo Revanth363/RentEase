@@ -31,4 +31,14 @@ const paymentSchema = new mongoose.Schema({
   
 }, { timestamps: true });
 
+// ============================================
+// PAYMENT INDEXES FOR PERFORMANCE
+// ============================================
+paymentSchema.index({ tenantId: 1, status: 1 }); // P0: Tenant payment queries with status
+paymentSchema.index({ propertyId: 1 }); // P0: Owner earnings queries
+paymentSchema.index({ ownerId: 1 }); // P0: Owner payment history
+paymentSchema.index({ status: 1 }); // P1: Payment status filtering
+paymentSchema.index({ propertyId: 1, status: 1 }); // P1: Property-specific status queries
+paymentSchema.index({ createdAt: -1 }); // P2: Date-based sorting
+
 module.exports = mongoose.model('Payment', paymentSchema);

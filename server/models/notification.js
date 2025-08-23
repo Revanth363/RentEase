@@ -26,4 +26,11 @@ const notificationSchema = new mongoose.Schema({
   isNew: { type: Boolean, default: true }
 }, { timestamps: true, suppressReservedKeysWarning: true });
 
+// ============================================
+// NOTIFICATION INDEXES FOR PERFORMANCE
+// ============================================
+notificationSchema.index({ recipient: 1, recipientType: 1 }); // P0: User notifications with type
+notificationSchema.index({ read: 1 }); // P1: Read/unread status filtering
+notificationSchema.index({ createdAt: -1 }); // P2: Recent notifications ordering
+
 module.exports = mongoose.model("Notification", notificationSchema);

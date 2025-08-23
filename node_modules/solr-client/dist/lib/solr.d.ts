@@ -1,0 +1,220 @@
+/// <reference types="node" />
+import { Query } from './query';
+import { Collection } from './collection';
+import { AddResponse, CommonResponse, JsonResponseData, ResourceOptions, SolrClientParams } from './types';
+import { Duplex } from 'stream';
+export declare type SearchResult<SolrDocument> = {
+    docs: SolrDocument[];
+    numFound: number;
+    numFoundExact: boolean;
+    start: number;
+};
+export declare type SearchResponse<SolrDocument> = {
+    debug?: Record<string, any>;
+    /** If the query defined a `cursorMark` parameter then this field will be present */
+    nextCursorMark?: string;
+    response: SearchResult<SolrDocument>;
+    responseHeader: {
+        QTime: 0;
+        params?: Record<string, any>;
+        status: number;
+    };
+};
+export declare function createClient(options?: SolrClientParams): Client;
+export declare function resolvePort(options: SolrClientParams): string | number;
+/**
+ * Solr client.
+ */
+export declare class Client {
+    private readonly options;
+    private readonly UPDATE_JSON_HANDLER;
+    private readonly UPDATE_HANDLER;
+    private readonly TERMS_HANDLER;
+    private readonly SPELL_HANDLER;
+    private readonly REAL_TIME_GET_HANDLER;
+    private readonly ADMIN_PING_HANDLER;
+    private readonly COLLECTIONS_HANDLER;
+    private readonly SELECT_HANDLER;
+    private readonly undiciClient;
+    constructor(options?: SolrClientParams);
+    get solrVersion(): number;
+    /**
+     * Construct the full path to the given "handler".
+     *
+     * @param handler
+     *   Relative URL path for the solr handler.
+     *
+     * @returns
+     *   Full URL to the handler.
+     */
+    private getFullHandlerPath;
+    /**
+     * Common function for all HTTP requests.
+     *
+     * @param path
+     *   Full URL for the request.
+     * @param method
+     *   HTTP method, like "GET" or "POST".
+     * @param body
+     *   Optional data for the request body.
+     * @param bodyContentType
+     *   Optional content type for the request body.
+     * @param acceptContentType
+     *   The expected content type of the response.
+     *
+     * @returns
+     *   Parsed JSON response data.
+     */
+    private doRequest;
+    /**
+     * Create credential using the basic access authentication method
+     */
+    basicAuth(username: string, password: string): Client;
+    /**
+     * Remove authorization header
+     */
+    unauth(): Client;
+    /**
+     * Add a document or a list of documents.
+     *
+     * @param docs
+     *   Document or list of documents to add into the Solr database.
+     * @param queryParameters
+     *   Query parameters to include in the URL.
+     */
+    add(docs: Record<string, any> | Record<string, any>[], queryParameters?: Record<string, any>): Promise<AddResponse>;
+    /**
+     * Updates a document or a list of documents.
+     *
+     * This function is a clone of `add` and it was added to give more clarity on the availability of atomic updates.
+     */
+    atomicUpdate: (docs: Record<string, any> | Record<string, any>[], queryParameters?: Record<string, any> | undefined) => Promise<AddResponse>;
+    /**
+     * Get a document by id or a list of documents by ids using the Real-time-get feature
+     *  in SOLR4 (https://wiki.apache.org/solr/RealTimeGet)
+     *
+     * @param ids
+     *   ID or list of IDs that identify the documents to get.
+     * @param query
+     */
+    realTimeGet<T>(ids: string | string[], query?: Query | Record<string, any> | string): Promise<SearchResponse<T>>;
+    /**
+     * Add the remote resource located at the given path `options.path` into
+     * the Solr database.
+     */
+    addRemoteResource(options: ResourceOptions): Promise<JsonResponseData>;
+    /**
+     * Create a writable/readable `Stream` to add documents into the Solr database.
+     */
+    createAddStream(options?: Record<string, any>): Duplex;
+    /**
+     * Commit last added and removed documents, that means your documents are now indexed.
+     */
+    commit(options?: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Call Lucene's IndexWriter.prepareCommit, the changes won't be visible in the index.
+     */
+    prepareCommit(): Promise<JsonResponseData>;
+    /**
+     * Soft commit all changes
+     */
+    softCommit(): Promise<JsonResponseData>;
+    /**
+     * Delete documents based on the given `field` and `text`.
+     */
+    delete(field: string, text: string, options?: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Delete a range of documents based on the given `field`, `start` and `stop` arguments.
+     */
+    deleteByRange(field: string, start: string | Date, stop: string | Date, options?: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Delete the document with the given `id`
+     *
+     * @param id
+     *   ID of the document you want to delete.
+     * @param options
+     */
+    deleteByID(id: string | number, options?: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Delete documents matching the given `query`.
+     */
+    deleteByQuery(query: string, options?: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Delete all documents.
+     */
+    deleteAll(options?: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Optimize the index.
+     */
+    optimize(options: Record<string, any>): Promise<JsonResponseData>;
+    /**
+     * Rollback all add/delete commands made since the last commit.
+     */
+    rollback(): Promise<JsonResponseData>;
+    /**
+     * Send an update command to the Solr server.
+     *
+     * @param data
+     *   The data to stringify in the body.
+     * @param queryParameters
+     *   Query parameters to include in the URL.
+     */
+    update<T>(data: Record<string, any>, queryParameters?: Record<string, any>): Promise<T>;
+    /**
+     * Search documents matching the `query`
+     */
+    search<T>(query: Query | Record<string, any> | string): Promise<SearchResponse<T>>;
+    /**
+     * Execute an Admin Collections task on `collection`
+     */
+    executeCollection(collection: Collection | Record<string, any> | string): Promise<CommonResponse>;
+    /**
+     * Search for all documents.
+     */
+    searchAll(): Promise<JsonResponseData>;
+    /**
+     * Search documents matching the `query`, with spellchecking enabled.
+     */
+    spell(query: Query): Promise<JsonResponseData>;
+    /**
+     * Terms search.
+     *
+     * Provides access to the indexed terms in a field and the number of documents that match each term.
+     */
+    termsSearch(query: Query | Record<string, any> | string): Promise<JsonResponseData>;
+    /**
+     * Perform an arbitrary query on a Solr handler (a.k.a. 'path').
+     *
+     * @param handler
+     *   The name of the handler (or 'path' in Solr terminology).
+     * @param query
+     *   A function, Query object, Collection object, plain object, or string
+     *   describing the query to perform.
+     */
+    doQuery<T>(handler: string, query: Collection | Query | Record<string, any> | string): Promise<T>;
+    /**
+     * Create an instance of `Query`
+     */
+    query(): Query;
+    /**
+     * Create an instance of `Collection`.
+     */
+    collection(): Collection;
+    /**
+     * Expose `format.escapeSpecialChars` from `Client.escapeSpecialChars`
+     */
+    escapeSpecialChars: any;
+    /**
+     * Ping the Solr server.
+     */
+    ping(): Promise<JsonResponseData>;
+    /**
+     * Utility only used in tests.
+     *
+     * @param {string} fieldName
+     *   The name of the field to create.
+     * @param {string} fieldType
+     *   The type of field to create.
+     */
+    createSchemaField(fieldName: string, fieldType: string): Promise<JsonResponseData>;
+}

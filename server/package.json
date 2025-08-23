@@ -5,7 +5,10 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:report": "jest --coverage --detectOpenHandles",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
   },
   "keywords": [],
   "author": "",
@@ -33,10 +36,18 @@
     "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "prom-client": "^15.0.0",
     "razorpay": "^2.9.6",
+    "redis": "^4.7.1",
     "rotating-file-stream": "^3.2.8",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "supertest": "^6.3.3",
+    "jest-mock-extended": "^3.0.5"
   },
   "description": ""
 }

@@ -61,6 +61,15 @@ const propertySchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// ============================================
+// PROPERTY INDEXES FOR PERFORMANCE
+// ============================================
+propertySchema.index({ ownerId: 1 }); // P0: Owner dashboard queries
+propertySchema.index({ tenantId: 1 }); // P0: Tenant property lookups
+propertySchema.index({ status: 1 }); // P0: Status filtering
+propertySchema.index({ isRented: 1 }); // P0: Rented/available properties
+propertySchema.index({ ownerId: 1, status: 1 }); // P1: Owner + status compound
+propertySchema.index({ location: 1 }); // P1: Location searches
 
 // Validate activeWorkers before saving
 propertySchema.pre('save', async function (next) {

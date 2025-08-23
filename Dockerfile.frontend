@@ -1,0 +1,44 @@
+# Frontend Dockerfile - React/Vite with Nginx
+
+# Stage 1: Build stage
+FROM node:18-alpine as builder
+
+WORKDIR /app
+
+# Copy package files
+COPY client/package.json ./
+
+# Install all dependencies
+RUN npm install --no-save
+
+# Copy ONLY source code (not node_modules from host)
+COPY client/src ./src
+COPY client/index.html ./
+COPY client/vite.config.js ./
+COPY client/eslint.config.js ./
+COPY client/public ./public
+
+# Build the React app with Vite
+RUN npm run build
+
+# Stage 2: Runtime stage (Nginx)
+FROM nginx:alpine
+
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/
+
+# Copy built React app from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Create health check script
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+
+# Expose port
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

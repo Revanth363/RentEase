@@ -12,4 +12,9 @@ const agreementSchema = new mongoose.Schema({
   action: { type: String }
 });
 
+// ============================================
+// AGREEMENT INDEXES FOR PERFORMANCE
+// ============================================
+agreementSchema.index({ ownerId: 1 }); // P2: Owner's agreements
+
 module.exports = mongoose.model('Agreement', agreementSchema);

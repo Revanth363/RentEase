@@ -1,0 +1,66 @@
+version: '3.9'
+
+# Development override - Start only databases, run app locally for hot-reload
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# Then locally run: npm run dev (in separate terminals for server & client)
+
+services:
+  # Disable frontend container for local development
+  frontend:
+    profiles:
+      - disabled
+    depends_on: []
+
+  # Disable backend container for local development
+  backend:
+    profiles:
+      - disabled
+    depends_on: []
+
+  # MongoDB with local development settings
+  mongodb:
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: rentease
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+      - mongodb_dev_config:/data/configdb
+    networks:
+      - ffsd-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 -u admin -p admin123 --authenticationDatabase admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis with local development settings
+  redis:
+    command: redis-server --appendonly yes --requirepass redis123
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - ffsd-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mongodb_dev_data:
+    driver: local
+  mongodb_dev_config:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+networks:
+  ffsd-network:
+    driver: bridge

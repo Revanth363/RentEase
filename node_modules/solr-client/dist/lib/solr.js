@@ -1,0 +1,484 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Client = exports.resolvePort = exports.createClient = void 0;
+const querystring = require("querystring");
+const JSONStream = require("JSONStream");
+const duplexer = require("duplexer");
+const query_1 = require("./query");
+const collection_1 = require("./collection");
+const versionUtils = require("./utils/version");
+const undici_1 = require("undici");
+const oldRequest = require('request');
+const format = require('./utils/format');
+const JSONbig = require('json-bigint');
+/**
+ * Pick appropriate JSON serializer/deserializer library based on the given `bigint` flag
+ *
+ * @param bigint
+ *   Whether to handle big numbers correctly or not.
+ *   The reason for not using JSONbig all the times is it has a significant performance cost.
+ *
+ * @return
+ *   JSON or JSONbig serializer/deserializer
+ */
+function pickJSON(bigint) {
+    return bigint ? JSONbig : JSON;
+}
+function createClient(options = {}) {
+    return new Client(options);
+}
+exports.createClient = createClient;
+function resolvePort(options) {
+    if (options.port === undefined) {
+        return '8983';
+    }
+    if (options.port === null || options.port === '') {
+        return '';
+    }
+    return options.port;
+}
+exports.resolvePort = resolvePort;
+/**
+ * Solr client.
+ */
+class Client {
+    constructor(options = {}) {
+        /**
+         * Updates a document or a list of documents.
+         *
+         * This function is a clone of `add` and it was added to give more clarity on the availability of atomic updates.
+         */
+        this.atomicUpdate = Client.prototype.add;
+        /**
+         * Expose `format.escapeSpecialChars` from `Client.escapeSpecialChars`
+         */
+        this.escapeSpecialChars = format.escapeSpecialChars;
+        this.options = {
+            host: options.host || '127.0.0.1',
+            port: resolvePort(options),
+            core: options.core || '',
+            path: options.path || '/solr',
+            tls: options.tls,
+            secure: options.secure || false,
+            bigint: options.bigint || false,
+            get_max_request_entity_size: options.get_max_request_entity_size || false,
+            solrVersion: options.solrVersion || versionUtils.Solr3_2,
+            ipVersion: options.ipVersion == 6 ? 6 : 4,
+            request: options.request || null,
+        };
+        // Default paths of all request handlers
+        this.UPDATE_JSON_HANDLER =
+            versionUtils.version(this.options.solrVersion) >= versionUtils.Solr4_0
+                ? 'update'
+                : 'update/json';
+        this.UPDATE_HANDLER = 'update';
+        this.SELECT_HANDLER = 'select';
+        this.COLLECTIONS_HANDLER = 'admin/collections';
+        this.ADMIN_PING_HANDLER = 'admin/ping';
+        this.REAL_TIME_GET_HANDLER = 'get';
+        this.SPELL_HANDLER = 'spell';
+        this.TERMS_HANDLER = 'terms';
+        const urlPrefix = this.options.host.startsWith('http')
+            ? ''
+            : this.options.tls
+                ? 'https://'
+                : 'http://';
+        this.undiciClient = new undici_1.Client(`${urlPrefix}${this.options.host}:${this.options.port}`, {
+            connect: this.options.tls,
+        });
+    }
+    get solrVersion() {
+        return this.options.solrVersion;
+    }
+    /**
+     * Construct the full path to the given "handler".
+     *
+     * @param handler
+     *   Relative URL path for the solr handler.
+     *
+     * @returns
+     *   Full URL to the handler.
+     */
+    getFullHandlerPath(handler) {
+        let pathArray;
+        if (handler === this.COLLECTIONS_HANDLER) {
+            pathArray = [this.options.path, handler];
+        }
+        else {
+            pathArray = [this.options.path, this.options.core, handler];
+        }
+        return pathArray.filter((e) => e).join('/');
+    }
+    /**
+     * Common function for all HTTP requests.
+     *
+     * @param path
+     *   Full URL for the request.
+     * @param method
+     *   HTTP method, like "GET" or "POST".
+     * @param body
+     *   Optional data for the request body.
+     * @param bodyContentType
+     *   Optional content type for the request body.
+     * @param acceptContentType
+     *   The expected content type of the response.
+     *
+     * @returns
+     *   Parsed JSON response data.
+     */
+    async doRequest(path, method, body, bodyContentType, acceptContentType) {
+        const protocol = this.options.secure ? 'https' : 'http';
+        const url = `${protocol}://${this.options.host}:${this.options.port}${path}`;
+        const requestOptions = {
+            ...this.options.request,
+            method,
+        };
+        // Now set options that the user should not be able to override.
+        if (!requestOptions.headers) {
+            requestOptions.headers = {};
+        }
+        requestOptions.headers['accept'] = acceptContentType;
+        if (method === 'POST') {
+            if (bodyContentType) {
+                requestOptions.headers['content-type'] = bodyContentType;
+            }
+            if (body) {
+                requestOptions.headers['content-length'] = Buffer.byteLength(body);
+                requestOptions.body = body;
+            }
+        }
+        if (this.options.authorization) {
+            requestOptions.headers['authorization'] = this.options.authorization;
+        }
+        // Perform the request and handle results.
+        const response = await this.undiciClient.request({
+            path: url,
+            ...requestOptions,
+        });
+        // Always consume the response body. See https://github.com/nodejs/undici#garbage-collection
+        const text = await response.body.text();
+        // Undici does not throw an error on certain status codes, this leaves that to us
+        if (response.statusCode < 200 || response.statusCode > 299) {
+            throw new Error(`Request HTTP error ${response.statusCode}: ${text}`);
+        }
+        return pickJSON(this.options.bigint).parse(text);
+    }
+    /**
+     * Create credential using the basic access authentication method
+     */
+    basicAuth(username, password) {
+        this.options.authorization =
+            'Basic ' + Buffer.from(username + ':' + password).toString('base64');
+        return this;
+    }
+    /**
+     * Remove authorization header
+     */
+    unauth() {
+        delete this.options.authorization;
+        return this;
+    }
+    /**
+     * Add a document or a list of documents.
+     *
+     * @param docs
+     *   Document or list of documents to add into the Solr database.
+     * @param queryParameters
+     *   Query parameters to include in the URL.
+     */
+    add(docs, queryParameters) {
+        // format `Date` object into string understood by Solr as a date.
+        docs = format.dateISOify(docs);
+        docs = Array.isArray(docs) ? docs : [docs];
+        return this.update(docs, queryParameters);
+    }
+    /**
+     * Get a document by id or a list of documents by ids using the Real-time-get feature
+     *  in SOLR4 (https://wiki.apache.org/solr/RealTimeGet)
+     *
+     * @param ids
+     *   ID or list of IDs that identify the documents to get.
+     * @param query
+     */
+    realTimeGet(ids, query = {}) {
+        ids = Array.isArray(ids) ? ids : [ids];
+        if (typeof query === 'object') {
+            query['ids'] = ids.join(',');
+        }
+        return this.doQuery(this.REAL_TIME_GET_HANDLER, query);
+    }
+    /**
+     * Add the remote resource located at the given path `options.path` into
+     * the Solr database.
+     */
+    addRemoteResource(options) {
+        options.parameters = options.parameters || {};
+        options.format = options.format === 'xml' ? '' : options.format || ''; // reason: the default route of the XmlUpdateRequestHandle is /update and not /update/xml.
+        options.parameters.commit =
+            options.parameters.commit === undefined
+                ? false
+                : options.parameters.commit;
+        options.parameters['stream.contentType'] =
+            options.contentType || 'text/plain;charset=utf-8';
+        if (options.path.match(/^https?:\/\//)) {
+            options.parameters['stream.url'] = options.path;
+        }
+        else {
+            options.parameters['stream.file'] = options.path;
+        }
+        const handler = this.UPDATE_HANDLER + '/' + options.format.toLowerCase();
+        const query = querystring.stringify(options.parameters);
+        return this.doQuery(handler, query);
+    }
+    /**
+     * Create a writable/readable `Stream` to add documents into the Solr database.
+     */
+    createAddStream(options = {}) {
+        const path = [
+            this.options.path,
+            this.options.core,
+            this.UPDATE_JSON_HANDLER +
+                '?' +
+                querystring.stringify({ ...options, wt: 'json' }),
+        ]
+            .filter(function (element) {
+            return element;
+        })
+            .join('/');
+        const headers = {
+            'content-type': 'application/json',
+            charset: 'utf-8',
+        };
+        if (this.options.authorization) {
+            headers['authorization'] = this.options.authorization;
+        }
+        const protocol = this.options.secure ? 'https' : 'http';
+        const optionsRequest = {
+            url: protocol + '://' + this.options.host + ':' + this.options.port + path,
+            method: 'POST',
+            headers: headers,
+        };
+        const jsonStreamStringify = JSONStream.stringify();
+        const postRequest = oldRequest(optionsRequest);
+        jsonStreamStringify.pipe(postRequest);
+        return duplexer(jsonStreamStringify, postRequest);
+    }
+    /**
+     * Commit last added and removed documents, that means your documents are now indexed.
+     */
+    commit(options) {
+        return this.update({
+            commit: options || {},
+        });
+    }
+    /**
+     * Call Lucene's IndexWriter.prepareCommit, the changes won't be visible in the index.
+     */
+    prepareCommit() {
+        return this.update({}, { prepareCommit: true });
+    }
+    /**
+     * Soft commit all changes
+     */
+    softCommit() {
+        return this.update({}, { softCommit: true });
+    }
+    /**
+     * Delete documents based on the given `field` and `text`.
+     */
+    delete(field, text, options) {
+        return this.update({
+            delete: {
+                query: field + ':' + format.escapeSpecialChars(format.dateISOify(text)),
+            },
+        }, options);
+    }
+    /**
+     * Delete a range of documents based on the given `field`, `start` and `stop` arguments.
+     */
+    deleteByRange(field, start, stop, options) {
+        start = format.dateISOify(start);
+        stop = format.dateISOify(stop);
+        return this.deleteByQuery(`${field}:[${start} TO ${stop}]`, options);
+    }
+    /**
+     * Delete the document with the given `id`
+     *
+     * @param id
+     *   ID of the document you want to delete.
+     * @param options
+     */
+    deleteByID(id, options) {
+        return this.update({
+            delete: {
+                id: id,
+            },
+        }, options);
+    }
+    /**
+     * Delete documents matching the given `query`.
+     */
+    deleteByQuery(query, options) {
+        return this.update({
+            delete: {
+                query: query,
+            },
+        }, options);
+    }
+    /**
+     * Delete all documents.
+     */
+    deleteAll(options) {
+        return this.deleteByQuery('*:*', options);
+    }
+    /**
+     * Optimize the index.
+     */
+    optimize(options) {
+        return this.update({
+            optimize: options || {},
+        });
+    }
+    /**
+     * Rollback all add/delete commands made since the last commit.
+     */
+    rollback() {
+        return this.update({
+            rollback: {},
+        });
+    }
+    /**
+     * Send an update command to the Solr server.
+     *
+     * @param data
+     *   The data to stringify in the body.
+     * @param queryParameters
+     *   Query parameters to include in the URL.
+     */
+    update(data, queryParameters) {
+        const path = this.getFullHandlerPath(this.UPDATE_JSON_HANDLER);
+        const queryString = querystring.stringify({
+            ...queryParameters,
+            wt: 'json',
+        });
+        return this.doRequest(`${path}?${queryString}`, 'POST', pickJSON(this.options.bigint).stringify(data), 'application/json', 'application/json; charset=utf-8');
+    }
+    /**
+     * Search documents matching the `query`
+     */
+    search(query) {
+        return this.doQuery(this.SELECT_HANDLER, query);
+    }
+    /**
+     * Execute an Admin Collections task on `collection`
+     */
+    executeCollection(collection) {
+        return this.doQuery(this.COLLECTIONS_HANDLER, collection);
+    }
+    /**
+     * Search for all documents.
+     */
+    searchAll() {
+        return this.search('q=*');
+    }
+    /**
+     * Search documents matching the `query`, with spellchecking enabled.
+     */
+    spell(query) {
+        return this.doQuery(this.SPELL_HANDLER, query);
+    }
+    /**
+     * Terms search.
+     *
+     * Provides access to the indexed terms in a field and the number of documents that match each term.
+     */
+    termsSearch(query) {
+        return this.doQuery(this.TERMS_HANDLER, query);
+    }
+    /**
+     * Perform an arbitrary query on a Solr handler (a.k.a. 'path').
+     *
+     * @param handler
+     *   The name of the handler (or 'path' in Solr terminology).
+     * @param query
+     *   A function, Query object, Collection object, plain object, or string
+     *   describing the query to perform.
+     */
+    async doQuery(handler, query) {
+        // Construct the string to use as query (GET) or body (POST).
+        let data;
+        if (query instanceof query_1.Query || query instanceof collection_1.Collection) {
+            data = query.build();
+        }
+        else if (typeof query === 'object') {
+            data = querystring.stringify(query);
+        }
+        else {
+            // query is a string.
+            data = query;
+        }
+        const path = this.getFullHandlerPath(handler);
+        const queryString = data ? data + '&wt=json' : 'wt=json';
+        // Decide whether to use GET or POST, based on the length of the data.
+        // 10 accounts for protocol and special characters like ://, port colon,
+        // initial slash, etc.
+        const approxUrlLength = 10 +
+            Buffer.byteLength(this.options.host) +
+            this.options.port.toString().length +
+            Buffer.byteLength(path) +
+            1 +
+            Buffer.byteLength(queryString);
+        const method = this.options.get_max_request_entity_size === false ||
+            approxUrlLength <= this.options.get_max_request_entity_size
+            ? 'GET'
+            : 'POST';
+        return this.doRequest(method === 'GET' ? `${path}?${queryString}` : path, method, method === 'POST' ? data : null, method === 'POST'
+            ? 'application/x-www-form-urlencoded; charset=utf-8'
+            : null, 'application/json; charset=utf-8');
+    }
+    /**
+     * Create an instance of `Query`
+     */
+    query() {
+        return new query_1.Query(this.options);
+    }
+    /**
+     * Create an instance of `Collection`.
+     */
+    collection() {
+        return new collection_1.Collection();
+    }
+    /**
+     * Ping the Solr server.
+     */
+    ping() {
+        return this.doQuery(this.ADMIN_PING_HANDLER, '');
+    }
+    /**
+     * Utility only used in tests.
+     *
+     * @param {string} fieldName
+     *   The name of the field to create.
+     * @param {string} fieldType
+     *   The type of field to create.
+     */
+    createSchemaField(fieldName, fieldType) {
+        return this.doRequest(this.getFullHandlerPath('schema'), 'POST', pickJSON(this.options.bigint).stringify({
+            'add-field': {
+                name: fieldName,
+                type: fieldType,
+                multiValued: false,
+                stored: true,
+            },
+        }), 'application/json', 'application/json; charset=utf-8').catch((err) => {
+            // TODO: We should handle this in a more robust way in the future, but
+            //   there is a difference between default setup in Solr 5 and Solr 8,
+            //   so some fields already exist in Solr 8. Hence if that's the case,
+            //   we just ignore that.
+            console.warn(err.message);
+            return {};
+        });
+    }
+}
+exports.Client = Client;
+//# sourceMappingURL=solr.js.map

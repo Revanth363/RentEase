@@ -38,4 +38,10 @@ const ownerSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// ============================================
+// OWNER INDEXES FOR PERFORMANCE
+// ============================================
+ownerSchema.index({ email: 1 }); // P0: Email-based authentication
+ownerSchema.index({ status: 1 }); // P1: Status filtering
+
 module.exports = mongoose.model("Owner", ownerSchema);

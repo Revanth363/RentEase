@@ -34,4 +34,12 @@ const workerSchema = new mongoose.Schema({
   isBooked: { type: Boolean, default: false },
 }, { timestamps: true });
 
+// ============================================
+// WORKER INDEXES FOR PERFORMANCE
+// ============================================
+workerSchema.index({ email: 1 }); // P0: Email-based authentication
+workerSchema.index({ location: 1, serviceType: 1 }); // P1: Worker search and filtering
+workerSchema.index({ status: 1 }); // P1: Status filtering
+workerSchema.index({ area: 1 }); // P2: Area-based queries
+
 module.exports = mongoose.model("Worker", workerSchema);

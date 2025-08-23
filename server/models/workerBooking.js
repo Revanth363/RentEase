@@ -14,4 +14,12 @@ const workerBookingSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// ============================================
+// WORKER BOOKING INDEXES FOR PERFORMANCE
+// ============================================
+workerBookingSchema.index({ workerId: 1 }); // P1: Worker's bookings
+workerBookingSchema.index({ tenantId: 1 }); // P1: Tenant's worker bookings
+workerBookingSchema.index({ workerId: 1, status: 1 }); // P1: Worker bookings by status
+workerBookingSchema.index({ status: 1 }); // P2: Booking status filtering
+
 module.exports = mongoose.model('WorkerBooking', workerBookingSchema);

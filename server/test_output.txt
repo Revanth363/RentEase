@@ -1,0 +1,218 @@
+﻿
+> server@1.0.0 test
+> jest --coverage --detectOpenHandles __tests__/controllers/razorpayPaymentController.test.js
+
+node.exe : (node:21192) [MONGOOSE] Warning: Duplicate schema index on 
+{"email":1} found. This is often due to declaring an index using both "index: 
+true" and "schema.index()". Please remove the duplicate index definition.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:21192) [M...dex definition. 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL __tests__/controllers/razorpayPaymentController.test.js
+  Razorpay Payment Controller
+    Edge Case 1: Initiate rent payment with valid data
+      ΓêÜ should create payment order with valid propertyId and amount (5 ms)
+      ΓêÜ should save payment record to database (1 ms)
+      ΓêÜ should return orderId for frontend payment gateway (1 ms)
+    Edge Case 2: Negative and invalid amounts
+      ΓêÜ should reject negative amount (2 ms)
+      ΓêÜ should reject zero amount (1 ms)
+      ├ù should reject non-numeric amount (32 ms)
+      ├ù should handle decimal amounts (1 ms)
+    Edge Case 3: Missing required fields
+      ΓêÜ should reject when propertyId is missing (1 ms)
+      ΓêÜ should reject when amount is missing (1 ms)
+      ΓêÜ should reject when both fields are missing (1 ms)
+    Edge Case 4: Property not found
+      ├ù should return 404 when property not found (2 ms)
+      ΓêÜ should not call Razorpay API if property not found (1 ms)
+    Edge Case 5: Razorpay API fails
+      ΓêÜ should handle Razorpay API errors (1 ms)
+      ΓêÜ should return error when Razorpay server is down (1 ms)
+    Edge Case 6: Verify payment with valid signature
+      ├ù should verify payment with correct signature (2 ms)
+      ΓêÜ should update payment status to completed after verification (1 ms)
+    Edge Case 7: Verify payment with invalid signature
+      ΓêÜ should reject payment with invalid signature (1 ms)
+      ΓêÜ should not update payment with tampered signature (1 ms)
+    Edge Case 8: Amount verification
+      ΓêÜ should handle amount mismatch detection (1 ms)
+    Edge Case 9: Duplicate payment verification
+      ΓêÜ should handle already verified payment (1 ms)
+    Edge Case 10: Worker payment initiation
+      ΓêÜ should initiate worker payment with valid data (133 ms)
+      ΓêÜ should validate worker payment amount (1 ms)
+    Edge Case 11: Authentication and authorization
+      ΓêÜ should use authenticated user context (1 ms)
+
+  ΓùÅ Razorpay Payment Controller ΓÇ║ Edge Case 2: Negative and invalid 
+amounts ΓÇ║ should reject non-numeric amount
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: 400
+    Received: 500
+
+    Number of calls: 1
+
+    [0m [90m 199 |[39m       [36mawait[39m 
+razorpayPaymentController[33m.[39minitiateRentPayment(req[33m,[39m 
+res)[33m;[39m
+     [90m 200 |[39m       
+    [31m[1m>[22m[39m[90m 201 |[39m       expect(res[33m.[39mstatus)[33
+m.[39mtoHaveBeenCalledWith([35m400[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 202 |[39m       expect(res[33m.[39mjson[33m.[39mmock[33m.[39m
+calls[[35m0[39m][[35m0[39m][33m.[39msuccess)[33m.[39mtoBe([36mfalse[3
+9m)[33m;[39m
+     [90m 203 |[39m     })[33m;[39m
+     [90m 204 |[39m[0m
+
+      at Object.toHaveBeenCalledWith 
+(__tests__/controllers/razorpayPaymentController.test.js:201:26)
+
+  ΓùÅ Razorpay Payment Controller ΓÇ║ Edge Case 2: Negative and invalid 
+amounts ΓÇ║ should handle decimal amounts
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: 200
+    Received: 500
+
+    Number of calls: 1
+
+    [0m [90m 230 |[39m       [36mawait[39m 
+razorpayPaymentController[33m.[39minitiateRentPayment(req[33m,[39m 
+res)[33m;[39m
+     [90m 231 |[39m       
+    [31m[1m>[22m[39m[90m 232 |[39m       expect(res[33m.[39mstatus)[33
+m.[39mtoHaveBeenCalledWith([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 233 |[39m     })[33m;[39m
+     [90m 234 |[39m   })[33m;[39m
+     [90m 235 |[39m[0m
+
+      at Object.toHaveBeenCalledWith 
+(__tests__/controllers/razorpayPaymentController.test.js:232:26)
+
+  ΓùÅ Razorpay Payment Controller ΓÇ║ Edge Case 4: Property not found ΓÇ║ 
+should return 404 when property not found
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: 404
+    Received: 500
+
+    Number of calls: 1
+
+    [0m [90m 285 |[39m       [36mawait[39m 
+razorpayPaymentController[33m.[39minitiateRentPayment(req[33m,[39m 
+res)[33m;[39m
+     [90m 286 |[39m       
+    [31m[1m>[22m[39m[90m 287 |[39m       expect(res[33m.[39mstatus)[33
+m.[39mtoHaveBeenCalledWith([35m404[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 288 |[39m       [36mconst[39m responseData [33m=[39m res[33m.
+[39mjson[33m.[39mmock[33m.[39mcalls[[35m0[39m][[35m0[39m][33m;[39m
+     [90m 289 |[39m       expect(responseData[33m.[39mmessage [33m||[39m 
+responseData[33m.[39merror)[33m.[39mtoBeDefined()[33m;[39m
+     [90m 290 |[39m       expect(responseData[33m.[39msuccess)[33m.[39mto
+Be([36mfalse[39m)[33m;[39m[0m
+
+      at Object.toHaveBeenCalledWith 
+(__tests__/controllers/razorpayPaymentController.test.js:287:26)
+
+  ΓùÅ Razorpay Payment Controller ΓÇ║ Edge Case 6: Verify payment with valid 
+signature ΓÇ║ should verify payment with correct signature
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: 200
+    Received: 500
+
+    Number of calls: 1
+
+    [0m [90m 403 |[39m       [36mawait[39m 
+razorpayPaymentController[33m.[39mverifyRentPayment(req[33m,[39m 
+res)[33m;[39m
+     [90m 404 |[39m       
+    [31m[1m>[22m[39m[90m 405 |[39m       expect(res[33m.[39mstatus)[33
+m.[39mtoHaveBeenCalledWith([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 406 |[39m     })[33m;[39m
+     [90m 407 |[39m
+     [90m 408 |[39m     test([32m'should update payment status to completed 
+after verification'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.toHaveBeenCalledWith 
+(__tests__/controllers/razorpayPaymentController.test.js:405:26)
+
+---------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------
+File                                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                                                                        
+---------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------
+All files                              |    2.19 |     1.15 |    0.67 |     2.3 |                                                                                                                                                          
+ config                                |       0 |        0 |       0 |       0 |                                                                                                                                                          
+  cloudinary.js                        |       0 |      100 |     100 |       0 | 1-8                                                                                                                                                      
+  indexes.js                           |       0 |        0 |       0 |       0 | 11-407                                                                                                                                                   
+  redis.js                             |       0 |        0 |       0 |       0 | 9-204                                                                                                                                                    
+  solr.js                              |       0 |        0 |       0 |       0 | 7-448                                                                                                                                                    
+ controllers                           |    2.77 |     1.38 |    1.06 |     2.9 |                                                                                                                                                          
+  adminBookingController.js            |       0 |        0 |       0 |       0 | 2-436                                                                                                                                                    
+  adminContactUsController.js          |       0 |        0 |       0 |       0 | 2-83                                                                                                                                                     
+  adminMaintenanceController.js        |       0 |        0 |       0 |       0 | 2-259                                                                                                                                                    
+  adminNotificationController.js       |       0 |        0 |       0 |       0 | 2-140                                                                                                                                                    
+  adminPaymentController.js            |       0 |        0 |       0 |       0 | 2-210                                                                                                                                                    
+  adminPropertyController.js           |       0 |        0 |       0 |       0 | 2-250                                                                                                                                                    
+  adminUserController.js               |       0 |        0 |       0 |       0 | 2-492                                                                                                                                                    
+  adminUserVerificationController.js   |       0 |        0 |       0 |       0 | 1-151                                                                                                                                                    
+  adminWorkerPaymentController.js      |       0 |        0 |       0 |       0 | 2-135                                                                                                                                                    
+  bookingController.js                 |       0 |        0 |       0 |       0 | 1-270                                                                                                                                                    
+  contactUsController.js               |       0 |        0 |       0 |       0 | 1-50                                                                                                                                                     
+  ownerController.js                   |       0 |        0 |       0 |       0 | 1-864                                                                                                                                                    
+  propertyController.js                |       0 |        0 |       0 |       0 | 1-233                                                                                                                                                    
+  razorpayPaymentController.js         |   27.48 |    18.51 |   21.42 |   27.56 | 26,51,97,161-162,170-171,198-199,208-209,226-255,287,302-382,395-511,523-542,554-572,584-636,648-699,711-763,775-826,838-905,918-999,1012-1094,1107-1130 
+  razorpayWebhookController.js         |       0 |        0 |       0 |       0 | 2-392                                                                                                                                                    
+  sample_controller.js                 |       0 |        0 |       0 |       0 |                                                                                                                                                          
+  superadminController.js              |       0 |        0 |       0 |       0 | 2-158                                                                                                                                                    
+  superadminauditController.js         |       0 |        0 |       0 |       0 | 4-30                                                                                                                                                     
+  superadminexecutivesController.js    |       0 |        0 |       0 |       0 | 2-128                                                                                                                                                    
+  superadminfinancialController.js     |       0 |        0 |       0 |       0 | 2-142                                                                                                                                                    
+  superadminownerController.js         |       0 |        0 |       0 |       0 | 2-84                                                                                                                                                     
+  superadminsettingsController.js      |       0 |        0 |       0 |       0 | 3-77                                                                                                                                                     
+  superadmintenantPaymentController.js |       0 |        0 |       0 |       0 | 2-157                                                                                                                                                    
+  superadminworkerController.js        |       0 |        0 |       0 |       0 | 2-102                                                                                                                                                    
+  tenantController.js                  |       0 |        0 |       0 |       0 | 2-1653                                                                                                                                                   
+  verificationController.js            |       0 |        0 |       0 |       0 | 1-80                                                                                                                                                     
+  workerController.js                  |       0 |        0 |       0 |       0 | 2-1789                                                                                                                                                   
+ middleware                            |       0 |        0 |       0 |       0 |                                                                                                                                                          
+  auth.js                              |       0 |        0 |       0 |       0 | 2-87                                                                                                                                                     
+  errorLogger.js                       |       0 |        0 |       0 |       0 | 2-77                                                                                                                                                     
+  logger.js                            |       0 |        0 |       0 |       0 | 2-81                                                                                                                                                     
+  metricsMiddleware.js                 |       0 |        0 |       0 |       0 | 7-70                                                                                                                                                     
+  sample_middleware.js                 |       0 |        0 |       0 |       0 |                                                                                                                                                          
+  uploadCloudinary.js                  |       0 |        0 |       0 |       0 | 1-53                                                                                                                                                     
+ utils                                 |       0 |        0 |       0 |       0 |                                                                                                                                                          
+  aggregationPipelines.js              |       0 |        0 |       0 |       0 | 14-752                                                                                                                                                   
+  cacheWrapper.js                      |       0 |        0 |       0 |       0 | 10-260                                                                                                                                                   
+  jwt.js                               |       0 |        0 |       0 |       0 | 3-23                                                                                                                                                     
+  metricsCollector.js                  |       0 |        0 |       0 |       0 | 7-375                                                                                                                                                    
+  performanceMetrics.js                |       0 |        0 |       0 |       0 | 10-353                                                                                                                                                   
+  razorpay.js                          |       0 |        0 |       0 |       0 | 2-167                                                                                                                                                    
+  sample_util.js                       |       0 |        0 |       0 |       0 |                                                                                                                                                          
+  solrSearch.js                        |       0 |        0 |       0 |       0 | 7-333                                                                                                                                                    
+---------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------
+Jest: "global" coverage threshold for statements (80%) not met: 2.19%
+Jest: "global" coverage threshold for branches (75%) not met: 1.15%
+Jest: "global" coverage threshold for lines (80%) not met: 2.3%
+Jest: "global" coverage threshold for functions (85%) not met: 0.67%
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 19 passed, 23 total
+Snapshots:   0 total
+Time:        2.63 s
+Ran all test suites matching 
+__tests__/controllers/razorpayPaymentController.test.js.

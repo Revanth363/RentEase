@@ -1,0 +1,95 @@
+{
+  "name": "solr-client",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "description": " A Solr client library for indexing, adding, deleting, committing, optimizing and searching documents within an Apache Solr installation (version>=3.2)",
+  "version": "0.10.0-rc10",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write \"{lib,examples,test}/**/*.ts\"",
+    "lint": "eslint \"lib/**/*.ts\" \"test/**/*.ts\"",
+    "test-cov": "jscoverage lib lib-cov && mocha -r ts-node/register -R html-cov test/*-test.ts > coverage.html && rm -r lib-cov",
+    "report": "rm -rf report && mkdir report && plato -r -d report main.ts lib/*",
+    "solr:current:start": "docker-compose -f docker-compose-solr-8.yml up --build -d solr8",
+    "solr:current:stop": "docker-compose -f docker-compose-solr-8.yml down",
+    "solr:current:logs": "docker logs solr-node-client_solr8_1",
+    "test:current": "mocha -r ts-node/register -R spec test/*-test.ts --client.bigint=true",
+    "solr:legacy:start": "docker-compose -f docker-compose-solr-5.yml up --build -d solr5",
+    "solr:legacy:stop": "docker-compose -f docker-compose-solr-5.yml down",
+    "solr:legacy:logs": "docker logs solr-node-client_solr5_1",
+    "test:legacy": "mocha -r ts-node/register -R spec test/*-test.ts --client.port=8984 && mocha -r ts-node/register -R spec test/*-test.ts --client.port=8984",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">= 12"
+  },
+  "dependencies": {
+    "duplexer": "^0.1.2",
+    "hnp": "^1.0.1",
+    "json-bigint": "^1.0.0",
+    "JSONStream": "^1.3.5",
+    "proxy-agent": "^5.0.0",
+    "request": "^2.88.2",
+    "tslib": "^2.3.1",
+    "undici": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.10.3",
+    "@types/request": "^2.48.7",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "bignumber.js": "^9.0.1",
+    "chai": "^4.3.4",
+    "csv-stream": "^0.2.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "figc": "^0.0.3",
+    "jasmine-core": "^3.10.1",
+    "minimist": "^1.2.5",
+    "mocha": "^9.1.2",
+    "prettier": "^2.4.1",
+    "ts-node": "^10.2.1",
+    "typescript": "4.4.3"
+  },
+  "files": [
+    "dist/*",
+    "CHANGELOG.md",
+    "CONTRIBUTIONS.md",
+    "LICENSE",
+    "main.ts",
+    "README.md",
+    "UPGRADING.md"
+  ],
+  "keywords": [
+    "solr",
+    "client",
+    "query",
+    "sdk",
+    "search"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lbdremy/solr-node-client"
+  },
+  "author": {
+    "name": "Remy Loubradou",
+    "email": "remy.loubradou@gmail.com",
+    "url": "https://twitter.com/#!/lbdremy"
+  },
+  "contributors": [
+    {
+      "name": "Igor Savin",
+      "email": "kibertoad@gmail.com",
+      "url": "https://twitter.com/kibertoad"
+    },
+    {
+      "name": "Rudolf Byker",
+      "email": "rudolfbyker@gmail.com",
+      "url": "https://github.com/rudolfbyker"
+    }
+  ],
+  "license": "MIT"
+}

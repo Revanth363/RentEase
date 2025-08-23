@@ -45,9 +45,9 @@ const PropertySearch = () => {
       try {
         const params = new URLSearchParams(searchParams);
         const res = await axios.get("/api/search", { params });
-        const data = Array.isArray(res.data) ? res.data : [];
-        setProperties(data);
-        setFilteredProperties(data);
+        const data = res.data?.properties || res.data || [];
+        setProperties(Array.isArray(data) ? data : []);
+        setFilteredProperties(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching properties:", err);
         setProperties([]);
@@ -58,6 +58,15 @@ const PropertySearch = () => {
     };
     fetchProperties();
   }, [searchParams]);
+
+  // Apply client-side filters after fetching
+  useEffect(() => {
+    let filtered = [...properties];
+
+    // All filtering now happens on backend, just apply sorting/display logic here if needed
+
+    setFilteredProperties(filtered);
+  }, [filters, properties]);
 
   // Client-side sorting
   useEffect(() => {
@@ -82,7 +91,7 @@ const PropertySearch = () => {
       }
     });
     setFilteredProperties(sorted);
-  }, [sortBy, properties]);
+  }, [sortBy]);
 
   // Toggle Sidebar (exact EJS behavior)
   const toggleSidebar = () => {
@@ -127,8 +136,9 @@ const PropertySearch = () => {
         params.set(key, Array.isArray(value) ? value.join(",") : value);
       }
     });
-    setSearchParams(params);
     toggleSidebar();
+    // Refresh page with new filters
+    window.location.href = `/search?${params.toString()}`;
   };
 
   const saveProperty = async (id) => {
@@ -162,7 +172,13 @@ const PropertySearch = () => {
 
   return (
     <div className="property-search-page">
-     
+      {/* Overlay */}
+      <div 
+        className="sidebar-overlay" 
+        ref={overlayRef}
+        onClick={toggleSidebar}
+        style={{ cursor: 'pointer' }}
+      ></div>
 
       {/* Filter Sidebar */}
       <aside className="filter-sidebar" ref={sidebarRef}>
@@ -353,18 +369,18 @@ const PropertySearch = () => {
                 <div className="property-info">
                   {/* EXACT MATCH TO YOUR ORIGINAL EJS CARD */}
                   <h3 className="property-name">
-                    {property.type.charAt(0).toUpperCase() +
-                      property.type.slice(1)}{" "}
+                    {(property.subtype || property.type || 'Property').charAt(0).toUpperCase() +
+                      (property.subtype || property.type || 'Property').slice(1)}{" "}
                     in {property.location}
                   </h3>
                   <p className="property-address">{property.address}</p>
 
                   <div className="property-features">
                     <div className="feature">
-                      Bed {property.beds} Bed{property.beds > 1 ? "s" : ""}
+                      Bed {property.bedrooms || property.beds || 0} Bed{(property.bedrooms || property.beds || 0) > 1 ? "s" : ""}
                     </div>
                     <div className="feature">
-                      Bath {property.baths} Bath{property.baths > 1 ? "s" : ""}
+                      Bath {property.bathrooms || property.baths || 0} Bath{(property.bathrooms || property.baths || 0) > 1 ? "s" : ""}
                     </div>
                     <div className="feature">
                       {property.furnished || "Unfurnished"}

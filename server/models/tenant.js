@@ -30,7 +30,11 @@ const tenantSchema = new mongoose.Schema({
   newListings: { type: Boolean, default: false },
 }, { timestamps: true });
 
-// Add indexes for performance
-tenantSchema.index({ _id: 1, maintenanceRequestIds: 1, complaintIds: 1 });
+// ============================================
+// TENANT INDEXES FOR PERFORMANCE
+// ============================================
+tenantSchema.index({ email: 1 }); // P0: Email-based authentication
+tenantSchema.index({ status: 1 }); // P1: Status filtering
+tenantSchema.index({ location: 1 }); // P2: Location-based queries
 
 module.exports = mongoose.model("Tenant", tenantSchema);

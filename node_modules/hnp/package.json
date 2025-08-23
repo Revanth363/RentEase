@@ -1,0 +1,22 @@
+{
+  "name": "hnp",
+  "version": "1.0.1",
+  "description": "The hasNestedProperty method missing in Object. This module does not extend Object.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha test/*-test.js"
+  },
+  "repository": "",
+  "keywords": [
+    "has",
+    "nested",
+    "property",
+    "check",
+    "lookup"
+  ],
+  "author": "Remy Loubradou",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^2.3.4"
+  }
+}

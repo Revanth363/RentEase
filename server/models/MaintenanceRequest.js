@@ -18,4 +18,11 @@ const maintenanceRequestSchema = new mongoose.Schema({
   tenantConfirmationDate: Date,
 }, { timestamps: true });
 
+// ============================================
+// MAINTENANCE REQUEST INDEXES FOR PERFORMANCE
+// ============================================
+maintenanceRequestSchema.index({ propertyId: 1, tenantId: 1 }); // P0: Property and tenant maintenance lookups
+maintenanceRequestSchema.index({ status: 1 }); // P1: Status filtering
+maintenanceRequestSchema.index({ assignedWorker: 1 }); // P1: Worker's maintenance requests
+
 module.exports = mongoose.model('MaintenanceRequest', maintenanceRequestSchema);
