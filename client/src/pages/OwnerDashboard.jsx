@@ -39,6 +39,7 @@ const OwnerDashboard = () => {
   const [showStatusUpdateOverlay, setShowStatusUpdateOverlay] = useState(false);
   const [showDeleteAccountOverlay, setShowDeleteAccountOverlay] = useState(false);
   const [showDeletePropertyOverlay, setShowDeletePropertyOverlay] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState(null);
 
   // Form refs
   const settingsFormRef = useRef();

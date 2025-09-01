@@ -7,7 +7,7 @@ const store = configureStore({
     auth: authReducer,
   },
   // Enable Redux DevTools in development
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: import.meta.env.MODE !== 'production',
 });
 
 export default store;

@@ -78,7 +78,7 @@ const PropertySearch = () => {
           return (a.price || 0) - (b.price || 0);
         case "price-high-to-low":
           return (b.price || 0) - (a.price || 0);
-        case "availability-soon":
+        case "availability-soon": {
           const dateA = a.availableFrom
             ? new Date(a.availableFrom)
             : new Date(9999, 0, 1);
@@ -86,6 +86,7 @@ const PropertySearch = () => {
             ? new Date(b.availableFrom)
             : new Date(9999, 0, 1);
           return dateA - dateB;
+        }
         default:
           return 0;
       }
