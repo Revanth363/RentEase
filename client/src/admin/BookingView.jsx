@@ -1,6 +1,6 @@
 // src/admin/BookingView.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../LoadingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchBookingDetails, fetchWorkerBookingDetails, approveBooking, rejectBooking, approveWorkerBooking, declineWorkerBooking } from '../services/api';
@@ -96,7 +96,6 @@ const CSS = `
 
 const BookingView = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { setIsLoading } = useLoading();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);

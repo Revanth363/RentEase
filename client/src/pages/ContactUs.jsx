@@ -86,7 +86,8 @@ const ContactUs = () => {
           type: "error",
         });
       }
-    } catch (error) {
+    } catch (_e) {
+      console.error(_e);
       setModal({
         show: true,
         message: "Network error. Is your backend running on port 3000?",

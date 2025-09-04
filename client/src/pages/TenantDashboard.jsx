@@ -114,10 +114,9 @@ function getSectionFromUrl() {
 
 const TenantDashboard = () => {
   const navigate = useNavigate();
-  const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [section, setSection] = useState(getSectionFromUrl());
+  const [section] = useState(getSectionFromUrl());
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
 
@@ -199,7 +198,6 @@ const TenantDashboard = () => {
   const {
     user = {},
     currentProperty = null,
-    payments = [],
     activeMaintenanceRequests = [],
     completedMaintenanceRequests = [],
     workers = [],
@@ -209,7 +207,6 @@ const TenantDashboard = () => {
     propertyOwner = null,
     nextPayment = null,
     complaints = [],
-    workerPayments = [],
   } = dashboard && dashboard.success === false ? {} : dashboard || {};
   const handleSubmitMaintenance = async (e) => {
     e.preventDefault();
@@ -270,10 +267,6 @@ const TenantDashboard = () => {
     }
   };
 
-  const openPaymentPopup = () => {
-    setRazorpayPaymentType('rent');
-    setShowRazorpayModal(true);
-  };
   const closePaymentPopup = () => {
     setShowPaymentPopup(false);
     setShowRazorpayModal(false);
@@ -418,7 +411,7 @@ const TenantDashboard = () => {
     }
   };
 
-  const handleDebookWorker = async (workerId, btnRef) => {
+  const handleDebookWorker = async (workerId) => {
     if (
       !confirm(
         "Are you sure you want to debook this worker? Please ensure you have completed this month's payment before proceeding."

@@ -71,12 +71,13 @@ const WorkerRegister = () => {
             setAreas(areasByCity[cityKey]);
           }
         }
-      } catch (err) {
+      } catch (e) {
+        console.error(e);
         console.log("No profile yet or not logged in");
       }
     };
     loadProfile();
-  }, []);
+  }, [areasByCity]);
 
   // Update areas based on city - matching EJS updateAreas() function
   const updateAreas = (cityValue) => {

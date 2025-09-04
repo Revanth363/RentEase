@@ -19,7 +19,8 @@ const CalendarTiles = ({ selectedDate, onSelect, completedDates = [] }) => {
     (completedDates || []).map((d) => {
       try {
         return new Date(d).toISOString().split("T")[0];
-      } catch (e) {
+      } catch (_e) {
+        // intentionally ignored
         return d;
       }
     })

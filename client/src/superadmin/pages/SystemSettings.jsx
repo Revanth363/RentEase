@@ -32,7 +32,7 @@ export default function SystemSettings() {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const res = await updateSystemSettings({ commission, maintenanceMode, maintenanceMessage });
+      await updateSystemSettings({ commission, maintenanceMode, maintenanceMessage });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {

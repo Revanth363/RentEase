@@ -116,7 +116,8 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
       setBookingDetails({ preferredDate: '', description: '' });
       navigate("/tenant/tenant_dashboard");
 
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       alert("Server error while booking");
       setBookingLoading(false);
     }

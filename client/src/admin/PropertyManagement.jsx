@@ -132,7 +132,8 @@ const PropertyManagement = () => {
       );
       alert("Verification updated!");
       fetchProperties();
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       alert("Failed to update verification");
     }
   };
@@ -146,7 +147,8 @@ const PropertyManagement = () => {
       });
       alert("Property deleted!");
       fetchProperties();
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       alert("Failed to delete property");
     }
   };

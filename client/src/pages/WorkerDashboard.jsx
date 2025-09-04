@@ -34,14 +34,14 @@ const WorkerDashboard = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("section") || "services";
   }
-  const [activeSection, setActiveSection] = useState(getSectionFromUrl());
+  const [activeSection] = useState(getSectionFromUrl());
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [user, setUser] = useState({});
   const [services, setServices] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [clients, setClients] = useState([]);
-  const [earnings, setEarnings] = useState({ monthly: 0, pending: 0 });
+  const [earnings] = useState({ monthly: 0, pending: 0 });
   const [transactions, setTransactions] = useState([]);
   const [reviews, setReviews] = useState({
     averageRating: 0,
@@ -57,7 +57,7 @@ const WorkerDashboard = () => {
   const [workHistory, setWorkHistory] = useState([]);
   const [generatedOTP, setGeneratedOTP] = useState(null);
   const [otpInput, setOtpInput] = useState("");
-  const [showOTPField, setShowOTPField] = useState(false);
+  const [showOTPField] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -444,7 +444,8 @@ const WorkerDashboard = () => {
       setGeneratedOTP(res.otp);
       setShowOTPField(true);
       Swal.fire("Success", "OTP generated and tenant notified!", "success");
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       Swal.fire("Error", "Failed to generate OTP", "error");
     }
   };
@@ -470,7 +471,8 @@ const WorkerDashboard = () => {
         const history = await getWorkHistory(selectedClient._id);
         setWorkHistory(history.data || []);
       }
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       Swal.fire("Error", "Invalid OTP", "error");
     }
   };

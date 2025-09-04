@@ -1,7 +1,6 @@
 // client/src/LoadingContext.jsx
-import React, { createContext, useContext, useState } from 'react';
-
-const LoadingContext = createContext();
+import { useContext, useState } from 'react';
+import LoadingContext from './context/LoadingContext';
 
 export const LoadingProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);

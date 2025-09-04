@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
 
 const RazorpayPaymentModal = ({
@@ -15,7 +15,6 @@ const RazorpayPaymentModal = ({
   onPaymentSuccess,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [orderData, setOrderData] = useState(null);
 
   const initiatePayment = async () => {
     try {

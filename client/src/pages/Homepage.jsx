@@ -88,7 +88,6 @@ const HomePage = () => {
         ];
 
   const swipeThreshold1 = 10;
-  const throttleTime1 = 500;
   const scrollThreshold1 = 10;
 
   useEffect(() => {

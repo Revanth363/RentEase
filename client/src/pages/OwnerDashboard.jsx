@@ -33,7 +33,7 @@ const OwnerDashboard = () => {
   const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [section, setSection] = useState(getSectionFromUrl());
+  const [section] = useState(getSectionFromUrl());
 
   // Modals / overlays
   const [showStatusUpdateOverlay, setShowStatusUpdateOverlay] = useState(false);
@@ -155,7 +155,6 @@ const OwnerDashboard = () => {
     user = {},
     properties = [],
     tenants = [],
-    payments = [],
     paymentSummary = {},
     maintenanceRequests = [],
     complaints = [],

@@ -7,7 +7,7 @@ import "../assets/css/PropertySearch.css";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const PropertySearch = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);

@@ -68,7 +68,8 @@ export const signupUser = createAsyncThunk(
       } else {
         return rejectWithValue(data.error || 'Registration failed');
       }
-    } catch (error) {
+    } catch (e) {
+      console.error(e);
       return rejectWithValue('Network error. Please check if the server is running on port 5000.');
     }
   }
@@ -87,13 +88,16 @@ export const logoutUser = createAsyncThunk(
       localStorage.removeItem('user');
       localStorage.removeItem('isAuthenticated');
       return null;
-    } catch (error) {
+    } catch (e) {
+      console.error(e);
       // even if server call fails, still clear client state
       try {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('isAuthenticated');
-      } catch (_e) {}
+      } catch (_e) {
+        // localStorage cleanup failed - intentionally ignored
+      }
       return rejectWithValue('Logout failed');
     }
   }
@@ -116,7 +120,8 @@ export const checkCurrentUser = createAsyncThunk(
       return {
         user: data.user || null,
       };
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       return rejectWithValue("Failed to check current user");
     }
   }
@@ -220,7 +225,9 @@ const authSlice = createSlice({
             localStorage.setItem('token', state.token);
           }
           localStorage.setItem('isAuthenticated', 'true');
-        } catch (_err) {}
+        } catch (_err) {
+          // localStorage write failed - intentionally ignored
+        }
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
@@ -236,7 +243,9 @@ const authSlice = createSlice({
           localStorage.removeItem('user');
           localStorage.removeItem('token');
           localStorage.removeItem('isAuthenticated');
-        } catch (_err) {}
+        } catch (_err) {
+          // localStorage removal failed - intentionally ignored
+        }
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;
@@ -249,7 +258,9 @@ const authSlice = createSlice({
           localStorage.removeItem('user');
           localStorage.removeItem('token');
           localStorage.removeItem('isAuthenticated');
-        } catch (_err) {}
+        } catch (_err) {
+          // localStorage removal failed - intentionally ignored
+        }
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
@@ -273,7 +284,9 @@ const authSlice = createSlice({
             localStorage.setItem('user', JSON.stringify(state.user));
           }
           localStorage.setItem('isAuthenticated', state.isAuthenticated ? 'true' : 'false');
-        } catch (_err) {}
+        } catch (_err) {
+          // localStorage write failed - intentionally ignored
+        }
       })
       .addCase(checkCurrentUser.rejected, (state, action) => {
         state.loading = false;
@@ -286,7 +299,9 @@ const authSlice = createSlice({
           localStorage.removeItem('user');
           localStorage.removeItem('token');
           localStorage.removeItem('isAuthenticated');
-        } catch (_err) {}
+        } catch (_err) {
+          // localStorage removal failed - intentionally ignored
+        }
       });
   },
 });

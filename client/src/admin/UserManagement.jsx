@@ -1,7 +1,7 @@
 // src/pages/admin/UserManagement.jsx
 import axios from 'axios';
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useLoading } from "../LoadingContext";
 import styles from "../assets/css/AdminDashboard.module.css";
 import AdminNavbar from "../components/AdminNavbar";
@@ -11,7 +11,6 @@ import { fetchAdminUsers } from "../services/api";
 const UserManagement = () => {
   const { setIsLoading } = useLoading();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
   const [total, setTotal] = useState(0);

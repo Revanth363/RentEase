@@ -3,10 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { Menu, X, LogOut, BarChart3 } from 'lucide-react';
-import axios from 'axios';
 import { API_URL } from '../../services/api'; // your API base URL
-import { useDispatch, useSelector } from 'react-redux';
-import { logoutUser, selectIsAuthenticated, selectUser } from '../../store/slices/authSlice';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../store/slices/authSlice';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,8 +42,6 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const currentUser = useSelector(selectUser);
 
   // Real logout handler (calls backend /api/logout)
   const handleLogout = async () => {
@@ -57,7 +54,9 @@ export default function Navbar() {
       // If server logout fails, continue to clear client state and navigate
       console.warn('Server logout failed (continuing to clear client state):', error);
     } finally {
-      try { document.cookie = 'accessToken=; Max-Age=0; path=/;'; } catch (_e) {}
+      try { document.cookie = 'accessToken=; Max-Age=0; path=/;'; } catch (e) {
+        // intentionally ignored
+      }
       navigate('/login', { replace: true });
     }
   };

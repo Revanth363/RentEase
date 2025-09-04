@@ -12,7 +12,7 @@ export default function ExampleForm() {
     password: '',
     userType: '',
   });
-  const [errors, setErrors] = useState({});
+  const [errors] = useState({});
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
 

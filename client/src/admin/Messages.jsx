@@ -4,7 +4,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useLoading } from '../LoadingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
-import { fetchAdminMessages } from '../services/api';
 import AdminNavbar from '../components/AdminNavbar';
 
 const Messages = () => {

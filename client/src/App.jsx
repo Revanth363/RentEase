@@ -1,7 +1,7 @@
 // src/App.jsx — FINAL & CLEAN VERSION
 import React from "react";
-import { Routes, Route, useLocation, useNavigate,Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { checkCurrentUser } from "./store/slices/authSlice";
 import { LoadingProvider } from "./LoadingContext";
@@ -67,8 +67,7 @@ import TenantPayments from "./superadmin/pages/TenantPayments";
 
 const App = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch(); // ← add this
+  const dispatch = useDispatch();
 
   const [maintenance, setMaintenance] = React.useState({ mode: false, message: '' });
 
@@ -94,8 +93,6 @@ const App = () => {
   const isSuperAdminRoute = location.pathname.startsWith("/superadmin");
   const shouldHideHeader =
     isAdminRoute || isSuperAdminRoute || hideHeaderPaths.includes(location.pathname);
-
-  const user = useSelector((state) => state.auth.user);
 
   // if maintenance mode and not admin/superadmin, show notice
   if (maintenance.mode && !isAdminRoute && !isSuperAdminRoute) {

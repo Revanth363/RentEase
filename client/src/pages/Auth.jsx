@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Login from './Login';
 import Register from './Register';
@@ -8,7 +8,6 @@ import '../assets/css/Auth.css';
 
 export default function Auth({ initial = 'login' }) {
   const navigate = useNavigate();
-  const location = useLocation();
   
   // Get auth state from Redux
   const user = useSelector((state) => state.auth.user);
