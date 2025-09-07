@@ -1,7 +1,7 @@
 // src/admin/NotificationView.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useLoading } from '../LoadingContext';
+import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { completeTask } from '../services/api';
 import axios from 'axios';
@@ -286,3 +286,4 @@ const NotificationView = () => {
 };
 
 export default NotificationView;
+

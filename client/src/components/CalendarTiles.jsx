@@ -19,8 +19,8 @@ const CalendarTiles = ({ selectedDate, onSelect, completedDates = [] }) => {
     (completedDates || []).map((d) => {
       try {
         return new Date(d).toISOString().split("T")[0];
-      } catch (_e) {
-        // intentionally ignored
+      } catch (e) {
+        console.error('Date parsing failed:', e);
         return d;
       }
     })

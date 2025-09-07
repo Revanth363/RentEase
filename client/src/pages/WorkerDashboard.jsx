@@ -8,7 +8,7 @@ import CalendarTiles from "../components/CalendarTiles";
 import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
 import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
-import { useLoading } from "../LoadingContext";
+import { useLoading } from "../context/useLoading";
 
 import {
   checkBookedStatus,
@@ -41,7 +41,7 @@ const WorkerDashboard = () => {
   const [services, setServices] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [clients, setClients] = useState([]);
-  const [earnings] = useState({ monthly: 0, pending: 0 });
+  const [, setEarnings] = useState({ monthly: 0, pending: 0 });
   const [transactions, setTransactions] = useState([]);
   const [reviews, setReviews] = useState({
     averageRating: 0,
@@ -57,7 +57,7 @@ const WorkerDashboard = () => {
   const [workHistory, setWorkHistory] = useState([]);
   const [generatedOTP, setGeneratedOTP] = useState(null);
   const [otpInput, setOtpInput] = useState("");
-  const [showOTPField] = useState(false);
+  const [, setShowOTPField] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -1194,3 +1194,4 @@ const WorkerDashboard = () => {
 };
 
 export default WorkerDashboard;
+

@@ -4,7 +4,7 @@ import "../assets/css/OwnerDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
 import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
-import { useLoading } from "../LoadingContext";
+import { useLoading } from "../context/useLoading";
 
 const sectionToUrl = (section) => {
   switch (section) {

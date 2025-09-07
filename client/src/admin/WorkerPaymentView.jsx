@@ -1,7 +1,7 @@
 // src/admin/WorkerPaymentView.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useLoading } from '../LoadingContext';
+import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import axios from 'axios';
 
@@ -248,3 +248,4 @@ const WorkerPaymentView = () => {
 };
 
 export default WorkerPaymentView;
+

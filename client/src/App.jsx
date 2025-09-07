@@ -2,7 +2,7 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { checkCurrentUser } from "./store/slices/authSlice";
 import { LoadingProvider } from "./LoadingContext";
 import Header from "./components/Header";

@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import * as tenantService from "../services/tenantService";
 import "../assets/css/TenantDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { useLoading } from "../LoadingContext";
 import CalendarTiles from "../components/CalendarTiles";
 import VerificationStatus from "../components/VerificationStatus";
 import RazorpayPaymentModal from "../components/RazorpayPaymentModal";

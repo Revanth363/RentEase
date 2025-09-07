@@ -1,5 +1,5 @@
 // client/src/LoadingContext.jsx
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import LoadingContext from './context/LoadingContext';
 
 export const LoadingProvider = ({ children }) => {
@@ -11,5 +11,3 @@ export const LoadingProvider = ({ children }) => {
     </LoadingContext.Provider>
   );
 };
-
-export const useLoading = () => useContext(LoadingContext);

@@ -96,6 +96,7 @@ export const logoutUser = createAsyncThunk(
         localStorage.removeItem('user');
         localStorage.removeItem('isAuthenticated');
       } catch (_e) {
+        console.error(_e);
         // localStorage cleanup failed - intentionally ignored
       }
       return rejectWithValue('Logout failed');
@@ -194,6 +195,7 @@ const authSlice = createSlice({
           }
           localStorage.setItem('isAuthenticated', 'true');
         } catch (_err) {
+          void _err;
           // ignore
         }
       })
@@ -226,6 +228,7 @@ const authSlice = createSlice({
           }
           localStorage.setItem('isAuthenticated', 'true');
         } catch (_err) {
+          void _err;
           // localStorage write failed - intentionally ignored
         }
       })
@@ -244,6 +247,7 @@ const authSlice = createSlice({
           localStorage.removeItem('token');
           localStorage.removeItem('isAuthenticated');
         } catch (_err) {
+          void _err;
           // localStorage removal failed - intentionally ignored
         }
       })
@@ -259,6 +263,7 @@ const authSlice = createSlice({
           localStorage.removeItem('token');
           localStorage.removeItem('isAuthenticated');
         } catch (_err) {
+          void _err;
           // localStorage removal failed - intentionally ignored
         }
       })
@@ -285,6 +290,7 @@ const authSlice = createSlice({
           }
           localStorage.setItem('isAuthenticated', state.isAuthenticated ? 'true' : 'false');
         } catch (_err) {
+          void _err;
           // localStorage write failed - intentionally ignored
         }
       })
@@ -300,6 +306,7 @@ const authSlice = createSlice({
           localStorage.removeItem('token');
           localStorage.removeItem('isAuthenticated');
         } catch (_err) {
+          void _err;
           // localStorage removal failed - intentionally ignored
         }
       });

@@ -55,6 +55,7 @@ export default function Navbar() {
       console.warn('Server logout failed (continuing to clear client state):', error);
     } finally {
       try { document.cookie = 'accessToken=; Max-Age=0; path=/;'; } catch (e) {
+        console.error(e);
         // intentionally ignored
       }
       navigate('/login', { replace: true });

@@ -4,7 +4,7 @@ import styles from '../assets/css/WorkerServices.module.css';
 import WorkerCard from '../pages/WorkerCard';
 import { useSearchParams } from 'react-router-dom';
 import { fetchWorkers, fetchWorkerFilters, filterWorkers } from '../services/api';
-import { useLoading } from '../LoadingContext'; // Added
+import { useLoading } from '../context/useLoading'; // Added
 
 export default function WorkerServices() {
   const [searchParams, setSearchParams] = useSearchParams();

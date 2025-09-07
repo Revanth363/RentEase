@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useLoading } from '../LoadingContext';
+import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const API_URL = '/api';

@@ -21,7 +21,7 @@ import axios from "axios";
 import styles from "../assets/css/Homepage.module.css";
 import { fetchProperties, fetchSliderProperties } from "../services/api";
 
-import { useLoading } from '../LoadingContext';
+import { useLoading } from '../context/useLoading';
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const HomePage = () => {

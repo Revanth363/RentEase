@@ -63,7 +63,6 @@ const RazorpayPaymentModal = ({
         return;
       }
 
-      setOrderData(data);
       openRazorpayCheckout(data);
     } catch (err) {
       console.error("Error initiating payment:", err);

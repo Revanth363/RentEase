@@ -1,7 +1,7 @@
 // src/pages/admin/Notifications.jsx
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useLoading } from '../LoadingContext';
+import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
 import { fetchAdminNotifications } from '../services/api';

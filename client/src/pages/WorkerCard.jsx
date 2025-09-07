@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import styles from '../assets/css/WorkerCard.module.css';
-import { useLoading } from '../LoadingContext';
+import { useLoading } from '../context/useLoading';
 
 export default function WorkerCard({ worker: propWorker = null, detailed = false }) {
   const params = useParams();
@@ -366,3 +366,4 @@ Click
     </div>
   );
 }
+
