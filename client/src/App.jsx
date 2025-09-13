@@ -1,7 +1,7 @@
 // src/App.jsx — FINAL & CLEAN VERSION
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+
 import { useDispatch } from "react-redux";
 import { checkCurrentUser } from "./store/slices/authSlice";
 import { LoadingProvider } from "./LoadingContext";

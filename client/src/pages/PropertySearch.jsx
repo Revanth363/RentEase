@@ -72,12 +72,12 @@ const PropertySearch = () => {
   useEffect(() => {
     const sorted = [...filteredProperties].sort((a, b) => {
       switch (sortBy) {
-        case "rating":
-          return (b.rating || 0) - (a.rating || 0);
-        case "price-low-to-high":
-          return (a.price || 0) - (b.price || 0);
-        case "price-high-to-low":
-          return (b.price || 0) - (a.price || 0);
+        case "rating": {
+          return (b.rating || 0) - (a.rating || 0); }
+        case "price-low-to-high": {
+          return (a.price || 0) - (b.price || 0); }
+        case "price-high-to-low": {
+          return (b.price || 0) - (a.price || 0); }
         case "availability-soon": {
           const dateA = a.availableFrom
             ? new Date(a.availableFrom)
