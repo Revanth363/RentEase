@@ -1,1 +1,0 @@
-[Release Notes](https://github.com/birdofpreyru/csurf/releases)
