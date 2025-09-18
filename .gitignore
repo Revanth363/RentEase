@@ -4,5 +4,8 @@ server/logs
 node_modules/
 client/node_modules/
 server/node_modules/
+client/dist/
+server/coverage/
+test_results.txt
 
 .env.docker
