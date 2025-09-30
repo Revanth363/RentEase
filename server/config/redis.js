@@ -2,31 +2,109 @@
  * Redis Configuration and Connection Manager
  * Phase 3: Caching Layer for Query Optimization
  * 
- * This module provides Redis connection management and caching utilities
- * for the optimized database queries from Phase 2.
+ * Supports two modes:
+ * 1. Local/Direct Redis: For development (docker-compose)
+ * 2. Upstash REST API: For production deployment
  */
 
 const redis = require('redis');
 
 let redisClient = null;
 let isConnected = false;
+let useUpstash = false;
+
+// Upstash REST API client
+class UpstashRedisClient {
+  constructor(restUrl, restToken) {
+    this.restUrl = restUrl;
+    this.restToken = restToken;
+  }
+
+  async executeCommand(command) {
+    try {
+      const response = await fetch(`${this.restUrl}/exec`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.restToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          commands: [command],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upstash API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.result?.[0];
+    } catch (error) {
+      console.error('[Upstash] API call failed:', error.message);
+      return null;
+    }
+  }
+
+  async set(key, value, ttl) {
+    const command = ttl ? ['SET', key, value, 'EX', ttl] : ['SET', key, value];
+    return await this.executeCommand(command);
+  }
+
+  async get(key) {
+    return await this.executeCommand(['GET', key]);
+  }
+
+  async del(key) {
+    return await this.executeCommand(['DEL', key]);
+  }
+
+  async keys(pattern) {
+    return await this.executeCommand(['KEYS', pattern]);
+  }
+
+  async flushAll() {
+    return await this.executeCommand(['FLUSHALL']);
+  }
+
+  async info() {
+    return await this.executeCommand(['INFO']);
+  }
+
+  async dbSize() {
+    return await this.executeCommand(['DBSIZE']);
+  }
+}
 
 /**
  * Initialize Redis connection
- * Uses environment variable REDIS_URL or defaults to localhost
- * Falls back gracefully if Redis is unavailable
+ * Detects Upstash credentials first, falls back to local Redis
  */
 async function initializeRedis() {
   try {
+    // Check if using Upstash (production)
+    const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+    const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    if (upstashUrl && upstashToken) {
+      console.log('[Redis] Initializing with Upstash REST API...');
+      redisClient = new UpstashRedisClient(upstashUrl, upstashToken);
+      useUpstash = true;
+      isConnected = true;
+      console.log('[Redis] Upstash REST API connected');
+      return true;
+    }
+
+    // Fall back to local Redis (development)
+    console.log('[Redis] Initializing with local Redis connection...');
     const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    
+
     redisClient = redis.createClient({
       url: redisUrl,
       socket: {
         reconnectStrategy: (retries) => Math.min(retries * 50, 500),
         connectTimeout: 5000,
       },
-      legacyMode: false
+      legacyMode: false,
     });
 
     redisClient.on('error', (err) => {
@@ -79,10 +157,16 @@ function isRedisConnected() {
  */
 async function cacheSet(key, data, ttlSeconds = 300) {
   if (!isConnected || !redisClient) return false;
-  
+
   try {
     const serialized = JSON.stringify(data);
-    await redisClient.setEx(key, ttlSeconds, serialized);
+
+    if (useUpstash) {
+      await redisClient.set(key, serialized, ttlSeconds);
+    } else {
+      await redisClient.setEx(key, ttlSeconds, serialized);
+    }
+
     return true;
   } catch (error) {
     console.warn(`[Redis] Cache set failed for key ${key}:`, error.message);
@@ -97,9 +181,16 @@ async function cacheSet(key, data, ttlSeconds = 300) {
  */
 async function cacheGet(key) {
   if (!isConnected || !redisClient) return null;
-  
+
   try {
-    const cached = await redisClient.get(key);
+    let cached;
+
+    if (useUpstash) {
+      cached = await redisClient.get(key);
+    } else {
+      cached = await redisClient.get(key);
+    }
+
     if (!cached) return null;
     return JSON.parse(cached);
   } catch (error) {
@@ -115,9 +206,14 @@ async function cacheGet(key) {
  */
 async function cacheDel(key) {
   if (!isConnected || !redisClient) return false;
-  
+
   try {
-    await redisClient.del(key);
+    if (useUpstash) {
+      await redisClient.del(key);
+    } else {
+      await redisClient.del(key);
+    }
+
     return true;
   } catch (error) {
     console.warn(`[Redis] Cache delete failed for key ${key}:`, error.message);
@@ -132,12 +228,26 @@ async function cacheDel(key) {
  */
 async function cacheDelPattern(pattern) {
   if (!isConnected || !redisClient) return 0;
-  
+
   try {
-    const keys = await redisClient.keys(pattern);
-    if (keys.length === 0) return 0;
-    
-    await redisClient.del(keys);
+    let keys;
+
+    if (useUpstash) {
+      keys = await redisClient.keys(pattern);
+    } else {
+      keys = await redisClient.keys(pattern);
+    }
+
+    if (!keys || keys.length === 0) return 0;
+
+    for (const key of keys) {
+      if (useUpstash) {
+        await redisClient.del(key);
+      } else {
+        await redisClient.del(key);
+      }
+    }
+
     return keys.length;
   } catch (error) {
     console.warn(`[Redis] Pattern delete failed for ${pattern}:`, error.message);
@@ -151,9 +261,14 @@ async function cacheDelPattern(pattern) {
  */
 async function cacheFlushAll() {
   if (!isConnected || !redisClient) return false;
-  
+
   try {
-    await redisClient.flushAll();
+    if (useUpstash) {
+      await redisClient.flushAll();
+    } else {
+      await redisClient.flushAll();
+    }
+
     console.log('[Redis] All cache flushed');
     return true;
   } catch (error) {
@@ -170,15 +285,20 @@ async function getCacheStats() {
   if (!isConnected || !redisClient) {
     return { connected: false };
   }
-  
+
   try {
-    const info = await redisClient.info();
-    const dbSize = await redisClient.dbSize();
-    
+    let dbSize;
+
+    if (useUpstash) {
+      dbSize = await redisClient.dbSize();
+    } else {
+      dbSize = await redisClient.dbSize();
+    }
+
     return {
       connected: true,
       dbSize,
-      info: info.substring(0, 500) // First 500 chars of info
+      mode: useUpstash ? 'Upstash REST API' : 'Local Redis',
     };
   } catch (error) {
     console.warn('[Redis] Stats retrieval failed:', error.message);
@@ -192,7 +312,9 @@ async function getCacheStats() {
 async function closeRedis() {
   if (redisClient && isConnected) {
     try {
-      await redisClient.quit();
+      if (!useUpstash && redisClient.quit) {
+        await redisClient.quit();
+      }
       isConnected = false;
       console.log('[Redis] Connection closed gracefully');
     } catch (error) {

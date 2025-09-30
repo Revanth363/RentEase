@@ -69,20 +69,27 @@ mongoose
 
 
 // ==============================================
-//           CORS – THIS IS THE CORRECT ONE
+//           CORS – Supports Dev & Production
 // ==============================================
 
+const corsOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://localhost',
+  'http://127.0.0.1',
+  'http://localhost:80',
+];
+
+// Add production origin if specified in environment
+if (process.env.CORS_ORIGIN) {
+  corsOrigins.push(process.env.CORS_ORIGIN);
+  console.log('[CORS] Added production origin:', process.env.CORS_ORIGIN);
+}
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:5174',   // if you ever use another Vite port
-    'http://localhost',         // Docker/Nginx production
-    'http://127.0.0.1',         // Docker/Nginx production
-    'http://localhost:80',      // Docker/Nginx production (explicit port)
-    // Add your production domain later, e.g. 'https://your-app.com'
-  ],
-  credentials: true,              // ← must be true for cookies (accessToken)
+  origin: corsOrigins,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
@@ -90,7 +97,7 @@ app.use(cors({
     'Accept',
     'X-Requested-With'
   ],
-  optionsSuccessStatus: 204       // browsers expect 204 for OPTIONS
+  optionsSuccessStatus: 204
 }));
 
 // Optional but very helpful in dev: log CORS requests
@@ -213,6 +220,17 @@ function generateOtp() {
 
 // OTP will be returned in response for development (no email service needed)
 
+
+// ============================================
+// HEALTH CHECK ENDPOINT (for deployment)
+// ============================================
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    message: 'Backend server is running',
+  });
+});
 
 // Routes
 app.use("/api/property", propertyRoutes);

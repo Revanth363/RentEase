@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: ffsd-backend
+    runtime: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      # Database
+      - key: MONGODB_URI
+        scope: secret
+      # JWT
+      - key: JWT_SECRET
+        scope: secret
+      # Razorpay Payment Gateway
+      - key: RAZORPAY_KEY_ID
+        scope: secret
+      - key: RAZORPAY_KEY_SECRET
+        scope: secret
+      # Cloudinary File Upload
+      - key: CLOUDINARY_NAME
+        scope: secret
+      - key: CLOUDINARY_API_KEY
+        scope: secret
+      - key: CLOUDINARY_API_SECRET
+        scope: secret
+      # Upstash Redis Cache (REST API)
+      - key: UPSTASH_REDIS_REST_URL
+        scope: secret
+      - key: UPSTASH_REDIS_REST_TOKEN
+        scope: secret
+      # CORS Origin (set to your Vercel frontend URL)
+      - key: CORS_ORIGIN
+        scope: secret
+    healthCheckPath: /api/health
+
