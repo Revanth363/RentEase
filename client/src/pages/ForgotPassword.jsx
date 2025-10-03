@@ -24,7 +24,8 @@ export default function ForgotPassword({ embed = false, onBack, onCreateAccount 
     }
     setBusy(true);
     try {
-      const res = await fetch('http://localhost:5000/forgot-password', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const res = await fetch(`${baseUrl}/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -55,7 +56,8 @@ export default function ForgotPassword({ embed = false, onBack, onCreateAccount 
     }
     setBusy(true);
     try {
-      const res = await fetch('http://localhost:5000/verify-otp', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const res = await fetch(`${baseUrl}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -86,7 +88,8 @@ export default function ForgotPassword({ embed = false, onBack, onCreateAccount 
     }
     setBusy(true);
     try {
-      const res = await fetch('http://localhost:5000/reset-password', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const res = await fetch(`${baseUrl}/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

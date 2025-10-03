@@ -74,7 +74,8 @@ export default function Login({ onForgot }) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    window.location.href = `${baseUrl}/auth/google`;
   };
 
   return (

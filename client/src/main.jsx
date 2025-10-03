@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './store';
 import App from './App';
+import './services/axiosConfig'; // ← Initialize axios with env vars
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

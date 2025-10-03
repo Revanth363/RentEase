@@ -25,8 +25,9 @@ const PropertyDetails = () => {
     const fetchProperty = async () => {
       if (!propertyId) return setLoading(false);
       try {
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
         const res = await fetch(
-          `http://localhost:5000/api/property/${propertyId}`
+          `${apiUrl}/property/${propertyId}`
         );
         if (!res.ok) throw new Error("Not found");
         const data = await res.json();
@@ -77,8 +78,9 @@ const PropertyDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
       const res = await fetch(
-        `http://localhost:5000/api/property/${propertyId}/contact`,
+        `${apiUrl}/property/${propertyId}/contact`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

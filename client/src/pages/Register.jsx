@@ -147,7 +147,8 @@ export default function Register() {
 
   // 🔹 GOOGLE REGISTRATION HANDLER
   const handleGoogleRegister = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+    window.location.href = `${baseUrl}/auth/google`;
   };
 
   return (
