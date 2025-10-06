@@ -24,7 +24,7 @@ export default function ForgotPassword({ embed = false, onBack, onCreateAccount 
     }
     setBusy(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       const res = await fetch(`${baseUrl}/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,7 +56,7 @@ export default function ForgotPassword({ embed = false, onBack, onCreateAccount 
     }
     setBusy(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       const res = await fetch(`${baseUrl}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,7 +88,7 @@ export default function ForgotPassword({ embed = false, onBack, onCreateAccount 
     }
     setBusy(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       const res = await fetch(`${baseUrl}/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

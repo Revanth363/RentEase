@@ -1,9 +1,16 @@
 import axios from 'axios';
 
-// Set axios baseURL from environment variable
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// Get base URL from environment (should NOT include /api - services add it)
+const baseURL = import.meta.env.VITE_API_BASE_URL ? 
+  import.meta.env.VITE_API_BASE_URL.replace('/api', '') : 
+  'http://localhost:5000';
 
-axios.defaults.baseURL = baseURL;
+// Construct full API URL
+const apiBaseURL = baseURL.startsWith('http') ? 
+  `${baseURL}/api` : 
+  '/api';
+
+axios.defaults.baseURL = apiBaseURL;
 axios.defaults.withCredentials = true;
 
 // Optional: Add request/response interceptors if needed

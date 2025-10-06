@@ -58,8 +58,8 @@ const ContactUs = () => {
     });
 
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/submit-form`, {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/submit-form`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
