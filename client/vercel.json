@@ -28,10 +28,6 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "connect-src 'self' http://localhost:5000 http://localhost:5173 ws://localhost:5173 https://ffsd-repo-react.onrender.com https://maps.googleapis.com https://*.googleapis.com https://*.gstatic.com https://checkout.razorpay.com https://api.razorpay.com https://cdn.razorpay.com https://lumberjack.razorpay.com"
         }
       ]
     }

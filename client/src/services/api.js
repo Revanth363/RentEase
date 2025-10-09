@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+const API_URL = '';
 export { API_URL };
 
 export const fetchProperties = async () => {
