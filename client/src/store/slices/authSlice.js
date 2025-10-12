@@ -6,7 +6,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
-    const res = await fetch("/login", {
+    const res = await fetch("/api/login", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -38,7 +38,7 @@ export const signupUser = createAsyncThunk(
   'auth/signupUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const res = await fetch('/register', {
+      const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
