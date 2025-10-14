@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../assets/css/BookProperty.module.css";
+import axios from "../services/axiosConfig";
 
 const BookProperty = () => {
   const [searchParams] = useSearchParams();
@@ -13,15 +14,16 @@ const BookProperty = () => {
 
   // Fetch current user session
   useEffect(() => {
-    fetch("/api/check-session", { credentials: "include" })
-      .then((res) => res.json())
+    axios.get("/check-session", { withCredentials: true })
+      .then((res) => res.data)
       .then((data) => {
         if (!data.user || data.user.userType !== "tenant") {
           navigate(`/login?redirect=/book-property?id=${propertyId}`);
         } else {
           setUser(data.user);
         }
-      });
+      })
+      .catch(() => navigate(`/login?redirect=/book-property?id=${propertyId}`));
   }, [navigate, propertyId]);
 
   if (!user) return null; // Wait until user loads
@@ -31,19 +33,14 @@ const BookProperty = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/bookings/book-property", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertyId,
-          startDate: new Date().toISOString(), // backend requires date
-          leaseDuration: 6,
-          comments: "",
-        }),
-      });
+      const response = await axios.post("/bookings/book-property", {
+        propertyId,
+        startDate: new Date().toISOString(), // backend requires date
+        leaseDuration: 6,
+        comments: "",
+      }, { withCredentials: true });
 
-      const result = await response.json();
+      const result = response.data;
 
       if (result.success) {
         setSubmitMessage("Booking request submitted successfully!");

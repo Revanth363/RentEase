@@ -64,7 +64,7 @@ const AdminUserVerifications = () => {
     setLoading(true);
     setIsLoading(true);
     try {
-      const res = await axios.get("/api/admin/verifications/all", { withCredentials: true });
+      const res = await axios.get("/admin/verifications/all", { withCredentials: true });
       let data = Array.isArray(res.data) ? res.data : (res.data?.verifications || res.data?.data || []);
 
       if (appliedFilters.status)

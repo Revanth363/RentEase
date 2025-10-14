@@ -44,7 +44,7 @@ const PropertySearch = () => {
       setLoading(true);
       try {
         const params = new URLSearchParams(searchParams);
-        const res = await axios.get("/api/search", { params });
+        const res = await axios.get("/search", { params });
         const data = res.data?.properties || res.data || [];
         setProperties(Array.isArray(data) ? data : []);
         setFilteredProperties(Array.isArray(data) ? data : []);
