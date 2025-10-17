@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
+import axios from "../services/axiosConfig";
 
 const RazorpayPaymentModal = ({
   isOpen,
@@ -23,35 +24,22 @@ const RazorpayPaymentModal = ({
       let response;
       if (paymentType === "rent") {
         // Initiate rent payment
-        response = await fetch("/api/razorpay/initiate-rent-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            propertyId,
-            ownerId,
-            amount: parseInt(amount),
-          }),
-        });
+        response = await axios.post("/razorpay/initiate-rent-payment", {
+          propertyId,
+          ownerId,
+          amount: parseInt(amount),
+        }, { withCredentials: true });
       } else if (paymentType === "worker") {
         // Initiate worker payment
-        response = await fetch("/api/razorpay/initiate-worker-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            workerId,
-            workingDays: parseInt(workingDays),
-            dailyRate: parseInt(dailyRate),
+        response = await axios.post("/razorpay/initiate-worker-payment", {
+          workerId,
+          workingDays: parseInt(workingDays),
+          dailyRate: parseInt(dailyRate),
           }),
         });
       }
 
-      const data = await response.json();
+      const data = response.data;
 
       if (!data.success) {
         Swal.fire({
@@ -157,37 +145,23 @@ const RazorpayPaymentModal = ({
       let verifyResponse;
       if (paymentType === "rent") {
         console.log('📤 Sending rent payment verification to backend...');
-        verifyResponse = await fetch("/api/razorpay/verify-rent-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            orderId: response.razorpay_order_id,
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature,
-          }),
-        });
+        verifyResponse = await axios.post("/razorpay/verify-rent-payment", {
+          orderId: response.razorpay_order_id,
+          paymentId: response.razorpay_payment_id,
+          signature: response.razorpay_signature,
+        }, { withCredentials: true });
       } else if (paymentType === "worker") {
         console.log('📤 Sending worker payment verification to backend...');
-        verifyResponse = await fetch("/api/razorpay/verify-worker-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            orderId: response.razorpay_order_id,
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature,
-          }),
-        });
+        verifyResponse = await axios.post("/razorpay/verify-worker-payment", {
+          orderId: response.razorpay_order_id,
+          paymentId: response.razorpay_payment_id,
+          signature: response.razorpay_signature,
+        }, { withCredentials: true });
       }
 
       console.log('📥 Response received:', verifyResponse.status, verifyResponse.statusText);
 
-      const verifyData = await verifyResponse.json();
+      const verifyData = verifyResponse.data;
 
       console.log('✅ Verification response data:', verifyData);
 

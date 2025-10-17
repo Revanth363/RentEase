@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import styles from '../assets/css/WorkerCard.module.css';
 import { useLoading } from '../context/useLoading';
+import axios from '../services/axiosConfig';
 
 export default function WorkerCard({ worker: propWorker = null, detailed = false }) {
   const params = useParams();
@@ -27,9 +28,8 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
     // fetch session user
     (async () => {
       try {
-        const res = await fetch("/api/check-session", { credentials: "include" });
-        const data = await res.json();
-        setLoggedInUser(data.user || null);
+        const res = await axios.get("/check-session", { withCredentials: true });
+        setLoggedInUser(res.data.user || null);
       } catch {
         setLoggedInUser(null);
       }
@@ -46,10 +46,8 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
 
       (async () => {
         try {
-          const res = await fetch(`/api/workers/${id}`);
-          if (!res.ok) throw new Error('Failed to load worker');
-          const data = await res.json();
-          if (mounted) setWorker(data);
+          const res = await axios.get(`/workers/${id}`);
+          if (mounted) setWorker(res.data);
         } catch (err) {
           if (mounted) {
             setError(err.message || 'Failed to load worker');
