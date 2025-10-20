@@ -35,8 +35,7 @@ const RazorpayPaymentModal = ({
           workerId,
           workingDays: parseInt(workingDays),
           dailyRate: parseInt(dailyRate),
-          }),
-        });
+        }, { withCredentials: true });
       }
 
       const data = response.data;
