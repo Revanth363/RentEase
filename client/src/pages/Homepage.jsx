@@ -99,11 +99,11 @@ const HomePage = () => {
         const [properties, sliderProperties, locationsRes, propertyTypesRes] = await Promise.all([
           fetchProperties(),
           fetchSliderProperties(),
-          axios.get('/api/locations', { withCredentials: true }).catch(err => {
+          axios.get('/locations', { withCredentials: true }).catch(err => {
             console.error("Error fetching locations:", err);
             return { data: [] };
           }),
-          axios.get('/api/property-types', { withCredentials: true }).catch(err => {
+          axios.get('/property-types', { withCredentials: true }).catch(err => {
             console.error("Error fetching property types:", err);
             return { data: [] };
           }),

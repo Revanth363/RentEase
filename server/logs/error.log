@@ -683,3 +683,22 @@
 2026-04-17T10:02:54.869Z | 404 | GET | /api/health | 0.252ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
 2026-04-17T10:03:24.926Z | 404 | GET | /api/health | 0.464ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
 2026-04-17T10:03:54.976Z | 404 | GET | /api/health | 0.324ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:19:56.608Z | 401 | GET | /api/me | 1.500ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: No token provided
+2026-04-17T16:20:06.617Z | 500 | GET | /api/properties | 10007.178ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: Failed to load properties
+2026-04-17T16:20:06.619Z | 500 | GET | /api/slider-properties | 10004.971ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: Failed to load slider properties
+2026-04-17T16:20:06.622Z | 500 | GET | /api/locations | 10006.690ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: Failed to load locations
+2026-04-17T16:20:06.624Z | 500 | GET | /api/property-types | 10008.307ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: Failed to load property types
+2026-04-17T16:20:06.627Z | 500 | GET | /api/public-settings | 10010.221ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: No error message
+2026-04-17T16:20:17.169Z | 404 | GET | /api/health | 56.628ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:20:22.261Z | 404 | GET | /api/health | 2.199ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:20:52.360Z | 404 | GET | /api/health | 0.645ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:21:21.488Z | 401 | GET | /api/me | 1.359ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: No token provided
+2026-04-17T16:21:22.455Z | 404 | GET | /api/health | 0.788ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:21:26.172Z | 401 | GET | /api/me | 0.658ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: No token provided
+2026-04-17T16:21:32.778Z | 401 | GET | /api/me | 0.425ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: No token provided
+2026-04-17T16:21:32.784Z | 401 | GET | /api/me | 0.312ms | User: guest | IP: ::ffff:172.18.0.5 | Body: - | Msg: No token provided
+2026-04-17T16:21:52.536Z | 404 | GET | /api/health | 0.197ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:22:22.620Z | 404 | GET | /api/health | 0.755ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:22:52.698Z | 404 | GET | /api/health | 0.391ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:23:22.769Z | 404 | GET | /api/health | 0.253ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-17T16:23:52.853Z | 404 | GET | /api/health | 0.349ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found

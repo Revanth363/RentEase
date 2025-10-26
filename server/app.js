@@ -79,6 +79,8 @@ const corsOrigins = [
   'http://localhost',
   'http://127.0.0.1',
   'http://localhost:80',
+  'https://rentease-lyart.vercel.app',
+  'https://rentease-jfqjlgw2n-scs837838revanth10c1a-5541s-projects.vercel.app',
 ];
 
 // Add production origin if specified in environment

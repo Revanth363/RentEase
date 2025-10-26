@@ -40,7 +40,7 @@ const VerificationStatus = ({ userId, userModel }) => {
     formData.append('userId', userId);
     formData.append('userModel', userModel);
     try {
-      await axios.post('/api/verification/upload', formData, { withCredentials: true });
+      await axios.post('/verification/upload', formData, { withCredentials: true });
       setFileInput([]);
       setUploadSuccess(true);
       fetchVerification();
