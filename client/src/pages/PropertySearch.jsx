@@ -33,7 +33,7 @@ const PropertySearch = () => {
   // Check session
   useEffect(() => {
     axios
-      .get("/api/check-session", { withCredentials: true })
+      .get(\"/check-session\", { withCredentials: true })
       .then((res) => setUser(res.data.user))
       .catch(() => setUser(null));
   }, []);

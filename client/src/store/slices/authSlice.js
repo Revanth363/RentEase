@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from '../../services/axiosConfig';
 
 // ============ ASYNC THUNKS ============
 
@@ -6,30 +7,26 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const res = await axios.post("/login", credentials, { withCredentials: true });
+      const data = res.data;
 
-    const data = await res.json();
+      if (!data.success) {
+        return rejectWithValue(data.error || "Login failed");
+      }
 
-    if (!res.ok || !data.success) {
-      return rejectWithValue(data.error || "Login failed");
+      // After login → fetch current user
+      const meRes = await axios.get("/me", { withCredentials: true });
+      const meData = meRes.data;
+
+      return {
+        user: meData.user,
+        redirectUrl: data.redirectUrl,
+        token: data.token || null,
+      };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || error.message || "Login failed");
     }
-
-    // After login → fetch current user
-    const meRes = await fetch("/api/me", { credentials: "include" });
-    if (!meRes.ok) throw new Error("Failed to get user");
-
-    const meData = await meRes.json();
-
-    return {
-      user: meData.user,
-      redirectUrl: data.redirectUrl,
-      token: data.token || null,
-    };
   }
 );
 
@@ -38,22 +35,10 @@ export const signupUser = createAsyncThunk(
   'auth/signupUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(userData),
-      });
+      const res = await axios.post('/register', userData, { withCredentials: true });
+      const data = res.data;
 
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { error: text || 'Registration failed' };
-      }
-
-      if (res.ok && data.success) {
+      if (data.success) {
         if (data.token) {
           localStorage.setItem('token', data.token);
         }
@@ -70,7 +55,7 @@ export const signupUser = createAsyncThunk(
       }
     } catch (e) {
       console.error(e);
-      return rejectWithValue('Network error. Please check if the server is running on port 5000.');
+      return rejectWithValue(e.response?.data?.error || 'Network error. Please check if the server is running.');
     }
   }
 );
@@ -81,7 +66,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // inform server so cookie is cleared
-      await fetch('/api/logout', { method: 'GET', credentials: 'include' });
+      await axios.get('/logout', { withCredentials: true });
 
       // clear any persisted state locally
       localStorage.removeItem('token');
@@ -109,17 +94,9 @@ export const checkCurrentUser = createAsyncThunk(
   "auth/checkCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch("/api/me", {
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        return rejectWithValue("No active session");
-      }
-
-      const data = await res.json();
+      const res = await axios.get("/me", { withCredentials: true });
       return {
-        user: data.user || null,
+        user: res.data.user || null,
       };
     } catch (e) {
       console.error(e);
