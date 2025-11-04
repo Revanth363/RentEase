@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authAxios } from '../../services/axiosConfig';
 import axios from '../../services/axiosConfig';
 
 // ============ ASYNC THUNKS ============
@@ -8,7 +9,7 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      const res = await axios.post("/login", credentials, { withCredentials: true });
+      const res = await authAxios.post("/login", credentials, { withCredentials: true });
       const data = res.data;
 
       if (!data.success) {
@@ -35,7 +36,7 @@ export const signupUser = createAsyncThunk(
   'auth/signupUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const res = await axios.post('/register', userData, { withCredentials: true });
+      const res = await authAxios.post('/register', userData, { withCredentials: true });
       const data = res.data;
 
       if (data.success) {
