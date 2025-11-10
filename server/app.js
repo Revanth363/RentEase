@@ -1104,9 +1104,10 @@ app.post("/login", async (req, res) => {
 
       const token = signToken(payload, { expiresIn: "1h" });
 
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: false,
+        secure: isProduction,
         sameSite: "lax",
         maxAge: 60 * 60 * 1000,
       });
@@ -1143,9 +1144,10 @@ app.post("/login", async (req, res) => {
 
       const token = signToken(payload, { expiresIn: "1h" });
 
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: false,
+        secure: isProduction,
         sameSite: "lax",
         maxAge: 60 * 60 * 1000,
       });
@@ -1200,9 +1202,10 @@ app.post("/login", async (req, res) => {
 
     const token = signToken(payload, { expiresIn: "1h" });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,
     });

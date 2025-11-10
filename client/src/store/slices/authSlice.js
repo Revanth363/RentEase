@@ -16,7 +16,14 @@ export const loginUser = createAsyncThunk(
         return rejectWithValue(data.error || "Login failed");
       }
 
-      // After login → fetch current user
+      // Store token from response in localStorage + set it in axios headers
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        // Add to axios default headers for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      }
+
+      // After login → fetch current user with the token now available
       const meRes = await axios.get("/me", { withCredentials: true });
       const meData = meRes.data;
 
@@ -26,6 +33,7 @@ export const loginUser = createAsyncThunk(
         token: data.token || null,
       };
     } catch (error) {
+      console.error('[Auth] Login error:', error);
       return rejectWithValue(error.response?.data?.error || error.message || "Login failed");
     }
   }
@@ -95,12 +103,22 @@ export const checkCurrentUser = createAsyncThunk(
   "auth/checkCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
+      // If token exists in localStorage, restore it to axios headers
+      const token = localStorage.getItem('token');
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        console.log('[Auth] Restored token from localStorage');
+      }
+
       const res = await axios.get("/me", { withCredentials: true });
       return {
         user: res.data.user || null,
       };
     } catch (e) {
-      console.error(e);
+      console.error('[Auth] checkCurrentUser error:', e);
+      // Clear token if it's invalid
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
       return rejectWithValue("Failed to check current user");
     }
   }
@@ -116,6 +134,12 @@ const getInitialState = () => {
   const token = localStorage.getItem('token');
   const user = localStorage.getItem('user');
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+  // If token exists, restore it to axios headers
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('[Auth] Restored token from localStorage to axios headers');
+  }
 
   return {
     user: user ? JSON.parse(user) : null,
