@@ -1329,7 +1329,13 @@ app.get(
         maxAge: 60 * 60 * 1000,
       });
 
-      res.redirect("http://localhost:5173/google-auth-success");
+      // Redirect to frontend with token (production-aware)
+      const frontendURL = process.env.FRONTEND_URL || 
+        (process.env.NODE_ENV === 'production' 
+          ? 'https://rentease-lyart.vercel.app'
+          : 'http://localhost:5173');
+      const redirectURL = `${frontendURL}/google-auth-success?token=${token}`;
+      res.redirect(redirectURL);
     } catch (err) {
       err.status = 500;
       next(err);

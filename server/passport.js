@@ -5,12 +5,20 @@ const Tenant = require("./models/tenant");
 const Owner = require("./models/owner");
 const Worker = require("./models/worker");
 
+// Construct full callback URL (required by Google OAuth)
+const callbackURL = process.env.GOOGLE_CALLBACK_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://ffsd-repo-react.onrender.com/auth/google/callback'
+    : 'http://localhost:5000/auth/google/callback');
+
+console.log('[Passport] Google OAuth Callback URL:', callbackURL);
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: callbackURL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
