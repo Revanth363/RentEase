@@ -12,8 +12,12 @@ console.log('[Axios Config] VITE_API_BASE_URL env:', envBaseURL);
 let baseURL;
 
 if (envBaseURL) {
-  // Remove /api suffix if present (we add it later)
-  baseURL = envBaseURL.replace('/api', '').replace(/\/$/, '');
+  // Remove /api suffix if present (we add it once later, consistently)
+  baseURL = envBaseURL.trim();
+  if (baseURL.endsWith('/api')) {
+    baseURL = baseURL.slice(0, -4); // Remove last 4 chars "/api"
+  }
+  baseURL = baseURL.replace(/\/$/, ''); // Remove trailing slash
   console.log('[Axios Config] Using env BaseURL:', baseURL);
 } else {
   // Use intelligent default based on environment
