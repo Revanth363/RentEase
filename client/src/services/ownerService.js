@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const BASE = "/api/owner";
-const BOOKING_BASE = "/api/bookings";
+const BASE = "/owner";
+const BOOKING_BASE = "/bookings";
 
 export const getOwnerDashboard = async () => {
   try {
@@ -16,7 +16,7 @@ export const getOwnerDashboard = async () => {
 };
 
 export const deleteProperty = async (propertyId) => {
-  const res = await axios.delete(`/api/property/${propertyId}`, {
+  const res = await axios.delete(`/property/${propertyId}`, {
     withCredentials: true,
   });
   return res.data;

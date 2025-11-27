@@ -12,7 +12,7 @@ export const confirmMaintenanceFixed = async ({ requestId, confirmation }) => {
 };
 import axios from "axios";
 
-const BASE = "/api/tenant";
+const BASE = "/tenant";
 
 export const getDashboard = async () => {
   try {
