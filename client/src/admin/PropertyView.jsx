@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
-import axios from 'axios';
+import axios from '../services/axiosConfig';
 import { fetchPropertyDetails, toggleVerify, deleteProperty } from '../services/api';
 
 const fmt   = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -142,7 +142,7 @@ const PropertyView = () => {
   const handleTogglePopular = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.put(`/api/admin/property/${id}/toggle-popular`, 
+      const response = await axios.put(`/admin/property/${id}/toggle-popular`, 
         { is_popular: !property.is_popular }, 
         { withCredentials: true }
       );

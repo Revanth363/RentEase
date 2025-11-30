@@ -4,9 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { completeMaintenance } from '../services/api';
-import axios from 'axios';
-
-const API = '/api';
+import axios from '../services/axiosConfig';
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 
 const StatusBadge = ({ status }) => {
@@ -102,7 +100,7 @@ const MaintenanceView = () => {
     const load = async () => {
       try {
         setLoading(true); setIsLoading(true);
-        const res = await axios.get(`${API}/admin/maintenance/${id}`, { withCredentials: true });
+        const res = await axios.get(`/admin/maintenance/${id}`, { withCredentials: true });
         setRequest(res.data.request || res.data.maintenanceRequest || res.data);
       } catch { setError('Failed to load maintenance request details.'); }
       finally { setLoading(false); setIsLoading(false); }

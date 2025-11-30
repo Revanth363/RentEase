@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../services/axiosConfig';
 import { useEffect, useState } from 'react';
 
 const VerificationStatus = ({ userId, userModel }) => {
@@ -17,7 +17,7 @@ const VerificationStatus = ({ userId, userModel }) => {
   const fetchVerification = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/verification/status?userId=${userId}&userModel=${userModel}`, { withCredentials: true });
+      const res = await axios.get(`/verification/status?userId=${userId}&userModel=${userModel}`, { withCredentials: true });
       setVerification(res.data);
     } catch {
       setVerification(null);

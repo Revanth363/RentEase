@@ -1,6 +1,7 @@
 // src/pages/admin/Messages.jsx
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import axios from '../services/axiosConfig';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
@@ -32,12 +33,12 @@ const Messages = () => {
     if (appliedFilters.fromDate) params.set('fromDate', appliedFilters.fromDate);
     if (appliedFilters.toDate) params.set('toDate', appliedFilters.toDate);
 
-    const url = params.toString() ? `/api/admin/messages?${params.toString()}` : '/api/admin/messages';
+    const url = params.toString() ? `/admin/messages?${params.toString()}` : '/admin/messages';
 
-    const res = await fetch(url, { credentials: 'include' });
-    if (!res.ok) throw new Error('Failed to fetch');
+    const res = await axios.get(url, { withCredentials: true });
+    if (!res.data) throw new Error('Failed to fetch');
 
-    const data = await res.json();
+    const data = res.data;
     const allMessages = data.contactSubmissions || [];
 
     // Client-side pagination only

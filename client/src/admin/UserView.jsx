@@ -1,11 +1,9 @@
 // src/pages/admin/UserView.jsx
-import axios from 'axios';
+import axios from '../services/axiosConfig';
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
-
-const API_URL = '/api';
 
 /* ─── tiny helpers ─────────────────────────────────────────── */
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -374,7 +372,7 @@ const UserView = () => {
       try {
         setLoading(true);
         setIsLoading(true);
-        const res  = await axios.get(`${API_URL}/admin/user/${id}/${userType}`, { withCredentials: true });
+        const res  = await axios.get(`/admin/user/${id}/${userType}`, { withCredentials: true });
         const data = res.data;
         setUser(data);
         setTenantProperty(data.tenantProperty || null);
@@ -415,7 +413,7 @@ const UserView = () => {
     const action = newStatus === 'Suspended' ? 'Suspend' : 'Reactivate';
     if (!window.confirm(`${action} this account?`)) return;
     try {
-      await axios.post(`${API_URL}/admin/user/status/${id}/${userType}`, { status: newStatus }, { withCredentials: true });
+      await axios.post(`/admin/user/status/${id}/${userType}`, { status: newStatus }, { withCredentials: true });
       setUser(u => ({ ...u, status: newStatus }));
     } catch {
       alert('Failed to update account status.');

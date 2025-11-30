@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import axios from "../services/axiosConfig";
 import * as tenantService from "../services/tenantService";
 import "../assets/css/TenantDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -179,9 +180,8 @@ const TenantDashboard = () => {
     if (userId) {
       (async () => {
         try {
-          const res = await fetch(`/api/verification/status?userId=${userId}&userModel=tenant`);
-          const data = await res.json();
-          setVerificationStatus(data.status);
+          const res = await axios.get(`/verification/status?userId=${userId}&userModel=tenant`);
+          setVerificationStatus(res.data.status);
         } catch {
           setVerificationStatus(null);
         } finally {
@@ -418,12 +418,8 @@ const TenantDashboard = () => {
     )
       return;
     try {
-      const response = await fetch(`/api/workers/debook/${workerId}`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await response.json();
+      const response = await axios.post(`/workers/debook/${workerId}`);
+      const data = response.data;
       if (data.success) {
         alert(data.message || "Worker debooked");
         setDashboard((prev) => ({
@@ -633,18 +629,13 @@ const TenantDashboard = () => {
 
     try {
       // Step 1: Initiate Razorpay order
-      const initiateRes = await fetch("/api/razorpay/initiate-rent-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          propertyId: currentProperty._id,
-          amount: currentProperty.price,
-          // Don't send dueDate - let backend calculate it (30 days from today)
-        }),
+      const initiateRes = await axios.post("/razorpay/initiate-rent-payment", {
+        propertyId: currentProperty._id,
+        amount: currentProperty.price,
+        // Don't send dueDate - let backend calculate it (30 days from today)
       });
 
-      const initiateData = await initiateRes.json();
+      const initiateData = initiateRes.data;
 
       if (!initiateData.success) {
         alert(initiateData.message || "Failed to initiate payment");
@@ -667,18 +658,13 @@ const TenantDashboard = () => {
         handler: async (response) => {
           // Step 3: Verify Payment
           try {
-            const verifyRes = await fetch("/api/razorpay/verify-rent-payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              }),
+            const verifyRes = await axios.post("/razorpay/verify-rent-payment", {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
             });
 
-            const verifyData = await verifyRes.json();
+            const verifyData = verifyRes.data;
 
             if (verifyData.success) {
               Swal.fire({
@@ -716,16 +702,11 @@ const TenantDashboard = () => {
             // When user closes the payment modal without completing payment
             console.log("Payment cancelled by user");
             try {
-              const cancelRes = await fetch("/api/razorpay/cancel-rent-payment", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                  orderId: initiateData.payment.orderId,
-                }),
+              const cancelRes = await axios.post("/razorpay/cancel-rent-payment", {
+                orderId: initiateData.payment.orderId,
               });
 
-              const cancelData = await cancelRes.json();
+              const cancelData = cancelRes.data;
 
               if (cancelData.success) {
                 Swal.fire({

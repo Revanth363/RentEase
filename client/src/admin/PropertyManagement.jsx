@@ -1,5 +1,5 @@
 // src/pages/admin/PropertyManagement.jsx
-import axios from "axios";
+import axios from "../services/axiosConfig";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLoading } from "../context/useLoading";

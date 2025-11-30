@@ -1,7 +1,7 @@
 // src/services/workerService.js
 import axios from "axios";
 
-const API = "/api/workers";
+const API = "/workers";
 
 export const getDashboardData = async () => {
   const res = await axios.get(`${API}/dashboard`, {

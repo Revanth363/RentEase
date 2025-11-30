@@ -4,9 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { completeTask } from '../services/api';
-import axios from 'axios';
-
-const API = '/api';
+import axios from '../services/axiosConfig';
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 
 const StatusBadge = ({ status }) => {
@@ -107,7 +105,7 @@ const NotificationView = () => {
     const load = async () => {
       try {
         setLoading(true); setIsLoading(true);
-        const res = await axios.get(`${API}/admin/notification/${id}`, { withCredentials: true });
+        const res = await axios.get(`/admin/notification/${id}`, { withCredentials: true });
         setNotif(res.data.notification || res.data);
       } catch { setError('Failed to load notification details.'); }
       finally { setLoading(false); setIsLoading(false); }

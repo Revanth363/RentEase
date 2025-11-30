@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
-import axios from 'axios';
-
-const API = '/api';
+import axios from '../services/axiosConfig';
 const fmt   = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 const money = (n) => n != null ? `₹${Number(n).toLocaleString('en-IN')}` : '—';
 
@@ -99,7 +97,7 @@ const WorkerPaymentView = () => {
     const load = async () => {
       try {
         setLoading(true); setIsLoading(true);
-        const res = await axios.get(`${API}/admin/worker-payment/${id}`, { withCredentials: true });
+        const res = await axios.get(`/admin/worker-payment/${id}`, { withCredentials: true });
         setPayment(res.data.payment || res.data);
       } catch { setError('Failed to load worker payment details.'); }
       finally { setLoading(false); setIsLoading(false); }

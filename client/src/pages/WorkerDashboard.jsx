@@ -84,9 +84,8 @@ const WorkerDashboard = () => {
     if (user && user._id) {
       (async () => {
         try {
-          const res = await fetch(`/api/verification/status?userId=${user._id}&userModel=worker`);
-          const data = await res.json();
-          setVerificationStatus(data.status);
+          const res = await axios.get(`/verification/status?userId=${user._id}&userModel=worker`);
+          setVerificationStatus(res.data.status);
         } catch {
           setVerificationStatus(null);
         } finally {
@@ -483,9 +482,7 @@ const WorkerDashboard = () => {
       const newNotifications = notifications.filter(n => n.isNew === true);
       newNotifications.forEach(async (notification) => {
         try {
-          await fetch(`/api/workers/notifications/${notification._id}/read`, {
-            method: "POST",
-          });
+          await axios.post(`/workers/notifications/${notification._id}/read`);
         } catch (err) {
           console.error("Error marking notification as read:", err);
         }

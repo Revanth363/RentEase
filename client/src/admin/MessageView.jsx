@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
-import axios from 'axios';
-
-const API = '/api';
+import axios from '../services/axiosConfig';
 const fmt = (d) => d ? new Date(d).toLocaleString('en-IN', {
   day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
 }) : '—';
@@ -92,7 +90,7 @@ const MessageView = () => {
     const load = async () => {
       try {
         setLoading(true); setIsLoading(true);
-        const res = await axios.get(`${API}/admin/message/${id}`, { withCredentials: true });
+        const res = await axios.get(`/admin/message/${id}`, { withCredentials: true });
         setMsg(res.data.submission || res.data.contact || res.data);
       } catch { setError('Failed to load message details.'); }
       finally { setLoading(false); setIsLoading(false); }

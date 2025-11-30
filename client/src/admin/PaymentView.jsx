@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
-import axios from 'axios';
-
-const API = '/api';
+import axios from '../services/axiosConfig';
 const fmt   = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 const money = (n) => n != null ? `₹${Number(n).toLocaleString('en-IN')}` : '—';
 
@@ -104,7 +102,7 @@ const PaymentView = () => {
     const load = async () => {
       try {
         setLoading(true); setIsLoading(true);
-        const res = await axios.get(`${API}/admin/payment/${id}`, { withCredentials: true });
+        const res = await axios.get(`/admin/payment/${id}`, { withCredentials: true });
         setPayment(res.data.payment || res.data);
       } catch { setError('Failed to load payment details.'); }
       finally { setLoading(false); setIsLoading(false); }
@@ -116,7 +114,7 @@ const PaymentView = () => {
     if (!window.confirm('Issue a refund for this payment?')) return;
     try {
       setIsLoading(true);
-      await axios.post(`${API}/admin/payment/${id}/refund`, {}, { withCredentials: true });
+      await axios.post(`/admin/payment/${id}/refund`, {}, { withCredentials: true });
       alert('Refund issued!'); window.location.reload();
     } catch { alert('Error issuing refund.'); }
     finally { setIsLoading(false); }
@@ -126,7 +124,7 @@ const PaymentView = () => {
     if (!window.confirm('Retry this payment?')) return;
     try {
       setIsLoading(true);
-      await axios.post(`${API}/admin/payment/${id}/retry`, {}, { withCredentials: true });
+      await axios.post(`/admin/payment/${id}/retry`, {}, { withCredentials: true });
       alert('Payment retried!'); window.location.reload();
     } catch { alert('Error retrying payment.'); }
     finally { setIsLoading(false); }

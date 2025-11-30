@@ -1,5 +1,5 @@
 // src/pages/admin/UserManagement.jsx
-import axios from 'axios';
+import axios from '../services/axiosConfig';
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLoading } from "../context/useLoading";
@@ -137,7 +137,7 @@ const handleSuspend = async (userId, userType, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     
     await axios.post(
-      `/api/admin/user/status/${userId}/${userType.toLowerCase()}`,
+      `/admin/user/status/${userId}/${userType.toLowerCase()}`,
       { status: newStatus },
       { withCredentials: true }
     );
@@ -155,7 +155,7 @@ const handleDelete = async (userId, userType) => {
 
   try {
     await axios.delete(
-      `/api/admin/user/delete/${userId}/${userType.toLowerCase()}`,
+      `/admin/user/delete/${userId}/${userType.toLowerCase()}`,
       { withCredentials: true }
     );
 

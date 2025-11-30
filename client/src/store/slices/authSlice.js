@@ -33,7 +33,6 @@ export const loginUser = createAsyncThunk(
         token: data.token || null,
       };
     } catch (error) {
-      console.error('[Auth] Login error:', error);
       return rejectWithValue(error.response?.data?.error || error.message || "Login failed");
     }
   }
@@ -107,7 +106,6 @@ export const checkCurrentUser = createAsyncThunk(
       const token = localStorage.getItem('token');
       if (token) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        console.log('[Auth] Restored token from localStorage');
       }
 
       const res = await axios.get("/me", { withCredentials: true });
@@ -115,7 +113,6 @@ export const checkCurrentUser = createAsyncThunk(
         user: res.data.user || null,
       };
     } catch (e) {
-      console.error('[Auth] checkCurrentUser error:', e);
       // Clear token if it's invalid
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
@@ -138,7 +135,6 @@ const getInitialState = () => {
   // If token exists, restore it to axios headers
   if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    console.log('[Auth] Restored token from localStorage to axios headers');
   }
 
   return {

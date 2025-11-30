@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import axios from "../services/axiosConfig";
 import * as ownerService from "../services/ownerService";
 import "../assets/css/OwnerDashboard.css";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -88,9 +89,8 @@ const OwnerDashboard = () => {
 
     (async () => {
       try {
-        const res = await fetch(`/api/verification/status?userId=${dashboard.user._id}&userModel=owner`);
-        const data = await res.json();
-        setVerificationStatus(data.status);
+        const res = await axios.get(`/verification/status?userId=${dashboard.user._id}&userModel=owner`);
+        setVerificationStatus(res.data.status);
       } catch (err) {
         console.error("Verification status fetch failed", err);
         setVerificationStatus(null);
@@ -119,9 +119,7 @@ const OwnerDashboard = () => {
           // Mark each unread notification as read
           const unreadNotifications = dashboard.notifications.filter(n => n.isNew === true);
           for (const notification of unreadNotifications) {
-            await fetch(`/api/owner/notifications/${notification._id}/read`, {
-              method: "POST"
-            });
+            await axios.post(`/owner/notifications/${notification._id}/read`);
           }
           // Refresh dashboard to update notification counts
           if (unreadNotifications.length > 0) {
@@ -174,10 +172,10 @@ const OwnerDashboard = () => {
   const handleNotificationAction = async (notificationId, action, isUnrentRequest) => {
     try {
       const endpoint = isUnrentRequest
-        ? `/api/owner/unrent-requests/${notificationId}/${action}`
-        : `/api/owner/notifications/${notificationId}/${action}`;
-      const res = await fetch(endpoint, { method: "POST" });
-      if (res.ok) {
+        ? `/owner/unrent-requests/${notificationId}/${action}`
+        : `/owner/notifications/${notificationId}/${action}`;
+      const res = await axios.post(endpoint);
+      if (res.status === 200) {
         setDashboard((prev) => ({
           ...prev,
           notifications: (prev?.notifications || []).map((n) =>
@@ -196,10 +194,8 @@ const OwnerDashboard = () => {
   const handleDeleteProperty = async () => {
     if (!propertyToDelete) return;
     try {
-      const res = await fetch(`/api/owner/properties/${propertyToDelete}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
+      const res = await axios.delete(`/owner/properties/${propertyToDelete}`);
+      if (res.status === 200) {
         setShowDeletePropertyOverlay(false);
         setPropertyToDelete(null);
         setDashboard((prev) => ({
@@ -216,12 +212,10 @@ const OwnerDashboard = () => {
   const handleDeleteAccount = async () => {
     if (!deleteAccountPassword) return;
     try {
-      const res = await fetch(`/api/owner/account`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: deleteAccountPassword }),
+      const res = await axios.delete(`/owner/account`, {
+        data: { password: deleteAccountPassword },
       });
-      if (res.ok) {
+      if (res.status === 200) {
         setShowDeleteAccountOverlay(false);
         setDeleteAccountPassword("");
         window.location.href = "/";
@@ -235,12 +229,8 @@ const OwnerDashboard = () => {
   const handleComplaintStatusUpdate = async () => {
     if (!currentComplaintId || !selectedStatus) return;
     try {
-      const res = await fetch(`/api/owner/complaints/${currentComplaintId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: selectedStatus }),
-      });
-      if (res.ok) {
+      const res = await axios.put(`/owner/complaints/${currentComplaintId}/status`, { status: selectedStatus });
+      if (res.status === 200) {
         setShowStatusUpdateOverlay(false);
         setCurrentComplaintId(null);
         setSelectedStatus("");

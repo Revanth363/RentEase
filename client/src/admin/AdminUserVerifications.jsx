@@ -1,5 +1,5 @@
 // src/admin/AdminUserVerifications.jsx
-import axios from "axios";
+import axios from "../services/axiosConfig";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLoading } from "../context/useLoading";
@@ -128,7 +128,7 @@ const AdminUserVerifications = () => {
     if (!confirm("Approve this verification?")) return;
     setActionLoading(true);
     try {
-      await axios.post(`/api/admin/verifications/${id}/approve`, {}, { withCredentials: true });
+      await axios.post(`/admin/verifications/${id}/approve`, {}, { withCredentials: true });
       setDocModal(null);
       fetchVerifications();
     } catch { alert("Failed to approve"); }
@@ -139,7 +139,7 @@ const AdminUserVerifications = () => {
     if (!rejectModal || !rejectReason.trim()) { alert("Please enter a rejection reason."); return; }
     setActionLoading(true);
     try {
-      await axios.post(`/api/admin/verifications/${rejectModal}/reject`, { reason: rejectReason }, { withCredentials: true });
+      await axios.post(`/admin/verifications/${rejectModal}/reject`, { reason: rejectReason }, { withCredentials: true });
       setRejectModal(null);
       setRejectReason("");
       setDocModal(null);
