@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from './axiosConfig';
 
 const BASE = "/owner";
 const BOOKING_BASE = "/bookings";

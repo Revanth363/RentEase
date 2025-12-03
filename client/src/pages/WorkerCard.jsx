@@ -91,19 +91,14 @@ export default function WorkerCard({ worker: propWorker = null, detailed = false
     setBookingLoading(true);
 
     try {
-      const res = await fetch(`/api/workers/${worker._id}/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ 
-          serviceType: worker.serviceType,
-          preferredDate: bookingDetails.preferredDate,
-        }),
+      const res = await axios.post(`/workers/${worker._id}/book`, { 
+        serviceType: worker.serviceType,
+        preferredDate: bookingDetails.preferredDate,
       });
 
-      const data = await res.json();
+      const data = res.data;
 
-      if (!res.ok) {
+      if (!res.status || res.status >= 400) {
         alert(data.error || "Failed to book worker");
         setBookingLoading(false);
         return;

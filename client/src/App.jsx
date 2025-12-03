@@ -75,7 +75,7 @@ const App = () => {
   useEffect(() => {
     dispatch(checkCurrentUser()); // Loads user from cookie/token
     // fetch public settings for maintenance
-    fetch('/api/public-settings')
+    fetch('/public-settings')
       .then((r) => r.json())
       .then((data) => {
         setMaintenance({

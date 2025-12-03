@@ -1,6 +1,6 @@
 // src/pages/PropertySearch.jsx
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import axios from '../services/axiosConfig';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "../assets/css/PropertyFilters.css";
 import "../assets/css/PropertySearch.css";
@@ -154,8 +154,8 @@ const PropertySearch = () => {
     }
     try {
       await axios.post(
-        "/api/tenant/saved-property",
-        { propertyId: id, action: "save" },
+        '/tenant/saved-property',
+        { propertyId: id, action: 'save' },
         { withCredentials: true }
       );
       alert("Property saved successfully!");

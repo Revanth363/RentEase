@@ -1,5 +1,5 @@
 // src/services/workerService.js
-import axios from "axios";
+import axios from './axiosConfig';
 
 const API = "/workers";
 

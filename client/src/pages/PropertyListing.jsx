@@ -117,7 +117,7 @@ const PropertyListing = () => {
     }
 
     try {
-      const response = await fetch("/api/property/list-property", {
+      const response = await fetch('/property/list-property', {
         method: "POST",
         body: formData,
         credentials: "include",

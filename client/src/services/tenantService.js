@@ -10,7 +10,7 @@ export const confirmMaintenanceFixed = async ({ requestId, confirmation }) => {
   });
   return res.data;
 };
-import axios from "axios";
+import axios from './axiosConfig';
 
 const BASE = "/tenant";
 

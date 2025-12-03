@@ -17,7 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from '../services/axiosConfig';
 import styles from "../assets/css/Homepage.module.css";
 import { fetchProperties, fetchSliderProperties } from "../services/api";
 
