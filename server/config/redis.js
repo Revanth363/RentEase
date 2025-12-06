@@ -16,21 +16,21 @@ let useUpstash = false;
 // Upstash REST API client
 class UpstashRedisClient {
   constructor(restUrl, restToken) {
-    this.restUrl = restUrl;
+    this.restUrl = restUrl.replace(/\/$/, ''); // Remove trailing slash
     this.restToken = restToken;
   }
 
   async executeCommand(command) {
     try {
-      const response = await fetch(`${this.restUrl}/exec`, {
-        method: 'POST',
+      // Build URL path from command array
+      const path = command.map(arg => encodeURIComponent(arg)).join('/');
+      const url = `${this.restUrl}/${path}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.restToken}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          commands: [command],
-        }),
       });
 
       if (!response.ok) {
@@ -38,7 +38,8 @@ class UpstashRedisClient {
       }
 
       const data = await response.json();
-      return data.result?.[0];
+      // Upstash returns { result: value } directly
+      return data.result;
     } catch (error) {
       console.error('[Upstash] API call failed:', error.message);
       return null;
@@ -46,7 +47,9 @@ class UpstashRedisClient {
   }
 
   async set(key, value, ttl) {
-    const command = ttl ? ['SET', key, value, 'EX', ttl] : ['SET', key, value];
+    const command = ttl 
+      ? ['SET', key, value, 'EX', ttl.toString()]
+      : ['SET', key, value];
     return await this.executeCommand(command);
   }
 
