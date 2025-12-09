@@ -1175,6 +1175,200 @@ body {
     position: fixed;
     left: -100%;
     top: 8vh;
+    background: #333;
+    transition: left 0.3s ease-in-out;
+    z-index: 100;
+    padding: 20px;
+  }
+
+  .ownd-sidebar.ownd-active {
+    left: 0;
+  }
+
+  .ownd-main-content {
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .ownd-prop-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .ownd-after-scroll-container {
+    width: 100%;
+    margin: 0 0 15px 0;
+  }
+
+  .ownd-modal-content {
+    width: 95%;
+  }
+
+  .ownd-settings-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  #header {
+    height: 60px;
+    padding: 5px;
+  }
+
+  #header #brandid {
+    font-size: 16px;
+  }
+
+  #header #tagline {
+    font-size: 9px;
+  }
+
+  .ownd-menu-toggle {
+    font-size: 20px;
+    top: 60px;
+  }
+
+  .ownd-sidebar {
+    width: 80%;
+    padding: 15px;
+    top: 60px;
+  }
+
+  .ownd-sidebar h2 {
+    font-size: 16px;
+  }
+
+  .ownd-sidebar ul li {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .ownd-main-content {
+    width: 100%;
+    top: 60px;
+    padding: 10px 5px;
+  }
+
+  .ownd-section {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .ownd-prop-container {
+    gap: 10px;
+  }
+
+  .ownd-after-scroll-container {
+    width: 100%;
+  }
+
+  .ownd-sc-image {
+    height: 150px;
+  }
+
+  .ownd-sc-text {
+    padding: 10px;
+  }
+
+  .ownd-add-button,
+  .ownd-pay-button,
+  .ownd-update-sts,
+  .ownd-msg-button,
+  .ownd-report-button {
+    font-size: 12px;
+    padding: 8px;
+    width: 100%;
+  }
+
+  .ownd-delete-popup {
+    width: 90%;
+  }
+
+  .ownd-modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .ownd-modal-content form input,
+  .ownd-modal-content form select,
+  .ownd-modal-content form textarea {
+    font-size: 14px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  table th,
+  table td {
+    padding: 5px;
+  }
+}
+
+/* Tablet (481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .ownd-prop-container {
+    flex-direction: column;
+  }
+
+  .ownd-after-scroll-container {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .ownd-settings-container {
+    grid-template-columns: 1fr;
+  }
+
+  .ownd-main-content {
+    width: calc(100% - 20px);
+    padding: 10px;
+  }
+
+  .ownd-add-button,
+  .ownd-pay-button {
+    min-width: 120px;
+  }
+}
+
+/* Extra Small (360px and below) */
+@media (max-width: 360px) {
+  #header #brandid {
+    font-size: 14px;
+  }
+
+  .ownd-sidebar {
+    width: 100%;
+  }
+
+  .ownd-section {
+    padding: 8px;
+  }
+
+  .ownd-sc-image {
+    height: 120px;
+  }
+
+  .ownd-modal-content {
+    width: 98%;
+    padding: 12px;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  table th,
+  table td {
+    padding: 4px;
+  }
+}
+    height: 100%;
+    position: fixed;
+    left: -100%;
+    top: 8vh;
     margin-top: 10px;
     background: #333;
     transition: left 0.3s ease-in-out;

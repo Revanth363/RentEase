@@ -898,6 +898,222 @@
   padding: 20px;
 }
 
+/* =================================================== */
+/* COMPREHENSIVE MOBILE MEDIA QUERIES FOR ALL DEVICES */
+/* =================================================== */
+
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #header {
+    height: 60px;
+    padding: 5px;
+  }
+
+  #header #brandid {
+    font-size: 16px;
+  }
+
+  #header #tagline {
+    font-size: 9px;
+  }
+
+  .wrkd-nav-toggle {
+    display: block !important;
+    font-size: 20px;
+    padding: 5px 8px;
+  }
+
+  .wrkd-sidebar {
+    width: 80%;
+    padding: 15px;
+  }
+
+  .wrkd-sidebar h2 {
+    font-size: 16px;
+  }
+
+  .wrkd-sidebar ul li {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .wrkd-main-content {
+    width: 100%;
+    top: 60px;
+    padding: 10px 5px;
+    margin: 0;
+  }
+
+  .wrkd-section {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .wrkd-stats-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .wrkd-stat-box {
+    padding: 12px;
+  }
+
+  .wrkd-stat-box h4 {
+    font-size: 14px;
+  }
+
+  .wrkd-job-card {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .wrkd-job-image {
+    width: 100%;
+    height: 150px;
+  }
+
+  .wrkd-table {
+    font-size: 12px;
+  }
+
+  .wrkd-table th,
+  .wrkd-table td {
+    padding: 5px;
+  }
+
+  .wrkd-modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .wrkd-modal-body {
+    padding: 15px;
+  }
+
+  .wrkd-modal-header h4 {
+    font-size: 16px;
+  }
+
+  .wrkd-form-group input,
+  .wrkd-form-group select,
+  .wrkd-form-group textarea {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .wrkd-popup-btn {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .wrkd-job-cards {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .wrkd-job-card {
+    width: 100%;
+  }
+}
+
+/* Tablet (481px to 768px) */
+@media (max-width: 768px) {
+  #header {
+    height: 70px;
+  }
+
+  #header #brandid {
+    font-size: 18px;
+  }
+
+  .wrkd-sidebar {
+    width: 65%;
+  }
+
+  .wrkd-main-content {
+    width: 100%;
+  }
+
+  .wrkd-stats-container {
+    flex-direction: column;
+  }
+
+  .wrkd-job-cards {
+    flex-direction: column;
+  }
+
+  .wrkd-job-card {
+    width: 100%;
+  }
+
+  .wrkd-table {
+    font-size: 13px;
+  }
+
+  .wrkd-table th,
+  .wrkd-table td {
+    padding: 8px;
+  }
+
+  .wrkd-modal-content {
+    width: 90%;
+  }
+}
+
+/* Medium Screen (769px to 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .wrkd-main-content {
+    width: calc(100% - 200px);
+    margin-left: 200px;
+  }
+
+  .wrkd-sidebar {
+    width: 200px;
+  }
+}
+
+/* Extra Small (360px and below) */
+@media (max-width: 360px) {
+  #header #brandid {
+    font-size: 14px;
+  }
+
+  .wrkd-sidebar {
+    width: 100%;
+  }
+
+  .wrkd-main-content {
+    padding: 5px;
+  }
+
+  .wrkd-section {
+    padding: 8px;
+  }
+
+  .wrkd-stat-box {
+    padding: 10px;
+  }
+
+  .wrkd-stat-box h4 {
+    font-size: 12px;
+  }
+
+  .wrkd-modal-content {
+    width: 98%;
+  }
+
+  .wrkd-form-group input,
+  .wrkd-form-group select,
+  .wrkd-form-group textarea {
+    font-size: 13px;
+  }
+}
+
 .wrkd-calendar-section {
   margin-bottom: 20px;
 }

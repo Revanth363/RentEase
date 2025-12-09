@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LoadingSpinner from "./LoadingSpinner";
+import axios from "../services/axiosConfig";
 
 const RazorpayPaymentHistory = ({
   historyType,
@@ -25,30 +26,26 @@ const RazorpayPaymentHistory = ({
       let endpoint = "";
       switch (historyType) {
         case "tenant-rent":
-          endpoint = `/api/razorpay/tenant-payment-history?page=${page}&limit=${limit}`;
+          endpoint = `/razorpay/tenant-payment-history?page=${page}&limit=${limit}`;
           break;
         case "tenant-worker":
-          endpoint = `/api/razorpay/tenant-worker-payment-history?page=${page}&limit=${limit}`;
+          endpoint = `/razorpay/tenant-worker-payment-history?page=${page}&limit=${limit}`;
           break;
         case "owner-rent":
-          endpoint = `/api/razorpay/owner-payment-history?page=${page}&limit=${limit}`;
+          endpoint = `/razorpay/owner-payment-history?page=${page}&limit=${limit}`;
           break;
         case "worker-payments":
-          endpoint = `/api/razorpay/worker-earnings-history?page=${page}&limit=${limit}`;
+          endpoint = `/razorpay/worker-earnings-history?page=${page}&limit=${limit}`;
           break;
         default:
           throw new Error("Invalid history type");
       }
 
-      const response = await fetch(endpoint, {
-        credentials: "include",
+      const response = await axios.get(endpoint, {
+        withCredentials: true,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch payment history");
-      }
-
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         setPayments(data.data || []);

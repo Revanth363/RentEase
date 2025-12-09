@@ -9,6 +9,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
 import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
 import { useLoading } from "../context/useLoading";
+import axios from "../services/axiosConfig";
 
 import {
   checkBookedStatus,
@@ -501,7 +502,7 @@ const WorkerDashboard = () => {
     return <LoadingSpinner />;
   }
 
-  const effectiveSection = !verificationLoading && verificationStatus !== "approved"
+  const effectiveSection = !verificationLoading && verificationStatus !== "verified"
     ? (["settings", "verification"].includes(activeSection) ? activeSection : "verification")
     : activeSection;
 
@@ -524,7 +525,7 @@ const WorkerDashboard = () => {
           {user.firstName} {user.lastName}
         </h3>
         <ul>
-          {verificationStatus !== "approved" ? (
+          {verificationStatus !== "verified" ? (
             <>
               <li
                 className={effectiveSection === "verification" ? "wrkd-sidebar-active-item" : ""}
@@ -627,7 +628,7 @@ const WorkerDashboard = () => {
       </div>
 
       <div className="wrkd-main-content">
-        {verificationStatus !== "approved" && (
+        {verificationStatus !== "verified" && (
           <div className="wrkd-unverified-banner">
             <i className="fa-solid fa-triangle-exclamation"></i>
             <div>
@@ -637,7 +638,7 @@ const WorkerDashboard = () => {
           </div>
         )}
 
-        {verificationStatus !== "approved" && (
+        {verificationStatus !== "verified" && (
           <div className={`wrkd-section ${effectiveSection === "verification" ? "wrkd-active" : ""}`}>
             <h3>Account Verification</h3>
             <VerificationStatus userId={user._id} userModel="worker" />

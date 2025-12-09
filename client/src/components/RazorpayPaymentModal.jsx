@@ -99,19 +99,14 @@ const RazorpayPaymentModal = ({
           // Handle payment cancellation when user closes modal
           try {
             const cancelEndpoint = paymentType === "rent" 
-              ? "/api/razorpay/cancel-rent-payment" 
-              : "/api/razorpay/cancel-worker-payment";
+              ? "/razorpay/cancel-rent-payment" 
+              : "/razorpay/cancel-worker-payment";
 
-            const cancelRes = await fetch(cancelEndpoint, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({
-                orderId: data.payment.orderId,
-              }),
-            });
+            const cancelRes = await axios.post(cancelEndpoint, {
+              orderId: data.payment.orderId,
+            }, { withCredentials: true });
 
-            const cancelData = await cancelRes.json();
+            const cancelData = cancelRes.data;
 
             if (cancelData.success) {
               Swal.fire({

@@ -166,40 +166,211 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .property-search-page h2 {
+    padding-left: 15px;
+  }
+  .property-search-page .property-grid {
+    margin-left: 30px;
+    gap: 1.5rem;
+  }
+  .property-search-page .property-card {
+    width: 320px;
+  }
+}
+
 @media (max-width: 768px) {
+  .property-search-page h2 {
+    padding-left: 10px;
+    font-size: 1.5rem;
+  }
+  
   .property-search-page .property-grid {
     padding: 0 10px;
+    margin-left: 0;
+    gap: 1rem;
+    justify-content: center;
   }
+  
   .property-search-page .property-card {
     width: 100%;
     max-width: 350px;
   }
+  
+  .property-search-page .property-image {
+    height: 150px;
+  }
+  
+  .property-search-page .property-info {
+    padding: 1rem;
+  }
+  
+  .property-search-page .property-name {
+    font-size: 1.1rem;
+  }
+  
+  .property-search-page .property-address {
+    font-size: 0.85rem;
+  }
+  
+  .property-search-page .property-price {
+    font-size: 1.1rem;
+  }
+  
+  .property-search-page .btn {
+    padding: 10px 15px;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+  
+  .property-search-page .wishlist-btn {
+    width: 90px;
+    height: 35px;
+  }
+  
+  .property-search-page .sort-options {
+    text-align: center;
+    margin: 20px 15px;
+  }
+  
+  .property-search-page .sort-options select {
+    min-width: 280px;
+    width: 100%;
+    max-width: 320px;
+    font-size: 14px;
+  }
+  
+  .property-search-page .content > h2 {
+    font-size: 1.7rem;
+    margin-top: 20px;
+  }
 }
 
 @media (max-width: 480px) {
-  .property-search-page .property-card {
-    max-width: 300px;
+  .property-search-page h2 {
+    padding-left: 5px;
+    font-size: 1.2rem;
   }
+  
+  .property-search-page .property-grid {
+    padding: 0 5px;
+    gap: 0.8rem;
+    justify-content: center;
+  }
+  
+  .property-search-page .property-card {
+    max-width: 95%;
+    min-width: 280px;
+  }
+  
+  .property-search-page .property-image {
+    height: 120px;
+  }
+  
+  .property-search-page .property-info {
+    padding: 0.8rem;
+  }
+  
+  .property-search-page .property-name {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .property-search-page .property-address {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .property-search-page .property-features {
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+  
+  .property-search-page .feature {
+    margin-right: 0.5rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+  }
+  
+  .property-search-page .property-price {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .property-search-page .rating {
+    gap: 5px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .property-search-page .stars {
+    font-size: 13px;
+  }
+  
+  .property-search-page .review-count {
+    font-size: 12px;
+  }
+  
+  .property-search-page .property-footer {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .property-search-page .btn {
+    font-size: 0.8rem;
+    width: auto;
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 10px;
+  }
+  
+  .property-search-page .wishlist-btn {
+    width: auto;
+    height: auto;
+    padding: 8px 10px;
+    margin: 0;
+  }
+  
+  .property-search-page .sort-options {
+    text-align: center;
+    margin: 15px 10px;
+  }
+  
+  .property-search-page .sort-options label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .property-search-page .sort-options select {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  
+  .property-search-page .content > h2 {
+    font-size: 1.3rem;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .property-search-page {
+    padding-top: 60px;
+  }
+  
+  .property-search-page .property-card {
+    max-width: 100%;
+  }
+  
   .property-search-page .property-image {
     height: 100px;
   }
-  .property-search-page .property-features {
-    flex-wrap: wrap;
-  }
-  .property-search-page .feature {
-    margin-bottom: 0.5rem;
-  }
+  
   .property-search-page .btn {
-    font-size: 0.8rem;
-    width: 100px;
-    height: 50px;
-    padding: 0 30px;
-    margin: 10px -10px 0 -20px;
-  }
-  .property-search-page .wishlist-btn {
-    width: 90px;
-    height: 50px;
-    padding-right: 30px;
+    font-size: 0.75rem;
+    padding: 6px 8px;
   }
 }
 

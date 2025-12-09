@@ -178,12 +178,60 @@
   display: block;
 }
 
-/* Mobile Styles */
+/* Tablet Styles */
+@media (max-width: 1024px) {
+  .header {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 10px 5px;
+  }
+
+  .logo {
+    padding-left: 5px;
+  }
+
+  .brandid {
+    font-size: 20px;
+  }
+
+  .cta {
+    margin-right: 1%;
+  }
+}
+
+/* Mobile Styles (Tablets and below) */
 @media (max-width: 768px) {
+  .header {
+    height: auto;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    display: flex;
+    flex-direction: column;
+    padding-left: 5px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .brandid {
+    font-size: 18px;
+  }
+
+  .tagline {
+    font-size: 10px;
+  }
+
   .navToggle {
     display: block;
-    position: absolute;
-    right: 10px;
+    position: relative;
+    font-size: 28px;
+    padding: 0 10px;
+    margin-left: auto;
   }
 
   .navMenu {
@@ -193,56 +241,143 @@
     overflow: hidden;
     flex-direction: column;
     position: absolute;
-    top: 10vh;
+    top: 60px;
     right: 0;
-    width: 40%;
+    width: 100%;
     background-color: #333;
     text-align: center;
     padding: 0;
     z-index: 1000;
+    transition: all 0.3s ease-in-out;
   }
 
   .navMenu.active {
     visibility: visible;
     opacity: 1;
-    max-height: 500px;
-    padding: 20px 0;
+    max-height: 400px;
+    padding: 15px 0;
   }
 
   .navLink {
-    width: 70%;
-    margin: 0 auto;
+    width: 100%;
     padding: 12px;
     border-bottom: 1px solid #555;
+    font-size: 14px;
   }
 
   .navLink:hover {
     background-color: #444;
   }
 
+  .navLink::after {
+    display: none;
+  }
+
   .cta {
-    position: absolute;
-    right: 60px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: fixed;
+    right: 10px;
+    top: 8px;
+    gap: 5px;
+    flex-direction: column;
   }
 
   .loginBtn {
     padding: 6px 10px;
-    font-size: 13px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .userGreeting {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .userGreeting span {
+    max-width: 80px;
+    font-size: 11px;
+  }
+
+  .icon {
+    font-size: 10px;
   }
 }
 
+/* Small Mobile Styles */
 @media (max-width: 480px) {
+  .header {
+    height: auto;
+    padding: 5px;
+  }
+
+  .logo {
+    padding-left: 3px;
+  }
+
+  .brandid {
+    font-size: 16px;
+  }
+
   .tagline {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .navToggle {
-    font-size: 30px;
+    font-size: 24px;
+    padding: 0 5px;
   }
 
   .cta {
-    right: 55px;
+    position: fixed;
+    right: 5px;
+    top: 5px;
+    gap: 3px;
+  }
+
+  .loginBtn {
+    padding: 5px 8px;
+    font-size: 11px;
+    border-radius: 3px;
+  }
+
+  .userGreeting {
+    padding: 5px 8px;
+    font-size: 11px;
+    gap: 3px;
+  }
+
+  .userGreeting span {
+    max-width: 60px;
+    font-size: 10px;
+  }
+
+  .dropdownContent {
+    position: fixed;
+    right: 5px;
+    min-width: 140px;
+  }
+
+  .dropdownContent a {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .navMenu {
+    top: 50px;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+  .brandid {
+    font-size: 14px;
+  }
+
+  .cta {
+    gap: 2px;
+  }
+
+  .loginBtn {
+    padding: 4px 6px;
+    font-size: 10px;
   }
 }

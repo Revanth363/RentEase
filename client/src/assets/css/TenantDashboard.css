@@ -1208,6 +1208,289 @@ button:disabled:hover {
   color: #000;
 }
 
+/* =================================================== */
+/* COMPREHENSIVE MOBILE MEDIA QUERIES FOR ALL DEVICES */
+/* =================================================== */
+
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #header {
+    height: 60px;
+    padding: 5px;
+  }
+
+  #header #brandid {
+    font-size: 16px;
+  }
+
+  #header #tagline {
+    font-size: 9px;
+  }
+
+  .tntd-nav-toggle {
+    display: block !important;
+    font-size: 20px;
+    padding: 5px 8px;
+  }
+
+  .tntd-sidebar {
+    width: 80%;
+    padding: 15px;
+  }
+
+  .tntd-sidebar h2 {
+    font-size: 16px;
+  }
+
+  .tntd-sidebar ul li {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .tntd-main-content {
+    width: 100%;
+    top: 60px;
+    padding: 10px 5px;
+    margin: 0;
+  }
+
+  .tntd-section {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .tntd-quick-stats {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tntd-stat-box {
+    padding: 12px;
+  }
+
+  .tntd-stat-box h4 {
+    font-size: 14px;
+  }
+
+  .tntd-property-card {
+    flex-direction: column;
+  }
+
+  .tntd-property-card img {
+    width: 100%;
+    height: 150px;
+  }
+
+  .tntd-property-details {
+    padding: 10px;
+  }
+
+  .tntd-maintenance-cards {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tntd-maintenance-card {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .tntd-worker-cards {
+    flex-direction: column;
+  }
+
+  .tntd-worker-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .tntd-worker-card img {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .tntd-payment-history {
+    font-size: 12px;
+  }
+
+  .tntd-payment-history th,
+  .tntd-payment-history td {
+    padding: 5px;
+  }
+
+  .tntd-popup-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .tntd-form-group input,
+  .tntd-form-group select,
+  .tntd-form-group textarea {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .tntd-submit-btn {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .tntd-settings-container {
+    grid-template-columns: 1fr;
+  }
+
+  #tntd-preferences-section {
+    grid-column: 1;
+  }
+
+  .tntd-modal .tntd-modal-content {
+    width: 95%;
+    margin: 20% auto;
+    padding: 15px;
+  }
+
+  .tntd-modal textarea {
+    width: 94%;
+    font-size: 14px;
+  }
+
+  .tntd-card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tntd-card-actions button {
+    width: 100%;
+  }
+}
+
+/* Tablet (481px to 768px) */
+@media (max-width: 768px) {
+  #header {
+    height: 70px;
+  }
+
+  #header #brandid {
+    font-size: 18px;
+  }
+
+  .tntd-sidebar {
+    width: 65%;
+  }
+
+  .tntd-main-content {
+    width: 100%;
+  }
+
+  .tntd-quick-stats {
+    flex-direction: column;
+  }
+
+  .tntd-maintenance-cards {
+    flex-direction: column;
+  }
+
+  .tntd-worker-cards {
+    flex-direction: column;
+  }
+
+  .tntd-settings-container {
+    grid-template-columns: 1fr;
+  }
+
+  #tntd-preferences-section {
+    grid-column: 1;
+  }
+
+  .tntd-service-categories {
+    flex-direction: column;
+  }
+
+  .tntd-service-category {
+    min-width: unset;
+  }
+
+  .tntd-payment-history {
+    font-size: 13px;
+  }
+
+  .tntd-payment-history th,
+  .tntd-payment-history td {
+    padding: 8px;
+  }
+}
+
+/* Medium Screen (769px to 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .tntd-main-content {
+    width: calc(100% - 200px);
+    margin-left: 200px;
+  }
+
+  .tntd-sidebar {
+    width: 200px;
+  }
+
+  .tntd-settings-container {
+    grid-template-columns: 1fr;
+  }
+
+  #tntd-preferences-section {
+    grid-column: 1;
+  }
+}
+
+/* Extra Small (360px and below) */
+@media (max-width: 360px) {
+  #header #brandid {
+    font-size: 14px;
+  }
+
+  .tntd-sidebar {
+    width: 100%;
+  }
+
+  .tntd-main-content {
+    padding: 5px;
+  }
+
+  .tntd-section {
+    padding: 8px;
+  }
+
+  .tntd-stat-box {
+    padding: 10px;
+  }
+
+  .tntd-stat-box h4 {
+    font-size: 12px;
+  }
+
+  .tntd-stat-box p {
+    font-size: 14px;
+  }
+
+  .tntd-maintenance-card {
+    padding: 12px;
+  }
+
+  .tntd-popup-content {
+    width: 98%;
+  }
+
+  .tntd-form-group input,
+  .tntd-form-group select,
+  .tntd-form-group textarea {
+    font-size: 13px;
+  }
+}
+
 .tntd-modal textarea {
   width: 95%;
   padding: 10px;

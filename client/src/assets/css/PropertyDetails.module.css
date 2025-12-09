@@ -240,17 +240,315 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+    top: 80px;
+  }
+
+  .mainImageContainer {
+    height: 400px;
+  }
+
+  .propertyInfo {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .propertyTitle {
+    font-size: 1.8rem;
+  }
+
+  .price {
+    font-size: 1.6rem;
+  }
+
+  .mapContainer {
+    height: 350px;
+  }
+}
+
 @media (max-width: 768px) {
+  .container {
+    padding: 12px;
+    top: 70px;
+    margin: 0;
+  }
+
+  .mainImageContainer {
+    height: 300px;
+    margin-bottom: 20px;
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .thumbnailGallery {
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .thumbnail {
+    width: 100px;
+    height: 70px;
+  }
+
   .propertyHeader {
     flex-direction: column;
+    margin-bottom: 20px;
   }
+
   .propertyPriceSection {
     text-align: left;
-    margin-top: 20px;
+    margin-top: 15px;
     padding-left: 0;
   }
-  .propertyInfo,
-  .amenitiesList,
+
+  .propertyTitle {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  .propertyLocation {
+    font-size: 1rem;
+  }
+
+  .price {
+    font-size: 1.4rem;
+  }
+
+  .contactNow {
+    padding: 12px 20px;
+    font-size: 1rem;
+    width: 100%;
+  }
+
+  .section {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+
+  .sectionTitle {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+  }
+
+  .propertyInfo {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .amenitiesList {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .amenitiesList li {
+    padding: 8px;
+    font-size: 0.95rem;
+  }
+
+  .infoIcon {
+    font-size: 1.2rem;
+  }
+
+  .mapContainer {
+    height: 300px;
+  }
+
+  .contactForm {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .formField input,
+  .formField textarea {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .submitBtn {
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .propertyDescription {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+    top: 60px;
+    margin: 0;
+  }
+
+  .mainImageContainer {
+    height: 200px;
+    margin-bottom: 15px;
+  }
+
+  .navButton {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .navButton:left {
+    left: 5px;
+  }
+
+  .navButton:right {
+    right: 5px;
+  }
+
+  .thumbnailGallery {
+    gap: 6px;
+    padding: 8px 0;
+  }
+
+  .thumbnail {
+    width: 80px;
+    height: 60px;
+  }
+
+  .propertyTitle {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+  }
+
+  .propertyLocation {
+    font-size: 0.9rem;
+  }
+
+  .propertyAddress,
+  .propertyRatingReviews {
+    font-size: 0.85rem;
+  }
+
+  .price {
+    font-size: 1.2rem;
+  }
+
+  .contactNow {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .section {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .propertyInfo {
+    gap: 10px;
+  }
+
+  .infoItem {
+    font-size: 0.9rem;
+  }
+
+  .infoIcon {
+    font-size: 1rem;
+    margin-right: 6px;
+  }
+
+  .amenitiesList li {
+    padding: 6px;
+    font-size: 0.85rem;
+  }
+
+  .mapContainer {
+    height: 200px;
+  }
+
+  .mapPlaceholder {
+    font-size: 0.9rem;
+  }
+
+  .contactForm {
+    gap: 12px;
+  }
+
+  .formField input,
+  .formField textarea {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .submitBtn {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .propertyDescription {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 8px;
+    top: 50px;
+  }
+
+  .mainImageContainer {
+    height: 150px;
+  }
+
+  .navButton {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .thumbnail {
+    width: 70px;
+    height: 50px;
+  }
+
+  .propertyTitle {
+    font-size: 1rem;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .section {
+    padding: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .formField input,
+  .formField textarea {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .submitBtn {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+}
   .contactForm {
     grid-template-columns: 1fr;
   }
