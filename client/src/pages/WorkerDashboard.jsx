@@ -8,7 +8,7 @@ import CalendarTiles from "../components/CalendarTiles";
 import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
 import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
-import { useLoading } from "../context/useLoading";
+import { useLoading } from "../LoadingContext";
 import axios from "../services/axiosConfig";
 
 import {
@@ -85,7 +85,7 @@ const WorkerDashboard = () => {
     if (user && user._id) {
       (async () => {
         try {
-          const res = await axios.get(`/verification/status?userId=${user._id}&userModel=worker`);
+          const res = await axios.get(`/verification/status`, { withCredentials: true });
           setVerificationStatus(res.data.status);
         } catch {
           setVerificationStatus(null);
