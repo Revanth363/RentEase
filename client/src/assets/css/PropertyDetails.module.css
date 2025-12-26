@@ -1,4 +1,4 @@
-﻿/* FINAL CSS - ARROWS NEVER MOVE DOWN */
+/* FINAL CSS - ARROWS NEVER MOVE DOWN */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -249,16 +249,4 @@
     margin-top: 20px;
     padding-left: 0;
   }
-  .propertyInfo,
-  .amenitiesList,
-  .contactForm {
-    grid-template-columns: 1fr;
-  }
-  .mainImageContainer {
-    height: 350px;
-  }
-  .navButton {
-    width: 45px;
-    height: 45px;
-  }
-
+ .propertyGrid { grid-template-columns: 1fr; } }
