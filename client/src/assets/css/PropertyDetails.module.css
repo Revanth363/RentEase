@@ -238,15 +238,4 @@
   background: #ff6f00;
   color: white;
 }
-
-/* Responsive */
-@media (max-width: 768px) {
-  .propertyHeader {
-    flex-direction: column;
-  }
-  .propertyPriceSection {
-    text-align: left;
-    margin-top: 20px;
-    padding-left: 0;
-  }
- .propertyGrid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .propertyHeader { flex-direction: column; } .propertyPriceSection { text-align: left; margin-top: 20px; padding-left: 0; } .propertyGrid { grid-template-columns: 1fr; } }
