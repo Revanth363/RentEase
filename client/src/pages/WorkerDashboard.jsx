@@ -8,7 +8,7 @@ import CalendarTiles from "../components/CalendarTiles";
 import LoadingSpinner from "../components/LoadingSpinner";
 import VerificationStatus from "../components/VerificationStatus";
 import RazorpayPaymentHistory from "../components/RazorpayPaymentHistory";
-import { useLoading } from "../LoadingContext";
+import { useLoading } from "../context/useLoading";
 import axios from "../services/axiosConfig";
 
 import {
