@@ -648,7 +648,7 @@ const WorkerDashboard = () => {
         {/* MY SERVICES */}
         <div
           className={`wrkd-section ${
-            activeSection === "services" ? "wrkd-active" : ""
+            effectiveSection === "services" ? "wrkd-active" : ""
           }`}
         >
           <h3>My Services</h3>
