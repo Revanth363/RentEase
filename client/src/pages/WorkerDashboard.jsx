@@ -86,8 +86,9 @@ const WorkerDashboard = () => {
       (async () => {
         try {
           const res = await axios.get(`/verification/status`, { withCredentials: true });
-          setVerificationStatus(res.data.status);
-        } catch {
+          setVerificationStatus(res.data.status || null);
+        } catch (err) {
+          console.error('Verification status error:', err.message);
           setVerificationStatus(null);
         } finally {
           setVerificationLoading(false);
