@@ -85,8 +85,8 @@ const WorkerDashboard = () => {
     if (user && user._id) {
       (async () => {
         try {
-          const res = await axios.get(`/verification/status`, { withCredentials: true });
-          setVerificationStatus(res.data.status || null);
+          const res = await axios.get(`/verification/status?userId=${user._id}&userModel=worker`, { withCredentials: true });
+          setVerificationStatus(res.data.status);
         } catch (err) {
           console.error('Verification status error:', err.message);
           setVerificationStatus(null);
@@ -503,7 +503,7 @@ const WorkerDashboard = () => {
     return <LoadingSpinner />;
   }
 
-  const effectiveSection = !verificationLoading && verificationStatus !== "verified"
+  const effectiveSection = !verificationLoading && verificationStatus !== "approved"
     ? (["settings", "verification"].includes(activeSection) ? activeSection : "verification")
     : activeSection;
 
@@ -526,7 +526,7 @@ const WorkerDashboard = () => {
           {user.firstName} {user.lastName}
         </h3>
         <ul>
-          {verificationStatus !== "verified" ? (
+          {verificationStatus !== "approved" ? (
             <>
               <li
                 className={effectiveSection === "verification" ? "wrkd-sidebar-active-item" : ""}
@@ -629,7 +629,7 @@ const WorkerDashboard = () => {
       </div>
 
       <div className="wrkd-main-content">
-        {verificationStatus !== "verified" && (
+        {verificationStatus !== "approved" && (
           <div className="wrkd-unverified-banner">
             <i className="fa-solid fa-triangle-exclamation"></i>
             <div>
@@ -639,7 +639,7 @@ const WorkerDashboard = () => {
           </div>
         )}
 
-        {verificationStatus !== "verified" && (
+        {verificationStatus !== "approved" && (
           <div className={`wrkd-section ${effectiveSection === "verification" ? "wrkd-active" : ""}`}>
             <h3>Account Verification</h3>
             <VerificationStatus userId={user._id} userModel="worker" />
