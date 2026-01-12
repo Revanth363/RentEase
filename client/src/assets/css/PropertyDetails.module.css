@@ -238,4 +238,27 @@
   background: #ff6f00;
   color: white;
 }
-@media (max-width: 768px) { .propertyHeader { flex-direction: column; } .propertyPriceSection { text-align: left; margin-top: 20px; padding-left: 0; } .propertyGrid { grid-template-columns: 1fr; } }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .propertyHeader {
+    flex-direction: column;
+  }
+  .propertyPriceSection {
+    text-align: left;
+    margin-top: 20px;
+    padding-left: 0;
+  }
+  .propertyInfo,
+  .amenitiesList,
+  .contactForm {
+    grid-template-columns: 1fr;
+  }
+  .mainImageContainer {
+    height: 350px;
+  }
+  .navButton {
+    width: 45px;
+    height: 45px;
+  }
+}
