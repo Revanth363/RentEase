@@ -16,6 +16,16 @@ services:
       # JWT
       - key: JWT_SECRET
         scope: secret
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
+        scope: secret
+      - key: GOOGLE_CLIENT_SECRET
+        scope: secret
+      - key: GOOGLE_CALLBACK_URL
+        value: https://ffsd-repo-react.onrender.com/auth/google/callback
+      # Frontend URL (for OAuth redirects and CORS)
+      - key: FRONTEND_URL
+        value: https://rentease-lyart.vercel.app
       # Razorpay Payment Gateway
       - key: RAZORPAY_KEY_ID
         scope: secret
