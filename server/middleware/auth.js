@@ -29,9 +29,14 @@ const getVerifiedUser = (req) => {
 // Base protection: any logged-in user
 const protect = (req, res, next) => {
   try {
-    req.user = getVerifiedUser(req);
+    const user = getVerifiedUser(req);
+    console.log('[Auth] Token verified successfully for user:', user.id);
+    req.user = user;
     next();
   } catch (err) {
+    console.error('[Auth] Token verification failed:', err.message);
+    console.error('[Auth] Authorization header:', req.headers.authorization ? 'present' : 'missing');
+    console.error('[Auth] AccessToken cookie:', req.cookies?.accessToken ? 'present' : 'missing');
     return res.status(401).json({
       success: false,
       error: err.message || "Unauthorized - please login"

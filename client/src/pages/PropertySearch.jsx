@@ -173,9 +173,14 @@ const PropertySearch = () => {
 
   return (
     <div className="property-search-page">
+      {/* Mobile Filter Toggle Button */}
+      <button className="filter-icon" onClick={toggleSidebar} ref={filterIconRef}>
+        ☰
+      </button>
+
       {/* Overlay */}
       <div 
-        className="sidebar-overlay" 
+        className="overlay" 
         ref={overlayRef}
         onClick={toggleSidebar}
         style={{ cursor: 'pointer' }}

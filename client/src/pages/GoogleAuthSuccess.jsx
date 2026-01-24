@@ -24,7 +24,13 @@ export default function GoogleAuthSuccess() {
 
           // Fetch user data to confirm login and get userType for redirection
           try {
-            const meRes = await axios.get('/me', { withCredentials: true });
+            // Pass token directly in request headers (more reliable than global defaults)
+            const meRes = await axios.get('/me', { 
+              headers: {
+                'Authorization': `Bearer ${token}`
+              },
+              withCredentials: true 
+            });
             console.log('[GoogleAuthSuccess] User fetched:', meRes.data.user);
 
             if (meRes.data.user) {

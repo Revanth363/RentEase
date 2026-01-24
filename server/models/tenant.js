@@ -33,7 +33,7 @@ const tenantSchema = new mongoose.Schema({
 // ============================================
 // TENANT INDEXES FOR PERFORMANCE
 // ============================================
-tenantSchema.index({ email: 1 }); // P0: Email-based authentication
+// Note: email already has unique: true constraint (creates index automatically)
 tenantSchema.index({ status: 1 }); // P1: Status filtering
 tenantSchema.index({ location: 1 }); // P2: Location-based queries
 

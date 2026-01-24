@@ -1,0 +1,147 @@
+2026-04-18T04:14:51.073Z | 401 | GET | /api/me | 7.178ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:05.767Z | 404 | GET | /api/health | 3.845ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:15:12.146Z | 401 | GET | /api/me | 1.391ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:16.300Z | 401 | GET | /api/me | 0.987ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:16.308Z | 401 | GET | /api/me | 1.065ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:18.274Z | 401 | GET | /api/me | 0.738ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:19.691Z | 401 | GET | /api/me | 0.424ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:19.700Z | 401 | GET | /api/me | 0.387ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:20.498Z | 401 | GET | /api/me | 0.574ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:22.148Z | 401 | GET | /api/me | 0.446ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:22.155Z | 401 | GET | /api/me | 0.381ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:22.409Z | 401 | GET | /api/me | 0.703ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:24.095Z | 401 | GET | /api/me | 0.631ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:24.214Z | 401 | GET | /api/me | 0.832ms | User: guest | IP: ::ffff:172.18.0.2 | Body: - | Msg: No token provided
+2026-04-18T04:15:36.906Z | 404 | GET | /api/health | 1.876ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:16:07.553Z | 404 | GET | /api/health | 0.549ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:16:20.609Z | 500 | GET | /auth/google/callback?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0Aci98E_BrAusOKqHyaP6eAZZ9s_0rJGjcr1tdv1_1OEgi0BLOQVNPXwRyaEIRD2f1BQBHA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=none | 354.449ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Internal Server Error
+2026-04-18T04:16:20.737Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 1.378ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-04-18T04:16:22.290Z | 404 | GET | /favicon.ico | 1.067ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Cannot GET /favicon.ico - Route not found
+2026-04-18T04:16:38.330Z | 404 | GET | /api/health | 0.526ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:17:09.082Z | 404 | GET | /api/health | 0.660ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:17:39.772Z | 404 | GET | /api/health | 0.694ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:18:10.508Z | 404 | GET | /api/health | 0.538ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:18:41.245Z | 404 | GET | /api/health | 0.593ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:19:11.963Z | 404 | GET | /api/health | 0.533ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:19:42.720Z | 404 | GET | /api/health | 0.770ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:20:13.534Z | 404 | GET | /api/health | 0.410ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:20:44.220Z | 404 | GET | /api/health | 0.472ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:21:15.007Z | 404 | GET | /api/health | 0.773ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:21:45.785Z | 404 | GET | /api/health | 1.027ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:22:16.564Z | 404 | GET | /api/health | 0.420ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:22:47.318Z | 404 | GET | /api/health | 0.922ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:23:18.027Z | 404 | GET | /api/health | 0.324ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:23:49.287Z | 404 | GET | /api/health | 0.828ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:24:19.963Z | 404 | GET | /api/health | 0.456ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:24:50.776Z | 404 | GET | /api/health | 0.345ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:25:23.051Z | 404 | GET | /api/health | 1.130ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:25:54.364Z | 404 | GET | /api/health | 0.843ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:26:25.696Z | 404 | GET | /api/health | 0.606ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:26:56.731Z | 404 | GET | /api/health | 1.046ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:27:27.902Z | 404 | GET | /api/health | 1.090ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:27:59.155Z | 404 | GET | /api/health | 1.208ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:28:30.822Z | 404 | GET | /api/health | 0.732ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:29:01.546Z | 404 | GET | /api/health | 0.430ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:29:32.796Z | 404 | GET | /api/health | 0.526ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:30:04.061Z | 404 | GET | /api/health | 0.424ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:30:35.350Z | 404 | GET | /api/health | 0.712ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:31:06.576Z | 404 | GET | /api/health | 1.291ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:31:37.672Z | 404 | GET | /api/health | 0.558ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:32:09.019Z | 404 | GET | /api/health | 0.514ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:32:40.269Z | 404 | GET | /api/health | 0.488ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:33:11.614Z | 404 | GET | /api/health | 0.622ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:33:42.543Z | 404 | GET | /api/health | 0.555ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:34:14.026Z | 404 | GET | /api/health | 0.467ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:34:45.296Z | 404 | GET | /api/health | 0.904ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:35:16.611Z | 404 | GET | /api/health | 0.562ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:35:47.794Z | 404 | GET | /api/health | 0.212ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:36:19.030Z | 404 | GET | /api/health | 0.224ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:36:50.251Z | 404 | GET | /api/health | 0.322ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:37:21.433Z | 404 | GET | /api/health | 0.348ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:37:52.677Z | 404 | GET | /api/health | 3.899ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:37:56.884Z | 401 | GET | /api/me | 2.016ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:37:56.888Z | 401 | GET | /api/me | 0.214ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:38:23.875Z | 404 | GET | /api/health | 0.387ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:38:55.106Z | 404 | GET | /api/health | 1.174ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:38:58.403Z | 401 | GET | /api/me | 0.479ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:38:58.415Z | 401 | GET | /api/me | 0.288ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:39:26.457Z | 404 | GET | /api/health | 0.240ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:39:57.652Z | 404 | GET | /api/health | 0.272ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:40:28.965Z | 404 | GET | /api/health | 0.259ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:41:00.205Z | 404 | GET | /api/health | 0.337ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:41:31.467Z | 404 | GET | /api/health | 0.351ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:42:03.234Z | 404 | GET | /api/health | 0.814ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:42:34.356Z | 404 | GET | /api/health | 1.213ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:43:05.780Z | 404 | GET | /api/health | 0.340ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:43:37.136Z | 404 | GET | /api/health | 0.424ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:44:08.471Z | 404 | GET | /api/health | 0.380ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:44:39.951Z | 404 | GET | /api/health | 0.240ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:45:11.283Z | 404 | GET | /api/health | 0.319ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:45:42.649Z | 404 | GET | /api/health | 0.542ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:46:13.999Z | 404 | GET | /api/health | 0.321ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:46:45.419Z | 404 | GET | /api/health | 0.248ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:47:16.748Z | 404 | GET | /api/health | 0.446ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:47:48.134Z | 404 | GET | /api/health | 0.282ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:48:19.572Z | 404 | GET | /api/health | 0.249ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:48:50.955Z | 404 | GET | /api/health | 0.359ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:49:22.324Z | 404 | GET | /api/health | 0.344ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:49:53.738Z | 404 | GET | /api/health | 0.345ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:50:25.186Z | 404 | GET | /api/health | 0.316ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:50:56.623Z | 404 | GET | /api/health | 2.137ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:51:28.008Z | 404 | GET | /api/health | 0.284ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:51:59.402Z | 404 | GET | /api/health | 0.256ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:52:03.225Z | 500 | GET | /auth/google/callback?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0Aci98E_BrAusOKqHyaP6eAZZ9s_0rJGjcr1tdv1_1OEgi0BLOQVNPXwRyaEIRD2f1BQBHA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=none | 372.076ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Internal Server Error
+2026-04-18T04:52:03.272Z | 404 | GET | /.well-known/appspecific/com.chrome.devtools.json | 0.817ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Cannot GET /.well-known/appspecific/com.chrome.devtools.json - Route not found
+2026-04-18T04:52:30.853Z | 404 | GET | /api/health | 0.711ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:53:02.344Z | 404 | GET | /api/health | 0.326ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:53:33.752Z | 404 | GET | /api/health | 0.677ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:54:04.035Z | 401 | GET | /api/me | 13.073ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:54:04.041Z | 401 | GET | /api/me | 1.257ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:54:04.045Z | 401 | GET | /api/me | 1.099ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:54:04.050Z | 401 | GET | /api/me | 1.017ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:54:05.285Z | 404 | GET | /api/health | 1.313ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:54:34.713Z | 404 | GET | /login | 0.504ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Cannot GET /login - Route not found
+2026-04-18T04:54:36.670Z | 404 | GET | /api/health | 0.325ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:54:39.521Z | 401 | GET | /api/me | 0.501ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:54:39.524Z | 401 | GET | /api/me | 0.210ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:54:54.332Z | 401 | GET | /api/me | 0.526ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:54:54.350Z | 401 | GET | /api/me | 0.520ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:55:08.214Z | 404 | GET | /api/health | 0.534ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:55:39.544Z | 404 | GET | /api/health | 0.347ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:56:10.965Z | 404 | GET | /api/health | 0.241ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:56:42.412Z | 404 | GET | /api/health | 0.469ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:57:13.913Z | 404 | GET | /api/health | 0.393ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:57:45.292Z | 404 | GET | /api/health | 0.375ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:58:11.789Z | 404 | GET | /login | 0.291ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Cannot GET /login - Route not found
+2026-04-18T04:58:14.230Z | 404 | GET | /login | 0.270ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Cannot GET /login - Route not found
+2026-04-18T04:58:15.593Z | 401 | GET | /api/me | 0.577ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:58:15.599Z | 401 | GET | /api/me | 0.460ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:58:16.167Z | 401 | GET | /api/me | 0.604ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:58:16.173Z | 401 | GET | /api/me | 0.399ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-18T04:58:16.706Z | 404 | GET | /api/health | 0.279ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:58:17.452Z | 401 | GET | /api/me | 2.024ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:58:17.456Z | 401 | GET | /api/me | 1.218ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:58:29.499Z | 401 | GET | /api/me | 2.848ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:58:29.503Z | 401 | GET | /api/me | 1.128ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:58:29.509Z | 401 | GET | /api/me | 2.034ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:58:29.514Z | 401 | GET | /api/me | 1.134ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T04:58:48.188Z | 404 | GET | /api/health | 0.953ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:59:19.675Z | 404 | GET | /api/health | 0.886ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T04:59:51.117Z | 404 | GET | /api/health | 0.231ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:00:22.543Z | 404 | GET | /api/health | 0.584ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:00:53.993Z | 404 | GET | /api/health | 0.234ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:01:07.649Z | 401 | GET | /api/me | 1.372ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:01:07.655Z | 401 | GET | /api/me | 2.205ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:01:07.660Z | 401 | GET | /api/me | 0.971ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:01:07.664Z | 401 | GET | /api/me | 1.031ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:01:25.488Z | 404 | GET | /api/health | 0.882ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:01:56.928Z | 404 | GET | /api/health | 0.321ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:02:28.387Z | 404 | GET | /api/health | 0.537ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:03:00.509Z | 404 | GET | /api/health | 0.490ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:03:31.254Z | 404 | GET | /api/health | 1.288ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:03:45.152Z | 401 | GET | /api/me | 2.586ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:03:45.158Z | 401 | GET | /api/me | 1.514ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:03:45.163Z | 401 | GET | /api/me | 1.104ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:03:45.169Z | 401 | GET | /api/me | 1.539ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-18T05:04:02.691Z | 404 | GET | /api/health | 0.428ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-18T05:04:34.108Z | 404 | GET | /api/health | 0.347ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
