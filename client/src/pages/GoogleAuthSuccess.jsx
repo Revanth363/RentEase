@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import axios from '../services/axiosConfig';
+import { checkCurrentUser } from "../store/slices/authSlice";
 
 export default function GoogleAuthSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const handleGoogleAuth = async () => {
@@ -22,22 +25,15 @@ export default function GoogleAuthSuccess() {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           console.log('[GoogleAuthSuccess] Token stored and set in axios headers');
 
-          // Fetch user data to confirm login and get userType for redirection
+          // Dispatch checkCurrentUser to update Redux auth state
+          // This will fetch user data and update the header
           try {
-            // Pass token directly in request headers (more reliable than global defaults)
-            const meRes = await axios.get('/me', { 
-              headers: {
-                'Authorization': `Bearer ${token}`
-              },
-              withCredentials: true 
-            });
-            console.log('[GoogleAuthSuccess] User fetched:', meRes.data.user);
+            const result = await dispatch(checkCurrentUser());
+            console.log('[GoogleAuthSuccess] Auth state updated:', result.payload);
 
-            if (meRes.data.user) {
-              localStorage.setItem('user', JSON.stringify(meRes.data.user));
-              
+            if (result.payload) {
               // Redirect to appropriate dashboard based on userType
-              const userType = meRes.data.user.userType || 'tenant';
+              const userType = result.payload.userType || 'tenant';
               const redirectMap = {
                 admin: '/admin',
                 superadmin: '/superadmin/overview',
@@ -49,10 +45,13 @@ export default function GoogleAuthSuccess() {
               
               console.log('[GoogleAuthSuccess] Redirecting to:', redirectPath);
               setTimeout(() => navigate(redirectPath), 500);
+            } else {
+              console.error('[GoogleAuthSuccess] Failed to get user from checkCurrentUser');
+              setTimeout(() => navigate('/'), 1000);
             }
           } catch (err) {
-            console.error('[GoogleAuthSuccess] Failed to fetch user:', err);
-            // Token exists but user fetch failed, redirect to home
+            console.error('[GoogleAuthSuccess] checkCurrentUser failed:', err);
+            // Even if fetch fails, user has token so redirect to home
             setTimeout(() => navigate('/'), 1000);
           }
         } else {
