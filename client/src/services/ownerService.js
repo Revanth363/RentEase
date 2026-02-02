@@ -5,9 +5,7 @@ const BOOKING_BASE = "/bookings";
 
 export const getOwnerDashboard = async () => {
   try {
-    const url = `${BASE}/dashboard`;
-    console.log('[OwnerService] Calling getOwnerDashboard, URL:', url);
-    const res = await axios.get(url, {
+    const res = await axios.get(`${BASE}/dashboard`, {
       withCredentials: true,
     });
     return res.data;

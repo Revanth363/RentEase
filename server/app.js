@@ -83,6 +83,62 @@ const corsOrigins = [
   'https://rentease-jfqjlgw2n-scs837838revanth10c1a-5541s-projects.vercel.app',
 ];
 
+const normalizeOrigin = (value) => {
+  if (!value || typeof value !== "string") return null;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+};
+
+const DEFAULT_DEV_FRONTEND = "http://localhost:5173";
+const DEFAULT_PROD_FRONTEND = "https://rentease-lyart.vercel.app";
+
+const allowedFrontendOrigins = new Set(
+  [
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGIN,
+    DEFAULT_PROD_FRONTEND,
+    "https://ffsdreporeact.vercel.app",
+    DEFAULT_DEV_FRONTEND,
+    "http://127.0.0.1:5173",
+  ]
+    .map(normalizeOrigin)
+    .filter(Boolean)
+);
+
+const encodeFrontendState = (origin) =>
+  Buffer.from(origin, "utf8").toString("base64url");
+
+const decodeFrontendState = (state) => {
+  if (!state || typeof state !== "string") return null;
+  try {
+    return Buffer.from(state, "base64url").toString("utf8");
+  } catch {
+    return null;
+  }
+};
+
+const resolveFrontendOrigin = ({ req, requestedOrigin, state }) => {
+  const fromState = normalizeOrigin(decodeFrontendState(state));
+  const fromQuery = normalizeOrigin(requestedOrigin);
+  const fromEnv = normalizeOrigin(process.env.FRONTEND_URL);
+
+  for (const origin of [fromState, fromQuery, fromEnv]) {
+    if (origin && allowedFrontendOrigins.has(origin)) {
+      return origin;
+    }
+  }
+
+  const requestHost = (req.get("host") || "").toLowerCase();
+  if (requestHost.includes("onrender.com")) {
+    return DEFAULT_PROD_FRONTEND;
+  }
+
+  return DEFAULT_DEV_FRONTEND;
+};
+
 // Add production origin if specified in environment
 if (process.env.CORS_ORIGIN) {
   corsOrigins.push(process.env.CORS_ORIGIN);
@@ -1299,7 +1355,18 @@ app.use(async (req, res, next) => {
 // Start Google login
 app.get(
   "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  (req, res, next) => {
+    const frontendOrigin = resolveFrontendOrigin({
+      req,
+      requestedOrigin: req.query.frontend,
+    });
+
+    const state = encodeFrontendState(frontendOrigin);
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state,
+    })(req, res, next);
+  }
 );
 
 // Google callback
@@ -1329,11 +1396,11 @@ app.get(
         maxAge: 60 * 60 * 1000,
       });
 
-      // Redirect to frontend with token (production-aware)
-      const frontendURL = process.env.FRONTEND_URL || 
-        (process.env.NODE_ENV === 'production' 
-          ? 'https://rentease-lyart.vercel.app'
-          : 'http://localhost:5173');
+      // Redirect to frontend with token using validated OAuth state/env fallback
+      const frontendURL = resolveFrontendOrigin({
+        req,
+        state: req.query.state,
+      });
       const redirectURL = `${frontendURL}/google-auth-success?token=${token}`;
       res.redirect(redirectURL);
     } catch (err) {

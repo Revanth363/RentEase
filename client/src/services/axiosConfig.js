@@ -37,27 +37,14 @@ if (baseURL.includes('rentease') || baseURL.includes('vercel')) {
 // Construct full API URL (with /api prefix)
 const apiBaseURL = `${baseURL}/api`;
 
-// DEBUG: Log configuration
-console.log('[Axios] Environment:', { isDev, envBaseURL, baseURL, apiBaseURL });
-console.log('[Axios] Using baseURL:', apiBaseURL);
-
 // Create main axios instance with /api prefix
 axios.defaults.baseURL = apiBaseURL;
 axios.defaults.withCredentials = true;
-
-// DEBUG: Log axios config
-console.log('[Axios] axios.defaults.baseURL set to:', axios.defaults.baseURL);
 
 // Create auth axios instance WITHOUT /api prefix (for /login, /register endpoints at root)
 export const authAxios = axios.create({
   baseURL: baseURL,
   withCredentials: true
-});
-
-// DEBUG: Log every request
-axios.interceptors.request.use(config => {
-  console.log('[Axios] Request URL:', config.url, '| Full URL would be:', `${config.baseURL}${config.url}`);
-  return config;
 });
 
 export default axios;

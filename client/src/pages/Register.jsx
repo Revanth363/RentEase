@@ -147,8 +147,10 @@ export default function Register() {
 
   // 🔹 GOOGLE REGISTRATION HANDLER
   const handleGoogleRegister = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-    window.location.href = `${baseUrl}/auth/google`;
+    const rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").trim();
+    const backendBaseUrl = rawBaseUrl.replace(/\/api\/?$/, "").replace(/\/$/, "");
+    const frontendOrigin = window.location.origin;
+    window.location.href = `${backendBaseUrl}/auth/google?frontend=${encodeURIComponent(frontendOrigin)}`;
   };
 
   return (
