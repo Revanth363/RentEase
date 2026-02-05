@@ -9,3 +9,4 @@ server/coverage/
 test_results.txt
 
 .env.docker
+.vercel
