@@ -33,17 +33,17 @@ export default function GoogleAuthSuccess() {
 
             if (result.payload) {
               // Redirect to appropriate dashboard based on userType
-              const userType = result.payload.userType || 'tenant';
+              const userType = result.payload.user?.userType || result.payload.userType || 'tenant';
               const redirectMap = {
                 admin: '/admin',
                 superadmin: '/superadmin/overview',
-                tenant: '/dashboard',
-                owner: '/owner-dashboard',
-                worker: '/worker-dashboard'
+                tenant: '/tenant/tenant_dashboard',
+                owner: '/owner_dashboard',
+                worker: '/worker_dashboard'
               };
               const redirectPath = redirectMap[userType] || '/dashboard';
               
-              console.log('[GoogleAuthSuccess] Redirecting to:', redirectPath);
+              console.log('[GoogleAuthSuccess] User type:', userType, '| Redirecting to:', redirectPath);
               setTimeout(() => navigate(redirectPath), 500);
             } else {
               console.error('[GoogleAuthSuccess] Failed to get user from checkCurrentUser');
