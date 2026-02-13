@@ -309,24 +309,36 @@ app.get("/api/test", (req, res) => {
 
 app.get("/api/properties", async (req, res) => {
   try {
-    const propertiesData = await Property.find({
-      isRented: false,
-      isVerified: true,
-      is_popular: true,
-    })
-      .select("_id name type subtype location price images")
-      .limit(6)
-      .lean();
+    // PHASE 3: Use cached query with 30-minute TTL (static homepage data)
+    const cacheResult = await cachedQuery(
+      'properties:featured:homepage',
+      async () => {
+        const propertiesData = await Property.find({
+          isRented: false,
+          isVerified: true,
+          is_popular: true,
+        })
+          .select("_id name type subtype location price images")
+          .limit(6)
+          .lean();
+        
+        // Transform images array to simple string format for first image
+        return propertiesData.map(prop => ({
+          ...prop,
+          id: prop._id,
+          place: prop.name,
+          image: prop.images && prop.images.length > 0 ? prop.images[0].url || prop.images[0] : null
+        }));
+      },
+      1800 // 30-minute cache TTL
+    );
     
-    // Transform images array to simple string format for first image
-    const transformedData = propertiesData.map(prop => ({
-      ...prop,
-      id: prop._id,
-      place: prop.name,
-      image: prop.images && prop.images.length > 0 ? prop.images[0].url || prop.images[0] : null
-    }));
+    if (cacheResult.source === 'error') {
+      return res.status(500).json({ error: "Failed to load properties" });
+    }
     
-    res.json(transformedData);
+    console.log(`[CACHE] Featured properties - Source: ${cacheResult.source}, Time: ${cacheResult.time}ms`);
+    res.json(cacheResult.data);
   } catch (error) {
     console.error("Error fetching properties:", error);
     res.status(500).json({ error: "Failed to load properties" });
@@ -367,23 +379,35 @@ app.get("/api/properties", async (req, res) => {
 
 app.get("/api/slider-properties", async (req, res) => {
   try {
-    const sliderPropertiesData = await Property.find({
-      isRented: false,
-      isVerified: true,
-    })
-      .select("name description images _id location subtype")
-      .limit(6)
-      .lean();
+    // PHASE 3: Use cached query with 30-minute TTL
+    const cacheResult = await cachedQuery(
+      'properties:slider:homepage',
+      async () => {
+        const sliderPropertiesData = await Property.find({
+          isRented: false,
+          isVerified: true,
+        })
+          .select("name description images _id location subtype")
+          .limit(6)
+          .lean();
+        
+        // Transform images array - extract URL from objects
+        return sliderPropertiesData.map(prop => ({
+          ...prop,
+          images: prop.images && prop.images.length > 0 
+            ? prop.images.map(img => typeof img === 'object' ? img.url : img)
+            : []
+        }));
+      },
+      1800 // 30-minute cache TTL
+    );
     
-    // Transform images array - extract URL from objects
-    const transformedData = sliderPropertiesData.map(prop => ({
-      ...prop,
-      images: prop.images && prop.images.length > 0 
-        ? prop.images.map(img => typeof img === 'object' ? img.url : img)
-        : []
-    }));
+    if (cacheResult.source === 'error') {
+      return res.status(500).json({ error: "Failed to load slider properties" });
+    }
     
-    res.json(transformedData);
+    console.log(`[CACHE] Slider properties - Source: ${cacheResult.source}, Time: ${cacheResult.time}ms`);
+    res.json(cacheResult.data);
   } catch (error) {
     console.error("Error fetching slider properties:", error);
     res.status(500).json({ error: "Failed to load slider properties" });
@@ -413,43 +437,56 @@ app.get("/api/slider-properties", async (req, res) => {
  */
 app.get("/api/locations", async (req, res) => {
   try {
-    const properties = await Property.find({
-      isRented: false,
-      isVerified: true,
-      location: { $ne: null, $ne: "" }
-    })
-      .select("location")
-      .lean();
-    
-    // Create a map with normalized keys to deduplicate (handling spelling variations)
-    const locationsMap = new Map();
-    properties.forEach((p) => {
-      if (p.location && p.location.trim()) {
-        const original = p.location.trim();
+    // PHASE 3: Use cached query with 60-minute TTL (rarely changes)
+    const cacheResult = await cachedQuery(
+      'filters:locations',
+      async () => {
+        const properties = await Property.find({
+          isRented: false,
+          isVerified: true,
+          location: { $ne: null, $ne: "" }
+        })
+          .select("location")
+          .lean();
         
-        // Normalize for comparison: handle common spelling variations
-        let normalized = original
-          .toLowerCase()
-          .replace(/\s+/g, "") // Remove all spaces
-          .replace(/[^a-z0-9]/g, ""); // Remove special chars
-        
-        // Handle common Indian city spelling variations
-        normalized = normalized
-          .replace(/visakhapatnam|viskahapatnam|visg|vizag/g, "visakhapatnam")
-          .replace(/hydrabad|hyderbad/g, "hyderabad")
-          .replace(/banglore|bangalore/g, "bangalore")
-          .replace(/bombay|mumbai/g, "mumbai")
-          .replace(/kolkata|calcutta/g, "kolkata");
-        
-        // Store only if not already present (preserves first occurrence's original casing)
-        if (!locationsMap.has(normalized)) {
-          locationsMap.set(normalized, original);
-        }
-      }
-    });
+        // Create a map with normalized keys to deduplicate (handling spelling variations)
+        const locationsMap = new Map();
+        properties.forEach((p) => {
+          if (p.location && p.location.trim()) {
+            const original = p.location.trim();
+            
+            // Normalize for comparison: handle common spelling variations
+            let normalized = original
+              .toLowerCase()
+              .replace(/\s+/g, "") // Remove all spaces
+              .replace(/[^a-z0-9]/g, ""); // Remove special chars
+            
+            // Handle common Indian city spelling variations
+            normalized = normalized
+              .replace(/visakhapatnam|viskahapatnam|visg|vizag/g, "visakhapatnam")
+              .replace(/hydrabad|hyderbad/g, "hyderabad")
+              .replace(/banglore|bangalore/g, "bangalore")
+              .replace(/bombay|mumbai/g, "mumbai")
+              .replace(/kolkata|calcutta/g, "kolkata");
+            
+            // Store only if not already present (preserves first occurrence's original casing)
+            if (!locationsMap.has(normalized)) {
+              locationsMap.set(normalized, original);
+            }
+          }
+        });
 
-    const uniqueLocations = Array.from(locationsMap.values()).sort();
-    res.json(uniqueLocations);
+        return Array.from(locationsMap.values()).sort();
+      },
+      3600 // 60-minute cache TTL
+    );
+    
+    if (cacheResult.source === 'error') {
+      return res.status(500).json({ error: "Failed to load locations" });
+    }
+    
+    console.log(`[CACHE] Locations filter - Source: ${cacheResult.source}, Time: ${cacheResult.time}ms`);
+    res.json(cacheResult.data);
   } catch (error) {
     console.error("Error fetching locations:", error);
     res.status(500).json({ error: "Failed to load locations" });
@@ -479,34 +516,47 @@ app.get("/api/locations", async (req, res) => {
  */
 app.get("/api/property-types", async (req, res) => {
   try {
-    const properties = await Property.find({
-      isRented: false,
-      isVerified: true,
-      subtype: { $ne: null, $ne: "" }
-    })
-      .select("subtype")
-      .lean();
-    
-    // Create a map with normalized keys to deduplicate
-    const typesMap = new Map();
-    properties.forEach((p) => {
-      if (p.subtype && p.subtype.trim()) {
-        const original = p.subtype.trim();
+    // PHASE 3: Use cached query with 60-minute TTL (rarely changes)
+    const cacheResult = await cachedQuery(
+      'filters:property-types',
+      async () => {
+        const properties = await Property.find({
+          isRented: false,
+          isVerified: true,
+          subtype: { $ne: null, $ne: "" }
+        })
+          .select("subtype")
+          .lean();
         
-        // Normalize: lowercase + remove spaces and special chars
-        const normalized = original
-          .toLowerCase()
-          .replace(/\s+/g, "") // Remove all spaces
-          .replace(/[^a-z0-9]/g, ""); // Remove special chars
-        
-        if (!typesMap.has(normalized)) {
-          typesMap.set(normalized, original);
-        }
-      }
-    });
+        // Create a map with normalized keys to deduplicate
+        const typesMap = new Map();
+        properties.forEach((p) => {
+          if (p.subtype && p.subtype.trim()) {
+            const original = p.subtype.trim();
+            
+            // Normalize: lowercase + remove spaces and special chars
+            const normalized = original
+              .toLowerCase()
+              .replace(/\s+/g, "") // Remove all spaces
+              .replace(/[^a-z0-9]/g, ""); // Remove special chars
+            
+            if (!typesMap.has(normalized)) {
+              typesMap.set(normalized, original);
+            }
+          }
+        });
 
-    const uniqueTypes = Array.from(typesMap.values()).sort();
-    res.json(uniqueTypes);
+        return Array.from(typesMap.values()).sort();
+      },
+      3600 // 60-minute cache TTL
+    );
+    
+    if (cacheResult.source === 'error') {
+      return res.status(500).json({ error: "Failed to load property types" });
+    }
+    
+    console.log(`[CACHE] Property types filter - Source: ${cacheResult.source}, Time: ${cacheResult.time}ms`);
+    res.json(cacheResult.data);
   } catch (error) {
     console.error("Error fetching property types:", error);
     res.status(500).json({ error: "Failed to load property types" });
