@@ -64,12 +64,25 @@ const propertySchema = new mongoose.Schema({
 // ============================================
 // PROPERTY INDEXES FOR PERFORMANCE
 // ============================================
-propertySchema.index({ ownerId: 1 }); // P0: Owner dashboard queries
-propertySchema.index({ tenantId: 1 }); // P0: Tenant property lookups
-propertySchema.index({ status: 1 }); // P0: Status filtering
-propertySchema.index({ isRented: 1 }); // P0: Rented/available properties
-propertySchema.index({ ownerId: 1, status: 1 }); // P1: Owner + status compound
-propertySchema.index({ location: 1 }); // P1: Location searches
+// P0: Core search filters (most frequent queries)
+propertySchema.index({ ownerId: 1 }); // Owner dashboard queries
+propertySchema.index({ tenantId: 1 }); // Tenant property lookups
+propertySchema.index({ status: 1 }); // Status filtering
+propertySchema.index({ isRented: 1 }); // Rented/available properties
+propertySchema.index({ isVerified: 1 }); // Verified properties for listing
+propertySchema.index({ is_popular: 1 }); // Popular properties for homepage
+propertySchema.index({ price: 1 }); // Price range queries
+
+// P1: Compound indexes for search queries
+propertySchema.index({ isRented: 1, isVerified: 1, is_popular: 1 }); // Homepage/featured properties
+propertySchema.index({ isRented: 1, isVerified: 1, location: 1 }); // Location-based search
+propertySchema.index({ isRented: 1, isVerified: 1, price: 1 }); // Price-based search
+propertySchema.index({ isRented: 1, isVerified: 1, subtype: 1 }); // Property type search
+propertySchema.index({ ownerId: 1, status: 1 }); // Owner + status
+propertySchema.index({ location: 1, createdAt: -1 }); // Location + recency
+
+// P2: Text index for full-text search (MongoDB text search)
+propertySchema.index({ name: 'text', description: 'text', address: 'text', location: 'text' }); // Full-text search fallback
 
 // Validate activeWorkers before saving
 propertySchema.pre('save', async function (next) {
