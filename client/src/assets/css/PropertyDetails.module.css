@@ -241,6 +241,52 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .propertyTitle {
+    font-size: 1.4rem;
+  }
+  .propertyLocation {
+    font-size: 0.9rem;
+  }
+  .propertyAddress,
+  .propertyRatingReviews {
+    font-size: 0.85rem;
+  }
+  .price {
+    font-size: 1.4rem;
+  }
+  .contactNow {
+    font-size: 0.95rem;
+    padding: 12px 20px;
+  }
+  .sectionTitle {
+    font-size: 1.2rem;
+  }
+  .infoItem {
+    font-size: 0.9rem;
+  }
+  .infoIcon {
+    font-size: 1.1rem;
+  }
+  .propertyDescription {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .amenitiesList li {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+  .mapPlaceholder {
+    font-size: 0.95rem;
+  }
+  .formField input,
+  .formField textarea {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+  .submitBtn {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
   .propertyHeader {
     flex-direction: column;
   }
@@ -260,5 +306,12 @@
   .navButton {
     width: 45px;
     height: 45px;
+  }
+  .section {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .container {
+    padding: 12px;
   }
 }

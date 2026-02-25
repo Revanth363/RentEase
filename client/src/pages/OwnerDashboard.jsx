@@ -35,6 +35,7 @@ const OwnerDashboard = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [section] = useState(getSectionFromUrl());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Modals / overlays
   const [showStatusUpdateOverlay, setShowStatusUpdateOverlay] = useState(false);
@@ -162,9 +163,14 @@ const OwnerDashboard = () => {
 
   // Toggle sidebar (mobile)
   const handleToggleMenu = () => {
+    setSidebarOpen(!sidebarOpen);
     const sidebar = document.getElementById("sidebar");
+    const overlay = document.querySelector(".ownd-overlay");
     if (sidebar) {
-      sidebar.classList.toggle("ownd-sidebar-open");
+      sidebar.classList.toggle("ownd-active");
+    }
+    if (overlay) {
+      overlay.classList.toggle("ownd-active");
     }
   };
 
@@ -385,9 +391,10 @@ const handleSettingsSubmit = async (e) => {
 
   return (
     <>
+      <div className="ownd-overlay" id="overlay" onClick={handleToggleMenu}></div>
       <div className="ownd-dashboard-container" style={{ position: "relative", marginTop: "80px" }}>
         <button className="ownd-menu-toggle" onClick={handleToggleMenu}>
-          <strong>{">"}</strong>
+          <strong>{sidebarOpen ? "<" : ">"}</strong>
         </button>
 
         {/* ─── SIDEBAR ──────────────────────────────────────── */}

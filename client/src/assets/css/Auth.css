@@ -19,7 +19,15 @@
 .auth-shell.login-mode,
 .auth-shell.register-mode {
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)),
-    var(--auth-bg-image) center/cover no-repeat fixed;
+    var(--auth-bg-image) center/cover no-repeat scroll;
+}
+
+/* Fix: Use fixed background only on desktop (≥901px) to avoid mobile jank */
+@media (min-width: 901px) {
+  .auth-shell.login-mode,
+  .auth-shell.register-mode {
+    background-attachment: fixed;
+  }
 }
 
 /* NEW: Only lock scroll on larger screens */
@@ -39,7 +47,7 @@
   .auth-shell {
     flex-direction: column;
     overflow-y: auto; /* ← explicitly allow scroll on mobile */
-    -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+    /* Removed -webkit-overflow-scrolling: touch to prevent animation jank */
   }
 }
 
@@ -64,6 +72,14 @@
   padding: 20px;
   margin-top: 80px;
 }
+
+/* Reduce top margin on small mobile screens to save space and improve scroll */
+@media (max-width: 520px) {
+  .panel-content {
+    margin-top: 30px;
+  }
+}
+
 .auth-embed > .login-page-root,
 .auth-embed > .register-page-root,
 .auth-embed > .forgot-page-root {
@@ -157,6 +173,8 @@
   .panel {
     flex-basis: auto !important;
     min-height: 50vh;
+    /* Disable heavy transitions on mobile for smooth scroll */
+    transition: none !important;
   }
   .panel.inactive .panel-content {
     display: none;

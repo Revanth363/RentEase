@@ -119,6 +119,7 @@ const TenantDashboard = () => {
   const [section] = useState(getSectionFromUrl());
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Modals/forms visibility
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
@@ -821,13 +822,14 @@ const TenantDashboard = () => {
       <div className="tntd-overlay" id="overlay"></div>
       <button
         className="tntd-menu-toggle"
-        onClick={() =>
+        onClick={() => {
+          setSidebarOpen(!sidebarOpen);
           document
             .querySelector(".tntd-sidebar")
-            ?.classList.toggle("tntd-active")
-        }
+            ?.classList.toggle("tntd-active");
+        }}
       >
-        <strong>&gt;</strong>
+        <strong>{sidebarOpen ? "<" : ">"}</strong>
       </button>
       <div className="tntd-dashboard-container">
         {verificationStatus !== "approved" ? (

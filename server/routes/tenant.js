@@ -148,6 +148,10 @@ router.post(
 router.get(
   "/dashboard-data",
   protect,
+  (req, res, next) => {
+    console.log("[ROUTE LOG] /dashboard-data hit at", new Date().toISOString());
+    next();
+  },
   tenantController.getDashboardData
 );
 
@@ -596,5 +600,20 @@ router.get(
   protect,
   tenantController.getWorkerWorkHistory
 );
+
+// DEBUG: Check saved listings directly
+router.get("/debug/saved-listings", protect, async (req, res) => {
+  try {
+    const Tenant = require("../models/tenant");
+    const tenant = await Tenant.findById(req.user.id).populate("savedListings");
+    res.json({
+      tenantId: req.user.id,
+      savedListingsCount: tenant.savedListings.length,
+      savedListings: tenant.savedListings
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

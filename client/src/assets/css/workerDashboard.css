@@ -25,7 +25,7 @@
 
 .wrkd-nav-toggle {
   display: none;
-  font-size: 24px;
+  font-size: 32px;
   background: none;
   border: none;
   color: white;
@@ -985,21 +985,271 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .wrkd-tentant-details {
+  .wrkd-menu-toggle {
+    display: block;
+    position: fixed;
+    z-index: 1001;
+    background-color: #333;
+    color: #ffc107;
+    top: 10vh;
+    left: 0;
+    padding: 8px 6px;
+    border-radius: 0;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .wrkd-sidebar {
+    width: 50vw;
+    height: 100%;
+    position: fixed;
+    left: -120%;
+    top: 10vh;
+    background: #333;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .wrkd-sidebar.wrkd-active {
+    left: 0;
+  }
+
+  .wrkd-sidebar h2 {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .wrkd-sidebar h3 {
+    font-size: 11px;
+  }
+
+  .wrkd-sidebar ul li {
+    font-size: 11px;
+    padding: 10px;
+  }
+
+  .wrkd-sidebar ul li i {
+    font-size: 13px;
+    margin-right: 8px;
+  }
+
+  .wrkd-main-content {
+    width: 100%;
+    margin: 0;
     padding: 15px;
+    position: relative;
+  }
+
+  .wrkd-section {
+    padding: 12px;
+    margin-top: 15px;
+  }
+
+  .wrkd-section h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .wrkd-section p {
+    font-size: 12px;
+  }
+
+  .wrkd-booking-card {
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  .wrkd-tentant-details {
+    padding: 10px;
+    font-size: 11px;
   }
 
   .wrkd-tentant-details li {
-    font-size: 14px;
-    padding: 6px 0;
+    font-size: 10px;
+    padding: 2px 0;
   }
 
   .wrkd-no-clients-message {
-    padding: 40px 15px;
+    padding: 20px 15px;
   }
 
   .wrkd-no-clients-message p {
-    font-size: 14px;
+    font-size: 12px;
+  }
+
+  .wrkd-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .wrkd-tab-button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .wrkd-form-group input,
+  .wrkd-form-group select,
+  .wrkd-form-group textarea {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .wrkd-form-group label {
+    font-size: 11px;
+  }
+
+  .wrkd-form-button {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .wrkd-table {
+    font-size: 11px;
+  }
+
+  .wrkd-table th,
+  .wrkd-table td {
+    padding: 4px;
+    font-size: 10px;
+  }
+
+  .wrkd-profile-header {
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .wrkd-profile-details {
+    padding: 10px;
+  }
+
+  .wrkd-profile-details h4 {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .wrkd-profile-details p {
+    font-size: 11px;
+    line-height: 1.3;
+    margin: 2px 0;
+  }
+
+  .wrkd-calendar-section {
+    margin-bottom: 10px;
+  }
+
+  .wrkd-date-picker {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .wrkd-work-history {
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .wrkd-work-history li {
+    margin: 2px 0;
+    font-size: 10px;
+  }
+
+  .wrkd-generate-otp-btn,
+  .wrkd-verify-otp-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .wrkd-unverified-banner {
+    padding: 12px 15px;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .wrkd-unverified-banner i {
+    font-size: 1.4rem;
+  }
+
+  .wrkd-unverified-banner h3 {
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .wrkd-unverified-banner p {
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .wrkd-overlay {
+    display: none;
+  }
+
+  .wrkd-overlay.wrkd-active {
+    display: block;
+  }
+
+  .wrkd-nav-toggle {
+    display: block;
+    position: absolute;
+    right: 15px;
+    background-color: #333;
+    color: #ffc107;
+    top: 10vh;
+    padding: 5px 8px;
+    font-size: 24px;
+  }
+
+  .wrkd-complaint-container {
+    margin-top: 12px;
+  }
+
+  .wrkd-res-complaint {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 9px;
+  }
+
+  .wrkd-res-complaint strong {
+    font-size: 9px;
+    font-weight: bold;
+  }
+
+  .wrkd-res-complaint ul {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0;
+  }
+
+  .wrkd-res-complaint ul li {
+    padding: 3px 0;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  .wrkd-res-complaint ul ul {
+    padding-left: 12px;
+    margin-top: 3px;
+  }
+
+  .wrkd-update-sts {
+    padding: 6px 10px;
+    margin-top: 8px;
+    margin-right: 6px;
+    background: #ffc107;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
   }
 }
 

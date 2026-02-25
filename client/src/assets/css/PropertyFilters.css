@@ -48,13 +48,56 @@
 /* Mobile: Hidden by default */
 @media (max-width: 768px) {
   .filter-sidebar {
-    transform: translateX(-100%);
-    width: 100vw;
+    transform: translateX(-120%);  /* FIX: Move further left for smooth slide-in animation */
+    width: 80vw;  /* FIX: Reduced to 80vw for balanced look on both sides */
     height: 100vh;
-    padding: 90px 20px 40px;
+    padding: 20px;
+    padding-top: 20px;
     z-index: 1500;
-    overflow-y: auto;     /* ✔ scroll allowed */
-    overflow-x: hidden;   /* ✔ horizontal hidden */
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-padding-top: 80px;
+  }
+
+  .filter-sidebar h2 {
+    margin: 0 0 15px 0;
+    margin-top: 120px;
+  }
+
+  .close-sidebar {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #ffc109;
+    color: black;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1700;
+  }
+
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 200px;
+  }
+
+  .filters button {
+    background: #ffc109;
+    color: black;
+    border: none;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
   }
 }
 
@@ -215,6 +258,7 @@ legend {
 
 @media (max-width: 768px) {
   .content {
-    margin-left: 0;
+    margin-left: 0;  /* FIX: Remove left margin on mobile to eliminate white space */
+    padding: 0;  /* FIX: Remove padding on mobile */
   }
 }

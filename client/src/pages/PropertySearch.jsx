@@ -2,6 +2,7 @@
 import axios from '../services/axiosConfig';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { FiFilter } from 'react-icons/fi';  /* Filter funnel icon */
 import "../assets/css/PropertyFilters.css";
 import "../assets/css/PropertySearch.css";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -175,7 +176,7 @@ const PropertySearch = () => {
     <div className="property-search-page">
       {/* Mobile Filter Toggle Button */}
       <button className="filter-icon" onClick={toggleSidebar} ref={filterIconRef}>
-        ☰
+        <FiFilter size={18} />
       </button>
 
       {/* Overlay */}

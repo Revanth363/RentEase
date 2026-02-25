@@ -20,13 +20,25 @@
 
 .filterToggle {
   display: none;
-  background: #ffc107;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 700;
+  position: fixed;
+  top: 90px;
+  left: 10px;
+  background: #ffc109;
+  color: black;
+  padding: 10px 8px 4px;
+  border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 20px;
+  z-index: 2000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (max-width: 768px) {
+  .filterToggle {
+    display: flex;
+  }
 }
 
 .layout {
@@ -181,6 +193,48 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 30px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.overlay.active { 
+  display: block; 
+}
+
+.closeSidebar {
+  display: none;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #ffc109;
+  color: black;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+}
+@media (max-width: 768px) {
+  .closeSidebar { 
+    display: block; 
+  }
+}
+.closeSidebar:hover { 
+  background: #ffb300; 
 }
 
 /* When a worker detail is open, make listing cards use the boxed detail dimensions
@@ -420,43 +474,69 @@
 
 /* Tablets and below */
 @media (max-width: 768px) {
-  .filterToggle {
-    display: block;
-  }
-
   .layout {
     flex-direction: column;
   }
 
   .sidebar {
-    width: 100%;
+    width: 80vw;
     position: fixed;
-    left: -100%;
-    top: 0;
+    left: 0;
+    transform: translateX(-120%);
+    top: 70px;
     bottom: 0;
+    height: calc(100vh - 70px);
     background: #fff;
-    z-index: 1000;
-    padding: 20px;
+    z-index: 1500;
+    padding: 60px 20px 40px;
     overflow-y: auto;
-    transition: left 0.3s ease;
+    overflow-x: hidden;
+    transition: transform 0.5s ease-in-out;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    scrollbar-width: thin;
+    scrollbar-color: #ffc109 #f5f5f5;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: #ffc109;
+    border-radius: 3px;
   }
 
   .sidebar.active {
-    left: 0;
+    transform: translateX(0);
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 0;
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 10px;
+  }
+
+  .grid > div {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   /* on small screens the sidebar stacks above; reset title margin */
   .title {
     margin-left: 0;
     text-align: left;
-  }
-
-  .title {
     font-size: 28px;
     padding-left: 0;
   }
@@ -482,5 +562,65 @@
   
   .cardImage {
     height: 200px;
+  }
+}
+
+/* Mobile text size reduction */
+@media (max-width: 768px) {
+  .title {
+    font-size: 22px;
+  }
+
+  .filterTitle {
+    font-size: 16px;
+  }
+
+  .groupRow label {
+    font-size: 13px;
+  }
+
+  .group select,
+  .groupRow select {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .apply,
+  .clear {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+
+  .workerName {
+    font-size: 18px;
+  }
+
+  .workerLocation {
+    font-size: 12px;
+  }
+
+  .workerPrice {
+    font-size: 16px;
+  }
+
+  .workerExp {
+    font-size: 12px;
+  }
+
+  .rateUnit {
+    font-size: 12px;
+  }
+
+  .viewButton {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .message {
+    font-size: 14px;
+  }
+
+  .error {
+    font-size: 14px;
   }
 }

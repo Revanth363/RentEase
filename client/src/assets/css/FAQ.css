@@ -110,3 +110,41 @@
 .faq-page .contact a:hover {
   color: #e6b800;
 }
+
+/* Mobile text size reduction */
+@media (max-width: 768px) {
+  .faq-page h1 {
+    font-size: 24px;
+  }
+
+  .faq-page .subheading {
+    font-size: 14px;
+  }
+
+  .faq-page .faq-question {
+    font-size: 15px;
+    padding: 12px 16px;
+  }
+
+  .faq-page .faq-question i {
+    font-size: 16px;
+  }
+
+  .faq-page .toggle-icon {
+    font-size: 14px;
+  }
+
+  .faq-page .faq-answer {
+    font-size: 14px;
+    padding: 0 16px;
+  }
+
+  .faq-page .contact {
+    font-size: 14px;
+  }
+
+  .faq-page .container {
+    margin: 30px auto;
+    padding: 15px;
+  }
+}

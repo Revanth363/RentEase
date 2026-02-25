@@ -180,10 +180,23 @@
 
 /* Mobile Styles */
 @media (max-width: 768px) {
+  .brandid {
+    font-size: 20px;
+  }
+
+  .tagline {
+    font-size: 11px;
+  }
+
+  .navLink {
+    font-size: 15px;
+  }
+
   .navToggle {
     display: block;
     position: absolute;
     right: 10px;
+    font-size: 30px;
   }
 
   .navMenu {
@@ -231,18 +244,68 @@
     padding: 6px 10px;
     font-size: 13px;
   }
+
+  .userGreeting {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .userGreeting span {
+    max-width: 80px;
+  }
+
+  .icon {
+    font-size: 12px;
+  }
+
+  .dropdownContent {
+    min-width: 140px;
+  }
+
+  .dropdownContent a {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 480px) {
+  .brandid {
+    font-size: 18px;
+  }
+
   .tagline {
     font-size: 9px;
   }
 
   .navToggle {
-    font-size: 30px;
+    font-size: 28px;
+    right: 8px;
   }
 
   .cta {
-    right: 55px;
+    right: 50px;
+  }
+
+  .loginBtn {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .userGreeting {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+
+  .userGreeting span {
+    max-width: 70px;
+  }
+
+  .navLink {
+    font-size: 14px;
+  }
+
+  .dropdownContent a {
+    padding: 8px 10px;
+    font-size: 12px;
   }
 }

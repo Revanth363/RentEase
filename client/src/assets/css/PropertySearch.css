@@ -33,7 +33,7 @@
   gap: 2rem;
   margin-bottom: 2rem;
   padding: 0 20px;
-  margin-left:70px;
+  margin-left: 70px;  /* Desktop only - removed on mobile */
 }
 
 .property-search-page .property-card {
@@ -75,6 +75,8 @@
 
 .property-search-page .property-info {
   padding: 1.2rem;
+  overflow: hidden;  /* FIX: Prevent content overflow */
+  box-sizing: border-box;  /* Include padding in width calculation */
 }
 .property-search-page .property-location {
   margin: -12px 0 10px;
@@ -132,10 +134,13 @@
 .property-search-page .property-footer {
   display: flex;
   justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;  /* FIX: Prevent button overlap */
+  overflow: hidden;  /* Prevent content from overflowing */
 }
 
 .property-search-page .btn {
-  padding: 15px 20px ;
+  padding: 15px 20px;
   background: var(--secondary);
   color: white;
   border: none;
@@ -144,6 +149,7 @@
   cursor: pointer;
   text-decoration: none;
   font-size: 0.9rem;
+  box-sizing: border-box;  /* FIX: Include padding in width */
 }
 
 .property-search-page .btn:hover {
@@ -169,37 +175,67 @@
 @media (max-width: 768px) {
   .property-search-page .property-grid {
     padding: 0 10px;
+    margin-left: 0;  /* FIX: Remove left margin for mobile centering */
+    gap: 1rem;  /* Reduce gap on mobile */
   }
   .property-search-page .property-card {
     width: 100%;
-    max-width: 350px;
+    max-width: 100%;
+    min-width: 0;  /* FIX: Prevent overflow */
+  }
+  /* FIX: Mobile button layout - center and full width */
+  .property-search-page .property-footer {
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;  /* FIX: Center buttons instead of space-between */
+  }
+  .property-search-page .btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    box-sizing: border-box;  /* Ensure padding doesn't exceed width */
+    max-width: 100%;  /* Prevent overflow */
+  }
+  .property-search-page .wishlist-btn {
+    width: 100%;
+    height: auto;
+    padding: 12px 16px;
+    margin: 0;
+    box-sizing: border-box;  /* Ensure padding doesn't exceed width */
+    max-width: 100%;  /* Prevent overflow */
   }
 }
 
 @media (max-width: 480px) {
   .property-search-page .property-card {
-    max-width: 300px;
+    max-width: 100%;
   }
   .property-search-page .property-image {
-    height: 100px;
+    height: 150px;
   }
   .property-search-page .property-features {
     flex-wrap: wrap;
+    gap: 8px;
   }
   .property-search-page .feature {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
+    font-size: 0.85rem;
   }
   .property-search-page .btn {
-    font-size: 0.8rem;
-    width: 100px;
-    height: 50px;
-    padding: 0 30px;
-    margin: 10px -10px 0 -20px;
+    font-size: 0.85rem;
+    width: 100%;
+    height: auto;
+    padding: 12px 16px;
+    margin: 0;
   }
   .property-search-page .wishlist-btn {
-    width: 90px;
-    height: 50px;
-    padding-right: 30px;
+    width: 100%;
+    height: auto;
+    padding: 12px 16px;
+    margin: 0;
+  }
+  .property-search-page .property-info {
+    padding: 1rem;
   }
 }
 

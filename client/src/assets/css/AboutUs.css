@@ -135,3 +135,30 @@
 .about-us-page .team-member p {
   font-size: 0.9rem;
 }
+
+/* Mobile text size reduction */
+@media (max-width: 768px) {
+  .about-us-page .about-info h2,
+  .about-us-page .team-info h2 {
+    font-size: 1.3rem;
+  }
+
+  .about-us-page .mission-item h3,
+  .about-us-page .feature-item h3,
+  .about-us-page .team-member h3 {
+    font-size: 1rem;
+  }
+
+  .about-us-page .container {
+    padding: 0 10px;
+  }
+
+  .about-us-page .about-info,
+  .about-us-page .team-info {
+    padding: 1.2rem;
+  }
+
+  .about-us-page .team-member p {
+    font-size: 0.8rem;
+  }
+}

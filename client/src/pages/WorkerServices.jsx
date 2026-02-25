@@ -1,5 +1,6 @@
 // src/pages/WorkerServices.jsx
 import React, { useEffect, useState, useCallback } from 'react';
+import { FiFilter } from 'react-icons/fi';
 import styles from '../assets/css/WorkerServices.module.css';
 import WorkerCard from '../pages/WorkerCard';
 import { useSearchParams } from 'react-router-dom';
@@ -12,6 +13,9 @@ export default function WorkerServices() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filtersActive, setFiltersActive] = useState(false);
+  const sidebarRef = React.useRef(null);
+  const overlayRef = React.useRef(null);
+  const filterIconRef = React.useRef(null);
 
   const { setIsLoading } = useLoading(); // Using global loading
 
@@ -89,22 +93,48 @@ export default function WorkerServices() {
     setSearchParams({});
   }
 
+  function toggleSidebar() {
+    const isActive = sidebarRef.current?.classList.contains('active');
+    if (isActive) {
+      sidebarRef.current?.classList.remove('active');
+      overlayRef.current?.classList.remove('active');
+      if (filterIconRef.current) filterIconRef.current.style.display = 'block';
+      document.body.style.overflow = 'auto';
+    } else {
+      sidebarRef.current?.classList.add('active');
+      overlayRef.current?.classList.add('active');
+      if (filterIconRef.current) filterIconRef.current.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+    }
+    setFiltersActive(!isActive);
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', paddingTop: '90px' }}>
       <div className={styles.root}>
         
         <button 
           className={styles.filterToggle} 
-          onClick={() => setFiltersActive(!filtersActive)}
-          style={{ position: 'fixed', top: 80, left: 20, zIndex: 1000 }}
+          onClick={toggleSidebar}
+          ref={filterIconRef}
         >
-          Filters
+          <FiFilter size={18} />
         </button>
+
+        <div 
+          className={styles.overlay} 
+          ref={overlayRef}
+          onClick={toggleSidebar}
+          style={{ cursor: 'pointer' }}
+        ></div>
 
         <h1 className={styles.title}>Find Domestic Workers</h1>
 
         <div className={styles.layout}>
-          <aside className={`${styles.sidebar} ${filtersActive ? styles.active : ''}`}>
+          <aside className={`${styles.sidebar} ${filtersActive ? styles.active : ''}`} ref={sidebarRef}>
+            <button className={styles.closeSidebar} onClick={toggleSidebar}>
+              ×
+            </button>
             <div className={styles.filterCard}>
               <h3 className={styles.filterTitle}>Search Location</h3>
               <div className={styles.group}>

@@ -943,7 +943,7 @@ body {
 
 .ownd-nav-toggle {
   display: none;
-  font-size: 24px;
+  font-size: 32px;
   background: none;
   border: none;
   color: white;
@@ -1150,11 +1150,15 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   #header {
-    height: 8vh;
+    height: 10vh;
   }
 
   #header #brandid {
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  #header #tagline {
+    font-size: 10px;
   }
 
   .ownd-menu-toggle {
@@ -1163,33 +1167,50 @@ body {
     z-index: 1001;
     background-color: #333;
     color: #ffc107;
-    top: 8vh;
-    margin-top: 10px;
-    padding-bottom: 5px;
-    border-radius: 0px 3px 3px 0px;
+    top: 10vh;
+    left: 0;
+    padding: 8px 6px;
+    border-radius: 0;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
   }
 
   .ownd-sidebar {
-    width: 50%;
+    width: 50vw;
     height: 100%;
     position: fixed;
-    left: -100%;
-    top: 8vh;
-    margin-top: 10px;
+    left: -120%;
+    top: 10vh;
     background: #333;
     transition: left 0.3s ease-in-out;
     z-index: 1000;
     padding: 20px;
+    overflow-y: auto;
   }
 
   .ownd-sidebar.ownd-active {
     left: 0;
   }
 
+  .ownd-sidebar h2 {
+    font-size: 13px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  .ownd-sidebar ul li {
+    font-size: 11px;
+    padding: 10px;
+  }
+
   .ownd-main-content {
-    margin: 0px 5vw;
-    width: 90vw;
-    top: 17vh;
+    margin: 0;
+    width: 100%;
+    padding: 15px;
+    position: relative;
+    top: 0;
   }
 
   .ownd-nav-toggle {
@@ -1201,9 +1222,9 @@ body {
     padding: 5px 10px;
     border-radius: 5px;
     z-index: 1100;
+    font-size: 24px;
   }
 
-  /* Initially hide the nav links */
   #ownd-nav-menu {
     visibility: hidden;
     opacity: 0;
@@ -1219,17 +1240,13 @@ body {
     transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
     padding: 0;
     z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    height: fit-content;
-    display: flex;
   }
 
   #ownd-nav-menu a {
-    width: 70%;
+    width: 100%;
     display: block;
     padding: 10px;
-    font-size: 16px;
+    font-size: 14px;
     color: white;
     text-decoration: none;
     border-bottom: 1px solid gray;
@@ -1239,77 +1256,266 @@ body {
     background-color: #444;
   }
 
-  /* Show menu when active */
   #ownd-nav-menu.ownd-active {
     visibility: visible;
     opacity: 1;
     max-height: 500px;
-    padding: 10px 5px 0px 5px;
-  }
-
-  .ownd-sidebar ul li {
-    font-size: 14px;
+    padding: 10px 0;
   }
 
   .ownd-after-scroll-container {
-    width: 280px;
+    width: 100%;
   }
 
   .ownd-add-button {
     margin-top: 15px;
-    margin-left: 15px;
+    margin-left: 0;
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
   }
 
   .ownd-prop-container {
     width: 100%;
-    display: flex;
-    margin-left: 15px;
-    flex-direction: row;
-    flex-wrap: wrap;
+    margin-left: 0;
     justify-content: center;
   }
 
   .ownd-settings-section {
-    flex: 1 1 100%;
-    width: 80%;
+    width: 100%;
   }
 
   .ownd-form-row {
     flex-direction: column;
-    gap: 0;
+    gap: 10px;
+  }
+
+  .ownd-form-row input,
+  .ownd-form-row select,
+  .ownd-form-row textarea {
+    width: 100%;
+    font-size: 12px;
+    padding: 8px;
   }
 
   .ownd-button-container {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .ownd-button-container button {
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
   }
 
   .ownd-payment-summary,
   .ownd-reports-summary,
   .ownd-services-container {
     flex-direction: column;
+    gap: 12px;
   }
 
   .ownd-report-card,
   .ownd-summary-card,
   .ownd-service-card {
     min-width: auto;
+    padding: 12px;
   }
 
   .ownd-notification-container {
-    gap: 15px;
+    gap: 12px;
   }
 
   .ownd-notification-card {
     width: 100%;
+    padding: 12px;
   }
 
   .ownd-notification-actions {
     flex-direction: column;
-    align-items: flex-end;
+    gap: 8px;
+    align-items: stretch;
   }
 
   .ownd-action-button {
     width: 100%;
-    text-align: center;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .ownd-section {
+    padding: 12px;
+    margin-top: 15px;
+  }
+
+  .ownd-section h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .ownd-section p {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .ownd-section h4 {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .ownd-section label {
+    font-size: 12px;
+  }
+
+  .ownd-main-sen {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .ownd-sc-text {
+    font-size: 11px;
+    padding-top: 8px;
+  }
+
+  .ownd-prop-details ul li {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+
+  .ownd-prop-button {
+    height: 28px;
+    padding: 4px 6px;
+    font-size: 11px;
+    margin: 3px;
+  }
+
+  .ownd-tenant-details {
+    width: 95%;
+    margin: 8px;
+    padding: 10px;
+  }
+
+  .ownd-tenant-details ul {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .ownd-tenant-details ul li {
+    margin-bottom: 2px;
+  }
+
+  .ownd-msg-button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .ownd-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+
+  .ownd-overlay.ownd-active {
+    display: block;
+  }
+
+  #ownd-house-owner-name {
+    font-size: 12px;
+  }
+
+  .ownd-report-card,
+  .ownd-summary-card,
+  .ownd-service-card {
+    font-size: 11px;
+  }
+
+  .ownd-property-card {
+    font-size: 11px;
+  }
+
+  .ownd-after-scroll-container {
+    min-width: auto;
+  }
+
+  .ownd-sc-image-container {
+    height: 140px;
+  }
+
+  .ownd-prop-view {
+    padding: 2px 8px;
+    justify-content: space-evenly;
+  }
+
+  .ownd-res-complaint {
+    font-size: 11px;
+    margin: 8px;
+    padding: 10px;
+  }
+
+  .ownd-res-complaint ul {
+    padding: 0;
+    margin: 0 0 10px 0;
+  }
+
+  .ownd-res-complaint ul li {
+    margin-bottom: 2px;
+  }
+
+  .ownd-update-sts {
+    padding: 6px 10px;
+    font-size: 11px;
+    margin: 4px 2px;
+  }
+
+  .ownd-request-card {
+    font-size: 11px;
+    margin: 8px;
+    padding: 10px;
+  }
+
+  .ownd-request-header {
+    margin-bottom: 8px;
+  }
+
+  .ownd-request-header h4 {
+    font-size: 12px;
+    margin: 0 0 4px 0;
+  }
+
+  .ownd-request-details p {
+    font-size: 11px;
+    margin: 3px 0;
+  }
+
+  .ownd-notification-card {
+    font-size: 11px;
+  }
+
+  .ownd-notification-header h4 {
+    font-size: 12px;
+  }
+
+  .ownd-notification-details p {
+    font-size: 11px;
+    margin: 3px 0;
+  }
+
+  .ownd-payment-table-container {
+    font-size: 11px;
+  }
+
+  .ownd-payment-table-container h4 {
+    font-size: 12px;
+  }
+
+  .ownd-notification-card {
+    font-size: 10px;
   }
 }
