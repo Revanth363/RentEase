@@ -195,13 +195,14 @@ exports.getOwnerDashboard = async (req, res) => {
     );
 
     // RESPONSE: Return optimized data
-    console.log(`[PHASE 2] Dashboard response ready - Query time: ${queryTime}ms`);
+    console.log(`[PHASE 2] Dashboard response ready - Query time: ${cacheResult.time}ms (${cacheResult.source})`);
     res.json({
       success: true,
       meta: {
         optimized: true,
-        queryTime: `${queryTime}ms`,
-        queriesReduced: "15-20 → 1 aggregation"
+        queryTime: `${cacheResult.time}ms`,
+        queriesReduced: "15-20 → 1 aggregation",
+        source: cacheResult.source
       },
       user: {
         _id: owner._id,
