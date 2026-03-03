@@ -66,7 +66,7 @@ const WorkerBooking = require("../models/workerBooking");
 const UnrentRequest = require("../models/unrentRequest");
 const Booking = require("../models/booking");
 const { buildTenantDashboardPipeline } = require("../utils/aggregationPipelines");
-const { cachedQuery } = require("../utils/cacheWrapper");
+const { cachedQuery, invalidateCache } = require("../utils/cacheWrapper");
 // bcrypt removed; plain-text password comparisons are used per requirement
 
 // Dashboard Controller
@@ -231,7 +231,7 @@ exports.getDashboardData = async (req, res) => {
     }
     
     const userId = req.user.id;
-    const cacheKey = `dashboard:tenant:${userId}`;
+    const cacheKey = `dashboard:tenant:v3:${userId}`;
     const TTL_SECONDS = 300; // 5 minutes
 
     // PHASE 3: Cached query with automatic fallback
@@ -253,14 +253,57 @@ exports.getDashboardData = async (req, res) => {
         const queryTime = Date.now() - startTime;
         const aggregatedData = aggregationResult[0];
 
+        const mapPropertyCard = (prop) => {
+          const propertyImages = (prop.images || [])
+            .map((img) => {
+              if (typeof img === "string") return img;
+              if (img?.url) return img.url;
+              return null;
+            })
+            .filter(Boolean);
+
+          return {
+            _id: prop._id,
+            images: propertyImages,
+            name: prop.name,
+            location: prop.location,
+            price: prop.price,
+            availableFrom: prop.availableFrom,
+            subtype: prop.subtype,
+            size: prop.size,
+            furnished: prop.furnished,
+          };
+        };
+
         // Extract and format data from aggregation result
+        let savedListings = (aggregatedData.savedListingsDetails || []).map(mapPropertyCard);
+
+        // Fallback for legacy/mixed data shapes where aggregation lookup may not return expected docs
+        if (savedListings.length === 0) {
+          const tenantSaved = await Tenant.findById(userId)
+            .select("savedListings")
+            .lean();
+
+          const savedIds = (tenantSaved?.savedListings || []).map((item) =>
+            item?._id ? item._id : item
+          ).filter(Boolean);
+
+          if (savedIds.length > 0) {
+            const fallbackSavedProperties = await Property.find({
+              _id: { $in: savedIds },
+            }).lean();
+            savedListings = fallbackSavedProperties.map(mapPropertyCard);
+          }
+        }
+
         const tenant = {
           _id: aggregatedData._id,
           firstName: aggregatedData.firstName,
           lastName: aggregatedData.lastName,
           email: aggregatedData.email,
           phone: aggregatedData.phone,
-          location: aggregatedData.location
+          location: aggregatedData.location,
+          savedListings,
         };
 
         // Current property - get the first one (rented property)
@@ -368,18 +411,27 @@ exports.getDashboardData = async (req, res) => {
         let enrichedRentalHistory = [];
         
         if (rentalHistoryDoc?.propertyIds?.length > 0) {
-          const propertyIds = rentalHistoryDoc.propertyIds.map(h => h.property);
+          const historyItems = rentalHistoryDoc.propertyIds || [];
+          const propertyIds = historyItems
+            .map((h) => h?.property || h?.propertyId)
+            .filter(Boolean);
+
           const properties = await Property.find({ _id: { $in: propertyIds } }).lean();
           const ratings = await Rating.find({ 
             tenantId: userId, 
             propertyId: { $in: propertyIds } 
           }).lean();
 
-          enrichedRentalHistory = rentalHistoryDoc.propertyIds.map(historyItem => {
-            const property = properties.find(p => p._id.toString() === historyItem.property.toString());
-            const rating = ratings.find(r => r.propertyId.toString() === historyItem.property.toString());
+          enrichedRentalHistory = historyItems.map((historyItem) => {
+            const historyPropertyId = historyItem?.property || historyItem?.propertyId || null;
+            const property = historyPropertyId
+              ? properties.find((p) => p._id.toString() === historyPropertyId.toString())
+              : null;
+            const rating = historyPropertyId
+              ? ratings.find((r) => r.propertyId?.toString() === historyPropertyId.toString())
+              : null;
 
-            const propertyImages = (property?.images || []).map(img => {
+            const propertyImages = (property?.images || []).map((img) => {
               if (typeof img === "string") return img;
               if (img?.url) return img.url;
               return null;
@@ -387,12 +439,70 @@ exports.getDashboardData = async (req, res) => {
 
             return {
               ...historyItem,
+              property: historyPropertyId,
               propertyName: property ? property.name : "Property",
               propertyImages,
               rating: rating?.rating || null,
               review: rating?.review || null,
             };
           });
+        }
+
+        // Fallback: derive rental history from tenant bookings when rentalHistory collection is sparse/inconsistent
+        if (enrichedRentalHistory.length === 0) {
+          const bookingHistory = await Booking.find({ tenantId: userId })
+            .sort({ startDate: -1, createdAt: -1 })
+            .lean();
+
+          if (bookingHistory.length > 0) {
+            const bookingPropertyIds = bookingHistory
+              .map((b) => b?.propertyId)
+              .filter(Boolean);
+
+            const bookingProperties = await Property.find({
+              _id: { $in: bookingPropertyIds },
+            }).lean();
+
+            const bookingRatings = await Rating.find({
+              tenantId: userId,
+              propertyId: { $in: bookingPropertyIds },
+            }).lean();
+
+            enrichedRentalHistory = bookingHistory.map((bookingItem) => {
+              const bookingPropertyId = bookingItem?.propertyId || null;
+              const property = bookingPropertyId
+                ? bookingProperties.find(
+                    (p) => p._id.toString() === bookingPropertyId.toString()
+                  )
+                : null;
+              const rating = bookingPropertyId
+                ? bookingRatings.find(
+                    (r) => r.propertyId?.toString() === bookingPropertyId.toString()
+                  )
+                : null;
+
+              const propertyImages = (property?.images || [])
+                .map((img) => {
+                  if (typeof img === "string") return img;
+                  if (img?.url) return img.url;
+                  return null;
+                })
+                .filter(Boolean);
+
+              return {
+                property: bookingPropertyId,
+                propertyName: property?.name || bookingItem?.propertyName || "Property",
+                address: property?.address || "N/A",
+                propertyImages,
+                startDate: bookingItem?.startDate || null,
+                endDate: bookingItem?.endDate || null,
+                rent: bookingItem?.amount || property?.price || null,
+                status: bookingItem?.status || "Completed",
+                rating: rating?.rating || null,
+                review: rating?.review || null,
+              };
+            });
+          }
         }
 
         console.log(`[PHASE 2] Tenant Dashboard DB Query - ${queryTime}ms`);
@@ -958,6 +1068,7 @@ exports.toggleSavedProperty = async (req, res) => {
       await Tenant.findByIdAndUpdate(tenantId, {
         $push: { savedListings: propertyId },
       });
+      await invalidateCache(`dashboard:tenant:v3:${tenantId}`);
 
       const updatedTenant = await Tenant.findById(tenantId);
       console.log(
@@ -975,6 +1086,7 @@ exports.toggleSavedProperty = async (req, res) => {
       await Tenant.findByIdAndUpdate(tenantId, {
         $pull: { savedListings: propertyId },
       });
+      await invalidateCache(`dashboard:tenant:v3:${tenantId}`);
 
       const updatedTenant = await Tenant.findById(tenantId);
       console.log(

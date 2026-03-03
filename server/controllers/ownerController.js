@@ -9,7 +9,7 @@ const Agreement = require("../models/Agreement");
 const Notification = require("../models/notification");
 const UnrentRequest = require("../models/unrentRequest");
 const bookingController = require("./bookingController");
-const { cachedQuery } = require("../utils/cacheWrapper");
+const { cachedQuery, invalidateCache } = require("../utils/cacheWrapper");
 const {
   buildOwnerDashboardPipeline
 } = require("../utils/aggregationPipelines");
@@ -825,6 +825,9 @@ exports.approveUnrentProperty = async (req, res) => {
           $set: { status: "Cancelled" },
         }
       );
+
+      await invalidateCache(`dashboard:tenant:v3:${tenantId.toString()}`);
+
       return res.status(200).json({
         success: true,
         message: "Property unrented successfully",
