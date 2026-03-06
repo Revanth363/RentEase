@@ -149,6 +149,32 @@ const TenantDashboard = () => {
   const [rateTargetProperty, setRateTargetProperty] = useState(null);
   const [ratingReviewText, setRatingReviewText] = useState("");
 
+  const normalizeDashboardData = (raw) => {
+    const base = raw && raw.success === false ? {} : raw || {};
+    const baseUser = base.user || {};
+
+    const normalizedSavedListings = Array.isArray(baseUser.savedListings)
+      ? baseUser.savedListings
+      : Array.isArray(base.savedListings)
+      ? base.savedListings
+      : [];
+
+    const normalizedRentalHistory = Array.isArray(base.rentalHistory)
+      ? base.rentalHistory
+      : Array.isArray(baseUser.rentalHistory)
+      ? baseUser.rentalHistory
+      : [];
+
+    return {
+      ...base,
+      user: {
+        ...baseUser,
+        savedListings: normalizedSavedListings,
+      },
+      rentalHistory: normalizedRentalHistory,
+    };
+  };
+
   // Load dashboard data on mount
   useEffect(() => {
     let mounted = true;
@@ -158,15 +184,15 @@ const TenantDashboard = () => {
         if (mounted) {
           if (res && res.success) {
             // The backend returns the full data directly, not nested in a 'data' field
-            setDashboard(res);
+            setDashboard(normalizeDashboardData(res));
           } else {
             console.warn("Dashboard response not successful:", res);
-            setDashboard({});
+            setDashboard(normalizeDashboardData({}));
           }
         }
       } catch (err) {
         console.error("Failed to load tenant dashboard:", err);
-        if (mounted) setDashboard({});
+        if (mounted) setDashboard(normalizeDashboardData({}));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -175,6 +201,39 @@ const TenantDashboard = () => {
       mounted = false;
     };
   }, []);
+
+  // Recovery fallback: if main payload comes with empty saved listings,
+  // fetch directly from debug endpoint to avoid blank UI for valid accounts.
+  useEffect(() => {
+    const userId = dashboard?.user?._id;
+    const savedCount = Array.isArray(dashboard?.user?.savedListings)
+      ? dashboard.user.savedListings.length
+      : 0;
+
+    if (!userId || savedCount > 0) return;
+
+    (async () => {
+      try {
+        const res = await axios.get("/tenant/debug/saved-listings", {
+          withCredentials: true,
+        });
+
+        if (Array.isArray(res?.data?.savedListings) && res.data.savedListings.length > 0) {
+          setDashboard((prev) =>
+            normalizeDashboardData({
+              ...(prev || {}),
+              user: {
+                ...((prev && prev.user) || {}),
+                savedListings: res.data.savedListings,
+              },
+            })
+          );
+        }
+      } catch (err) {
+        console.warn("Saved listings fallback fetch failed:", err?.message || err);
+      }
+    })();
+  }, [dashboard?.user?._id, dashboard?.user?.savedListings?.length]);
 
   useEffect(() => {
     const userId = dashboard?.user?._id;
@@ -195,6 +254,7 @@ const TenantDashboard = () => {
   }, [dashboard]);
 
   // Safe destructuring from dashboard
+  const normalizedDashboard = normalizeDashboardData(dashboard);
   const {
     user = {},
     currentProperty = null,
@@ -207,7 +267,7 @@ const TenantDashboard = () => {
     propertyOwner = null,
     nextPayment = null,
     complaints = [],
-  } = dashboard && dashboard.success === false ? {} : dashboard || {};
+  } = normalizedDashboard;
   const handleSubmitMaintenance = async (e) => {
     e.preventDefault();
     const form = maintFormRef.current;
