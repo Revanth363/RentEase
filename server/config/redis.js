@@ -124,22 +124,10 @@ async function initializeRedis() {
       console.log('[Redis] Ready to accept commands');
     });
 
-    // Wrap connection with timeout to prevent hanging
-    const connectPromise = redisClient.connect();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Redis connection timeout after 3 seconds')), 3000)
-    );
-
-    try {
-      await Promise.race([connectPromise, timeoutPromise]);
-      isConnected = true;
-      console.log('[Redis] Initialization successful');
-      return true;
-    } catch (timeoutError) {
-      console.warn('[Redis] Connection timed out - caching disabled');
-      isConnected = false;
-      return false;
-    }
+    await redisClient.connect();
+    isConnected = true;
+    console.log('[Redis] Initialization successful');
+    return true;
   } catch (error) {
     console.warn('[Redis] Failed to initialize - caching disabled:', error.message);
     console.warn('[Redis] Application will continue without caching layer');
