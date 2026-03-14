@@ -664,19 +664,24 @@ button:disabled:hover {
 .tntd-history-content {
   background: #f9f9f9;
   padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   flex: 1;
+  border-left: 4px solid #ffc107;
 }
 
 .tntd-history-content h4 {
   margin-top: 0;
   margin-bottom: 10px;
+  color: #333;
+  font-size: 15px;
 }
 
 .tntd-history-content p {
   margin: 5px 0;
   font-size: 14px;
+  color: #666;
+  line-height: 1.5;
 }
 
 /* Saved Listings Styling */
@@ -732,15 +737,36 @@ button:disabled:hover {
 .tntd-remove-button {
   background: #f44336;
   color: white;
-  padding: 8px 12px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .tntd-remove-button:hover {
   background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tntd-remove-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.tntd-view-details {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  color: #000;
+}
+
+.tntd-view-details:hover {
+  text-decoration: none;
 }
 
 /* Reviews & Ratings Styling */
@@ -912,18 +938,28 @@ button:disabled:hover {
 .tntd-pay-buttons,
 .tntd-book-button {
   background: #ffc107;
-  color: black;
-  padding: 10px 15px;
+  color: #000;
+  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .tntd-pay-buttons:hover,
 .tntd-book-button:hover {
   background: #e0a800;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tntd-pay-buttons:active,
+.tntd-book-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 1100px) {
@@ -1133,18 +1169,35 @@ button:disabled:hover {
   .tntd-card-actions button,
   .tntd-card-actions a {
     width: 100%;
-    padding: 10px 8px;
-    font-size: 12px;
+    padding: 12px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
   }
 
   .tntd-book-button {
-    padding: 10px 8px;
-    font-size: 12px;
+    padding: 12px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  .tntd-book-button:active {
+    transform: scale(0.98);
   }
 
   .tntd-remove-button {
-    padding: 10px 8px;
-    font-size: 12px;
+    padding: 12px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  .tntd-remove-button:active {
+    transform: scale(0.98);
   }
 
   #tntd-home_proprty_card img {
@@ -1248,6 +1301,55 @@ button:disabled:hover {
   #rentalHistory {
     margin-top: 80px;
     padding-top: 50px;
+  }
+
+  #rentalHistory h3 {
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  #rentalHistory p {
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+
+  .tntd-history-timeline {
+    margin: 15px 0;
+  }
+
+  .tntd-history-timeline::before {
+    left: 8px;
+    width: 1px;
+  }
+
+  .tntd-history-item {
+    margin-bottom: 20px;
+  }
+
+  .tntd-timeline-dot {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin-right: 10px;
+  }
+
+  .tntd-history-content {
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 4px solid #ffc107;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .tntd-history-content h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+  }
+
+  .tntd-history-content p {
+    font-size: 11px;
+    margin: 3px 0;
+    line-height: 1.4;
   }
 
   #savedListings {
