@@ -1111,93 +1111,155 @@ button:disabled:hover {
   .tntd-saved-properties {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
+    padding: 8px;
   }
 
   .tntd-saved-properties .tntd-property-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
     overflow: hidden;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   .tntd-saved-properties .tntd-property-card .tntd-img_container {
     width: 100%;
-    height: 200px;
+    height: 160px;
+    margin: 0;
+    padding: 0;
   }
 
   .tntd-saved-properties .tntd-property-card .tntd-img_container img {
     width: 100%;
     height: 100%;
-    max-height: 280px;
     object-fit: cover;
+    display: block;
   }
 
   .tntd-property-info {
-    padding: 12px;
+    padding: 12px 12px 0 12px;
     flex: none;
   }
 
   .tntd-property-info h4 {
     font-size: 14px;
+    font-weight: 700;
     margin: 0 0 8px 0;
+    color: #333;
   }
 
   .tntd-property-info p {
     font-size: 12px;
-    margin: 4px 0;
-    line-height: 1.4;
+    margin: 5px 0;
+    line-height: 1.5;
+    color: #555;
+  }
+
+  .tntd-property-info p strong {
+    color: #333;
+    font-weight: 700;
   }
 
   .tntd-property-features {
     flex-wrap: wrap;
     gap: 6px;
-    margin: 8px 0;
+    margin: 8px 0 10px 0;
+    padding: 0 12px;
   }
 
   .tntd-property-features span {
-    font-size: 11px;
-    padding: 3px 6px;
+    font-size: 10px;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    display: inline-block;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
   }
 
   .tntd-card-actions {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 0 12px 12px 12px;
   }
 
   .tntd-card-actions button,
   .tntd-card-actions a {
     width: 100%;
-    padding: 12px 12px;
-    font-size: 13px;
+    padding: 13px 12px;
+    font-size: 12px;
     font-weight: 600;
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    min-height: 46px;
+    box-sizing: border-box;
   }
 
   .tntd-book-button {
     padding: 12px 12px;
     font-size: 13px;
-    font-weight: 600;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    font-weight: 700;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-height: 44px;
+    background: #ffc107;
+    color: #333;
+    border: none;
+    transition: all 0.2s ease;
+  }
+
+  .tntd-book-button:hover {
+    background: #ffb300;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 
   .tntd-book-button:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .tntd-remove-button {
     padding: 12px 12px;
     font-size: 13px;
-    font-weight: 600;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    font-weight: 700;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-height: 44px;
+    background: #f44336;
+    color: white;
+    border: none;
+    transition: all 0.2s ease;
+  }
+
+  .tntd-remove-button:hover {
+    background: #d32f2f;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 
   .tntd-remove-button:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .tntd-view-details {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+  }
+
+  .tntd-view-details:hover {
+    background: #e0e0e0 !important;
   }
 
   #tntd-home_proprty_card img {
@@ -1300,56 +1362,71 @@ button:disabled:hover {
 
   #rentalHistory {
     margin-top: 80px;
-    padding-top: 50px;
+    padding: 50px 8px 20px 8px;
   }
 
   #rentalHistory h3 {
     font-size: 14px;
-    margin-bottom: 15px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: #333;
   }
 
   #rentalHistory p {
-    font-size: 12px;
-    margin-bottom: 15px;
+    font-size: 11px;
+    margin: 0 0 15px 0;
+    color: #666;
   }
 
   .tntd-history-timeline {
-    margin: 15px 0;
+    margin: 0;
+    padding: 0;
+    position: relative;
   }
 
   .tntd-history-timeline::before {
-    left: 8px;
-    width: 1px;
+    left: 10px;
+    width: 2px;
   }
 
   .tntd-history-item {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
   }
 
   .tntd-timeline-dot {
     width: 20px;
     height: 20px;
     min-width: 20px;
-    margin-right: 10px;
+    margin-right: 12px;
+    margin-top: 1px;
+    background-color: #ffc107;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px #ffc107;
   }
 
   .tntd-history-content {
-    padding: 12px;
-    border-radius: 10px;
+    padding: 11px 12px;
+    border-radius: 8px;
     border-left: 4px solid #ffc107;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fafafa;
+    flex: 1;
   }
 
   .tntd-history-content h4 {
-    font-size: 13px;
-    font-weight: 600;
-    margin: 0 0 6px 0;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #333;
   }
 
   .tntd-history-content p {
-    font-size: 11px;
-    margin: 3px 0;
+    font-size: 10px;
+    margin: 2px 0;
     line-height: 1.4;
+    color: #666;
   }
 
   #savedListings {
