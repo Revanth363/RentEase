@@ -784,3 +784,6 @@
 2026-04-18T09:28:44.025Z | 404 | GET | /api/health | 0.568ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
 2026-04-18T09:53:08.957Z | 401 | GET | /api/me | 29.511ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
 2026-04-18T09:53:08.971Z | 401 | GET | /api/me | 3.878ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-18T11:06:46.428Z | 401 | GET | /api/me | 2.101ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-18T11:06:46.435Z | 401 | GET | /api/me | 2.135ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-18T11:37:17.612Z | 500 | POST | /api/razorpay/cancel-rent-payment | 111.679ms | User: ravikumar@gmail.com (tenant, ID: 692f3acbe0a3bff2c74335da) | IP: ::1 | Body: {"orderId":"order_SewREbmsofwZAY"} | Msg: Notification validation failed: status: `unread` is not a valid enum value for path `status`.

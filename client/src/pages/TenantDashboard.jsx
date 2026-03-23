@@ -511,10 +511,29 @@ const TenantDashboard = () => {
         review: reviewText,
       });
       if (res.success) {
-        setDashboard((prev) => ({
-          ...prev,
-          ratings: [res.rating, ...(prev.ratings || [])],
-        }));
+        setDashboard((prev) => {
+          // Update ratings array
+          const updatedDashboard = {
+            ...prev,
+            ratings: [res.rating, ...(prev.ratings || [])],
+          };
+          
+          // Also update rental history item with the new rating
+          if (prev.rentalHistory) {
+            updatedDashboard.rentalHistory = prev.rentalHistory.map((item) => {
+              const itemPropId = item.property || item._id;
+              if (String(itemPropId) === String(propertyId)) {
+                return {
+                  ...item,
+                  rating: selectedRating,
+                };
+              }
+              return item;
+            });
+          }
+          
+          return updatedDashboard;
+        });
         setSelectedRating(0);
         setRatingReviewText("");
         setShowRatePopup(false);

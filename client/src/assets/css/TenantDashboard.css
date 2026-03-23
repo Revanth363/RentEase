@@ -684,6 +684,73 @@ button:disabled:hover {
   line-height: 1.5;
 }
 
+/* Rental History Cards Styling */
+.tntd-rental-history-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.tntd-history-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.tntd-history-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.tntd-history-card .tntd-img_container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.tntd-history-card .tntd-img_container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tntd-history-card .tntd-history-header {
+  padding: 15px;
+}
+
+.tntd-history-card .tntd-history-header h5 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.tntd-history-card .tntd-history-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.tntd-history-card .tntd-rating {
+  padding: 0 15px;
+  margin-bottom: 10px;
+}
+
+.tntd-history-card .tntd-rating span {
+  font-size: 13px;
+}
+
+.tntd-history-card .tntd-card-actions {
+  padding: 0 15px 15px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 /* Saved Listings Styling */
 .tntd-saved-properties {
   margin-top: 20px;
@@ -1089,6 +1156,9 @@ button:disabled:hover {
   .tntd-section {
     padding: 12px;
     margin-top: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .tntd-section h3 {
@@ -1100,6 +1170,20 @@ button:disabled:hover {
   .tntd-section p {
     font-size: 12px;
     line-height: 1.4;
+  }
+
+  .tntd-rental-history-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tntd-history-card {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .tntd-property-card {
@@ -1407,8 +1491,8 @@ button:disabled:hover {
     background: #fafafa;
     flex: 1;
     margin-left: 8px;
-    margin-right: 8px;
-    max-width: 80%;
+    margin-right: 0;
+    min-width: 0;
   }
 
   .tntd-history-content h4 {

@@ -330,6 +330,61 @@ body {
   font-weight: bold;
 }
 
+/* Tenant Payment Summary */
+.ownd-payment-summary {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  gap: 30px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.ownd-payment-summary h4 {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.ownd-combined-payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ownd-combined-payment-table thead {
+  background-color: #f2f2f2;
+}
+
+.ownd-combined-payment-table th,
+.ownd-combined-payment-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.ownd-combined-payment-table th {
+  font-weight: bold;
+  color: #333;
+  background-color: #f2f2f2;
+}
+
+.ownd-combined-payment-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.ownd-combined-payment-table td:last-child {
+  font-weight: 600;
+}
+
 .ownd-payment-summary {
   display: flex;
   flex-wrap: wrap;
@@ -1517,5 +1572,37 @@ body {
 
   .ownd-notification-card {
     font-size: 10px;
+  }
+
+  .ownd-payment-summary {
+    padding: 10px;
+    margin: 12px 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ownd-payment-summary h4 {
+    font-size: 12px;
+    margin: 5px 0;
+  }
+
+  .ownd-combined-payment-table {
+    font-size: 11px;
+    margin-top: 10px;
+  }
+
+  .ownd-combined-payment-table th,
+  .ownd-combined-payment-table td {
+    padding: 8px;
+    font-size: 10px;
+  }
+
+  .ownd-combined-payment-table th {
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .ownd-combined-payment-table tbody tr:hover {
+    background-color: #f0f0f0;
   }
 }

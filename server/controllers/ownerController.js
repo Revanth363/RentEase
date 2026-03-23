@@ -157,6 +157,15 @@ exports.getOwnerDashboard = async (req, res) => {
       };
     });
 
+    // Debug: Log payments data
+    console.log("[DEBUG] Payments array length:", payments.length);
+    if (payments.length > 0) {
+      console.log("[DEBUG] First payment:", JSON.stringify(payments[0], null, 2));
+      console.log("[DEBUG] Payment statuses:", payments.map(p => p.status));
+    }
+    console.log("[DEBUG] Enriched payments:", enrichedPayments.length);
+    console.log("[DEBUG] Filtered non-pending:", enrichedPayments.filter((p) => p.status !== "Pending").length);
+
     // Calculate reports
     const totalRevenue = enrichedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const reports = {
@@ -178,15 +187,20 @@ exports.getOwnerDashboard = async (req, res) => {
       ]
     };
 
-    // Payment summary
+    // Payment summary - excluding pending payments for actual amounts
+    const completedPayments = enrichedPayments.filter((p) => p.status !== "Pending");
+    const totalAmount = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const commissionAmount = totalAmount * 0.05;
+    const netAmount = totalAmount - commissionAmount;
+
     const paymentSummary = {
       monthlyRevenue: totalRevenue,
       upcomingPayments: enrichedPayments
         .filter((p) => p.status === "Pending")
         .reduce((sum, p) => sum + (p.amount || 0), 0),
-      totalRevenue: totalRevenue,
-      commission: totalRevenue * 0.05,
-      netIncome: totalRevenue * 0.95
+      totalAmount: totalAmount,
+      commission: commissionAmount,
+      netAmount: netAmount
     };
 
     // Format notifications

@@ -154,6 +154,7 @@ const OwnerDashboard = () => {
     user = {},
     properties = [],
     tenants = [],
+    payments = [],
     paymentSummary = {},
     maintenanceRequests = [],
     complaints = [],
@@ -425,11 +426,6 @@ const handleSettingsSubmit = async (e) => {
                   onClick={() => window.location.href = sectionToUrl("payments")}
                 >
                   <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
-                  {dashboard?.payments?.filter(p => p.status === 'Pending' || p.isNew === true).length > 0 && (
-                    <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: '#dc3545', color: 'white', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px', minWidth: '24px'}}>
-                      {dashboard?.payments?.filter(p => p.status === 'Pending' || p.isNew === true).length > 99 ? '99+' : dashboard?.payments?.filter(p => p.status === 'Pending' || p.isNew === true).length}
-                    </span>
-                  )}
                 </li>
                 <li
                   className={effectiveSection === "maintenance" ? "ownd-sidebar-active-item" : ""}
@@ -648,13 +644,46 @@ const handleSettingsSubmit = async (e) => {
             <p>Monthly Revenue: <strong>₹{(paymentSummary?.monthlyRevenue || 0).toLocaleString()}</strong></p>
             <p>Upcoming Payments: <strong>₹{(paymentSummary?.upcomingPayments || 0).toLocaleString()}</strong></p>
 
+            <div className="ownd-payment-summary">
+              <h4>Total Amount: ₹{(paymentSummary?.totalAmount || 0).toLocaleString()}</h4>
+              <h4>Commission: ₹{(paymentSummary?.commission || 0).toLocaleString()}</h4>
+              <h4>Net Amount: ₹{(paymentSummary?.netAmount || 0).toLocaleString()}</h4>
+            </div>
+
             <div className="ownd-payment-table-container">
-              <h4>Recent Transactions</h4>
-              <RazorpayPaymentHistory
-                historyType="owner-rent"
-                className="ownd-payment-table"
-                showSummary={true}
-              />
+              <h4>Transactions</h4>
+              {payments.filter(p => p.status !== 'Pending').length > 0 ? (
+                <table className="ownd-combined-payment-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Tenant Name</th>
+                      <th>Property Name</th>
+                      <th>Contact</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.filter(p => p.status !== 'Pending').map((payment, index) => {
+                      const tenant = tenants.find(t => t._id === payment.tenantId) || {};
+                      const paymentDate = payment.createdDate || payment.dateSubmitted || payment.createdAt || payment.paymentDate || payment.date;
+                      return (
+                        <tr key={payment._id || index}>
+                          <td>{paymentDate ? new Date(paymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "N/A"}</td>
+                          <td>{tenant.firstName ? `${tenant.firstName} ${tenant.lastName}` : "N/A"}</td>
+                          <td>{tenant.property || "N/A"}</td>
+                          <td>{tenant.phone || "N/A"}</td>
+                          <td>₹{(payment.amount || 0).toLocaleString()}</td>
+                          <td className={`ownd-status-${(payment.status || "pending").toLowerCase()}`}>{payment.status || "N/A"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No transactions available.</p>
+              )}
             </div>
           </div>
 
