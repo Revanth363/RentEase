@@ -187,11 +187,17 @@ exports.getOwnerDashboard = async (req, res) => {
       ]
     };
 
-    // Payment summary - excluding pending payments for actual amounts
-    const completedPayments = enrichedPayments.filter((p) => p.status !== "Pending");
+    // Payment summary - only "Paid" payments count as completed
+    const completedPayments = enrichedPayments.filter((p) => p.status === "Paid");
     const totalAmount = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const commissionAmount = totalAmount * 0.05;
     const netAmount = totalAmount - commissionAmount;
+
+    // Debug: Show final calculation
+    console.log("[DEBUG] Completed payments (Paid only):", completedPayments.length);
+    console.log("[DEBUG] Total amount calculation:", totalAmount);
+    console.log("[DEBUG] Commission (5%):", commissionAmount);
+    console.log("[DEBUG] Net amount:", netAmount);
 
     const paymentSummary = {
       monthlyRevenue: totalRevenue,
