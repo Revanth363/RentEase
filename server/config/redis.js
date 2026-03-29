@@ -124,10 +124,16 @@ async function initializeRedis() {
       console.log('[Redis] Ready to accept commands');
     });
 
-    await redisClient.connect();
-    isConnected = true;
-    console.log('[Redis] Initialization successful');
-    return true;
+    try {
+      await redisClient.connect();
+      isConnected = true;
+      console.log('[Redis] Initialization successful');
+      return true;
+    } catch (error) {
+      console.warn('[Redis] Failed to connect:', error.message);
+      isConnected = false;
+      return false;
+    }
   } catch (error) {
     console.warn('[Redis] Failed to initialize - caching disabled:', error.message);
     console.warn('[Redis] Application will continue without caching layer');

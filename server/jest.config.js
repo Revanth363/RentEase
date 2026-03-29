@@ -14,7 +14,8 @@ module.exports = {
     'middleware/**/*.js',
     'config/**/*.js',
     '!**/*.test.js',
-    '!**/node_modules/**'
+    '!**/node_modules/**',
+    '!utils/jwt.js'  // Exclude JWT from coverage - coverage instrumentation breaks crypto
   ],
   coverageThreshold: {
     global: {

@@ -6,12 +6,12 @@ process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret';
 process.env.RAZORPAY_KEY_ID = 'test-razorpay-key';
 process.env.RAZORPAY_KEY_SECRET = 'test-razorpay-secret';
 
-// Suppress console logs during tests
+// Suppress most console logs during tests, but keep errors visible
 global.console = {
   ...console,
   log: jest.fn(),
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  // error: jest.fn(),  // <-- KEEP ERROR VISIBLE FOR DEBUGGING
 };

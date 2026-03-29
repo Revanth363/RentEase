@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.85% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>13/14</span>
+                <span class='fraction'>15/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">63.63% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/5</span>
+                <span class='fraction'>7/11</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.3% </span>
+                <span class="strong">82.35% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>12/13</span>
+                <span class='fraction'>14/17</span>
             </div>
         
             
@@ -94,34 +94,46 @@
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
 <a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">60x</span>
-<span class="cline-any cline-yes">60x</span>
+<span class="cline-any cline-yes">36x</span>
+<span class="cline-any cline-yes">36x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">60x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">25x</span>
-<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">36x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -130,10 +142,10 @@ const jwt = require("jsonwebtoken");
 &nbsp;
 // Read JWT_SECRET at runtime (not at module load time) to ensure env vars are available
 function getJWTSecret() {
-  const secret = process.env.JWT_SECRET;
-  <span class="missing-if-branch" title="if path not taken" >I</span>if (!secret) {
+  const secret = process.env.JWT_SECRET || <span class="branch-1 cbranch-no" title="branch not covered" >"your-secret-key-change-in-production-12345678";</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!process.env.JWT_SECRET) {
 <span class="cstat-no" title="statement not covered" >    console.warn(</span>
-      "WARNING: process.env.JWT_SECRET is not set. Use a strong 64+ char secret in production."
+      "WARNING: process.env.JWT_SECRET is not set. Using default secret - change in production!"
     );
   }
   return secret;
@@ -141,6 +153,9 @@ function getJWTSecret() {
 &nbsp;
 function signToken(payload, options = {}) {
   const JWT_SECRET = getJWTSecret();
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!JWT_SECRET) {
+<span class="cstat-no" title="statement not covered" >    throw new Error("JWT_SECRET is not configured");</span>
+  }
   const signOptions = {};
   if (options.expiresIn) signOptions.expiresIn = options.expiresIn;
   else signOptions.expiresIn = "1h";
@@ -149,6 +164,9 @@ function signToken(payload, options = {}) {
 &nbsp;
 function verifyToken(token) {
   const JWT_SECRET = getJWTSecret();
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!JWT_SECRET) {
+<span class="cstat-no" title="statement not covered" >    throw new Error("JWT_SECRET is not configured");</span>
+  }
   return jwt.verify(token, JWT_SECRET);
 }
 &nbsp;
@@ -163,7 +181,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-18T04:11:17.341Z
+                at 2026-04-18T13:23:51.274Z
             </div>
         <script src="../prettify.js"></script>
         <script>

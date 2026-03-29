@@ -652,7 +652,7 @@ const handleSettingsSubmit = async (e) => {
 
             <div className="ownd-payment-table-container">
               <h4>Transactions</h4>
-              {payments.filter(p => p.status === 'Paid').length > 0 ? (
+              {payments.filter(p => p.status !== 'Pending').length > 0 ? (
                 <table className="ownd-combined-payment-table">
                   <thead>
                     <tr>
@@ -665,7 +665,7 @@ const handleSettingsSubmit = async (e) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {payments.filter(p => p.status === 'Paid').map((payment, index) => {
+                    {payments.filter(p => p.status !== 'Pending').map((payment, index) => {
                       const tenant = tenants.find(t => t._id === payment.tenantId) || {};
                       const paymentDate = payment.createdDate || payment.dateSubmitted || payment.createdAt || payment.paymentDate || payment.date;
                       return (

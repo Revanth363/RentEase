@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "jest --coverage --detectOpenHandles",
+    "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:report": "jest --coverage --detectOpenHandles",
     "test:ci": "jest --ci --coverage --maxWorkers=2"

@@ -20,7 +20,15 @@ const jwt = require('jsonwebtoken');
 
 describe('JWT Authentication', () => {
   
-  const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only-not-for-production';
+  const JWT_SECRET = 'test-secret-key-for-testing-only-not-for-production';
+
+  beforeAll(() => {
+    process.env.JWT_SECRET = JWT_SECRET;
+  });
+
+  afterAll(() => {
+    delete process.env.JWT_SECRET;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,6 +50,7 @@ describe('JWT Authentication', () => {
       
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
+      console.log('DEBUG: token generated:', token);
       expect(token.split('.').length).toBe(3); // JWT has 3 parts
     });
 
@@ -516,3 +525,4 @@ describe('JWT Authentication', () => {
     });
   });
 });
+

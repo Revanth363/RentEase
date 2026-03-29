@@ -112,6 +112,11 @@ describe('Razorpay Payment Controller', () => {
     };
   });
 
+  afterEach(() => {
+    // Ensure native crypto methods are restored after tests that spy/mock them.
+    jest.restoreAllMocks();
+  });
+
   // ============================================
   // EDGE CASE 1: Initiate rent payment with valid data
   // ============================================
@@ -479,8 +484,8 @@ describe('Razorpay Payment Controller', () => {
         signature: 'valid_sig',
         amount: 10000 // Different from original
       };
-      
-      crypto.createHmac = jest.fn().mockReturnValue({
+
+      jest.spyOn(crypto, 'createHmac').mockReturnValue({
         update: jest.fn().mockReturnValue({
           digest: jest.fn().mockReturnValue('valid_sig')
         })
@@ -510,8 +515,8 @@ describe('Razorpay Payment Controller', () => {
         paymentId: 'pay_123456',
         signature: 'valid_sig'
       };
-      
-      crypto.createHmac = jest.fn().mockReturnValue({
+
+      jest.spyOn(crypto, 'createHmac').mockReturnValue({
         update: jest.fn().mockReturnValue({
           digest: jest.fn().mockReturnValue('valid_sig')
         })
