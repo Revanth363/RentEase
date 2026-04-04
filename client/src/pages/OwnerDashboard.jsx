@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../services/axiosConfig";
 import * as ownerService from "../services/ownerService";
 import "../assets/css/OwnerDashboard.css";
@@ -29,6 +30,7 @@ function getSectionFromUrl() {
 }
 
 const OwnerDashboard = () => {
+  const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const { setIsLoading } = useLoading();
@@ -406,13 +408,13 @@ const handleSettingsSubmit = async (e) => {
               <>
                 <li
                   className={effectiveSection === "properties" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("properties")}
+                  onClick={() => navigate(sectionToUrl("properties"))}
                 >
                   <i className="fa-solid fa-house"></i> My Properties
                 </li>
                 <li
                   className={effectiveSection === "tenants" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("tenants")}
+                  onClick={() => navigate(sectionToUrl("tenants"))}
                 >
                   <i className="fa-solid fa-user"></i> My Tenants
                   {dashboard?.tenants?.filter(t => t.isNew === true || t.status === 'new').length > 0 && (
@@ -423,13 +425,13 @@ const handleSettingsSubmit = async (e) => {
                 </li>
                 <li
                   className={effectiveSection === "payments" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("payments")}
+                  onClick={() => navigate(sectionToUrl("payments"))}
                 >
                   <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
                 </li>
                 <li
                   className={effectiveSection === "maintenance" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("maintenance")}
+                  onClick={() => navigate(sectionToUrl("maintenance"))}
                 >
                   <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance Requests
                   {dashboard?.activeMaintenanceRequests?.filter(m => m.status === 'Pending' || m.isNew === true).length > 0 && (
@@ -440,7 +442,7 @@ const handleSettingsSubmit = async (e) => {
                 </li>
                 <li
                   className={effectiveSection === "complaints" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("complaints")}
+                  onClick={() => navigate(sectionToUrl("complaints"))}
                 >
                   <i className="fa-solid fa-message"></i> Complaints
                   {dashboard?.complaints?.filter(c => c.status === 'Pending' || c.isNew === true).length > 0 && (
@@ -451,7 +453,7 @@ const handleSettingsSubmit = async (e) => {
                 </li>
                 <li
                   className={effectiveSection === "rentUnrentRequests" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("rentUnrentRequests")}
+                  onClick={() => navigate(sectionToUrl("rentUnrentRequests"))}
                 >
                   <i className="fa-solid fa-key"></i> Rent/Unrent Requests
                   {(dashboard?.rentUnrentRequests?.filter(r => r.status === 'Pending').length || 0) + (dashboard?.unrentRequests?.filter(u => u.status === 'Pending' || u.isNew === true).length || 0) > 0 && (
@@ -462,13 +464,13 @@ const handleSettingsSubmit = async (e) => {
                 </li>
                 <li
                   className={effectiveSection === "reports" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("reports")}
+                  onClick={() => navigate(sectionToUrl("reports"))}
                 >
                   <i className="fa-solid fa-chart-column"></i> Reports & Analytics
                 </li>
                 <li
                   className={effectiveSection === "notifications" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("notifications")}
+                  onClick={() => navigate(sectionToUrl("notifications"))}
                 >
                   <i className="fa-solid fa-bell"></i> Notifications
                   {notifications?.filter(n => n.isNew === true).length > 0 && (
@@ -492,7 +494,7 @@ const handleSettingsSubmit = async (e) => {
                 </li>
                 <li
                   className={effectiveSection === "settings" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("settings")}
+                  onClick={() => navigate(sectionToUrl("settings"))}
                 >
                   <i className="fa-solid fa-gears"></i> Settings
                 </li>
@@ -501,13 +503,13 @@ const handleSettingsSubmit = async (e) => {
               <>
                 <li
                   className={effectiveSection === "verification" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("verification")}
+                  onClick={() => navigate(sectionToUrl("verification"))}
                 >
                   <i className="fa-solid fa-shield-halved"></i> Verification
                 </li>
                 <li
                   className={effectiveSection === "settings" ? "ownd-sidebar-active-item" : ""}
-                  onClick={() => window.location.href = sectionToUrl("settings")}
+                  onClick={() => navigate(sectionToUrl("settings"))}
                 >
                   <i className="fa-solid fa-gears"></i> Settings
                 </li>
@@ -574,10 +576,10 @@ const handleSettingsSubmit = async (e) => {
                         </button>
                         {property.isRented && (
                           <>
-                            <button className="ownd-prop-button" onClick={() => window.location.href = sectionToUrl("payments")}>
+                            <button className="ownd-prop-button" onClick={() => navigate(sectionToUrl("payments"))}>
                               Rent Details
                             </button>
-                            <button className="ownd-prop-button" onClick={() => window.location.href = sectionToUrl("complaints")}>
+                            <button className="ownd-prop-button" onClick={() => navigate(sectionToUrl("complaints"))}>
                               View Complaints
                             </button>
                           </>

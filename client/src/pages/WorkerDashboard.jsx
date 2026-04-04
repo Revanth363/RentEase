@@ -158,7 +158,7 @@ const WorkerDashboard = () => {
         default: return "/worker_dashboard";
       }
     };
-    window.location.href = sectionToUrl(section);
+    navigate(sectionToUrl(section));
     // setActiveSection(section); // no longer needed
     if (window.innerWidth <= 768) setSidebarOpen(false);
   };

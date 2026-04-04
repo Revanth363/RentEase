@@ -26,43 +26,43 @@ const sectionToUrl = (section) => {
     default: return "/tenant/tenant_dashboard";
   }
 };
-const Sidebar = ({ unreadNotificationCount = 0, section = "home" }) => (
+const Sidebar = ({ unreadNotificationCount = 0, section = "home", navigate }) => (
   <div className="tntd-sidebar" id="sidebar">
     <h2>Tenant Dashboard</h2>
     <ul>
       <li 
         className={section === "home" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("home")}
+        onClick={() => navigate(sectionToUrl("home"))}
       > 
         <i className="fa-solid fa-house"></i> Home
       </li>
       <li 
         className={section === "rentPayments" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("rentPayments")}
+        onClick={() => navigate(sectionToUrl("rentPayments"))}
       > 
         <i className="fa-solid fa-hand-holding-dollar"></i> Rent Payments
       </li>
       <li 
         className={section === "maintenance" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("maintenance")}
+        onClick={() => navigate(sectionToUrl("maintenance"))}
       > 
         <i className="fa-solid fa-screwdriver-wrench"></i> Maintenance Requests
       </li>
       <li 
         className={section === "complaints" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("complaints")}
+        onClick={() => navigate(sectionToUrl("complaints"))}
       > 
         <i className="fa-solid fa-comments"></i> Complaints
       </li>
       <li 
         className={section === "movers" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("movers")}
+        onClick={() => navigate(sectionToUrl("movers"))}
       > 
         <i className="fa-solid fa-users"></i> Domestic Workers
       </li>
       <li 
         className={section === "notifications" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("notifications")}
+        onClick={() => navigate(sectionToUrl("notifications"))}
       > 
         <i className="fa-solid fa-bell"></i> Notifications
         {unreadNotificationCount > 0 && (
@@ -86,19 +86,19 @@ const Sidebar = ({ unreadNotificationCount = 0, section = "home" }) => (
       </li>
       <li 
         className={section === "savedListings" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("savedListings")}
+        onClick={() => navigate(sectionToUrl("savedListings"))}
       > 
         <i className="fa-solid fa-bookmark"></i> Saved Listings
       </li>
       <li 
         className={section === "rentalHistory" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("rentalHistory")}
+        onClick={() => navigate(sectionToUrl("rentalHistory"))}
       > 
         <i className="fa-solid fa-star-half-stroke"></i> Rental History
       </li>
       <li 
         className={section === "settings" ? "tntd-sidebar-active-item" : ""}
-        onClick={() => window.location.href = sectionToUrl("settings")}
+        onClick={() => navigate(sectionToUrl("settings"))}
       > 
         <i className="fa-solid fa-gears"></i> Settings
       </li>
@@ -933,6 +933,7 @@ const TenantDashboard = () => {
           <Sidebar 
             unreadNotificationCount={notifications?.filter(n => n.status === 'Pending' && n.read === false).length || 0}
             section={section}
+            navigate={navigate}
           />
         )}
         <div className="tntd-main-content">
