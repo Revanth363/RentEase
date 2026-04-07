@@ -912,3 +912,5 @@
 2026-04-18T17:53:58.180Z | 404 | GET | /api/health | 1.104ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
 2026-04-18T17:54:31.408Z | 404 | GET | /api/health | 0.348ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
 2026-04-18T17:55:04.554Z | 404 | GET | /api/health | 2.939ms | User: guest | IP: ::1 | Body: - | Msg: Cannot GET /api/health - Route not found
+2026-04-19T05:46:48.614Z | 401 | GET | /api/me | 9.915ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-19T05:46:48.621Z | 401 | GET | /api/me | 1.272ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token

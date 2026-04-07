@@ -1,7 +1,7 @@
 // src/pages/WorkerDashboard.jsx
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../assets/css/workerDashboard.css";
 import CalendarTiles from "../components/CalendarTiles";
@@ -28,6 +28,7 @@ const WorkerDashboard = () => {
     const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { setIsLoading } = useLoading();
 
   const [loading, setLoading] = useState(true);
@@ -35,8 +36,13 @@ const WorkerDashboard = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("section") || "services";
   }
-  const [activeSection] = useState(getSectionFromUrl());
+  const [activeSection, setActiveSection] = useState(getSectionFromUrl());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Update activeSection when URL changes
+  useEffect(() => {
+    setActiveSection(getSectionFromUrl());
+  }, [location]);
 
   const [user, setUser] = useState({});
   const [services, setServices] = useState([]);

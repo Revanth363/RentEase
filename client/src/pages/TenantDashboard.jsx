@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import axios from "../services/axiosConfig";
 import * as tenantService from "../services/tenantService";
@@ -114,12 +114,18 @@ function getSectionFromUrl() {
 
 const TenantDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [section] = useState(getSectionFromUrl());
+  const [section, setSection] = useState(getSectionFromUrl());
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Update section when URL changes
+  useEffect(() => {
+    setSection(getSectionFromUrl());
+  }, [location]);
 
   // Modals/forms visibility
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);

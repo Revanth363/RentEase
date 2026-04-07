@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "../services/axiosConfig";
 import * as ownerService from "../services/ownerService";
 import "../assets/css/OwnerDashboard.css";
@@ -31,13 +31,19 @@ function getSectionFromUrl() {
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const { setIsLoading } = useLoading();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [section] = useState(getSectionFromUrl());
+  const [section, setSection] = useState(getSectionFromUrl());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Update section when URL changes
+  useEffect(() => {
+    setSection(getSectionFromUrl());
+  }, [location]);
 
   // Modals / overlays
   const [showStatusUpdateOverlay, setShowStatusUpdateOverlay] = useState(false);
