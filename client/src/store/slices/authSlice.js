@@ -112,7 +112,7 @@ export const checkCurrentUser = createAsyncThunk(
       return {
         user: res.data.user || null,
       };
-    } catch (e) {
+    } catch {
       // Clear token if it's invalid
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];

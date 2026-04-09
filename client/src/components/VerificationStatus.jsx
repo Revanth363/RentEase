@@ -1,5 +1,5 @@
 import axios from '../services/axiosConfig';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 const VerificationStatus = ({ userId, userModel }) => {
   const [verification, setVerification] = useState(null);
@@ -9,12 +9,7 @@ const VerificationStatus = ({ userId, userModel }) => {
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  useEffect(() => {
-    if (!userId) return; // wait until userId is available
-    fetchVerification();
-  }, [userId, userModel]);
-
-  const fetchVerification = async () => {
+  const fetchVerification = useCallback(async () => {
     setLoading(true);
     try {
       const res = await axios.get(`/verification/status?userId=${userId}&userModel=${userModel}`, { withCredentials: true });
@@ -23,7 +18,12 @@ const VerificationStatus = ({ userId, userModel }) => {
       setVerification(null);
     }
     setLoading(false);
-  };
+  }, [userId, userModel]);
+
+  useEffect(() => {
+    if (!userId) return; // wait until userId is available
+    fetchVerification();
+  }, [userId, userModel, fetchVerification]);
 
   const handleFileChange = (e) => {
     setFileInput(Array.from(e.target.files));

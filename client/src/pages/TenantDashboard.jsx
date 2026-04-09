@@ -239,7 +239,7 @@ const TenantDashboard = () => {
         console.warn("Saved listings fallback fetch failed:", err?.message || err);
       }
     })();
-  }, [dashboard?.user?._id, dashboard?.user?.savedListings?.length]);
+  }, [dashboard]);
 
   useEffect(() => {
     const userId = dashboard?.user?._id;

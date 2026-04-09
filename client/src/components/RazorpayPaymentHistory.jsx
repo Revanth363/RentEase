@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import LoadingSpinner from "./LoadingSpinner";
 import axios from "../services/axiosConfig";
 
@@ -14,11 +14,7 @@ const RazorpayPaymentHistory = ({
   const page = 1;
   const [limit] = useState(10);
 
-  useEffect(() => {
-    fetchPaymentHistory();
-  }, [historyType, page]);
-
-  const fetchPaymentHistory = async () => {
+  const fetchPaymentHistory = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -60,7 +56,11 @@ const RazorpayPaymentHistory = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [historyType, page, limit]);
+
+  useEffect(() => {
+    fetchPaymentHistory();
+  }, [fetchPaymentHistory]);
 
   if (loading) return <LoadingSpinner />;
 

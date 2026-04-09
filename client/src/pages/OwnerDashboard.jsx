@@ -87,7 +87,7 @@ const OwnerDashboard = () => {
         }
       });
     return () => { mounted = false; };
-  }, []);
+  }, [setIsLoading]);
 
   // 2. Fetch verification status after dashboard loads
   useEffect(() => {
@@ -143,7 +143,7 @@ const OwnerDashboard = () => {
       };
       markNotificationsAsRead();
     }
-  }, [effectiveSection]);
+  }, [effectiveSection, dashboard]);
 
   if (loading || verificationLoading) {
     return <LoadingSpinner />;
