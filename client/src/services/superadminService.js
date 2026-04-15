@@ -119,15 +119,81 @@ export const updateSystemSettings = async (settings) => {
 };
 
 /**
- * Fetch audit logs
+ * Fetch audit logs with filtering and pagination
+ * @param {Object} filters - { action, userId, startDate, endDate, status, limit, skip, sortBy, sortOrder }
  */
-export const getAuditLogs = async () => {
+export const getAuditLogs = async (filters = {}) => {
   try {
-    const response = await axios.get('/superadmin/audit-logs');
-    return response.data || [];
+    const params = {
+      limit: filters.limit || 50,
+      skip: filters.skip || 0,
+      sortBy: filters.sortBy || 'timestamp',
+      sortOrder: filters.sortOrder || '-1',
+    };
+
+    if (filters.action) params.action = filters.action;
+    if (filters.userId) params.userId = filters.userId;
+    if (filters.role) params.role = filters.role;
+    if (filters.search) params.search = filters.search;
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+    if (filters.resourceType) params.resourceType = filters.resourceType;
+    if (filters.status) params.status = filters.status;
+
+    const response = await axios.get('/superadmin/audit-logs', { params });
+    return response.data || { logs: [], pagination: {} };
   } catch (error) {
-    handleError(error, 'getAuditLogs');
-    return [];
+    const message = error.response?.data?.error || error.response?.data?.message || 'Failed to fetch audit logs';
+    throw new Error(message);
+  }
+};
+
+/**
+ * Get audit log statistics
+ * @param {Object} filters - { startDate, endDate }
+ */
+export const getAuditStats = async (filters = {}) => {
+  try {
+    const params = {};
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+
+    const response = await axios.get('/superadmin/audit-logs/stats', { params });
+    return response.data || {};
+  } catch (error) {
+    handleError(error, 'getAuditStats');
+    return {};
+  }
+};
+
+/**
+ * Export audit logs to CSV
+ * @param {Object} filters - { action, startDate, endDate }
+ */
+export const exportAuditLogs = async (filters = {}) => {
+  try {
+    const params = {};
+    if (filters.action) params.action = filters.action;
+    if (filters.role) params.role = filters.role;
+    if (filters.status) params.status = filters.status;
+    if (filters.resourceType) params.resourceType = filters.resourceType;
+    if (filters.search) params.search = filters.search;
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+
+    const response = await axios.get('/superadmin/audit-logs/export', { params, responseType: 'blob' });
+    // Trigger download
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `audit-logs-${new Date().toISOString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return true;
+  } catch (error) {
+    console.error('Error exporting audit logs:', error);
+    return false;
   }
 };
 

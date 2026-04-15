@@ -1,6 +1,7 @@
 // server/routes/superadmin.js
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const { protect, superadminProtect } = require('../middleware/auth');
 
@@ -14,10 +15,117 @@ const settingsCtrl = require('../controllers/superadminsettingsController');
 const auditCtrl = require('../controllers/superadminauditController');
 const tenantPaymentCtrl = require('../controllers/superadmintenantPaymentController');
 
-// Apply protection to ALL superadmin routes
+// Apply protection to ALL other superadmin routes
 // protect: must be logged in
 // superadminProtect: must be superadmin (replaces your broken requireSuperAdmin)
 router.use(protect, superadminProtect);
+
+const inferAction = (method, path, body = {}) => {
+	const p = (path || '').toLowerCase();
+
+	if (method === 'POST') {
+		if (p.includes('property')) return 'CREATE_PROPERTY';
+		if (p.includes('booking')) return 'CREATE_BOOKING';
+		if (p.includes('payment')) return 'PROCESS_PAYMENT';
+		if (p.includes('complaint')) return 'CREATE_COMPLAINT';
+		if (p.includes('maintenance')) return 'CREATE_MAINTENANCE';
+		if (p.includes('verification')) return 'VERIFY_USER';
+		if (p.includes('setting')) return 'SYSTEM_SETTING_CHANGE';
+		if (p.includes('status') && body?.status === 'Suspended') return 'SUSPEND_USER';
+		if (p.includes('status') && body?.status === 'Active') return 'ACTIVATE_USER';
+		if (p.includes('executive') || p.includes('user')) return 'CREATE_USER';
+	}
+
+	if (method === 'PATCH' || method === 'PUT') {
+		if (p.includes('property')) return 'UPDATE_PROPERTY';
+		if (p.includes('booking')) return 'UPDATE_BOOKING';
+		if (p.includes('complaint')) return 'UPDATE_COMPLAINT';
+		if (p.includes('maintenance')) return 'UPDATE_MAINTENANCE';
+		if (p.includes('verification') && p.includes('reject')) return 'REJECT_VERIFICATION';
+		if (p.includes('verification')) return 'VERIFY_USER';
+		if (p.includes('setting')) return 'SYSTEM_SETTING_CHANGE';
+		if (p.includes('status') && body?.status === 'Suspended') return 'SUSPEND_USER';
+		if (p.includes('status') && body?.status === 'Active') return 'ACTIVATE_USER';
+		if (p.includes('executive') || p.includes('user')) return 'UPDATE_USER';
+	}
+
+	if (method === 'DELETE') {
+		if (p.includes('property')) return 'DELETE_PROPERTY';
+		if (p.includes('booking')) return 'CANCEL_BOOKING';
+		if (p.includes('executive') || p.includes('user')) return 'DELETE_USER';
+	}
+
+	if (method === 'GET') {
+		if (p.includes('property')) return 'UPDATE_PROPERTY';
+		if (p.includes('booking')) return 'UPDATE_BOOKING';
+		if (p.includes('payment')) return 'PROCESS_PAYMENT';
+		if (p.includes('verification')) return 'VERIFY_USER';
+		if (p.includes('maintenance')) return 'UPDATE_MAINTENANCE';
+		if (p.includes('complaint')) return 'UPDATE_COMPLAINT';
+		if (p.includes('setting')) return 'SYSTEM_SETTING_CHANGE';
+		if (p.includes('executive') || p.includes('user')) return 'UPDATE_USER';
+	}
+
+	return 'UPDATE_PROFILE';
+};
+
+const inferResourceType = (path) => {
+	const p = (path || '').toLowerCase();
+	if (p.includes('property')) return 'property';
+	if (p.includes('booking')) return 'booking';
+	if (p.includes('payment')) return 'payment';
+	if (p.includes('complaint')) return 'complaint';
+	if (p.includes('maintenance')) return 'maintenance';
+	if (p.includes('verification')) return 'verification';
+	if (p.includes('executive') || p.includes('user')) return 'user';
+	return 'system';
+};
+
+// Auto-capture superadmin actions so audit logs are populated even before every controller is instrumented.
+router.use((req, res, next) => {
+	const path = req.path || '';
+
+	// Skip read/write of audit endpoints themselves to avoid self-generated noise.
+	if (path.startsWith('/audit-logs')) {
+		return next();
+	}
+
+	res.on('finish', async () => {
+		try {
+			if (!req.audit || !req.user?.id) return;
+
+			const status = res.statusCode >= 400 ? 'failed' : 'success';
+			const userId = req.user.id;
+			const action = inferAction(req.method, path, req.body);
+			const resourceType = inferResourceType(path);
+
+			const paramId = Object.values(req.params || {}).find((value) => mongoose.Types.ObjectId.isValid(value));
+
+			await req.audit({
+				action,
+				performedBy: {
+					userId,
+					name: req.user.email || 'Super Admin',
+					email: req.user.email,
+					role: req.user.userType,
+				},
+				resource: {
+					type: resourceType,
+					id: paramId,
+					name: path,
+				},
+				description: `${req.method} ${path}`,
+				req,
+				status,
+				errorMessage: status === 'failed' ? `HTTP ${res.statusCode}` : undefined,
+			});
+		} catch (error) {
+			console.error('[Audit] superadmin auto-log failed:', error.message);
+		}
+	});
+
+	return next();
+});
 
 // ─── ROUTES ────────────────────────────────────────────────────────────────
 
@@ -548,6 +656,9 @@ router.post('/settings', settingsCtrl.updateSystemSettings);
  *       500:
  *         description: Server error
  */
+router.get('/audit-logs/stats', auditCtrl.getAuditStats);
+router.get('/audit-logs/export', auditCtrl.exportAuditLogs);
+router.get('/audit-logs/seed-sample', auditCtrl.createSampleAuditLogs);
 router.get('/audit-logs', auditCtrl.getAuditLogs);
 
 /**

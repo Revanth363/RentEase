@@ -16,6 +16,7 @@ const { verifyToken, signToken } = require("./utils/jwt");
 const { cachedQuery } = require("./utils/cacheWrapper");
 const metricsCollector = require("./utils/metricsCollector");
 const { metricsMiddleware } = require("./middleware/metricsMiddleware");
+const { attachAuditLogger } = require("./middleware/auditLogger");
 const { solrSearch, getSearchStats } = require("./utils/solrSearch");
 const solrConfig = require("./config/solr");
 
@@ -156,6 +157,9 @@ app.use(helmet.referrerPolicy({ policy: 'no-referrer' })); // Strict referrer po
 
 // ─── PHASE 4: Metrics Collection Middleware ────────────────────
 app.use(metricsMiddleware);
+
+// ─── Audit Logger Middleware ────────────────────
+app.use(attachAuditLogger);
 
 // express-session removed; using stateless JWT cookies instead
 
@@ -1140,6 +1144,32 @@ app.post("/login", async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    const logLoginEvent = async (userDoc, roleLabel) => {
+      if (!req.audit || !userDoc?._id) return;
+
+      try {
+        await req.audit({
+          action: 'LOGIN',
+          performedBy: {
+            userId: userDoc._id,
+            name: userDoc.fullName || userDoc.name || userDoc.username || userDoc.email,
+            email: userDoc.email,
+            role: roleLabel,
+          },
+          resource: {
+            type: 'user',
+            id: userDoc._id,
+            name: userDoc.email,
+          },
+          description: `${roleLabel} logged in`,
+          req,
+          status: 'success',
+        });
+      } catch (auditError) {
+        console.error('[Audit] Login audit failed:', auditError.message);
+      }
+    };
+
     // ───── 1. SUPERADMIN CHECK (separate collection) ─────
     const SuperAdmin = require('./models/SuperAdmin');
     const superAdmin = await SuperAdmin.findOne({ email: normalizedEmail });
@@ -1161,6 +1191,8 @@ app.post("/login", async (req, res) => {
         sameSite: "lax",
         maxAge: 60 * 60 * 1000,
       });
+
+      await logLoginEvent(superAdmin, 'superadmin');
 
       return res.json({
         success: true,
@@ -1201,6 +1233,8 @@ app.post("/login", async (req, res) => {
         sameSite: "lax",
         maxAge: 60 * 60 * 1000,
       });
+
+      await logLoginEvent(admin, 'admin');
 
       return res.json({
         success: true,
@@ -1259,6 +1293,8 @@ app.post("/login", async (req, res) => {
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,
     });
+
+    await logLoginEvent(user, userType);
 
     return res.json({
       success: true,
