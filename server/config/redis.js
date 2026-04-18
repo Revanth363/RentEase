@@ -12,6 +12,43 @@ const redis = require('redis');
 let redisClient = null;
 let isConnected = false;
 let useUpstash = false;
+let isLocalRedisMode = false;
+let redisDisabledForSession = false;
+
+function isLocalRedisTarget(redisUrl) {
+  try {
+    const parsed = new URL(redisUrl);
+    const host = (parsed.hostname || '').toLowerCase();
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  } catch (error) {
+    return true;
+  }
+}
+
+function disableRedisForSession(message) {
+  if (redisDisabledForSession) {
+    return;
+  }
+
+  if (message) {
+    console.warn(message);
+  }
+
+  redisDisabledForSession = true;
+  isConnected = false;
+
+  if (redisClient) {
+    try {
+      if (typeof redisClient.disconnect === 'function' && redisClient.isOpen) {
+        redisClient.disconnect();
+      }
+    } catch (error) {
+      // Ignore cleanup errors during graceful fallback.
+    }
+  }
+
+  redisClient = null;
+}
 
 // Upstash REST API client
 class UpstashRedisClient {
@@ -84,6 +121,10 @@ class UpstashRedisClient {
  */
 async function initializeRedis() {
   try {
+    if (redisDisabledForSession) {
+      return false;
+    }
+
     // Check if using Upstash (production)
     const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
     const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -92,6 +133,7 @@ async function initializeRedis() {
       console.log('[Redis] Initializing with Upstash REST API...');
       redisClient = new UpstashRedisClient(upstashUrl, upstashToken);
       useUpstash = true;
+      isLocalRedisMode = false;
       isConnected = true;
       console.log('[Redis] Upstash REST API connected');
       return true;
@@ -100,18 +142,29 @@ async function initializeRedis() {
     // Fall back to local Redis (development)
     console.log('[Redis] Initializing with local Redis connection...');
     const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    isLocalRedisMode = isLocalRedisTarget(redisUrl);
 
     redisClient = redis.createClient({
       url: redisUrl,
       socket: {
-        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
-        connectTimeout: 5000,
+        reconnectStrategy: (retries) => {
+          if (isLocalRedisMode) {
+            return false;
+          }
+          return Math.min(retries * 50, 500);
+        },
+        connectTimeout: isLocalRedisMode ? 1500 : 5000,
       },
       legacyMode: false,
     });
 
     redisClient.on('error', (err) => {
       console.error('[Redis] Connection error:', err.message);
+
+      if (isLocalRedisMode && !isConnected) {
+        disableRedisForSession('[Redis] Local Redis unavailable - caching disabled for this session, using MongoDB queries directly');
+      }
+
       isConnected = false;
     });
 
@@ -131,6 +184,9 @@ async function initializeRedis() {
       return true;
     } catch (error) {
       console.warn('[Redis] Failed to connect:', error.message);
+      if (isLocalRedisMode) {
+        disableRedisForSession('[Redis] Local Redis connection failed - caching disabled for this session, using MongoDB queries directly');
+      }
       isConnected = false;
       return false;
     }
@@ -179,6 +235,9 @@ async function cacheSet(key, data, ttlSeconds = 300) {
     return true;
   } catch (error) {
     console.warn(`[Redis] Cache set failed for key ${key}:`, error.message);
+    if (isLocalRedisMode) {
+      disableRedisForSession('[Redis] Local Redis command failure - disabling cache and continuing with MongoDB only');
+    }
     return false;
   }
 }
@@ -204,6 +263,9 @@ async function cacheGet(key) {
     return JSON.parse(cached);
   } catch (error) {
     console.warn(`[Redis] Cache get failed for key ${key}:`, error.message);
+    if (isLocalRedisMode) {
+      disableRedisForSession('[Redis] Local Redis command failure - disabling cache and continuing with MongoDB only');
+    }
     return null;
   }
 }
@@ -226,6 +288,9 @@ async function cacheDel(key) {
     return true;
   } catch (error) {
     console.warn(`[Redis] Cache delete failed for key ${key}:`, error.message);
+    if (isLocalRedisMode) {
+      disableRedisForSession('[Redis] Local Redis command failure - disabling cache and continuing with MongoDB only');
+    }
     return false;
   }
 }
@@ -260,6 +325,9 @@ async function cacheDelPattern(pattern) {
     return keys.length;
   } catch (error) {
     console.warn(`[Redis] Pattern delete failed for ${pattern}:`, error.message);
+    if (isLocalRedisMode) {
+      disableRedisForSession('[Redis] Local Redis command failure - disabling cache and continuing with MongoDB only');
+    }
     return 0;
   }
 }
@@ -282,6 +350,9 @@ async function cacheFlushAll() {
     return true;
   } catch (error) {
     console.warn('[Redis] Flush all failed:', error.message);
+    if (isLocalRedisMode) {
+      disableRedisForSession('[Redis] Local Redis command failure - disabling cache and continuing with MongoDB only');
+    }
     return false;
   }
 }

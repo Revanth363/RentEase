@@ -15,9 +15,25 @@ const http = require('http');
 
 let solrClient = null;
 let isConnected = false;
+let solrDisabledForSession = false;
 const SOLR_HOST = process.env.SOLR_HOST || 'localhost';
 const SOLR_PORT = process.env.SOLR_PORT || 8983;
 const SOLR_CORE = process.env.SOLR_CORE || 'rentease';
+
+function isLocalSolrHost() {
+  const host = (SOLR_HOST || '').toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+}
+
+function disableSolrForSession(message) {
+  if (message) {
+    console.warn(message);
+  }
+
+  isConnected = false;
+  solrDisabledForSession = true;
+  solrClient = null;
+}
 
 /**
  * Initialize Solr connection with connection pooling
@@ -26,6 +42,11 @@ const SOLR_CORE = process.env.SOLR_CORE || 'rentease';
 async function initializeSolr() {
   return new Promise((resolve) => {
     try {
+      if (solrDisabledForSession) {
+        resolve(false);
+        return;
+      }
+
       // Skip if solr-client is not available
       if (!solr) {
         console.warn('⚠ Solr disabled - using MongoDB search fallback');
@@ -60,8 +81,12 @@ async function initializeSolr() {
             isConnected = true;
             resolve(true);
           } else {
-            console.warn(`⚠ Solr unavailable (HTTP ${res.statusCode}) - full-text search disabled, using MongoDB regex search as fallback`);
-            isConnected = false;
+            if (isLocalSolrHost()) {
+              disableSolrForSession(`⚠ Solr unavailable on localhost (HTTP ${res.statusCode}) - using MongoDB search directly for this session`);
+            } else {
+              console.warn(`⚠ Solr unavailable (HTTP ${res.statusCode}) - full-text search disabled, using MongoDB regex search as fallback`);
+              isConnected = false;
+            }
             resolve(false);
           }
         }
@@ -70,8 +95,26 @@ async function initializeSolr() {
       req.on('error', (err) => {
         if (!resolved) {
           resolved = true;
-          console.warn(`⚠ Solr unavailable (${SOLR_HOST}:${SOLR_PORT}) - full-text search disabled, using MongoDB regex search as fallback`);
-          isConnected = false;
+          if (isLocalSolrHost()) {
+            disableSolrForSession(`⚠ Solr unavailable on localhost (${SOLR_HOST}:${SOLR_PORT}) - using MongoDB search directly for this session`);
+          } else {
+            console.warn(`⚠ Solr unavailable (${SOLR_HOST}:${SOLR_PORT}) - full-text search disabled, using MongoDB regex search as fallback`);
+            isConnected = false;
+          }
+          resolve(false);
+        }
+      });
+
+      req.on('timeout', () => {
+        if (!resolved) {
+          resolved = true;
+          req.destroy();
+          if (isLocalSolrHost()) {
+            disableSolrForSession('⚠ Solr localhost connection timed out - using MongoDB search directly for this session');
+          } else {
+            console.warn(`⚠ Solr timeout (${SOLR_HOST}:${SOLR_PORT}) - full-text search disabled, using MongoDB regex search as fallback`);
+            isConnected = false;
+          }
           resolve(false);
         }
       });
@@ -171,6 +214,10 @@ async function indexProperty(property) {
  * @returns {Promise<number>} Number of successfully indexed properties
  */
 async function indexPropertiesBatch(properties) {
+  if (!isConnected || !solrClient || solrDisabledForSession) {
+    return 0;
+  }
+
   if (!properties || properties.length === 0) {
     return 0;
   }
@@ -328,6 +375,11 @@ async function clearIndex() {
 async function getIndexStats() {
   return new Promise((resolve) => {
     try {
+      if (!isConnected || solrDisabledForSession) {
+        resolve({ indexed: 0, connected: false, source: 'mongodb-fallback' });
+        return;
+      }
+
       const options = {
         hostname: SOLR_HOST,
         port: SOLR_PORT,
@@ -356,7 +408,18 @@ async function getIndexStats() {
 
       req.on('error', (err) => {
         console.error('Error getting index stats:', err.message);
+        if (isLocalSolrHost()) {
+          disableSolrForSession('⚠ Solr localhost stats request failed - switching to MongoDB-only search mode');
+        }
         resolve({ indexed: 0, connected: false, error: err.message });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        if (isLocalSolrHost()) {
+          disableSolrForSession('⚠ Solr localhost stats request timed out - switching to MongoDB-only search mode');
+        }
+        resolve({ indexed: 0, connected: false, error: 'Solr stats request timeout' });
       });
 
       req.end();
@@ -375,7 +438,7 @@ async function getIndexStats() {
  */
 async function executeSolrQuery(query, options = {}) {
   return new Promise((resolve) => {
-    if (!isConnected || !solrClient) {
+    if (!isConnected || !solrClient || solrDisabledForSession) {
       resolve({ success: false, results: [], source: 'error' });
       return;
     }
@@ -414,6 +477,14 @@ async function executeSolrQuery(query, options = {}) {
         let data = '';
         res.on('data', chunk => { data += chunk; });
         res.on('end', () => {
+          if (res.statusCode !== 200) {
+            if (isLocalSolrHost()) {
+              disableSolrForSession(`⚠ Solr localhost query failed (HTTP ${res.statusCode}) - using MongoDB-only search mode`);
+            }
+            resolve({ success: false, results: [], error: `Solr HTTP ${res.statusCode}`, source: 'error' });
+            return;
+          }
+
           try {
             const result = JSON.parse(data);
             console.log(`✅ Solr Response: numFound=${result.response?.numFound}, docs count=${result.response?.docs?.length}`);
@@ -433,7 +504,18 @@ async function executeSolrQuery(query, options = {}) {
 
       req.on('error', (err) => {
         console.error('Solr HTTP request error:', err);
+        if (isLocalSolrHost()) {
+          disableSolrForSession('⚠ Solr localhost request failed - switching to MongoDB-only search mode');
+        }
         resolve({ success: false, results: [], error: err.message, source: 'error' });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        if (isLocalSolrHost()) {
+          disableSolrForSession('⚠ Solr localhost request timed out - switching to MongoDB-only search mode');
+        }
+        resolve({ success: false, results: [], error: 'Solr request timeout', source: 'error' });
       });
 
       req.end();
