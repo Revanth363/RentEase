@@ -11,6 +11,7 @@ const STATUS_COLORS = {
   Paid: styles.badgePaid,
   Pending: styles.badgePending,
   Overdue: styles.badgeOverdue,
+  Cancelled: styles.badgeCancelled,
 };
 
 export default function TenantPayments() {
@@ -140,7 +141,7 @@ export default function TenantPayments() {
 
         <div className={styles.filterGroup}>
           <Filter size={16} className={styles.filterIcon} />
-          {['all', 'Paid', 'Pending', 'Overdue'].map((s) => (
+          {['all', 'Paid', 'Pending', 'Overdue', 'Cancelled'].map((s) => (
             <button
               key={s}
               className={`${styles.filterBtn} ${statusFilter === s ? styles.filterBtnActive : ''}`}

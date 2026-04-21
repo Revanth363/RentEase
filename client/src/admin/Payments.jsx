@@ -5,7 +5,7 @@ import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
 import { fetchAdminPayments } from '../services/api';
-import AdminNavbar from '../components/AdminNavbar';
+
 
 const Payments = () => {
   const { setIsLoading } = useLoading();
@@ -143,13 +143,13 @@ const Payments = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>Payments & Transactions</h1>
-      <AdminNavbar />
+
 
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
         {/* LEFT: Filter Panel */}
         <aside style={{
-          width: '250px',
-          minWidth: '280px',
+          width: '350px',
+          minWidth: '350px',
           background: 'white',
           padding: '24px',
           borderRadius: '12px',

@@ -465,6 +465,54 @@ router.patch('/executives/:id/status', executivesCtrl.updateExecutiveStatus);
 /**
  * @swagger
  * /api/superadmin/executives/{id}:
+ *   patch:
+ *     summary: Update executive details
+ *     description: SuperAdmin updates an executive's personal information (firstName, lastName, email, optional password)
+ *     tags:
+ *       - SuperAdmin - Executives
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Executive ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 description: Optional - leave empty to keep current password
+ *     responses:
+ *       200:
+ *         description: Executive updated successfully
+ *       400:
+ *         description: Bad request - email exists or invalid password
+ *       401:
+ *         description: Unauthorized - superadmin required
+ *       404:
+ *         description: Executive not found
+ *       500:
+ *         description: Server error
+ */
+router.patch('/executives/:id', executivesCtrl.updateExecutive);
+
+/**
+ * @swagger
+ * /api/superadmin/executives/{id}:
  *   delete:
  *     summary: Delete executive
  *     description: SuperAdmin permanently deletes an executive account from the platform

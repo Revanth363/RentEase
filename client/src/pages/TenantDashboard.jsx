@@ -127,6 +127,28 @@ const TenantDashboard = () => {
     setSection(getSectionFromUrl());
   }, [location]);
 
+  // Reload dashboard data when switching sections
+  useEffect(() => {
+    if (section && section !== "settings" && section !== "verification") {
+      let mounted = true;
+      (async () => {
+        try {
+          const res = await tenantService.getDashboard?.();
+          if (!mounted) return;
+          if (res) {
+            const normalizedData = normalizeDashboardData(res);
+            setDashboard(normalizedData);
+          }
+        } catch (err) {
+          if (mounted) {
+            console.error("Error reloading dashboard:", err);
+          }
+        }
+      })();
+      return () => { mounted = false; };
+    }
+  }, [section]);
+
   // Modals/forms visibility
   const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
@@ -497,8 +519,9 @@ const TenantDashboard = () => {
         alert(data.message || data.error || "Error");
       }
     } catch (err) {
-      console.error(err);
-      alert("Network error");
+      console.error("Debook error:", err);
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to debook worker";
+      alert(errorMsg);
     }
   };
 
@@ -1156,10 +1179,25 @@ const TenantDashboard = () => {
                         if (!confirmed) return;
                         const res = await tenantService.updateMaintenanceStatus({ requestId: r._id, status: newStatus });
                         if (res.success) {
-                          setDashboard((prev) => ({
-                            ...prev,
-                            activeMaintenanceRequests: prev.activeMaintenanceRequests.map((req) => req._id === r._id ? { ...req, status: newStatus } : req),
-                          }));
+                          setDashboard((prev) => {
+                            if (newStatus === "Resolved") {
+                              // Move from active to completed
+                              return {
+                                ...prev,
+                                activeMaintenanceRequests: prev.activeMaintenanceRequests.filter(req => req._id !== r._id),
+                                completedMaintenanceRequests: [
+                                  ...prev.completedMaintenanceRequests,
+                                  { ...r, status: newStatus }
+                                ]
+                              };
+                            } else {
+                              // Keep in active requests
+                              return {
+                                ...prev,
+                                activeMaintenanceRequests: prev.activeMaintenanceRequests.map((req) => req._id === r._id ? { ...req, status: newStatus } : req),
+                              };
+                            }
+                          });
                           alert('Status updated successfully.');
                         } else {
                           alert(res.message || 'Error updating status');
@@ -1430,7 +1468,9 @@ const TenantDashboard = () => {
             <h3>Notifications</h3>
             <div className="tntd-notification-container">
               {notifications && notifications.length > 0 ? (
-                notifications.map((notification) => (
+                [...notifications]
+                  .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
+                  .map((notification) => (
                   <div
                     className={`tntd-notification-card ${
                       notification.read ? "tntd-read" : "tntd-unread"

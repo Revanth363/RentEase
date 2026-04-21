@@ -45,6 +45,27 @@ const OwnerDashboard = () => {
     setSection(getSectionFromUrl());
   }, [location]);
 
+  // Reload dashboard data when switching sections
+  useEffect(() => {
+    if (section && section !== "settings" && section !== "verification") {
+      let mounted = true;
+      ownerService
+        .getOwnerDashboard()
+        .then((res) => {
+          if (!mounted) return;
+          if (res && (res.user || res.success)) {
+            setDashboard(res);
+          }
+        })
+        .catch((err) => {
+          if (mounted) {
+            console.error("Error reloading dashboard:", err);
+          }
+        });
+      return () => { mounted = false; };
+    }
+  }, [section]);
+
   // Modals / overlays
   const [showStatusUpdateOverlay, setShowStatusUpdateOverlay] = useState(false);
   const [showDeleteAccountOverlay, setShowDeleteAccountOverlay] = useState(false);
@@ -764,6 +785,7 @@ const handleSettingsSubmit = async (e) => {
               {notifications.filter(n => n.type === "Booking Request" || n.type === "Unrent Request").length > 0 ? (
                 notifications
                   .filter(n => n.type === "Booking Request" || n.type === "Unrent Request")
+                  .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
                   .map((notification) => (
                     <div key={notification._id} className="ownd-notification-card">
                       <div className="ownd-notification-header">
@@ -1035,6 +1057,7 @@ const handleSettingsSubmit = async (e) => {
               ).length > 0 ? (
                 notifications
                   .filter(n => n.type !== "Booking Request" && n.type !== "Unrent Request")
+                  .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
                   .map((notification) => (
                     <div key={notification._id} className="ownd-notification-card">
                       <div className="ownd-notification-header">

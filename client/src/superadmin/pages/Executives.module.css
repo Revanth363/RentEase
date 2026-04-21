@@ -147,6 +147,7 @@
   gap: 0.5rem;
 }
 
+.editBtn,
 .suspendBtn,
 .activateBtn,
 .deleteBtn {
@@ -157,6 +158,19 @@
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editBtn {
+  background: #007bff;
+  color: white;
+}
+
+.editBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .suspendBtn {

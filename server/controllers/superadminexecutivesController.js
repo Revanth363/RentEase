@@ -114,6 +114,55 @@ exports.updateExecutiveStatus = async (req, res) => {
   }
 };
 
+// update executive details (firstName, lastName, email, password)
+exports.updateExecutive = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, password } = req.body;
+
+    const executive = await Admin.findById(id);
+    if (!executive) {
+      return res.status(404).json({ success: false, message: 'Executive not found' });
+    }
+
+    // Check if email is being changed to an existing email
+    if (email && email !== executive.email) {
+      const existing = await Admin.findOne({ email });
+      if (existing) {
+        return res.status(400).json({ success: false, message: 'Email already exists' });
+      }
+    }
+
+    // Update fields
+    if (firstName) executive.firstName = firstName;
+    if (lastName) executive.lastName = lastName;
+    if (email) executive.email = email;
+    if (password && password.length >= 8) {
+      executive.password = password;
+    } else if (password && password.length > 0 && password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+    }
+
+    await executive.save();
+
+    res.json({
+      success: true,
+      message: 'Executive updated successfully',
+      executive: {
+        _id: executive._id,
+        firstName: executive.firstName,
+        lastName: executive.lastName,
+        email: executive.email,
+        role: executive.role,
+        status: executive.status
+      }
+    });
+  } catch (error) {
+    console.error('Update executive error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update executive', error: error.message });
+  }
+};
+
 // delete executive
 exports.deleteExecutive = async (req, res) => {
   try {

@@ -368,7 +368,7 @@ exports.getDashboardData = async (req, res) => {
 
         const completedMaintenanceRequests = maintenanceRequests.filter(m => 
           m.status === "Resolved"
-        ).sort((a, b) => new Date(b.dateReported) - new Date(a.dateReported)).slice(0, 5);
+        ).sort((a, b) => new Date(b.dateReported) - new Date(a.dateReported));
 
         // Domestic workers
         const domesticWorkers = aggregatedData.domesticWorkerDetails || [];

@@ -5,7 +5,7 @@ import axios from '../services/axiosConfig';
 import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
-import AdminNavbar from '../components/AdminNavbar';
+
 
 const Messages = () => {
   const { setIsLoading } = useLoading();
@@ -95,13 +95,12 @@ const Messages = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>Contact Us Messages</h1>
-      <AdminNavbar />
 
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
         {/* LEFT: Filter Panel */}
         <aside style={{
-          width: '250px',
-          minWidth: '280px',
+          width: '350px',
+          minWidth: '350px',
           background: 'white',
           padding: '24px',
           borderRadius: '12px',

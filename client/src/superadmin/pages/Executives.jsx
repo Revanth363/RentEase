@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Executives.module.css';
-import { Plus, Search, AlertCircle } from 'lucide-react';
-import { getExecutives, createExecutive, updateExecutiveStatus, deleteExecutive } from '../../services/superadminService';
+import { Plus, Search, AlertCircle, Edit } from 'lucide-react';
+import { getExecutives, createExecutive, updateExecutive, updateExecutiveStatus, deleteExecutive } from '../../services/superadminService';
 
 export default function Executives() {
   const [executives, setExecutives] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [editingExecutive, setEditingExecutive] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -84,7 +86,42 @@ export default function Executives() {
     }
   };
 
-  
+  const handleEditClick = (exec) => {
+    setEditingExecutive(exec);
+    setFormData({
+      firstName: exec.firstName,
+      lastName: exec.lastName,
+      email: exec.email,
+      password: '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+
+    const updateData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+    };
+
+    // Only include password if it's provided
+    if (formData.password) {
+      updateData.password = formData.password;
+    }
+
+    try {
+      const res = await updateExecutive(editingExecutive._id, updateData);
+      setExecutives(executives.map(e => e._id === editingExecutive._id ? res.executive : e));
+      alert(res.message || 'Executive updated successfully!');
+      setFormData({ firstName: '', lastName: '', email: '', password: '' });
+      setShowEditModal(false);
+      setEditingExecutive(null);
+    } catch (err) {
+      alert(err.message || 'Failed to update executive');
+    }
+  };
 
   if (loading) return <div className={styles.container}>Loading executives...</div>;
   if (error) return <div className={styles.container} style={{ color: '#dc3545' }}>{error}</div>;
@@ -147,6 +184,13 @@ export default function Executives() {
                   </td>
                   <td>
                     <div className={styles.actionButtons}>
+                      <button
+                        className={styles.editBtn}
+                        onClick={() => handleEditClick(exec)}
+                      >
+                        <Edit size={16} />
+                        Edit
+                      </button>
                       <button
                         className={exec.status === 'Active' ? styles.suspendBtn : styles.activateBtn}
                         onClick={() => handleToggleStatus(exec)}
@@ -223,6 +267,71 @@ export default function Executives() {
                 </button>
                 <button type="submit" className={styles.submitBtn}>
                   Create Executive
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h2 className={styles.modalTitle}>Edit Executive</h2>
+            <form className={styles.form} onSubmit={handleEdit}>
+              <div className={styles.formGroup}>
+                <label>First Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter first name"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter last name"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>New Password (Leave empty to keep current password)</label>
+                <input
+                  type="password"
+                  placeholder="Enter new password (optional)"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+              </div>
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingExecutive(null);
+                    setFormData({ firstName: '', lastName: '', email: '', password: '' });
+                  }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className={styles.submitBtn}>
+                  Update Executive
                 </button>
               </div>
             </form>

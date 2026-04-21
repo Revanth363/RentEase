@@ -54,7 +54,8 @@ const BookProperty = () => {
         setSubmitMessage("");
       }
     } catch (err) {
-      setErrorMessage(err.message);
+      const serverMessage = err.response?.data?.message || err.message || "Booking failed";
+      setErrorMessage(serverMessage);
       setSubmitMessage("");
     }
   };

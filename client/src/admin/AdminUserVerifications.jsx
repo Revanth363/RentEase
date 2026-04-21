@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLoading } from "../context/useLoading";
 import styles from "../assets/css/AdminDashboard.module.css";
-import AdminNavbar from "../components/AdminNavbar";
+
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const DOC_TYPE_LABELS = {
@@ -153,7 +153,6 @@ const AdminUserVerifications = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>User Verifications</h1>
-      <AdminNavbar />
 
       <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
 

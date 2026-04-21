@@ -250,6 +250,19 @@ export const deleteExecutive = async (id) => {
   }
 };
 
+/**
+ * Update an executive's details (firstName, lastName, email)
+ */
+export const updateExecutive = async (id, data) => {
+  try {
+    const response = await axios.patch(`/superadmin/executives/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating executive:', error);
+    throw error.response?.data || { message: 'Failed to update executive' };
+  }
+};
+
 export default {
   getPlatformStats,
   getFinancialAnalytics,
@@ -257,6 +270,7 @@ export default {
   getWorkerEarnings,
   getExecutives,
   createExecutive,
+  updateExecutive,
   updateExecutiveStatus,
   deleteExecutive,
   getSystemSettings,

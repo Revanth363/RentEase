@@ -278,6 +278,11 @@
   color: #721c24;
 }
 
+.badgeCancelled {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
 /* ─── STATUS/ERROR ───────────────────────────────────────────────────────── */
 
 .loadingMsg,

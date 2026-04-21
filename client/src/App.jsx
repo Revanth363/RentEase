@@ -24,6 +24,9 @@ import FAQ from "./pages/FAQ";
 import WorkerServices from "./pages/WorkerServices";
 import WorkerCard from "./pages/WorkerCard";
 import BookProperty from "./pages/BookProperty";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import DataPolicy from "./pages/DataPolicy";
 
 import TenantDashboard from "./pages/TenantDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
@@ -53,6 +56,7 @@ import WorkerPaymentView from "./admin/WorkerPaymentView";
 import AdminUserVerifications from "./admin/AdminUserVerifications";
 
 import AdminRoute from "./components/AdminRoute";
+import AdminLayout from "./admin/AdminLayout";
 
 // Super Admin Pages
 import SuperAdminLayout from "./superadmin/SuperAdminLayout";
@@ -75,7 +79,7 @@ const App = () => {
   useEffect(() => {
     dispatch(checkCurrentUser()); // Loads user from cookie/token
     // fetch public settings for maintenance
-    fetch('/public-settings')
+    fetch('/api/public-settings')
       .then((r) => r.json())
       .then((data) => {
         setMaintenance({
@@ -115,8 +119,9 @@ const App = () => {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/workerDetails" element={<WorkerServices />} />
           <Route path="/worker/:id" element={<WorkerCard detailed />} />
-          <Route path="/privacy_policy" element={<div>Privacy Policy</div>} />
-          <Route path="/termsofservice" element={<div>Terms of Service</div>} />
+          <Route path="/privacy_policy" element={<PrivacyPolicy />} />
+          <Route path="/termsofservice" element={<TermsOfService />} />
+          <Route path="/cookie-policy" element={<DataPolicy />} />
           <Route path="/book-property" element={<BookProperty />} />
 
           {/* Auth Routes — NO HEADER */}
@@ -143,162 +148,38 @@ const App = () => {
             element={<div>Property Management</div>}
           />
 
-          {/* ADMIN ROUTES — PROTECTED & NO HEADER */}
+          {/* ADMIN ROUTES — PROTECTED WITH PERSISTENT LAYOUT */}
           <Route
-            path="/admin"
+            path="/admin/*"
             element={
               <AdminRoute>
-                <Navigate to="/admin/property-management" replace />
+                <AdminLayout />
               </AdminRoute>
             }
-          />
-          <Route
-            path="/admin/property-management"
-            element={
-              <AdminRoute>
-                <PropertyManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/user-management"
-            element={
-              <AdminRoute>
-                <UserManagement />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/service-bookings"
-            element={
-              <AdminRoute>
-                <ServiceBookings />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/payments"
-            element={
-              <AdminRoute>
-                <Payments />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/worker-payments"
-            element={
-              <AdminRoute>
-                <WorkerPayments />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/notifications"
-            element={
-              <AdminRoute>
-                <Notifications />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/maintenance-requests"
-            element={
-              <AdminRoute>
-                <MaintenanceRequests />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/messages"
-            element={
-              <AdminRoute>
-                <Messages />
-              </AdminRoute>
-            }
-          />
-
-          <Route
-            path="/admin/user-verifications"
-            element={
-              <AdminRoute>
-                <AdminUserVerifications />
-              </AdminRoute>
-            }
-          />
-
-          {/* Admin Detail Views */}
-          <Route
-            path="/admin/booking/:id"
-            element={
-              <AdminRoute>
-                <BookingView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/maintenance/:id"
-            element={
-              <AdminRoute>
-                <MaintenanceView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/notification/:id"
-            element={
-              <AdminRoute>
-                <NotificationView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/message/:id"
-            element={
-              <AdminRoute>
-                <MessageView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/payment/:id"
-            element={
-              <AdminRoute>
-                <PaymentView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/property/:id"
-            element={
-              <AdminRoute>
-                <PropertyView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/user/:id/:userType"
-            element={
-              <AdminRoute>
-                <UserView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/worker-payment/:id"
-            element={
-              <AdminRoute>
-                <WorkerPaymentView />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/worker-booking/:id"
-            element={
-              <AdminRoute>
-                <BookingView />
-              </AdminRoute>
-            }
-          />
+          >
+            {/* redirect bare /admin to property-management */}
+            <Route index element={<Navigate to="/admin/property-management" replace />} />
+            <Route path="property-management" element={<PropertyManagement />} />
+            <Route path="user-management" element={<UserManagement />} />
+            <Route path="service-bookings" element={<ServiceBookings />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="worker-payments" element={<WorkerPayments />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="maintenance-requests" element={<MaintenanceRequests />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="user-verifications" element={<AdminUserVerifications />} />
+            
+            {/* Admin Detail Views */}
+            <Route path="booking/:id" element={<BookingView />} />
+            <Route path="maintenance/:id" element={<MaintenanceView />} />
+            <Route path="notification/:id" element={<NotificationView />} />
+            <Route path="message/:id" element={<MessageView />} />
+            <Route path="payment/:id" element={<PaymentView />} />
+            <Route path="property/:id" element={<PropertyView />} />
+            <Route path="user/:id/:userType" element={<UserView />} />
+            <Route path="worker-payment/:id" element={<WorkerPaymentView />} />
+            <Route path="worker-booking/:id" element={<BookingView />} />
+          </Route>
 
           {/* superadmin section (layout handles protection) */}
           <Route path="/superadmin/*" element={<SuperAdminLayout />}>                

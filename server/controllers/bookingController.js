@@ -72,6 +72,28 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Property not found' });
     }
 
+    // Check if tenant already has an active rental
+    const existingRental = await Property.findOne({
+      tenantId: req.user.id,
+      isRented: true
+    });
+    if (existingRental) {
+      console.warn(`Tenant already has an active rental: ${existingRental._id}, tenant ID: ${req.user.id}`);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'You already have an active rental. Please unrent your current property before booking another one.' 
+      });
+    }
+
+    // Check if the property is already rented to someone else
+    if (property.isRented && property.tenantId && property.tenantId.toString() !== req.user.id) {
+      console.warn(`Property already rented to another tenant: ${propertyId}, tenant ID: ${req.user.id}`);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'This property is already rented. Please choose another property.' 
+      });
+    }
+
     // Calculate endDate (no validation)
     const startDateObj = new Date(startDate);
     const leaseDurationNum = parseInt(leaseDuration) || 6; // Default to 6 if invalid

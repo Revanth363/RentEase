@@ -117,7 +117,7 @@ const PropertyListing = () => {
     }
 
     try {
-      const response = await fetch('/property/list-property', {
+      const response = await fetch('/api/property/list-property', {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -416,7 +416,63 @@ const PropertyListing = () => {
             </div>
           </div>
 
-          {/* ── Photos ── */}
+          {/* ── Amenities ── */}
+          <div className="pl-form-section">
+            <h2>Amenities</h2>
+            <p style={{ marginBottom: '16px', color: '#666' }}>Select all amenities available at your property</p>
+            <div className="pl-amenities-grid">
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="wifi" name="amenities" value="WiFi" />
+                <label htmlFor="wifi">WiFi</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="parking" name="amenities" value="Parking" />
+                <label htmlFor="parking">Parking</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="swimming-pool" name="amenities" value="Swimming Pool" />
+                <label htmlFor="swimming-pool">Swimming Pool</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="gym" name="amenities" value="Gym" />
+                <label htmlFor="gym">Gym</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="laundry" name="amenities" value="Laundry" />
+                <label htmlFor="laundry">Laundry</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="ac" name="amenities" value="Air Conditioning" />
+                <label htmlFor="ac">Air Conditioning</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="security" name="amenities" value="Security" />
+                <label htmlFor="security">24/7 Security</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="geyser" name="amenities" value="Geyser" />
+                <label htmlFor="geyser">Hot Water Geyser</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="kitchen" name="amenities" value="Modular Kitchen" />
+                <label htmlFor="kitchen">Modular Kitchen</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="garden" name="amenities" value="Garden" />
+                <label htmlFor="garden">Garden</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="balcony" name="amenities" value="Balcony" />
+                <label htmlFor="balcony">Balcony</label>
+              </div>
+              <div className="pl-amenity-item">
+                <input type="checkbox" id="lift" name="amenities" value="Lift" />
+                <label htmlFor="lift">Lift</label>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Photos ──
           <div className="pl-form-section">
             <h2>Upload Photos (up to 10)</h2>
             <div className={`pl-form-group ${errors.photos ? "pl-error" : ""}`}>

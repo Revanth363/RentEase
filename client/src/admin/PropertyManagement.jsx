@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLoading } from "../context/useLoading";
 import styles from "../assets/css/AdminDashboard.module.css";
-import AdminNavbar from "../components/AdminNavbar";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { API_URL } from "../services/api";
 
@@ -162,14 +161,13 @@ const PropertyManagement = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>Property Management</h1>
-      <AdminNavbar />
 
       <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
         {/* Filters */}
         <aside
           style={{
-            width: "300px",
-            minWidth: "300px",
+            width: "350px",
+            minWidth: "350px",
             background: "white",
             padding: "24px",
             borderRadius: "12px",

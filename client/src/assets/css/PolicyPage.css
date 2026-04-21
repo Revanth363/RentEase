@@ -1,0 +1,153 @@
+/* src/assets/css/PolicyPage.css */
+
+/* Same font as NotFound/Contact Us */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+
+/* Reset only inside this section */
+.policy-wrapper *,
+.policy-wrapper *::before,
+.policy-wrapper *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.policy-wrapper {
+  background-color: rgba(226, 194, 187, 0.445);
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 60px;
+}
+
+.policy-whole-container {
+  width: 100%;
+  max-width: 1500px;
+}
+
+.policy-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.12);
+  padding: 4rem 2.5rem;
+}
+
+.policy-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 2rem;
+}
+
+.policy-header h1 {
+  font-size: 2.5rem;
+  color: #ffcc00;
+  margin-bottom: 0.5rem;
+}
+
+.policy-date {
+  font-size: 0.95rem;
+  color: #999;
+  font-style: italic;
+}
+
+.policy-content {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+  line-height: 1.8;
+}
+
+.policy-content section {
+  margin-bottom: 2.5rem;
+}
+
+.policy-content h2 {
+  font-size: 1.5rem;
+  color: #ffcc00;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #007bff;
+}
+
+.policy-content h3 {
+  font-size: 1.2rem;
+  color: #34495e;
+  margin: 1.5rem 0 0.8rem;
+}
+
+.policy-content p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.policy-content ul {
+  margin-left: 20px;
+  margin-bottom: 1rem;
+}
+
+.policy-content li {
+  margin-bottom: 0.8rem;
+  list-style-type: disc;
+  color: #555;
+}
+
+.policy-content strong {
+  color: #2c3e50;
+}
+
+/* Button - exact match to NotFound style */
+.policy-btn {
+  display: inline-block;
+  padding: 0.95rem 2.8rem;
+  font-size: 1.15rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.policy-primary-btn {
+  background-color: #ffcc00;
+  color: #333;
+}
+
+.policy-primary-btn:hover {
+  background-color: #ffc700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .policy-wrapper {
+    padding: 80px 15px 40px;
+  }
+
+  .policy-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .policy-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .policy-content h2 {
+    font-size: 1.2rem;
+  }
+
+  .policy-content p {
+    font-size: 0.95rem;
+  }
+
+  .policy-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
+}

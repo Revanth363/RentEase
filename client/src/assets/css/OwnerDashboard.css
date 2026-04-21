@@ -71,7 +71,7 @@ body {
   background: #333;
   color: white;
   padding: 2vw;
-  height: 100vh;
+  height: 200vh;
   position: fixed;
   left: 0%;
   top: 10%;
@@ -83,6 +83,9 @@ body {
   color: #ffc107;
   font-size: 20px;
   margin-bottom: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ownd-sidebar ul {

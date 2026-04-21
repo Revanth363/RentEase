@@ -5,7 +5,7 @@ import { useLoading } from '../context/useLoading';
 import LoadingSpinner from '../components/LoadingSpinner';
 import styles from '../assets/css/AdminDashboard.module.css';
 import { fetchAdminWorkerBookings } from '../services/api';
-import AdminNavbar from '../components/AdminNavbar';
+
 
 const ServiceBookings = () => {
   const { setIsLoading } = useLoading();
@@ -112,13 +112,12 @@ const ServiceBookings = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.h1}>Service Bookings</h1>
-      <AdminNavbar />
 
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
         {/* LEFT: Filter Panel */}
         <aside style={{
-          width: '320px',
-          minWidth: '280px',
+          width: '380px',
+          minWidth: '350px',
           background: 'white',
           padding: '24px',
           borderRadius: '12px',

@@ -32,23 +32,18 @@ const WorkerDashboard = () => {
   const { setIsLoading } = useLoading();
 
   const [loading, setLoading] = useState(true);
-  function getSectionFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("section") || "services";
-  }
-  const [activeSection, setActiveSection] = useState(getSectionFromUrl());
+  const [section, setSection] = useState("services");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Update activeSection when URL changes
   useEffect(() => {
-    setActiveSection(getSectionFromUrl());
-  }, [location]);
+    loadDashboard();
+  }, []);
 
   const [user, setUser] = useState({});
   const [services, setServices] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [clients, setClients] = useState([]);
-  const [, setEarnings] = useState({ monthly: 0, pending: 0 });
+  const [earnings, setEarnings] = useState({ monthly: 0, pending: 0 });
   const [transactions, setTransactions] = useState([]);
   const [reviews, setReviews] = useState({
     averageRating: 0,
@@ -148,24 +143,8 @@ const WorkerDashboard = () => {
     }
   };
 
-  const showSection = (section) => {
-    // Map section to URL and force reload
-    const sectionToUrl = (s) => {
-      switch (s) {
-        case "services": return "/worker_dashboard?section=services";
-        case "bookings": return "/worker_dashboard?section=bookings";
-        case "clients": return "/worker_dashboard?section=clients";
-        case "earnings": return "/worker_dashboard?section=earnings";
-        case "transactions": return "/worker_dashboard?section=transactions";
-        case "reviews": return "/worker_dashboard?section=reviews";
-        case "notifications": return "/worker_dashboard?section=notifications";
-        case "settings": return "/worker_dashboard?section=settings";
-        case "verification": return "/worker_dashboard?section=verification";
-        default: return "/worker_dashboard";
-      }
-    };
-    navigate(sectionToUrl(section));
-    // setActiveSection(section); // no longer needed
+  const showSection = (sectionName) => {
+    setSection(sectionName);
     if (window.innerWidth <= 768) setSidebarOpen(false);
   };
 
@@ -486,8 +465,10 @@ const WorkerDashboard = () => {
 
   // Mark notifications as read when viewing the notifications section
   useEffect(() => {
-    if (activeSection === "notifications" && notifications?.length > 0) {
+    if (section === "notifications" && notifications?.length > 0) {
       const newNotifications = notifications.filter(n => n.isNew === true);
+      
+      // Mark notifications as read on backend
       newNotifications.forEach(async (notification) => {
         try {
           await axios.post(`/workers/notifications/${notification._id}/read`);
@@ -496,22 +477,24 @@ const WorkerDashboard = () => {
         }
       });
 
-      // Update local state to mark as read
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.isNew === true ? { ...n, isNew: false, read: true } : n
-        )
-      );
+      // Update local state to mark as read (only once per section change)
+      if (newNotifications.length > 0) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.isNew === true ? { ...n, isNew: false, read: true } : n
+          )
+        );
+      }
     }
-  }, [activeSection, notifications]);
+  }, [section]);
 
   if (loading || verificationLoading) {
     return <LoadingSpinner />;
   }
 
   const effectiveSection = !verificationLoading && verificationStatus !== "approved"
-    ? (["settings", "verification"].includes(activeSection) ? activeSection : "verification")
-    : activeSection;
+    ? (["settings", "verification"].includes(section) ? section : "verification")
+    : section;
 
   return (
     <div className="wrkd-dashboard-container">
@@ -747,9 +730,7 @@ const WorkerDashboard = () => {
                     </li>
                     <li>
                       <strong>Service Start Date:</strong>{" "}
-                      {booking.preferredDate
-                        ? new Date(booking.preferredDate).toLocaleDateString()
-                        : "Not specified"}
+                      {booking.preferredDate || "Not specified"}
                     </li>
                     <li>
                       <strong>Status:</strong> {booking.status}
@@ -815,10 +796,9 @@ const WorkerDashboard = () => {
                     <li>
                       <strong>Location:</strong> {client.location || "N/A"}
                     </li>
-                    {client.bookingDate && (
+                    {client.bookingDate && client.bookingDate !== "N/A" && (
                       <li>
-                        <strong>Booked Since:</strong>{" "}
-                        {new Date(client.bookingDate).toLocaleDateString()}
+                        <strong>Booked Since:</strong> {client.bookingDate}
                       </li>
                     )}
                   </ul>
@@ -841,6 +821,37 @@ const WorkerDashboard = () => {
           }`}
         >
           <h3>My Earnings</h3>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '20px',
+            marginBottom: '30px'
+          }}>
+            <div style={{
+              background: '#f8f9fa',
+              padding: '20px',
+              borderRadius: '8px',
+              border: '1px solid #dee2e6',
+              textAlign: 'center'
+            }}>
+              <h4 style={{ color: '#6c757d', marginTop: 0 }}>Monthly Earnings</h4>
+              <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: 0 }}>
+                ₹{earnings?.monthly?.toLocaleString() || '0'}
+              </p>
+            </div>
+            <div style={{
+              background: '#fff3cd',
+              padding: '20px',
+              borderRadius: '8px',
+              border: '1px solid #ffc107',
+              textAlign: 'center'
+            }}>
+              <h4 style={{ color: '#856404', marginTop: 0 }}>Pending Earnings</h4>
+              <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#ff9800', margin: 0 }}>
+                ₹{earnings?.pending?.toLocaleString() || '0'}
+              </p>
+            </div>
+          </div>
           <RazorpayPaymentHistory
             historyType="worker-payments"
             className="wrkd-earnings-table"
@@ -900,7 +911,9 @@ const WorkerDashboard = () => {
             {notifications.length === 0 ? (
               <p>No notifications.</p>
             ) : (
-              notifications.map((notif) => (
+              [...notifications]
+                .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
+                .map((notif) => (
                 <div
                   key={notif._id}
                   className={`wrkd-notification-card ${

@@ -186,6 +186,9 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
       time: booking.bookingDate
         ? new Date(booking.bookingDate).toLocaleTimeString()
         : "N/A",
+      preferredDate: booking.preferredDate
+        ? new Date(booking.preferredDate).toLocaleDateString()
+        : null,
       status: booking.status || "Pending",
     }));
 
@@ -217,8 +220,8 @@ exports.renderWorkerDashboardSafer = async (req, res) => {
 
       const bookingDate =
         tenantBookings.length > 0 && tenantBookings[0].bookingDate
-          ? tenantBookings[0].bookingDate
-          : null;
+          ? new Date(tenantBookings[0].bookingDate).toLocaleDateString()
+          : "N/A";
 
       return {
         _id: client._id,
@@ -904,10 +907,6 @@ exports.bookWorkerCorrected = async (req, res) => {
       return res.status(404).json({ error: "Worker not found" });
     }
 
-    if (worker.serviceStatus !== "Available") {
-      return res.status(400).json({ error: "Worker is not available" });
-    }
-
     const tenant = await Tenant.findById(tenantId);
     if (!tenant) {
       return res.status(404).json({ error: "Tenant not found" });
@@ -917,8 +916,7 @@ exports.bookWorkerCorrected = async (req, res) => {
       return res.status(400).json({ error: "Worker already booked" });
     }
 
-    // Mark worker as unavailable and booked
-    worker.serviceStatus = "Unavailable";
+    // Mark worker as booked (but don't change serviceStatus - let worker control manually)
     worker.isBooked = true;
     await worker.save();
 
@@ -1109,6 +1107,9 @@ exports.getWorkerBookings = async (req, res) => {
       time: booking.bookingDate
         ? new Date(booking.bookingDate).toLocaleTimeString()
         : "N/A",
+      preferredDate: booking.preferredDate
+        ? new Date(booking.preferredDate).toLocaleDateString()
+        : null,
       status: booking.status || "Pending",
     }));
     return res.status(200).json(formattedBookings);
@@ -1280,6 +1281,11 @@ exports.debookWorker = async (req, res) => {
     const workerId = req.params.id;
     const tenantId = req.user.id;
 
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(workerId)) {
+      return res.status(400).json({ error: "Invalid worker ID format" });
+    }
+
     const worker = await Worker.findById(workerId);
     if (!worker) {
       return res.status(404).json({ error: "Worker not found" });
@@ -1290,94 +1296,69 @@ exports.debookWorker = async (req, res) => {
       return res.status(404).json({ error: "Tenant not found" });
     }
 
-    // Check if worker is booked by this tenant
-    if (!tenant.domesticWorkerId.some((id) => id.toString() === workerId)) {
+    // Check if there's an active booking
+    const booking = await WorkerBooking.findOne({
+      tenantId: new mongoose.Types.ObjectId(tenantId),
+      workerId: new mongoose.Types.ObjectId(workerId),
+      status: { $in: ["Pending", "Approved"] }
+    });
+
+    // If no active booking and worker not in domesticWorkerId, deny
+    const workerInDomestic = tenant.domesticWorkerId && tenant.domesticWorkerId.some((id) => id.toString() === workerId);
+    
+    if (!booking && !workerInDomestic) {
       return res
         .status(400)
         .json({ error: "Worker is not booked by this tenant" });
     }
 
-    // Check if current billing cycle payment is made for monthly workers
-    const booking = await WorkerBooking.findOne({
-      tenantId,
-      workerId,
-      status: "Approved",
+    // ===== CHECK IF WORK HAS BEEN TRACKED =====
+    const WorkTracking = require("../models/workTracking");
+    const trackedWork = await WorkTracking.findOne({
+      tenantId: new mongoose.Types.ObjectId(tenantId),
+      workerId: new mongoose.Types.ObjectId(workerId),
+      otpVerified: true
     });
 
-    if (booking && worker.rateUnit === "monthly") {
-      const bookingDate = new Date(booking.bookingDate);
-      const now = new Date();
-      const dayOfMonth = bookingDate.getDate();
-
-      let currentCycleStart, currentCycleEnd;
-
-      if (now.getDate() >= dayOfMonth) {
-        currentCycleStart = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          dayOfMonth
-        );
-        currentCycleEnd = new Date(
-          now.getFullYear(),
-          now.getMonth() + 1,
-          dayOfMonth - 1,
-          23,
-          59,
-          59,
-          999
-        );
-      } else {
-        currentCycleStart = new Date(
-          now.getFullYear(),
-          now.getMonth() - 1,
-          dayOfMonth
-        );
-        currentCycleEnd = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          dayOfMonth - 1,
-          23,
-          59,
-          59,
-          999
-        );
-      }
-
-      const recentPayment = await WorkerPayment.findOne({
-        tenantId,
-        workerId,
-        paymentDate: { $gte: currentCycleStart, $lte: currentCycleEnd },
-        status: "Paid",
+    // If work has been tracked, check if payment is made
+    if (trackedWork) {
+      const payment = await WorkerPayment.findOne({
+        tenantId: new mongoose.Types.ObjectId(tenantId),
+        workerId: new mongoose.Types.ObjectId(workerId),
+        status: "Paid"
       });
 
-      if (!recentPayment) {
+      if (!payment) {
         return res.status(400).json({
-          error: "Payment pending for current billing cycle",
-          message:
-            "Please complete the current billing cycle payment before debooking the worker.",
+          error: "Payment pending",
+          message: "Please complete the payment for work done before debooking the worker."
         });
       }
     }
 
     // ===== CRITICAL FIX: Remove tenant from worker's clientIds =====
-    worker.clientIds = worker.clientIds.filter(
-      (id) => id.toString() !== tenantId.toString()
-    );
+    if (worker.clientIds && Array.isArray(worker.clientIds)) {
+      worker.clientIds = worker.clientIds.filter(
+        (id) => id.toString() !== tenantId.toString()
+      );
+    }
 
     // Update worker's isBooked status based on remaining clients
-    worker.isBooked = worker.clientIds.length > 0;
+    worker.isBooked = worker.clientIds && worker.clientIds.length > 0;
     await worker.save();
 
     // Remove worker from tenant's domesticWorkerId array
-    tenant.domesticWorkerId = tenant.domesticWorkerId.filter(
-      (id) => id.toString() !== workerId
-    );
+    if (tenant.domesticWorkerId && Array.isArray(tenant.domesticWorkerId)) {
+      tenant.domesticWorkerId = tenant.domesticWorkerId.filter(
+        (id) => id.toString() !== workerId
+      );
+    }
     await tenant.save();
 
     // Delete or update WorkerBooking records
     await WorkerBooking.deleteMany({
-      tenantId,
-      workerId,
+      tenantId: new mongoose.Types.ObjectId(tenantId),
+      workerId: new mongoose.Types.ObjectId(workerId),
       status: "Approved",
     });
 
@@ -1385,9 +1366,9 @@ exports.debookWorker = async (req, res) => {
     const notification = new Notification({
       type: "Debooking",
       message: `You have been debooked by ${tenant.firstName} ${tenant.lastName} for ${worker.serviceType}.`,
-      recipient: workerId,
+      recipient: new mongoose.Types.ObjectId(workerId),
       recipientType: "Worker",
-      tenant: tenantId,
+      tenant: new mongoose.Types.ObjectId(tenantId),
       tenantName: `${tenant.firstName} ${tenant.lastName}`,
       status: "Info",
       priority: "High",
@@ -1398,7 +1379,7 @@ exports.debookWorker = async (req, res) => {
     const savedNotification = await notification.save();
 
     // Add notification to worker's notificationIds array
-    await Worker.findByIdAndUpdate(workerId, {
+    await Worker.findByIdAndUpdate(new mongoose.Types.ObjectId(workerId), {
       $push: { notificationIds: savedNotification._id },
     });
 
@@ -1493,6 +1474,7 @@ exports.getDashboardDataAPI = async (req, res) => {
             propertyId: { address: b.tenantAddress || "N/A" },
             date: b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "N/A",
             time: b.bookingDate ? new Date(b.bookingDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "N/A",
+            preferredDate: b.preferredDate ? new Date(b.preferredDate).toLocaleDateString() : null,
             status: b.status || "Pending",
           };
         });
