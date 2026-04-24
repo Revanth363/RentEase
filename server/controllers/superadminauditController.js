@@ -44,65 +44,33 @@ exports.getAuditLogs = async (req, res) => {
     // Build filter query
     const filter = {};
 
-    if (action && action !== 'all') {
-      filter.action = action.toUpperCase();
-    }
+    // FIXED: Show only admin logins, filter out all other roles and actions
+    filter.action = 'LOGIN';
+    filter['performedBy.role'] = 'admin';
 
-    if (userId) {
-      filter['performedBy.userId'] = userId;
-    }
+    // Use aggregation to get only the LAST login per admin
+    const pipeline = [
+      { $match: filter },
+      // Sort by timestamp descending to get latest first
+      { $sort: { timestamp: -1 } },
+      // Group by userId and get the first (latest) login for each admin
+      {
+        $group: {
+          _id: '$performedBy.userId',
+          doc: { $first: '$$ROOT' },
+        },
+      },
+      // Unwind to get back the document
+      { $replaceRoot: { newRoot: '$doc' } },
+      // Final sort by timestamp descending
+      { $sort: { timestamp: -1 } },
+    ];
 
-    if (role && role !== 'all') {
-      filter['performedBy.role'] = role;
-    }
+    // Execute aggregation query
+    const logs = await AuditLog.aggregate(pipeline).exec();
 
-    if (resourceType && resourceType !== 'all') {
-      filter['resource.type'] = resourceType;
-    }
-
-    if (status && status !== 'all') {
-      filter.status = status;
-    }
-
-    if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), 'i');
-      filter.$or = [
-        { action: searchRegex },
-        { 'performedBy.name': searchRegex },
-        { 'performedBy.email': searchRegex },
-        { 'resource.name': searchRegex },
-        { description: searchRegex },
-      ];
-    }
-
-    // Date range filter
-    if (startDate || endDate) {
-      filter.timestamp = {};
-      if (startDate) {
-        filter.timestamp.$gte = new Date(startDate);
-      }
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        filter.timestamp.$lte = end;
-      }
-    }
-
-    // Build sort object
-    const sort = {};
-    const sortVal = parseInt(sortOrder) === -1 ? -1 : 1;
-    sort[sortBy] = sortVal;
-
-    // Execute query with pagination
-    const logs = await AuditLog.find(filter)
-      .sort(sort)
-      .limit(parseInt(limit))
-      .skip(parseInt(skip))
-      .lean()
-      .exec();
-
-    // Get total count for pagination
-    const total = await AuditLog.countDocuments(filter);
+    // Get total count (number of unique admins)
+    const total = logs.length;
 
     // Format response
     const formattedLogs = logs.map((log) => ({
@@ -129,9 +97,9 @@ exports.getAuditLogs = async (req, res) => {
       logs: formattedLogs,
       pagination: {
         total,
-        limit: parseInt(limit),
-        skip: parseInt(skip),
-        pages: Math.ceil(total / parseInt(limit)),
+        limit: total,
+        skip: 0,
+        pages: 1,
       },
     });
   } catch (error) {

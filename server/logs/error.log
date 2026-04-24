@@ -19,3 +19,7 @@
 2026-04-20T19:12:29.083Z | 401 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 1.671ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
 2026-04-20T19:12:29.086Z | 401 | GET | /api/razorpay/tenant-payment-history?page=1&limit=10 | 2.241ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
 2026-04-20T19:12:29.089Z | 401 | GET | /api/razorpay/tenant-worker-payment-history?page=1&limit=10 | 1.596ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-21T05:39:22.099Z | 401 | GET | /api/me | 10.000ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-21T05:39:22.109Z | 401 | GET | /api/me | 2.807ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
+2026-04-21T05:39:41.142Z | 401 | GET | /api/me | 1.324ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-04-21T05:39:41.155Z | 401 | GET | /api/me | 4.626ms | User: guest | IP: ::1 | Body: - | Msg: No token provided

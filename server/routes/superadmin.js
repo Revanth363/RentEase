@@ -92,7 +92,9 @@ router.use((req, res, next) => {
 
 	res.on('finish', async () => {
 		try {
-			if (!req.audit || !req.user?.id) return;
+			// Prevent multiple audit logs for same request
+			if (req._auditLogged || !req.audit || !req.user?.id) return;
+			req._auditLogged = true;
 
 			const status = res.statusCode >= 400 ? 'failed' : 'success';
 			const userId = req.user.id;
@@ -100,6 +102,9 @@ router.use((req, res, next) => {
 			const resourceType = inferResourceType(path);
 
 			const paramId = Object.values(req.params || {}).find((value) => mongoose.Types.ObjectId.isValid(value));
+			
+			// Build full endpoint with /api/superadmin prefix
+			const fullEndpoint = `/api/superadmin${path}`;
 
 			await req.audit({
 				action,
@@ -112,9 +117,9 @@ router.use((req, res, next) => {
 				resource: {
 					type: resourceType,
 					id: paramId,
-					name: path,
+					name: fullEndpoint,
 				},
-				description: `${req.method} ${path}`,
+				description: `${req.method} ${fullEndpoint}`,
 				req,
 				status,
 				errorMessage: status === 'failed' ? `HTTP ${res.statusCode}` : undefined,
