@@ -342,6 +342,31 @@ const HomePage = () => {
     navigate(`/search?${params.toString()}`);
   };
 
+  const handleListPropertyClick = (e) => {
+    e.preventDefault();
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const user = localStorage.getItem('user');
+    
+    if (isAuthenticated && user) {
+      try {
+        const userData = JSON.parse(user);
+        if (userData.role === 'owner') {
+          // User is logged in as owner - stay on page (same page)
+          navigate('/property_listing_page');
+        } else {
+          // User is logged in but not as owner - redirect to login
+          navigate('/login');
+        }
+      } catch (error) {
+        // If user data is invalid, redirect to login
+        navigate('/login');
+      }
+    } else {
+      // User not logged in - redirect to login
+      navigate('/login');
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error)
     return (
@@ -850,16 +875,10 @@ const HomePage = () => {
                   <a href="/search">Rent a Home</a>
                 </li>
                 <li>
-                  <a href="/property_listing_page">List Your Property</a>
+                  <a href="#" onClick={handleListPropertyClick}>List Your Property</a>
                 </li>
                 <li>
                   <a href="/workerDetails">Domestic Services</a>
-                </li>
-                <li>
-                  <a href="/tenant_dashboard">Online Rent Payment</a>
-                </li>
-                <li>
-                  <a href="/property-management">Property Management</a>
                 </li>
               </ul>
             </div>
@@ -893,7 +912,7 @@ const HomePage = () => {
           </div>
           <div className={styles['footer-bottom']}>
             <div className={styles.copyright}>
-              <p>&copy; 2025 RentEase. All Rights Reserved.</p>
+              <p>&copy; 2026 RentEase. All Rights Reserved.</p>
             </div>
             <div className={styles['footer-bottom-links']}>
               <a href="/privacy_policy">Privacy Policy</a>

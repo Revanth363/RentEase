@@ -23,3 +23,7 @@
 2026-04-21T05:39:22.109Z | 401 | GET | /api/me | 2.807ms | User: guest | IP: ::1 | Body: - | Msg: Invalid or expired token
 2026-04-21T05:39:41.142Z | 401 | GET | /api/me | 1.324ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
 2026-04-21T05:39:41.155Z | 401 | GET | /api/me | 4.626ms | User: guest | IP: ::1 | Body: - | Msg: No token provided
+2026-04-21T09:43:52.401Z | 401 | GET | /api/me | 28.180ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-21T09:43:52.530Z | 401 | GET | /api/me | 17.337ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: Invalid or expired token
+2026-04-21T09:45:04.344Z | 401 | GET | /api/me | 1.785ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
+2026-04-21T09:45:04.360Z | 401 | GET | /api/me | 0.794ms | User: guest | IP: ::ffff:172.18.0.1 | Body: - | Msg: No token provided
