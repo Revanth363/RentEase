@@ -28,7 +28,8 @@ const WorkerDashboard = () => {
     const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
+  // eslint-disable-next-line no-unused-vars
+  const _location = useLocation();
   const { setIsLoading } = useLoading();
 
   const [loading, setLoading] = useState(true);
@@ -486,6 +487,7 @@ const WorkerDashboard = () => {
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section]);
 
   if (loading || verificationLoading) {

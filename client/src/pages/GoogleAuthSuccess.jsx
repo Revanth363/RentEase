@@ -65,7 +65,7 @@ export default function GoogleAuthSuccess() {
     };
 
     handleGoogleAuth();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, dispatch]);
 
   return (
     <div style={{ 

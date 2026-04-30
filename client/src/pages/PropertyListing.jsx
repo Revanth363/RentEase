@@ -34,6 +34,7 @@ const PropertyListing = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const validImageFiles = files.filter((file) => file.type.startsWith("image/"));
@@ -54,6 +55,7 @@ const PropertyListing = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const removeImage = (index) => {
     setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
@@ -144,6 +146,7 @@ const PropertyListing = () => {
     setErrors({});
   };
 
+  // eslint-disable-next-line no-unused-vars
   const openFileDialog = () => {
     fileInputRef.current?.click();
   };

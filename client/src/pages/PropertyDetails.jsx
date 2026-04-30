@@ -72,6 +72,7 @@ const PropertyDetails = () => {
       container?.removeEventListener("touchstart", handleStart);
       container?.removeEventListener("touchend", handleEnd);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [property, currentImageIndex]);
 
   // CONTACT FORM

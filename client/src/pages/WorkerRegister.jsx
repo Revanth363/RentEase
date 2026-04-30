@@ -1,5 +1,5 @@
 // src/pages/WorkerRegister.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerWorker, getDashboardData } from "../services/workerService";
 import "../assets/css/workerRegister.css";
@@ -27,14 +27,14 @@ const WorkerRegister = () => {
   const [areas, setAreas] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Area data - matching EJS exactly
-  const areasByCity = {
+  // Area data - matching EJS exactly - wrapped in useMemo to prevent dependency changes
+  const areasByCity = useMemo(() => ({
     delhi: ["karol bagh", "connaught place", "dwarka", "rohini"],
     mumbai: ["andheri", "bandra", "juhu", "colaba"],
     bangalore: ["koramangala", "indiranagar", "whitefield", "jp nagar"],
     chennai: ["t nagar", "anna nagar", "adyar", "mylapore"],
     sricity: ["central", "north", "south"],
-  };
+  }), []);
 
   // Load current worker profile on mount
   useEffect(() => {
@@ -77,7 +77,7 @@ const WorkerRegister = () => {
       }
     };
     loadProfile();
-  }, [areasByCity]);
+  }, []);
 
   // Update areas based on city - matching EJS updateAreas() function
   const updateAreas = (cityValue) => {

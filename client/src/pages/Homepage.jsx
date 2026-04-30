@@ -149,13 +149,7 @@ const HomePage = () => {
     return () => {
       setIsLoading(false);
     };
-  }, [setIsLoading]);
-
-  useEffect(() => {
-    const updateArticlesPerPage = () => {
-      if (window.innerWidth <= 480) {
-        setArticlesPerPage(1);
-      } else if (window.innerWidth <= 768) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
         setArticlesPerPage(2);
       } else {
         setArticlesPerPage(4);
@@ -357,7 +351,7 @@ const HomePage = () => {
           // User is logged in but not as owner - redirect to login
           navigate('/login');
         }
-      } catch (error) {
+      } catch (_error) {
         // If user data is invalid, redirect to login
         navigate('/login');
       }

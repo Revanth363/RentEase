@@ -1024,3 +1024,5 @@
 2026-04-21T09:45:04.677Z | GET /api/search 200 | 384.998 ms | User: guest | Type: none | ID: - | IP: ::ffff:172.18.0.1
 2026-04-21T09:45:04.730Z | GET /api/search 200 | 16.603 ms | User: guest | Type: none | ID: - | IP: ::ffff:172.18.0.1
 2026-04-21T09:45:20.357Z | GET /api/health 200 | 0.295 ms | User: guest | Type: none | ID: - | IP: ::1
+2026-04-21T09:45:50.483Z | GET /api/health 200 | 0.593 ms | User: guest | Type: none | ID: - | IP: ::1
+2026-04-21T09:46:20.628Z | GET /api/health 200 | 0.562 ms | User: guest | Type: none | ID: - | IP: ::1
