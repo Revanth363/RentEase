@@ -149,7 +149,14 @@ const HomePage = () => {
     return () => {
       setIsLoading(false);
     };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setIsLoading]);
+
+  useEffect(() => {
+    const updateArticlesPerPage = () => {
+      if (window.innerWidth <= 480) {
+        setArticlesPerPage(1);
+      } else if (window.innerWidth <= 768) {
         setArticlesPerPage(2);
       } else {
         setArticlesPerPage(4);
