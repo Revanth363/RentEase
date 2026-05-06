@@ -358,7 +358,7 @@ const HomePage = () => {
           // User is logged in but not as owner - redirect to login
           navigate('/login');
         }
-      } catch (_error) {
+      } catch (err) {
         // If user data is invalid, redirect to login
         navigate('/login');
       }

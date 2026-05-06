@@ -77,7 +77,7 @@ const WorkerRegister = () => {
       }
     };
     loadProfile();
-  }, []);
+  }, [areasByCity]);
 
   // Update areas based on city - matching EJS updateAreas() function
   const updateAreas = (cityValue) => {

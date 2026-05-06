@@ -28,8 +28,7 @@ const WorkerDashboard = () => {
     const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const navigate = useNavigate();
-  // eslint-disable-next-line no-unused-vars
-  const _location = useLocation();
+  const location = useLocation();
   const { setIsLoading } = useLoading();
 
   const [loading, setLoading] = useState(true);
@@ -99,7 +98,7 @@ const WorkerDashboard = () => {
     } else if (!loading) {
       setVerificationLoading(false);
     }
-  }, [user, loading]);
+  }, [user, loading, loadDashboard]);
 
   const loadDashboard = async () => {
     try {
