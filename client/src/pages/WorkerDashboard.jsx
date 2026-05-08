@@ -1,6 +1,6 @@
 // src/pages/WorkerDashboard.jsx
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../assets/css/workerDashboard.css";
@@ -28,7 +28,7 @@ const WorkerDashboard = () => {
     const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
+  const _location = useLocation();
   const { setIsLoading } = useLoading();
 
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ const WorkerDashboard = () => {
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+  }, [loadDashboard]);
 
   const [user, setUser] = useState({});
   const [services, setServices] = useState([]);
@@ -80,7 +80,7 @@ const WorkerDashboard = () => {
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+  }, [loadDashboard]);
 
   useEffect(() => {
     if (user && user._id) {
@@ -98,9 +98,9 @@ const WorkerDashboard = () => {
     } else if (!loading) {
       setVerificationLoading(false);
     }
-  }, [user, loading, loadDashboard]);
+  }, [user, loading]);
 
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getDashboardData();
@@ -141,7 +141,7 @@ const WorkerDashboard = () => {
       setLoading(false);
       setIsLoading(false);
     }
-  };
+  }, [navigate, setIsLoading]);
 
   const showSection = (sectionName) => {
     setSection(sectionName);
