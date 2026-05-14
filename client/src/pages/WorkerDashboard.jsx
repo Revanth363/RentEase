@@ -25,21 +25,17 @@ import {
 } from "../services/workerService";
 
 const WorkerDashboard = () => {
-    const [verificationStatus, setVerificationStatus] = useState(null);
-  const [verificationLoading, setVerificationLoading] = useState(true);
   const navigate = useNavigate();
   const _location = useLocation();
   const { setIsLoading } = useLoading();
 
+  // 1. State Declarations
+  const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [verificationLoading, setVerificationLoading] = useState(true);
   const [section, setSection] = useState("services");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
-
-  const [user, setUser] = useState({});
   const [services, setServices] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [clients, setClients] = useState([]);
@@ -78,28 +74,7 @@ const WorkerDashboard = () => {
     paymentAlerts: true,
   });
 
-  useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
-
-  useEffect(() => {
-    if (user && user._id) {
-      (async () => {
-        try {
-          const res = await axios.get(`/verification/status?userId=${user._id}&userModel=worker`, { withCredentials: true });
-          setVerificationStatus(res.data.status);
-        } catch (err) {
-          console.error('Verification status error:', err.message);
-          setVerificationStatus(null);
-        } finally {
-          setVerificationLoading(false);
-        }
-      })();
-    } else if (!loading) {
-      setVerificationLoading(false);
-    }
-  }, [user, loading]);
-
+  // 2. Callbacks
   const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
@@ -142,6 +117,32 @@ const WorkerDashboard = () => {
       setIsLoading(false);
     }
   }, [navigate, setIsLoading]);
+
+  // 3. Effects
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    if (user && user._id) {
+      (async () => {
+        try {
+          const res = await axios.get(
+            `/verification/status?userId=${user._id}&userModel=worker`,
+            { withCredentials: true }
+          );
+          setVerificationStatus(res.data.status);
+        } catch (err) {
+          console.error("Verification status error:", err.message);
+          setVerificationStatus(null);
+        } finally {
+          setVerificationLoading(false);
+        }
+      })();
+    } else if (!loading) {
+      setVerificationLoading(false);
+    }
+  }, [user, loading]);
 
   const showSection = (sectionName) => {
     setSection(sectionName);

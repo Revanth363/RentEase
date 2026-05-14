@@ -1,0 +1,750 @@
+\documentclass[12pt,a4paper]{article}
+
+%% ── Core Packages ──────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=2.5cm, top=3cm, bottom=3cm]{geometry}
+
+%% ── Color & Graphics ───────────────────────────────────────────────
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+
+%% ── Tables ─────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+%% ── Layout & Styling ───────────────────────────────────────────────
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{subcaption}
+
+%% ── Hyperlinks ─────────────────────────────────────────────────────
+\usepackage[hidelinks,
+  pdfauthor={Tail Treasures Team},
+  pdftitle={Domain-Driven Design: Tail Treasures},
+  pdfsubject={Software Engineering - DDD Assignment}
+]{hyperref}
+
+%% ── Color Palette ──────────────────────────────────────────────────
+\definecolor{primary}{HTML}{1E40AF}
+\definecolor{accent}{HTML}{0891B2}
+\definecolor{ctxBlue}{HTML}{DBEAFE}
+\definecolor{ctxGreen}{HTML}{D1FAE5}
+\definecolor{ctxTeal}{HTML}{CCFBF1}
+\definecolor{ctxOrange}{HTML}{FED7AA}
+\definecolor{ctxPurple}{HTML}{EDE9FE}
+\definecolor{ctxPink}{HTML}{FCE7F3}
+\definecolor{ctxRed}{HTML}{FEE2E2}
+\definecolor{lightgray}{HTML}{F8FAFC}
+\definecolor{bordergray}{HTML}{CBD5E1}
+\definecolor{darktext}{HTML}{1E293B}
+\definecolor{mutedtext}{HTML}{64748B}
+
+%% ── tcolorbox Styles ───────────────────────────────────────────────
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{contextbox}[3][]{
+  enhanced, breakable,
+  colback=#2!20!white,
+  colframe=#2!60!black,
+  fonttitle=\bfseries\small,
+  title={\small #3},
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt, boxrule=1pt,
+  #1
+}
+
+\newtcolorbox{infobox}[1]{
+  enhanced,
+  colback=lightgray,
+  colframe=bordergray,
+  fonttitle=\bfseries\small\color{primary},
+  title={#1},
+  arc=3pt, boxrule=0.8pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+}
+
+%% ── Section Formatting ─────────────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}
+  {\thesection}{1em}{}[\color{primary}\titlerule]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{accent}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{darktext}}
+  {\thesubsubsection}{1em}{}
+
+%% ── Header / Footer ────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{mutedtext}Tail Treasures — Domain-Driven Design}
+\fancyhead[R]{\small\color{mutedtext}SEM-5 Final Assignment}
+\fancyfoot[C]{\small\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ── List Styling ───────────────────────────────────────────────────
+\setlist[itemize]{noitemsep, topsep=3pt, leftmargin=1.5em}
+\setlist[enumerate]{noitemsep, topsep=3pt, leftmargin=1.5em}
+
+%% ────────────────────────────────────────────────────────────────────
+\begin{document}
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  TITLE PAGE
+%% ═══════════════════════════════════════════════════════════════════
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+
+  {\color{primary}\rule{\linewidth}{2pt}}\\[0.4cm]
+  {\color{accent}\rule{\linewidth}{0.6pt}}\\[1.2cm]
+
+  {\Huge\bfseries\color{primary} Tail Treasures}\\[0.5cm]
+  {\Large\color{accent} A Multi-Role Pet Care and Adoption Platform}\\[0.8cm]
+  {\color{accent}\rule{0.4\linewidth}{0.6pt}}\\[0.8cm]
+
+  {\large\bfseries\color{darktext}
+    Domain-Driven Design Report}\\[0.3cm]
+  {\normalsize\color{mutedtext}
+    Strategic Design | Bounded Contexts | Context Mappings |\\[0.1cm]
+    Entities, Value Objects \& Services | Aggregates | Cardinality Ratios}
+
+  \vspace{1.5cm}
+
+  \begin{tcolorbox}[
+    enhanced, colback=ctxBlue!40!white, colframe=primary,
+    arc=6pt, boxrule=1pt, width=0.7\linewidth,
+    left=12pt, right=12pt, top=10pt, bottom=10pt
+  ]
+    \centering
+    {\small\bfseries\color{primary} Submitted By}\\[6pt]
+    {\normalsize\color{darktext} Peddineini Bhaswanth (Team Lead)}\\[2pt]
+    {\small\color{mutedtext} + 4 Team Members}\\[6pt]
+    {\small\bfseries\color{primary} Course}\\[4pt]
+    {\small\color{darktext} Software Engineering \& Design Methodology}\\[2pt]
+    {\small\color{mutedtext} SEM-5 | 4 Credits | Final Assignment}
+  \end{tcolorbox}
+
+  \vspace{1cm}
+  {\small\color{mutedtext} April 2026}
+
+  \vfill
+  {\color{accent}\rule{\linewidth}{0.6pt}}\\[0.2cm]
+  {\color{primary}\rule{\linewidth}{2pt}}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  SECTION 1: PROJECT TITLE AND DESCRIPTION
+%% ═══════════════════════════════════════════════════════════════════
+\section{Project Title and Description}
+
+\subsection*{Title}
+\begin{tcolorbox}[enhanced, colback=ctxBlue!30!white, colframe=primary,
+  arc=4pt, boxrule=1pt, left=10pt, right=10pt, top=8pt, bottom=8pt]
+  {\large\bfseries\color{primary} Tail Treasures: A Multi-Role Pet Care and Adoption Platform}
+\end{tcolorbox}
+
+\subsection*{Description}
+
+\textbf{Tail Treasures} is a comprehensive, cloud-ready MERN-stack web application designed to unify the fragmented ecosystem of pet care services into a single, cohesive digital platform. Built with Node.js and Express for the backend, React with Redux for the frontend, and MongoDB as the primary data store, the platform addresses the end-to-end lifecycle of responsible pet ownership.
+
+The platform serves \textbf{six distinct user roles}: customers who browse and adopt pets or purchase supplies, \textbf{sellers} who list and manage pet products, \textbf{veterinarians} who offer consultation services, \textbf{organisations (shelters)} that manage adoptable animals, and \textbf{administrators} (including co-admins) who govern the entire platform. Role-based access control enforced through JWT authentication and an approval workflow ensures that sellers, vets, and organisations are verified before gaining elevated access.
+
+Core features include a \textbf{pet adoption pipeline} with scored applications, a \textbf{veterinary appointment scheduler} with real-time slot availability and geospatial vet discovery (using OpenStreetMap and OSRM), a full-featured \textbf{e-commerce engine} with cart management, GST-inclusive pricing, and order tracking, and a \textbf{financial ledger system} that records every transaction, calculates commissions, and supports admin-initiated payouts.
+
+Supporting services include Redis-based caching, Cloudinary CDN integration for media uploads, an in-app notification system, a support messaging module, and role-specific dashboards with revenue analytics. The platform is documented with Swagger and tested using Jest and Supertest.
+
+\textbf{Total models:} 12 | \textbf{API routes:} 60+ | \textbf{Frontend pages:} 30+
+
+\newpage
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  SECTION 2: DOMAIN-DRIVEN DESIGN
+%% ═══════════════════════════════════════════════════════════════════
+\section{Domain-Driven Design}
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Bounded Contexts}
+%%─────────────────────────────────────────────────────────────
+
+A \textbf{Bounded Context} is an explicit boundary within which a particular domain model applies and a consistent \textit{Ubiquitous Language} is maintained. For Tail Treasures, the domain is divided into \textbf{seven bounded contexts}, each owning its own model, data, and language. No two contexts share a database collection directly; cross-context communication occurs through well-defined interfaces.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{bounded_context.png}
+  \caption{Bounded Context Diagram — Tail Treasures Platform}
+\end{figure}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxBlue!80!black}{BC-1 \quad Identity \& Access Management Context}
+\textbf{Purpose:} Manages all user identity, authentication, and authorisation concerns. Acts as the upstream provider for every other context — it owns the \texttt{User} entity and is the single source of truth for who is authenticated and what role they hold.
+
+\textbf{Ubiquitous Language:} \textit{User, Role, Credential, Token, Approval, isApproved, isAdmin, Seller, Veterinary, Organisation, Customer, Co-Admin, Balance, ProfileImage, JWT, Google OAuth}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Local email/password registration and login
+  \item Google OAuth 2.0 via Passport.js
+  \item JWT issuance and validation
+  \item Role-based access control (RBAC) enforcement
+  \item Admin approval workflow for Sellers, Vets, and Organisations
+  \item Profile management and password change
+  \item Financial balance field on User (for seller/vet payouts)
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxGreen!80!black}{BC-2 \quad Pet Adoption Context}
+\textbf{Purpose:} Owns the entire lifecycle of an adoptable animal, from intake by a shelter/organisation to final adoption. Manages the pet profiles and the multi-stage adoption application pipeline.
+
+\textbf{Ubiquitous Language:} \textit{Pet, AdoptionApplication, Shelter, Species, Breed, HealthInfo, VaccinationStatus, AdoptionStatus, ApplicationScore, Applicant, ApprovalDecision, FeaturedPet}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item CRUD for pet profiles with image uploads (Cloudinary/local)
+  \item Pet status management: \texttt{available, pending, adopted, not\_available}
+  \item Adoption application submission by customers
+  \item Application scoring (scored model with home environment, experience, references)
+  \item Application status workflow: \texttt{pending → under\_review → approved / rejected}
+  \item Prevention of pet deletion when active applications exist
+  \item Featured pet listings; breed/species filtering and text search
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxTeal!80!black}{BC-3 \quad Veterinary Care Context}
+\textbf{Purpose:} Manages the full appointment scheduling lifecycle between customers and approved veterinarians, including geospatial discovery and slot-based availability.
+
+\textbf{Ubiquitous Language:} \textit{Appointment, Veterinarian, TimeSlot, ConsultationFee, ServiceType, AvailableDays, ClinicAddress, GeoCoordinates, SlotAvailability, Booking, VetDashboard}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Real-time available time slot computation per vet per date
+  \item Clash detection for double-booking prevention
+  \item Appointment status workflow: \texttt{pending → confirmed → in-progress → completed / cancelled / no-show}
+  \item Revenue recording on appointment completion (vet commission, balance credit)
+  \item Geospatial vet discovery using MongoDB \texttt{2dsphere} index
+  \item OSRM-based driving distance + Haversine fallback
+  \item Vet clinic address and coordinates management via Nominatim geocoding
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxOrange!80!black}{BC-4 \quad E-Commerce Context}
+\textbf{Purpose:} Handles the complete product commerce flow — from product listing by sellers to cart management, checkout, and order fulfilment.
+
+\textbf{Ubiquitous Language:} \textit{Product, Category, Stock, SalePrice, Cart, CartItem, Order, OrderItem, ShippingAddress, PaymentMethod, OrderStatus, PaymentStatus, Review, Rating, PromoCode, Shipping}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Seller product CRUD with Cloudinary image support
+  \item Real-time stock management and low-stock tracking
+  \item Cart with 18\% GST calculation; free shipping above ₹1,000
+  \item Cart validation: out-of-stock removal, quantity adjustment, price sync
+  \item Order creation from cart; order number generation
+  \item Order status: \texttt{pending → processing → shipped → delivered / cancelled}
+  \item Stock restoration on cancellation; stock decrement on order creation
+  \item Review submission with purchase verification; aggregate average rating
+  \item Promo code application with min-order constraints
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxPurple!80!black}{BC-5 \quad Financial \& Revenue Context}
+\textbf{Purpose:} Acts as the platform's financial ledger. Records every monetary event, aggregates daily/weekly/monthly revenue summaries, tracks seller/vet commissions, and processes admin payouts.
+
+\textbf{Ubiquitous Language:} \textit{Transaction, Revenue, Payout, Commission, GrossRevenue, NetAmount, Tax, GST, PeriodIdentifier, SellerMetric, VetMetric, Balance, Ledger, Refund, Chargeback}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Ledger-based \texttt{Transaction} records for every sale, refund, commission, payout
+  \item Daily \texttt{Revenue} aggregation records (periodType: daily)
+  \item Per-seller commission calculation (default 10\%, configurable)
+  \item Per-vet commission calculation on appointment completion
+  \item Seller balance credit on order delivery; debit on cancellation/refund
+  \item Admin payout processing with MongoDB session (atomic transaction)
+  \item Revenue summary API for admin dashboard analytics
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxPink!80!black}{BC-6 \quad Communication Context}
+\textbf{Purpose:} Manages all platform communication channels — support messages sent by users and in-app notifications delivered to users by system events.
+
+\textbf{Ubiquitous Language:} \textit{Message, Notification, Recipient, IsRead, NotificationType, RelatedModel, SupportTicket, AdminReply, ClearAll, UnreadCount, TTL}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item User support message submission and admin reply system
+  \item Message read/unread status management by admin
+  \item In-app notification creation (called by other contexts via \texttt{createNotification})
+  \item Notification read/unread/clear-all operations per user
+  \item Auto-expiry of notifications after 30 days (MongoDB TTL index)
+  \item Notification count badge for navbar UI
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxRed!80!black}{BC-7 \quad Platform Administration Context}
+\textbf{Purpose:} Provides administrative governance across the entire platform. Manages user approvals, content moderation, co-admin provisioning, and platform-wide analytics.
+
+\textbf{Ubiquitous Language:} \textit{Admin, CoAdmin, Approval, UserManagement, PlatformStats, ContentModeration, PendingApproval, RolePromotion, DashboardSummary}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Approve/reject sellers, vets, and organisations
+  \item Update or delete any user, order, pet, product, or application
+  \item Co-admin provisioning (create, list, delete co-admins)
+  \item Access to all financial reports and ledger data
+  \item Initiate payouts to sellers/vets
+  \item Admin dashboard with cross-context aggregated statistics
+  \item Role-switching between Admin and Co-Admin dashboards
+\end{itemize}
+\end{contextbox}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Context Mappings}
+%%─────────────────────────────────────────────────────────────
+
+Context Mapping defines how bounded contexts relate to and integrate with each other, describing the \textit{direction of influence} (upstream/downstream) and the \textit{integration pattern} used. In DDD, \textbf{[U]} denotes the upstream context (supplier) and \textbf{[D]} denotes the downstream context (consumer).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{context_mapping.png}
+  \caption{Context Mapping Diagram — Integration Patterns between Bounded Contexts}
+\end{figure}
+
+\subsubsection*{Integration Pattern Legend}
+
+\begin{center}
+\begin{tabular}{@{}lp{10cm}@{}}
+\toprule
+\textbf{Pattern} & \textbf{Description} \\
+\midrule
+\textbf{OHS} — Open Host Service & Upstream publishes a well-defined, stable API consumed by many downstream contexts. \\
+\textbf{PL} — Published Language & Structured data format (e.g., JWT payload, JSON schema) shared as a contract. \\
+\textbf{C/S} — Customer / Supplier & Asymmetric relationship; supplier (U) provides, customer (D) consumes and can negotiate. \\
+\textbf{CF} — Conformist & Downstream adopts upstream model with no translation layer; accepts upstream as-is. \\
+\textbf{ACL} — Anti-Corruption Layer & Downstream creates a translation layer to shield its model from the upstream. \\
+\textbf{ED} — Event-Driven & Loosely coupled, one-way notification; upstream fires an event, downstream reacts. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.8em}
+
+\subsubsection*{Detailed Mapping Relationships}
+
+\begin{longtable}{@{}p{3.2cm}p{0.5cm}p{3.2cm}p{2.2cm}p{5.2cm}@{}}
+\toprule
+\textbf{Upstream [U]} & & \textbf{Downstream [D]} & \textbf{Pattern} & \textbf{Description} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{c}{\textit{(Context Mapping Table continued)}} \\
+\toprule
+\textbf{Upstream [U]} & & \textbf{Downstream [D]} & \textbf{Pattern} & \textbf{Description} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Identity \& Access & $\rightarrow$ & E-Commerce & OHS + PL & E-Commerce consumes JWT tokens and \texttt{User.\_id} references. Seller identity and commissionRate are sourced from Identity context. \\[4pt]
+Identity \& Access & $\rightarrow$ & Veterinary Care & OHS + PL & Appointment context uses \texttt{User.\_id} for both customer and vet fields. Reads \texttt{vetInfo.consultationFee}, \texttt{availableDays}, coordinates from Identity. \\[4pt]
+Identity \& Access & $\rightarrow$ & Pet Adoption & OHS + PL & Pet Adoption reads \texttt{User.\_id} for shelter and applicant references. Org role membership determined by Identity context. \\[4pt]
+Identity \& Access & $\rightarrow$ & Financial & OHS + PL & Financial context updates \texttt{User.balance} field. Reads seller \texttt{commissionRate} from User's sellerInfo. Completely dependent on Identity for user lookups. \\[4pt]
+Identity \& Access & $\rightarrow$ & Communication & OHS & Notification \texttt{recipient} is always a \texttt{User.\_id} sourced from Identity context. \\[4pt]
+Platform Admin & $\rightarrow$ & Identity \& Access & Customer/Supplier & Admin \textit{supplies} the approval decision; Identity \textit{consumes} it by setting \texttt{isApproved=true}. Admin is upstream because it initiates role promotions and account deletions. \\[4pt]
+E-Commerce & $\rightarrow$ & Financial & Customer/Supplier & E-Commerce (U) triggers financial recording on order \texttt{paid} and \texttt{delivered} events. Financial (D) records \texttt{Transaction} and updates \texttt{Revenue}. \\[4pt]
+Veterinary Care & $\rightarrow$ & Financial & Conformist & On appointment \texttt{completed}, Vet Care directly calls Financial logic inline. Financial context is not negotiated with — the Revenue/Transaction schema is adopted as-is. \\[4pt]
+Pet Adoption & $\rightarrow$ & Communication & Event-Driven & Application status changes (approved/rejected) trigger notifications to the applicant. Communication context reacts to domain events fired by Pet Adoption. \\[4pt]
+E-Commerce & $\rightarrow$ & Communication & Event-Driven & Order events (placed, shipped, delivered, cancelled) trigger user notifications. Loosely coupled — Communication is a passive observer. \\[4pt]
+Veterinary Care & $\rightarrow$ & Communication & Event-Driven & Appointment events (confirmed, cancelled) trigger notifications to both customer and vet. \\[4pt]
+Platform Admin & $\rightarrow$ & E-Commerce & Customer/Supplier & Admin governs product moderation, order overrides, and seller approvals that gate access to E-Commerce seller features. \\[4pt]
+Platform Admin & $\rightarrow$ & Pet Adoption & Customer/Supplier & Admin/Co-Admin can override application statuses and manage pet profiles outside the organisation's self-service scope. \\[4pt]
+Financial & $\rightarrow$ & Identity \& Access & ACL (write-back) & Financial writes seller/vet balance back to \texttt{User.balance}. An ACL ensures Financial does not call Identity route handlers directly — it uses the \texttt{User} model directly with a mongoose session. \\[4pt]
+\end{longtable}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Entities, Value Objects, and Domain Services per Subdomain}
+%%─────────────────────────────────────────────────────────────
+
+In DDD terminology: \textbf{Entities} have a unique identity that persists over time. \textbf{Value Objects} are defined solely by their attributes — they have no identity of their own and are immutable. \textbf{Domain Services} encapsulate business logic that does not naturally belong to any single entity.
+
+\subsubsection{BC-1: Identity \& Access Management Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+User & Entity & \_id, name, email, password (hashed), role, isApproved, profileImage, balance, address, createdAt \\
+SellerInfo & Value Object & businessName, businessType, gstin, commissionRate, bankDetails — immutable seller profile data embedded in User \\
+VetInfo & Value Object & specialization, licenseNumber, consultationFee, availableDays, availableTimeSlots, clinicAddress, coordinates (GeoJSON Point) \\
+Address & Value Object & street, city, state, zipCode, country — no identity, compared by value \\
+AuthService & Domain Service & Handles login, registration, JWT generation, Google OAuth callback, comparePassword (bcrypt), password upgrade logic \\
+TokenService & Domain Service & generateToken(userId), verifyToken(token), token expiry management via JWT\_EXPIRES\_IN \\
+RoleGuardService & Domain Service & isApproved checks, role hierarchy enforcement, RBAC middleware (requireAuth, requireRole, requireAdmin) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-2: Pet Adoption Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Pet & Entity & \_id, name, species, breed, gender, size, age, status, images, mainImage, shelter (ref), healthInfo, behavioralTraits, description \\
+AdoptionApplication & Entity & \_id, pet (ref), applicant (ref), status, score, personalInfo, livingArrangement, petExperience, references, reviewedBy, reviewNotes \\
+HealthInfo & Value Object & vaccinated (bool), specialNeedsDescription — embedded; no lifecycle of its own \\
+Age & Value Object & \{value: Number, unit: 'years'|'months'\} — compared by combined value, not identity \\
+BehavioralTraits & Value Object & goodWithKids, goodWithPets, energyLevel, trainability — embedded boolean/enum set \\
+ApplicationScore & Value Object & Numeric score 0--100 computed from living situation, experience, income, references \\
+PetService & Domain Service & getAllPets (filtered, paginated), getFeaturedPets, searchPets, getBreedsByType, updateAdoptionStatus, getPetStats \\
+AdoptionService & Domain Service & submitApplication, scoreApplication (calculateScore method), updateApplicationStatus, reject competing applications on adoption \\
+FileCleanupService & Domain Service & deleteFiles on pet deletion or image replacement (calls upload middleware's deleteFiles utility) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-3: Veterinary Care Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Appointment & Entity & \_id, customer (ref), veterinary (ref), petName, petType, petAge, date, timeSlot, reason, status, consultationFee, paymentStatus, notes \\
+TimeSlot & Value Object & \{start: String, end: String\} e.g. ``09:00''--``10:00'' — compared by start+end, no identity \\
+ConsultationFee & Value Object & Numeric amount in INR; derived from vet's vetInfo.consultationFee or default 500 \\
+ClinicAddress & Value Object & line1, line2, city, state, pincode, country, fullAddress — embedded in vetInfo \\
+GeoPoint & Value Object & \{type: ``Point'', coordinates: [lng, lat]\} — GeoJSON, used for 2dsphere indexing \\
+AppointmentService & Domain Service & createAppointment, getAvailableSlots, clashDetection, getVetAppointments, getMyAppointments, cancelAppointment, updateStatus \\
+VetDiscoveryService & Domain Service & getVeterinaries (approved only), proximity filtering using MongoDB \$near operator \\
+DistanceService & Domain Service & calculateDistances using OSRM table API; Haversine fallback; haversineDistance formula \\
+GeocodingService & Domain Service & geocodeAddress via Nominatim, reverseGeocode, buildFullAddress; 1 req/sec rate limit \\
+RevenueRecordingService & Domain Service & On appointment completed: calculate commission, credit vet balance, create Transaction, update Revenue record \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-4: E-Commerce Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Product & Entity & \_id, seller (ref), name, description, price, salePrice, onSale, category, petType, stock, images, mainImage, ratings, numReviews, isFeatured \\
+Cart & Entity & \_id, customer (ref), items[], subtotal, tax, shippingCost, total, updatedAt \\
+CartItem & Value Object & product (ref), quantity, price, name, image — embedded; no standalone lifecycle \\
+Order & Entity & \_id, orderNumber, customer (ref), items[], subtotal, tax, shipping, total, shippingAddress, paymentMethod, status, paymentStatus, paymentDetails \\
+OrderItem & Value Object & product (ref), seller (ref), name, price, quantity, image — embedded line item \\
+ShippingAddress & Value Object & fullName, phone, street, city, state, zipCode, country — embedded; compared by value \\
+PaymentDetails & Value Object & paidAt, transactionId — embedded payment proof \\
+PriceInfo & Value Object & price, salePrice, onSale — computed effective price used in cart/order \\
+Review & Entity & \_id, product (ref), user (ref), rating, title, body, verifiedPurchase, createdAt \\
+ProductService & Domain Service & CRUD, search/filter with Redis caching, featured products, category stats, Solr integration hint \\
+CartService & Domain Service & addToCart, updateCartItem, removeFromCart, clearCart, validateCart, calculateTotals (GST 18\%, shipping threshold ₹1000) \\
+CheckoutService & Domain Service & getCheckoutSummary, validateCheckout (PIN code format, payment methods), calculateShippingCost, applyPromoCode \\
+OrderService & Domain Service & createOrder (from cart), updateOrderStatus, updatePaymentStatus, cancelOrder, restoreStock, getSellerOrders, getOrderStats \\
+ReviewService & Domain Service & submitReview (verified purchase check), calculateAverageRating (aggregation pipeline on Product) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-5: Financial \& Revenue Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Transaction & Entity & \_id, transactionId (UUID), order (ref), appointment (ref), user (ref), type (sale/refund/commission/payout), amount, commission, tax, netAmount, status, description, paymentGateway \\
+Revenue & Entity & \_id, date, periodType (daily), periodIdentifier (YYYY-MM-DD), productSales\{totalOrders, totalRevenue\}, appointments\{totalAppointments, totalRevenue, byVeterinary[]\}, sellerMetrics[], summary\{totalRevenue, totalTax, totalCommission, totalPayouts, totalOrders, totalTransactions\} \\
+SellerMetric & Value Object & seller (ref), name, totalSales, totalRevenue, commission — embedded array element in Revenue \\
+VetRevenueEntry & Value Object & veterinary (ref), name, count, revenue — embedded in Revenue.appointments.byVeterinary \\
+PayoutDetails & Value Object & method, referenceId, notes — embedded in Transaction.paymentGateway \\
+FinancialLedgerService & Domain Service & getLedger (paginated, filtered by role/date/type), getRevenueSummary (aggregate across Revenue records) \\
+PayoutService & Domain Service & processPayout: validates balance, deducts User.balance, creates payout Transaction, updates Revenue.totalPayouts — all within MongoDB session \\
+CommissionService & Domain Service & Calculate commission = amount × (commissionRate / 100); netAmount = amount − commission. Default rate 10\% for sellers, configurable via sellerInfo.commissionRate \\
+RevenueAggregatorService & Domain Service & calculateTotals method on Revenue model; find-or-create daily Revenue record by periodIdentifier \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-6: Communication Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Message & Entity & \_id, sender (ref), subject, body, category, relatedModel, relatedId, isRead, adminReply, repliedAt, status (open/resolved), createdAt \\
+Notification & Entity & \_id, recipient (ref), type, title, message, relatedModel, relatedId, link, isRead, createdAt (TTL 30 days) \\
+NotificationType & Value Object & Enumerated string: order\_update, appointment\_update, adoption\_update, payment, system, general \\
+NotificationService & Domain Service & createNotification (internal helper), getMyNotifications (paginated), getUnreadCount, markAsRead, markAllAsRead, deleteNotification, clearAll \\
+MessageService & Domain Service & getAllMessages (admin), getMessageById, markMessageAsRead, updateMessageStatus, replyToMessage, deleteMessage \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-7: Platform Administration Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+AdminUser & Entity & Specialisation of User with role=``admin''; no separate collection — identity in BC-1 \\
+CoAdmin & Entity & Specialisation of User with role=``co-admin''; created by admin via dedicated endpoint \\
+ApprovalDecision & Value Object & \{userId, decision: approved|rejected, decidedBy, decidedAt\} — transient, not persisted separately \\
+DashboardSummary & Value Object & Composite read-model: usersByRole, petStats, productStats, orderStats, revenueStats, recentActivity — assembled on-the-fly from multiple aggregations \\
+AdminService & Domain Service & getAllUsers, getUserById, updateUser, deleteUser, approveUser, updateUserRole, getAllCoAdmins, createCoAdmin, deleteCoAdmin \\
+ApplicationManagementService & Domain Service & getAllApplications (cross-org), getApplicationById, updateApplicationStatus with notes \\
+DashboardService & Domain Service & getAdminDashboard (multi-model aggregation), getSellerDashboard, getVeterinaryDashboard, getCustomerDashboard — each returns role-scoped statistics \\
+CacheService & Domain Service & getRedisClient (singleton), getJson, setJson (EX TTL), getNamespaceVersion, bumpNamespaceVersion — namespace-versioned cache invalidation \\
+CloudinaryService & Domain Service & isCloudinaryEnabled, uploadLocalFileToCloudinary, safeUnlink; falls back to local storage when not configured \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Cardinality Ratios for Entities}
+%%─────────────────────────────────────────────────────────────
+
+Cardinality ratios describe the numerical relationships between entity instances across the domain. The following table uses standard notation: \textbf{1:1} (one-to-one), \textbf{1:N} (one-to-many), \textbf{M:N} (many-to-many).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{er_diagram.png}
+  \caption{Entity Relationship Diagram with Crow's Foot Cardinality Notation}
+\end{figure}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{3.8cm}p{6cm}@{}}
+\toprule
+\textbf{Entity A} & \textbf{Ratio} & \textbf{Entity B} & \textbf{Explanation} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\textit{(Cardinality Table continued)}} \\
+\toprule
+\textbf{Entity A} & \textbf{Ratio} & \textbf{Entity B} & \textbf{Explanation} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+User & 1:1 & Cart & Each customer owns exactly one cart document. Cart is created on first access. \\[4pt]
+User & 1:N & Orders & A customer can place many orders over time. Each order belongs to exactly one customer. \\[4pt]
+User (as Seller) & 1:N & Products & A seller can list many products. Each product belongs to exactly one seller. \\[4pt]
+User (as Customer) & 1:N & Appointments & A customer can book many appointments. Each appointment has exactly one customer. \\[4pt]
+User (as Vet) & 1:N & Appointments & A vet can conduct many appointments. Each appointment has exactly one assigned veterinarian. \\[4pt]
+User (as Org) & 1:N & Pets & A shelter can manage many pets. Each pet belongs to exactly one shelter organisation. \\[4pt]
+User & 1:N & AdoptionApplications & A user can submit applications for multiple pets. Each application has one applicant. \\[4pt]
+User & 1:N & Reviews & A user can write many reviews. Each review has exactly one author. \\[4pt]
+User & 1:N & Notifications & A user can receive many notifications. Each notification targets one recipient. \\[4pt]
+User & 1:N & Transactions & A user (seller/vet/admin) can have many ledger entries. Each transaction references one user. \\[4pt]
+Pet & 1:N & AdoptionApplications & A pet can receive multiple applications. Each application is for exactly one pet. \\[4pt]
+Order & 1:N & OrderItems & An order must contain at least one item. Each item belongs to exactly one order (embedded). \\[4pt]
+Cart & 1:N & CartItems & A cart holds zero or more items. Each cart item is embedded within exactly one cart. \\[4pt]
+Product & 1:N & CartItems & A product can appear in many carts. Each cart item references exactly one product. \\[4pt]
+Product & 1:N & OrderItems & A product can be sold in many order line items. Each order item references one product. \\[4pt]
+Product & 1:N & Reviews & A product can have many reviews. Each review is linked to exactly one product. \\[4pt]
+Revenue & 1:N & Transactions & One daily revenue record tracks many transactions. Each transaction belongs to one period. \\[4pt]
+Revenue & 1:N & SellerMetrics & One revenue record holds metrics for multiple sellers (embedded array). \\[4pt]
+Appointment & 1:1 & Transaction & A completed appointment generates exactly one primary transaction ledger entry for the vet. \\[4pt]
+Order & 1:N & Transactions & An order generates one sale transaction on payment; a refund transaction on cancellation. \\[4pt]
+User (Seller) & M:N & Orders & Multiple sellers' products appear in one order; one seller appears in multiple orders. Resolved via OrderItem.seller. \\[4pt]
+\bottomrule
+\end{longtable}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Aggregates}
+%%─────────────────────────────────────────────────────────────
+
+An \textbf{Aggregate} is a cluster of domain objects (entities and value objects) treated as a single unit for data changes. Each aggregate has exactly one \textbf{Aggregate Root} — the only object through which external actors interact with the cluster. All invariants within the aggregate are enforced by the root.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{aggregates.png}
+  \caption{Aggregate Diagram — Aggregate Roots, Entities, and Value Objects}
+\end{figure}
+
+\subsubsection{AG-1: User Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{User}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+User & \textbf{Aggregate Root} & Global identity; all cross-context references point to User.\_id \\
+SellerInfo & Value Object & Embedded subdocument; mutated only through User.save() \\
+VetInfo & Value Object & Contains GeoJSON coordinates; updated via User.findByIdAndUpdate \\
+Address & Value Object & Embedded; user's contact/delivery address \\
+Balance & Value Object & Scalar field on User; modified atomically in Financial context \\
+\end{tabular}
+
+\textbf{Invariants:} Password must be bcrypt-hashed before save (pre-save hook). If role is seller/vet/org, isApproved must be true before login is permitted. Balance cannot go negative (enforced in PayoutService).
+\end{infobox}
+
+\subsubsection{AG-2: Pet Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Pet}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Pet & \textbf{Aggregate Root} & Represents one adoptable animal \\
+HealthInfo & Value Object & vaccinated, specialNeedsDescription — embedded \\
+Age & Value Object & \{value, unit\} — computed display string from root \\
+BehavioralTraits & Value Object & Embedded boolean flags \\
+Images[ ] & Value Object & Array of URL strings; mainImage is first element \\
+\end{tabular}
+
+\textbf{Invariants:} Status can only be \texttt{available}, \texttt{pending}, \texttt{adopted}, or \texttt{not\_available}. A pet with status \texttt{pending} or \texttt{adopted} cannot be deleted. Deletion is blocked if pending/approved AdoptionApplications exist.
+\end{infobox}
+
+\subsubsection{AG-3: AdoptionApplication Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{AdoptionApplication}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+AdoptionApplication & \textbf{Aggregate Root} & Tracks one applicant's request for one pet \\
+PersonalInfo & Value Object & name, age, occupation, income — embedded \\
+LivingArrangement & Value Object & homeType, hasYard, numPeople, hasChildren, hasOtherPets \\
+PetExperience & Value Object & previousPets, experienceLevel, reasonForAdoption \\
+References & Value Object & name, phone, relationship (array, max 2) \\
+ApplicationScore & Value Object & Computed integer 0--100 from weighted sub-scores \\
+\end{tabular}
+
+\textbf{Invariants:} One applicant cannot have two active (pending/under\_review) applications for the same pet. Score is recalculated on every update via \texttt{calculateScore()}. When application is approved, all other applications for that pet should be moved to rejected.
+\end{infobox}
+
+\subsubsection{AG-4: Appointment Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Appointment}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Appointment & \textbf{Aggregate Root} & One scheduled consultation session \\
+TimeSlot & Value Object & \{start, end\} — defines the booking window \\
+ConsultationFee & Value Object & Fixed at booking time from vet's configured fee \\
+PetInfo & Value Object & petName, petType, petAge — captured at booking \\
+\end{tabular}
+
+\textbf{Invariants:} No two confirmed/pending appointments for the same vet on the same date+timeSlot.start may exist simultaneously (enforced in createAppointment). Status transitions are one-directional: cancelled and completed are terminal states. Completed status auto-sets paymentStatus to ``paid'' and triggers revenue recording.
+\end{infobox}
+
+\subsubsection{AG-5: Order Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Order}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Order & \textbf{Aggregate Root} & Represents a completed purchase transaction \\
+OrderItem[ ] & Value Object & Embedded line items (product, seller, name, price, qty, image) \\
+ShippingAddress & Value Object & Captured at checkout; immutable after creation \\
+PaymentDetails & Value Object & paidAt, transactionId — set on payment confirmation \\
+\end{tabular}
+
+\textbf{Invariants:} Order must have at least one item. Subtotal, tax (18\% GST), shipping (₹0 if subtotal $\geq$ ₹1000 else ₹50), and total are computed at creation and immutable. Cancelled and delivered orders cannot change status. Cancellation by customer only allowed for \texttt{pending} status; admin can cancel any non-terminal order.
+\end{infobox}
+
+\subsubsection{AG-6: Cart Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Cart}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Cart & \textbf{Aggregate Root} & Mutable session basket per customer \\
+CartItem[ ] & Value Object & Embedded items; quantity, price snapshot, product ref \\
+Totals & Value Object & subtotal, tax (18\%), shippingCost, total — computed via calculateTotals() \\
+\end{tabular}
+
+\textbf{Invariants:} Quantity for any item cannot exceed current Product.stock. Effective price is always re-synced from Product (sale price if onSale). calculateTotals() must be called after every mutation. Cart is cleared atomically when an Order is created.
+\end{infobox}
+
+\subsubsection{AG-7: Product Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Product}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Product & \textbf{Aggregate Root} & A listable item for sale on the platform \\
+Review[ ] & Entity & Each review has its own identity (\_id); belongs to exactly one product \\
+PriceInfo & Value Object & price, salePrice, onSale — governs effective price \\
+Images[ ] & Value Object & URLs; mainImage is denormalized first element \\
+RatingSummary & Value Object & ratings (avg), numReviews — updated by Review.calculateAverageRating() \\
+\end{tabular}
+
+\textbf{Invariants:} One user can only review a product once (unique index on product+user). Review submission requires a verified purchase (order must be delivered). Product stock cannot go below zero. On Review save/delete, calculateAverageRating() recalculates and updates Product.ratings atomically.
+\end{infobox}
+
+\subsubsection{AG-8: Revenue Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Revenue}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Revenue & \textbf{Aggregate Root} & One document per day (periodType=daily, periodIdentifier=YYYY-MM-DD) \\
+Transaction[ ] & Entity & Each ledger entry is its own entity with unique transactionId (UUID) \\
+SellerMetric[ ] & Value Object & Embedded per-seller breakdown within the revenue record \\
+VetRevenueEntry[ ] & Value Object & Embedded per-vet breakdown within appointments sub-document \\
+Summary & Value Object & \{totalRevenue, totalTax, totalCommission, totalPayouts, totalOrders, totalTransactions\} \\
+\end{tabular}
+
+\textbf{Invariants:} Only one Revenue document per periodIdentifier exists (find-or-create pattern). Summary totals are always additive (never replaced, only incremented). Payouts are recorded via a MongoDB session to guarantee atomicity with User.balance deduction. Refunds create new Transaction records with negative amounts — they never mutate existing Transaction records.
+\end{infobox}
+
+\vspace{1em}
+
+\begin{tcolorbox}[enhanced, colback=ctxBlue!20!white, colframe=primary,
+  arc=4pt, boxrule=0.8pt, title={\textbf{Aggregate Design Summary}}]
+\begin{tabular}{@{}p{3.5cm}p{3cm}p{2.2cm}p{4.8cm}@{}}
+\toprule
+\textbf{Aggregate} & \textbf{Root} & \textbf{Entities} & \textbf{Value Objects} \\
+\midrule
+User & User & — & SellerInfo, VetInfo, Address, Balance \\
+Pet & Pet & — & HealthInfo, Age, BehavioralTraits, Images \\
+AdoptionApplication & AdoptionApplication & — & PersonalInfo, LivingArrangement, PetExperience, Score \\
+Appointment & Appointment & — & TimeSlot, ConsultationFee, PetInfo \\
+Order & Order & — & OrderItem, ShippingAddress, PaymentDetails \\
+Cart & Cart & — & CartItem, Totals \\
+Product & Product & Review & PriceInfo, Images, RatingSummary \\
+Revenue & Revenue & Transaction & SellerMetric, VetRevenueEntry, Summary \\
+\bottomrule
+\end{tabular}
+\end{tcolorbox}
+
+\end{document}

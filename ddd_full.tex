@@ -1,0 +1,1200 @@
+\documentclass[12pt,a4paper]{article}
+
+%% ── Core Packages ──────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=2.5cm, top=3cm, bottom=3cm]{geometry}
+
+%% ── Color & Graphics ───────────────────────────────────────────────
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+
+%% ── Tables ─────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+%% ── Layout & Styling ───────────────────────────────────────────────
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{subcaption}
+
+%% ── Hyperlinks ─────────────────────────────────────────────────────
+\usepackage[hidelinks,
+  pdfauthor={RentEase Team},
+  pdftitle={Domain-Driven Design: RentEase},
+  pdfsubject={Web Backend Development - DDD Assignment}
+]{hyperref}
+
+%% ── Color Palette ──────────────────────────────────────────────────
+\definecolor{primary}{HTML}{1E40AF}
+\definecolor{accent}{HTML}{0891B2}
+\definecolor{ctxBlue}{HTML}{DBEAFE}
+\definecolor{ctxGreen}{HTML}{D1FAE5}
+\definecolor{ctxTeal}{HTML}{CCFBF1}
+\definecolor{ctxOrange}{HTML}{FED7AA}
+\definecolor{ctxPurple}{HTML}{EDE9FE}
+\definecolor{ctxPink}{HTML}{FCE7F3}
+\definecolor{ctxRed}{HTML}{FEE2E2}
+\definecolor{ctxYellow}{HTML}{FEF9C3}
+\definecolor{ctxIndigo}{HTML}{E0E7FF}
+\definecolor{ctxLime}{HTML}{ECFCCB}
+\definecolor{ctxRose}{HTML}{FFE4E6}
+\definecolor{ctxCyan}{HTML}{CFFAFE}
+\definecolor{ctxAmber}{HTML}{FDE68A}
+\definecolor{ctxSlate}{HTML}{E2E8F0}
+\definecolor{lightgray}{HTML}{F8FAFC}
+\definecolor{bordergray}{HTML}{CBD5E1}
+\definecolor{darktext}{HTML}{1E293B}
+\definecolor{mutedtext}{HTML}{64748B}
+
+%% ── tcolorbox Styles ───────────────────────────────────────────────
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{contextbox}[3][]{
+  enhanced, breakable,
+  colback=#2!20!white,
+  colframe=#2!60!black,
+  fonttitle=\bfseries\small,
+  title={\small #3},
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  arc=4pt, boxrule=1pt,
+  #1
+}
+
+\newtcolorbox{infobox}[1]{
+  enhanced, breakable,
+  colback=lightgray,
+  colframe=bordergray,
+  fonttitle=\bfseries\small\color{primary},
+  title={#1},
+  arc=3pt, boxrule=0.8pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+}
+
+%% ── Section Formatting ─────────────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}
+  {\thesection}{1em}{}[\color{primary}\titlerule]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{accent}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{darktext}}
+  {\thesubsubsection}{1em}{}
+
+%% ── Header / Footer ────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{mutedtext}RentEase — Domain-Driven Design}
+\fancyhead[R]{\small\color{mutedtext}Web Backend Development}
+\fancyfoot[C]{\small\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ── List Styling ───────────────────────────────────────────────────
+\setlist[itemize]{noitemsep, topsep=3pt, leftmargin=1.5em}
+\setlist[enumerate]{noitemsep, topsep=3pt, leftmargin=1.5em}
+
+%% ────────────────────────────────────────────────────────────────────
+\begin{document}
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  TITLE PAGE
+%% ═══════════════════════════════════════════════════════════════════
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+
+  {\color{primary}\rule{\linewidth}{2pt}}\\[0.4cm]
+  {\color{accent}\rule{\linewidth}{0.6pt}}\\[1.2cm]
+
+  {\Huge\bfseries\color{primary} RentEase}\\[0.5cm]
+  {\Large\color{accent} A Home Rental Management Platform}\\[0.8cm]
+  {\color{accent}\rule{0.4\linewidth}{0.6pt}}\\[0.8cm]
+
+  {\large\bfseries\color{darktext}
+    Domain-Driven Design Report}\\[0.3cm]
+  {\normalsize\color{mutedtext}
+    Strategic Design | Bounded Contexts | Context Mappings |\\[0.1cm]
+    Entities, Value Objects \& Services | Aggregates | Cardinality Ratios}
+
+  \vspace{1.5cm}
+
+  \begin{tcolorbox}[
+    enhanced, colback=ctxBlue!40!white, colframe=primary,
+    arc=6pt, boxrule=1pt, width=0.75\linewidth,
+    left=12pt, right=12pt, top=10pt, bottom=10pt
+  ]
+    \centering
+    {\small\bfseries\color{primary} Submitted By}\\[6pt]
+    {\normalsize\color{darktext} 1. Syed Dheeraj Shahul \quad (S20230010235)}\\[2pt]
+    {\normalsize\color{darktext} 2. D Revanth Kumar \quad (S20230010073)}\\[2pt]
+    {\normalsize\color{darktext} 3. A Sai Satish \quad (S20230010010)}\\[2pt]
+    {\normalsize\color{darktext} 4. B Vignesh \quad (S20230010038)}\\[2pt]
+    {\normalsize\color{darktext} 5. Ganesh Koti Reddy \quad (S20230010238)}\\[8pt]
+    {\small\bfseries\color{primary} Course}\\[4pt]
+    {\small\color{darktext} Web Backend Development}
+  \end{tcolorbox}
+
+  \vspace{1cm}
+  {\small\color{mutedtext} April 2026}
+
+  \vfill
+  {\color{accent}\rule{\linewidth}{0.6pt}}\\[0.2cm]
+  {\color{primary}\rule{\linewidth}{2pt}}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  SECTION 1: PROJECT TITLE AND DESCRIPTION
+%% ═══════════════════════════════════════════════════════════════════
+\section{Project Title and Description}
+
+\subsection*{Title}
+\begin{tcolorbox}[enhanced, colback=ctxBlue!30!white, colframe=primary,
+  arc=4pt, boxrule=1pt, left=10pt, right=10pt, top=8pt, bottom=8pt]
+  {\large\bfseries\color{primary} RentEase: A Home Rental Management Platform}
+\end{tcolorbox}
+
+\subsection*{Description}
+
+\textbf{RentEase} is a comprehensive rental management platform that connects property owners, tenants, and domestic workers in one place. Owners can list their properties---whether apartments, houses, or commercial spaces---with complete details such as location, price, number of bedrooms and bathrooms, and furnishing status. Each owner has a dedicated dashboard to track rental income, view commission breakdowns, monitor bookings, and handle maintenance requests.
+
+Tenants can search and browse available properties, submit booking requests, and pay rent securely through Razorpay integration. The payment system records every transaction and shows the platform commission alongside the net amount transferred to the owner. Tenants can also rate and review properties to help other users make informed decisions, and they manage all their bookings and domestic worker hirings from their own dashboard.
+
+Workers register on the platform and use their dashboard to manage service bookings, track earnings, and view detailed payment histories---all processed through the same Razorpay gateway for full transparency.
+
+The platform uses a multi-level administration system. Regular admins manage user verifications, bookings, maintenance requests, and payments. Superadmins handle financial analytics, owner and worker earnings reports, executive management, audit logs, and system-wide configuration.
+
+A KYC verification system ensures that all users and properties are legitimate before they can access platform features. The system is secured with JWT authentication, structured error handling, and comprehensive logging throughout.
+
+\textbf{Total models:} 23 | \textbf{API routes:} 12 route files | \textbf{Controllers:} 27
+
+\newpage
+
+%% ═══════════════════════════════════════════════════════════════════
+%%  SECTION 2: DOMAIN-DRIVEN DESIGN
+%% ═══════════════════════════════════════════════════════════════════
+\section{Domain-Driven Design}
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Bounded Contexts}
+%%─────────────────────────────────────────────────────────────
+
+A \textbf{Bounded Context} is an explicit boundary within which a particular domain model applies and a consistent \textit{Ubiquitous Language} is maintained. RentEase is divided into \textbf{14 Bounded Contexts} grouped into four domain categories. No two contexts share a database collection directly; cross-context communication occurs through well-defined interfaces.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{RentEase_DDD.png}
+  \caption{Bounded Context Diagram — RentEase Platform}
+\end{figure}
+
+\vspace{0.5em}
+
+%%── Core Domains ─────────────────────────────────────────────
+
+\begin{contextbox}{ctxBlue!80!black}{BC-1 \quad Property Management Context}
+\textbf{Purpose:} Manages the core property inventory and owner lifecycle. Property can only be rented if \texttt{isVerified=true}; only verified owners can list properties.
+
+\textbf{Ubiquitous Language:} \textit{Property, Owner, Location, Amenity, PropertyImage, isVerified, isRented, FurnishingType, SecurityDeposit, LeaseDuration, ActiveWorkers, PropertyProof}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Property CRUD with Cloudinary image and proof uploads
+  \item Property verification/rejection workflow by admin
+  \item Owner registration, profile management, and earnings tracking
+  \item Property search by location, type, price, furnishing
+  \item Active worker pre-save validation (only valid workers attached)
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxGreen!80!black}{BC-2 \quad Tenant Management Context}
+\textbf{Purpose:} Manages tenant registrations, profiles, and platform interactions. Tenant can only book if verified; cannot book the same property twice simultaneously.
+
+\textbf{Ubiquitous Language:} \textit{Tenant, SavedListing, RentalHistory, NotificationPreferences, DomesticWorker, ContactInfo, AccountStatus}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Tenant registration, activation, and suspension
+  \item Saved listings (bookmark properties)
+  \item Rental history tracking (append-only per tenant)
+  \item Notification preference management
+  \item Domestic worker hiring from tenant dashboard
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxTeal!80!black}{BC-3 \quad Booking / Rental Lifecycle Context}
+\textbf{Purpose:} Manages the entire rental process from request to active lease, including termination. State Machine: Pending $\rightarrow$ Approved $\rightarrow$ Active $\rightarrow$ Terminated | Rejected.
+
+\textbf{Ubiquitous Language:} \textit{Booking, RentalAgreement, UnrentRequest, BookingStatus, LeaseDetails, AgreementTerms, StartDate, EndDate, AssignedWorker}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Booking creation, approval, rejection, and termination
+  \item Rental agreement generation and signing
+  \item Unrent (early termination) request handling
+  \item Status transition enforcement via state machine
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxOrange!80!black}{BC-4 \quad Payment Processing \& Ledger Context}
+\textbf{Purpose:} Handles all monetary transactions, commission tracking, and the financial ledger via Razorpay integration. Commission is calculated at payment time and is immutable.
+
+\textbf{Ubiquitous Language:} \textit{Payment, Razorpay, OrderId, Commission, CommissionPercent, RefundId, RefundAmount, PaymentStatus, TransactionId, ReceiptUrl}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Razorpay order creation and payment verification
+  \item Commission calculation and snapshot at payment time
+  \item Refund processing with reason tracking
+  \item Payment status management: Pending, Paid, Overdue, Refunded, Failed, Cancelled
+\end{itemize}
+\end{contextbox}
+
+%%── Supporting Domains ───────────────────────────────────────
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxPurple!80!black}{BC-5 \quad Worker Services Context}
+\textbf{Purpose:} Manages domestic worker profiles, availability, and service offerings. Worker is visible only if verified; availability updates based on active bookings.
+
+\textbf{Ubiquitous Language:} \textit{Worker, ServiceType, AvailabilityStatus, ServiceRate, WorkerProfile, RateUnit, Experience, IsBooked, ClientIds}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Worker registration, search by location/service type
+  \item Availability status management (Available, Booked, OnLeave)
+  \item Worker profile with Cloudinary image upload
+  \item Client relationship tracking
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxPink!80!black}{BC-6 \quad Worker Booking \& Payments Context}
+\textbf{Purpose:} Manages service bookings and a separate payment ledger for worker earnings. Payment amount = workingDays $\times$ dailyRate; commission immutable at payment time.
+
+\textbf{Ubiquitous Language:} \textit{WorkerBooking, WorkerPayment, WorkTracking, OTP, WorkingDays, DailyRate, CommissionSnapshot, PreferredDate, ServiceType}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Worker service booking creation, approval, completion
+  \item Worker payment with working days calculation
+  \item Daily work attendance tracking via OTP verification
+  \item Commission calculation and Razorpay processing
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxRed!80!black}{BC-7 \quad Maintenance \& Support Context}
+\textbf{Purpose:} Tracks property issues, maintenance requests, complaints, and resolution.
+
+\textbf{Ubiquitous Language:} \textit{MaintenanceRequest, Complaint, IssueType, TenantConfirmation, ScheduledDate, CompletionDate, Response}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Maintenance request creation, scheduling, and completion
+  \item Tenant confirmation workflow (Pending, Confirmed, Rejected)
+  \item Complaint filing with admin response and resolution
+  \item Worker assignment for maintenance tasks
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxYellow!80!black}{BC-8 \quad Rating \& Review Context}
+\textbf{Purpose:} Collects and manages tenant feedback. One rating per tenant per entity; only allowed after booking/service is Completed.
+
+\textbf{Ubiquitous Language:} \textit{Rating, Review, RatingScore, RatingContext, VerifiedBooking, PropertyRating, WorkerRating}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Rating submission (1--5 scale) with review text
+  \item Rating for properties, owners, and workers
+  \item Average rating aggregation on target entities
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxIndigo!80!black}{BC-9 \quad Verification / KYC Context}
+\textbf{Purpose:} Verifies the identity of users before granting platform access. One verification record per user; access gated on \texttt{status=approved}. Uses polymorphic \texttt{refPath} discriminator.
+
+\textbf{Ubiquitous Language:} \textit{Verification, Document, UserModel, RejectionReason, Reviewer, Aadhaar, PAN, DrivingLicense, SkillCertificate}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Document submission (aadhaar, pan, driving\_license, college\_id, skill\_certificate)
+  \item Admin review with approve/reject and rejection reason
+  \item Polymorphic user reference: tenant, owner, or worker
+  \item Verification gating for booking, listing, and worker visibility
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxLime!80!black}{BC-10 \quad Notification Context}
+\textbf{Purpose:} Sends system alerts to users about important platform events. Each notification has exactly one recipient and is immutable after creation. Uses polymorphic \texttt{refPath} for recipient.
+
+\textbf{Ubiquitous Language:} \textit{Notification, RecipientType, NotificationType, Priority, Read, IsNew, BookingId, PropertyName}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Notification creation, dispatch to Owner/Tenant/Worker
+  \item Read/unread status management
+  \item Polymorphic recipient: Owner, Tenant, Worker via refPath
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxCyan!80!black}{BC-11 \quad Contact \& Inquiry Context}
+\textbf{Purpose:} Collects visitor inquiries about properties. Contact is immutable after creation.
+
+\textbf{Ubiquitous Language:} \textit{Contact, PropertyInquiry, Subject, Message, SubmittedAt}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item General contact form submission
+  \item Property-specific inquiry submission
+  \item Admin viewing and responding to inquiries
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxAmber!80!black}{BC-12 \quad Unrent Request Context}
+\textbf{Purpose:} Handles early lease termination requests. Approval changes Booking status to Terminated and property status to Available.
+
+\textbf{Ubiquitous Language:} \textit{UnrentRequest, EarlyExit, RentPaid, CompletedDate, FinancialSettlement}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Unrent request creation with reason
+  \item Approval/rejection workflow (rent must be paid before approval)
+  \item Triggers booking termination and property availability update
+\end{itemize}
+\end{contextbox}
+
+%%── Operational \& Analytical Domains ────────────────────────
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxRose!80!black}{BC-13 \quad Admin Management Context}
+\textbf{Purpose:} Provides operational oversight and approval controls across the entire platform.
+
+\textbf{Ubiquitous Language:} \textit{Admin, AdminRole, AdminStatus, Verification, BookingApproval, PaymentTracking, MaintenanceOversight}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item User verification review (approve/reject)
+  \item Booking approval flow and payment tracking
+  \item Maintenance request management and complaint handling
+  \item Notification and contact inquiry management
+\end{itemize}
+\end{contextbox}
+
+\vspace{0.5em}
+
+\begin{contextbox}{ctxSlate!80!black}{BC-14 \quad SuperAdmin / Finance Context}
+\textbf{Purpose:} Business intelligence, financial analytics, and system-wide configuration. Read-only access to all operational contexts; audit logs are append-only.
+
+\textbf{Ubiquitous Language:} \textit{SuperAdmin, Settings, AuditLog, Commission, MaintenanceMode, Revenue, EarningsReport, ExecutiveManagement}
+
+\textbf{Responsibilities:}
+\begin{itemize}
+  \item Platform-wide analytics: revenue, earnings, user statistics
+  \item Commission rate and maintenance mode configuration
+  \item Admin account management (create, suspend, delete)
+  \item Audit log viewing (admin login activity)
+  \item Owner and worker earnings reports
+\end{itemize}
+\end{contextbox}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Context Mappings}
+%%─────────────────────────────────────────────────────────────
+
+Context Mapping defines how bounded contexts relate to and integrate with each other, describing the \textit{direction of influence} (upstream/downstream) and the \textit{integration pattern} used. In DDD, \textbf{[U]} denotes the upstream context (supplier) and \textbf{[D]} denotes the downstream context (consumer).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{context_mapping.png}
+  \caption{Context Mapping Diagram — Integration Patterns between 14 Bounded Contexts}
+\end{figure}
+
+\subsubsection*{Integration Pattern Legend}
+
+\begin{center}
+\begin{tabular}{@{}lp{10cm}@{}}
+\toprule
+\textbf{Pattern} & \textbf{Description} \\
+\midrule
+\textbf{U/D} — Upstream/Downstream & One context depends on another; downstream consumes upstream's data. \\
+\textbf{OHS} — Open Host Service & Upstream publishes a well-defined API consumed by many downstream contexts. \\
+\textbf{C/S} — Customer / Supplier & Asymmetric relationship; supplier provides, customer consumes and can negotiate. \\
+\textbf{CF} — Conformist & Downstream adopts upstream model with no translation; accepts as-is. \\
+\textbf{SK} — Shared Kernel & Two contexts share a subset of the domain model (e.g., shared IDs). \\
+\textbf{ACL} — Anti-Corruption Layer & Downstream creates a translation layer to shield its model from upstream. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.8em}
+
+\subsubsection*{All Context Mappings (26 Total)}
+
+\begin{longtable}{@{}p{3.2cm}p{0.5cm}p{3.2cm}p{2.2cm}p{5.2cm}@{}}
+\toprule
+\textbf{Upstream [U]} & & \textbf{Downstream [D]} & \textbf{Pattern} & \textbf{Description} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{c}{\textit{(Context Mapping Table continued)}} \\
+\toprule
+\textbf{Upstream [U]} & & \textbf{Downstream [D]} & \textbf{Pattern} & \textbf{Description} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Verification & $\rightarrow$ & Property Mgmt & U/D & Owner must be verified before listing a property. \\[3pt]
+Verification & $\rightarrow$ & Tenant Mgmt & U/D & Tenant must be verified before booking a property. \\[3pt]
+Verification & $\rightarrow$ & Worker Services & U/D & Worker must be verified before becoming visible to tenants. \\[3pt]
+Property Mgmt & $\rightarrow$ & Booking / Rental & C/S & Booking context queries property details and availability. \\[3pt]
+Booking / Rental & $\rightarrow$ & Payment Processing & OHS & Booking approval triggers Payment creation with \texttt{status=Pending}. \\[3pt]
+Payment Processing & $\rightarrow$ & Notification & OHS & Payment confirmation triggers notifications to tenant and owner. \\[3pt]
+Worker Booking & $\rightarrow$ & Worker Payment & OHS & Worker service completion creates WorkerPayment in separate ledger. \\[3pt]
+Worker Payment & $\rightarrow$ & Notification & OHS & Worker payment confirmation triggers earnings notification. \\[3pt]
+Maintenance & $\rightarrow$ & Notification & OHS & Owner notified on issue report; tenant notified on completion. \\[3pt]
+Rating \& Review & $\rightarrow$ & Property Mgmt & CF & Rating conforms to Property model; updates \texttt{Property.rating}. \\[3pt]
+Rating \& Review & $\rightarrow$ & Worker Services & CF & Rating updates worker average rating and review count. \\[3pt]
+Contact \& Inquiry & $\rightarrow$ & Notification & OHS & Property inquiry triggers notification to property owner. \\[3pt]
+Unrent Request & $\leftrightarrow$ & Booking / Rental & SK & Shared Booking IDs; approval changes Booking status to \texttt{Terminated}. \\[3pt]
+Admin Mgmt & $\rightarrow$ & Verification & U/D & Admin reviews and approves/rejects pending verifications. \\[3pt]
+Admin Mgmt & $\rightarrow$ & Booking / Rental & U/D & Admin controls booking approval flow; triggers Payment creation. \\[3pt]
+Admin Mgmt & $\rightarrow$ & Maintenance & U/D & Admin marks maintenance requests as completed. \\[3pt]
+Notification & $\rightarrow$ & Admin Mgmt & OHS & Admin queries, filters, and marks notifications. \\[3pt]
+Contact \& Inquiry & $\rightarrow$ & Admin Mgmt & OHS & Admin views contact submissions and responds. \\[3pt]
+Payment Processing & $\rightarrow$ & Admin Mgmt & OHS & Admin views payment records with commission breakdown. \\[3pt]
+Worker Payment & $\rightarrow$ & Admin Mgmt & OHS & Admin views worker payment records and commission details. \\[3pt]
+Payment Processing & $\rightarrow$ & SuperAdmin & OHS & SuperAdmin queries all payment data for financial analytics. \\[3pt]
+Worker Payment & $\rightarrow$ & SuperAdmin & OHS & SuperAdmin queries worker payment data for earnings reports. \\[3pt]
+Booking / Rental & $\rightarrow$ & SuperAdmin & OHS & SuperAdmin queries booking trends for business intelligence. \\[3pt]
+Property Mgmt & $\rightarrow$ & SuperAdmin & OHS & SuperAdmin queries property metrics for platform analytics. \\[3pt]
+Worker Services & $\rightarrow$ & SuperAdmin & OHS & SuperAdmin queries worker metrics for platform health monitoring. \\[3pt]
+SuperAdmin & $\rightarrow$ & Admin Mgmt & U/D & SuperAdmin manages admin accounts (create, suspend, delete). \\[3pt]
+\end{longtable}
+
+\subsubsection*{Anti-Corruption Layers}
+
+\begin{center}
+\begin{tabular}{@{}p{4cm}p{10cm}@{}}
+\toprule
+\textbf{ACL} & \textbf{Description} \\
+\midrule
+Razorpay Integration & Isolates external Razorpay API from internal Payment domain objects. \\
+Cloudinary Upload & Isolates file upload complexity; stores only \texttt{\{url, publicId\}} in Document value objects. \\
+Notification Publisher & Decouples notification sending from business logic in other contexts. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Entities, Value Objects, and Domain Services per Subdomain}
+%%─────────────────────────────────────────────────────────────
+
+In DDD terminology: \textbf{Entities} have a unique identity that persists over time. \textbf{Value Objects} are defined solely by their attributes — they have no identity of their own and are immutable. \textbf{Domain Services} encapsulate business logic that does not naturally belong to any single entity.
+
+\subsubsection{BC-1: Property Management Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Property & Entity & name, location, price, beds, baths, floor, furnished, type, subtype, images[], amenities[], isVerified, isRented, status, ownerId, tenantId, securityDeposit, leaseDuration, coordinates\{lat, lng\}, activeWorkers[] \\
+Owner & Entity & firstName, lastName, email, phone, accountNo, upiid, status, propertyIds[], tenantIds[], notificationIds[], notifications\{email, sms, payment, complaint, maintenance\} \\
+Location & Value Object & \{address, city, state, lat, lng\} — geographic location \\
+PropertyImage & Value Object & \{url, publicId\} — Cloudinary image reference \\
+AmenityList & Value Object & [string] — property amenities \\
+NotificationPreferences & Value Object & \{email, sms, payment, complaint, maintenance\} — owner alert settings \\
+BankingInfo & Value Object & \{accountNo, upiid\} — owner payment details \\
+PropertyListingService & Domain Svc & listProperty(), updateProperty(), deleteProperty() \\
+PropertySearchService & Domain Svc & searchByLocation(), filterByPrice(), filterByType() \\
+OwnerService & Domain Svc & registerOwner(), updateProfile(), getOwnerEarnings() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-2: Tenant Management Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Tenant & Entity & firstName, lastName, email, phone, status, savedListings[], paymentIds[], maintenanceRequestIds[], rentalHistoryIds[], ratingIds[], domesticWorkerId[], notification preferences \\
+RentalHistory & Entity & tenantId, propertyIds[\{property, startDate, endDate, rent, status, reasonForMoving\}] \\
+ContactInfo & Value Object & \{email, phone, location\} — tenant contact details \\
+SavedListing & Value Object & \{propertyId, savedDate\} — bookmarked property \\
+PreferenceSettings & Value Object & \{emailNotifications, smsNotifications, rentReminders, maintenanceUpdates, newListings\} \\
+RentalRecord & Value Object & \{property, startDate, endDate, rent, status, reasonForMoving\} — single history entry \\
+TenantRegistrationService & Domain Svc & registerTenant(), activateTenant(), suspendTenant() \\
+SavedListingsService & Domain Svc & saveProperty(), unsaveProperty(), getSavedListings() \\
+RentalHistoryService & Domain Svc & addToHistory(), getRentalHistory() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-3: Booking / Rental Lifecycle Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Booking & Entity & tenantId, propertyId, ownerId, amount, bookingDate, startDate, endDate, status, assignedWorker \\
+RentalAgreement & Entity & ownerId, title, status, startDate, endDate, monthlyRent, securityDeposit \\
+UnrentRequest & Entity & propertyId, tenantId, ownerId, reason, status, rentPaid, createdDate, completedDate \\
+BookingStatus & Value Object & Enum: Pending, Approved, Active, Rejected, Terminated \\
+LeaseDetails & Value Object & \{startDate, endDate, monthlyAmount, leaseDuration\} \\
+AgreementTerms & Value Object & \{securityDeposit, maintenanceCharges, cancellationPolicy\} \\
+BookingService & Domain Svc & createBooking(), updateBookingStatus(), cancelBooking() \\
+BookingApprovalService & Domain Svc & approveBooking(), rejectBooking(), terminateBooking() \\
+UnrentRequestService & Domain Svc & createUnrentRequest(), approveUnrentRequest() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-4: Payment Processing \& Ledger Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Payment & Entity & tenantId, ownerId, propertyId, bookingId, amount, status, orderId, razorpayPaymentId, razorpaySignature, commission, commissionPercent, refundId, refundAmount \\
+PaymentStatus & Value Object & Enum: Pending, Paid, Overdue, Refunded, Failed, Cancelled \\
+MoneyAmount & Value Object & \{amount, currency, inPaise\} \\
+CommissionCalculation & Value Object & \{amount, percent, calculatedAt\} — immutable snapshot \\
+RazorpaySignature & Value Object & \{orderId, paymentId, signature, verificationStatus\} \\
+RefundInfo & Value Object & \{refundId, amount, date, reason, status\} \\
+PaymentInitiationService & Domain Svc & initiateRentPayment(), createRazorpayOrder() \\
+PaymentVerificationService & Domain Svc & verifyRazorpaySignature(), confirmPayment() \\
+RefundService & Domain Svc & initiateRefund(), processRefund() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-5: Worker Services Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Worker & Entity & firstName, lastName, email, phone, location, area, serviceType, experience, price, rateUnit, availability, serviceStatus, image\{url, publicId\}, bookingIds[], clientIds[], ratingId \\
+WorkerServiceType & Value Object & Enum: cook, cleaning, gardening, caretaker, other \\
+AvailabilityStatus & Value Object & Enum: Available, Booked, OnLeave \\
+ServiceRate & Value Object & \{price, rateUnit, currency\} \\
+WorkerProfile & Value Object & \{name, experience, description, image, area\} \\
+WorkerRegistrationService & Domain Svc & registerWorker(), suspendWorker(), activateWorker() \\
+WorkerSearchService & Domain Svc & searchByLocation(), searchByServiceType(), filterByRating() \\
+WorkerAvailabilityService & Domain Svc & updateAvailabilityStatus(), markAsBooked() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-6: Worker Booking \& Payments Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+WorkerBooking & Entity & tenantId, workerId, serviceType, status, bookingDate, preferredDate, description, tenantName, tenantAddress \\
+WorkerPayment & Entity & tenantId, workerId, amount, workingDays, dailyRate, commission, commissionPercent, orderId, razorpayPaymentId, refundId \\
+WorkTracking & Entity & workerId, tenantId, workDate, otp, otpVerified, expiresAt — daily work attendance via OTP \\
+BookingStatus & Value Object & Enum: Pending, Approved, Declined, Completed \\
+WorkingDaysCalculation & Value Object & \{daysCount, dailyRate, totalAmount\} \\
+CommissionSnapshot & Value Object & \{percent, amount, appliedAt\} — immutable \\
+OTPVerification & Value Object & \{otp, otpVerified, expiresAt\} \\
+WorkerBookingService & Domain Svc & createBooking(), approveBooking(), completeBooking() \\
+WorkerPaymentService & Domain Svc & initiatePayment(), verifyPayment(), confirmPayment() \\
+WorkTrackingService & Domain Svc & generateOTP(), verifyOTP(), getWorkHistory() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-7: Maintenance \& Support Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+MaintenanceRequest & Entity & tenantId, propertyId, issueType, description, location, dateReported, scheduledDate, completionDate, status, tenantConfirmation \\
+Complaint & Entity & tenantId, propertyId, category, subject, description, dateSubmitted, status, response, responseDate \\
+IssueType & Value Object & Enum: plumbing, electrical, painting, appliance, structural, general \\
+MaintenanceStatus & Value Object & Enum: Pending, In Progress, Resolved, Closed \\
+ConfirmationStatus & Value Object & Enum: Pending, Confirmed, Rejected \\
+ComplaintStatus & Value Object & Enum: Open, In Progress, Resolved \\
+MaintenanceRequestService & Domain Svc & reportIssue(), updateStatus(), markComplete() \\
+ComplaintService & Domain Svc & fileComplaint(), respondToComplaint(), resolveComplaint() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-8: Rating \& Review Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Rating & Entity & tenantId, propertyId OR workerId, ownerId, rating (1--5), review (text), date \\
+RatingScore & Value Object & Integer: 1, 2, 3, 4, 5 \\
+ReviewText & Value Object & String (max 500 chars) \\
+RatingContext & Value Object & Enum: property, worker \\
+RatingService & Domain Svc & submitRating(), updateRating(), validateRating() \\
+RatingAggregationService & Domain Svc & calculateAverageRating(), updatePropertyRating() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-9: Verification / KYC Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Verification & Entity & user (polymorphic ref), userModel (tenant/owner/worker), status, documents[], rejectionReason, reviewer \\
+VerificationStatus & Value Object & Enum: pending, approved, rejected \\
+DocumentType & Value Object & Enum: aadhaar, pan, driving\_license, property\_proof, skill\_certificate \\
+Document & Value Object & \{url, public\_id, type, skillType\} \\
+VerificationSubmissionService & Domain Svc & submitDocuments(), updateDocuments() \\
+AdminReviewService & Domain Svc & getPendingReviews(), approveVerification(), rejectVerification() \\
+VerificationGatingService & Domain Svc & checkUserCanBook(), checkUserCanListProperty() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-10: Notification Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Notification & Entity & type, message, recipient (polymorphic), recipientType, recipientName, status, priority, read, isNew, bookingId, propertyName \\
+NotificationType & Value Object & Enum: BookingApproved, PaymentConfirmed, MaintenanceReported, etc. \\
+NotificationStatus & Value Object & Enum: Pending, Completed, Approved, Rejected, Info \\
+Priority & Value Object & Enum: Low, Medium, High, Urgent \\
+RecipientReference & Value Object & \{userId, userType (Owner/Tenant/Worker)\} \\
+NotificationCreationService & Domain Svc & createNotification(), createBulkNotifications() \\
+NotificationDispatchService & Domain Svc & sendToOwner(), sendToTenant(), sendToWorker() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-11: Contact \& Inquiry Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Contact & Entity & name, email, phone, subject, message, submittedAt \\
+PropertyInquiry & Entity & name, email, phone, query, propertyId, ownerId \\
+InquiryType & Value Object & Enum: general, property\_specific \\
+ContactInfo & Value Object & \{name, email, phone\} \\
+InquirySubmissionService & Domain Svc & submitGeneralInquiry(), submitPropertyInquiry() \\
+InquiryResponseService & Domain Svc & respondToInquiry(), editResponse() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-12: Unrent Request Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+UnrentRequest & Entity & propertyId, tenantId, ownerId, reason, status, createdDate, completedDate, rentPaid \\
+UnrentStatus & Value Object & Enum: Pending, Approved, Rejected \\
+EarlyExitTerms & Value Object & \{breakageCharges, securityDepositReturn, noticeRequired\} \\
+FinancialSettlement & Value Object & \{deductions, depositsReturned, finesPaid\} \\
+UnrentRequestService & Domain Svc & createUnrentRequest(), getRequestsByTenant() \\
+LeaseTerminationService & Domain Svc & terminateBooking(), updatePropertyToAvailable() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-13: Admin Management Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+Admin & Entity & username, firstName, lastName, email, password, role, status, lastLogin, createdAt \\
+AdminRole & Value Object & Enum: admin \\
+AdminStatus & Value Object & Enum: Active, Suspended \\
+AdminPermissions & Value Object & [verification, booking, payments, maintenance, notifications, inquiries] \\
+VerificationService & Domain Svc & getPendingVerifications(), approveVerification(), rejectVerification() \\
+BookingApprovalService & Domain Svc & getPendingBookings(), approveBooking(), terminateBooking() \\
+PaymentTrackingService & Domain Svc & getAllPayments(), getPaymentDetails(), filterByStatus() \\
+MaintenanceService & Domain Svc & getAllMaintenanceRequests(), markCompleted() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{BC-14: SuperAdmin / Finance Context}
+
+\begin{center}
+\begin{tabular}{@{}p{3.5cm}p{2cm}p{8.5cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Type} & \textbf{Key Attributes / Responsibility} \\
+\midrule
+SuperAdmin & Entity & email, password, fullName, designation, isActive, createdAt \\
+Settings & Entity & commission (\%), maintenanceMode, maintenanceMessage, currency, paymentGateway, emailNotifications — singleton \\
+AuditLog & Entity & action, performedBy, role, date, details — admin activity log \\
+CommissionRate & Value Object & Number (0--100\%) \\
+MaintenanceMode & Value Object & Boolean + String message \\
+AuditEntry & Value Object & \{action, admin, timestamp, target, result\} \\
+PlatformStatsService & Domain Svc & getTotalUsers(), getTotalProperties(), getTotalRevenue() \\
+FinancialAnalyticsService & Domain Svc & getMonthlyRevenue(), getCommissionBreakdown() \\
+AuditLogService & Domain Svc & getAdminLogins(), filterByAdmin(), generateAuditReport() \\
+SettingsService & Domain Svc & updateCommission(), toggleMaintenance(), getCachedSettings() \\
+ExecutivesService & Domain Svc & createAdmin(), updateAdminStatus(), deleteAdmin() \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{1em}
+
+\begin{tcolorbox}[enhanced, colback=ctxBlue!20!white, colframe=primary,
+  arc=4pt, boxrule=0.8pt, title={\textbf{Entity \& Value Object Summary across all 14 Contexts}}]
+\begin{tabular}{@{}p{3.5cm}p{3.5cm}p{6.5cm}@{}}
+\toprule
+\textbf{Bounded Context} & \textbf{Entities} & \textbf{Key Value Objects} \\
+\midrule
+Property Mgmt & Property, Owner & Location, PropertyImage, AmenityList, BankingInfo, NotificationPreferences \\
+Tenant Mgmt & Tenant, RentalHistory & ContactInfo, SavedListing, PreferenceSettings, RentalRecord \\
+Booking / Rental & Booking, Agreement, UnrentReq & BookingStatus, LeaseDetails, AgreementTerms, UnrentStatus \\
+Payment Processing & Payment & PaymentStatus, MoneyAmount, CommissionCalc, RazorpaySignature, RefundInfo \\
+Worker Services & Worker & WorkerServiceType, AvailabilityStatus, ServiceRate, WorkerProfile \\
+Worker Booking \& Pay & WorkerBooking, WorkerPayment, WorkTracking & BookingStatus, WorkingDaysCalc, CommissionSnapshot, OTPVerification \\
+Maintenance \& Support & MaintenanceRequest, Complaint & IssueType, MaintenanceStatus, ConfirmationStatus, ComplaintStatus \\
+Rating \& Review & Rating & RatingScore, ReviewText, RatingContext \\
+Verification / KYC & Verification & VerificationStatus, DocumentType, Document \\
+Notification & Notification & NotificationType, NotificationStatus, Priority, RecipientReference \\
+Contact \& Inquiry & Contact, PropertyInquiry & InquiryType, ContactInfo, InquiryMessage \\
+Unrent Request & UnrentRequest & UnrentStatus, EarlyExitTerms, FinancialSettlement \\
+Admin Mgmt & Admin & AdminRole, AdminStatus, AdminPermissions \\
+SuperAdmin / Finance & SuperAdmin, Settings, AuditLog & CommissionRate, MaintenanceMode, AuditEntry \\
+\bottomrule
+\end{tabular}
+\end{tcolorbox}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{entities_diagram.png}
+  \caption{RentEase — Entities and Value Objects Class Diagram across all Bounded Contexts}
+\end{figure}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Cardinality Ratios for Entities}
+%%─────────────────────────────────────────────────────────────
+
+Cardinality ratios describe the numerical relationships between entity instances across the domain. Notation: \textbf{1:1} (One-to-One), \textbf{1:N} (One-to-Many), \textbf{N:M} (Many-to-Many), \textbf{1:0..1} (One-to-Optional-One), \textbf{Polymorphic} (reference resolves to multiple entity types via discriminator).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{er_diagram.png}
+  \caption{Entity Relationship Diagram with Cardinality Ratios}
+\end{figure}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{3.8cm}p{6cm}@{}}
+\toprule
+\textbf{Entity A} & \textbf{Ratio} & \textbf{Entity B} & \textbf{Explanation} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\textit{(Cardinality Table continued)}} \\
+\toprule
+\textbf{Entity A} & \textbf{Ratio} & \textbf{Entity B} & \textbf{Explanation} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Owner & 1:N & Property & One owner manages multiple properties. \\[3pt]
+Property & 1:0..1 & Tenant & One property has at most one active tenant. \\[3pt]
+Owner & N:M & Tenant & Multiple properties have multiple tenants over time. \\[3pt]
+Tenant & N:M & Property (saved) & Tenant saves multiple properties; property saved by many. \\[3pt]
+Property & N:M & Worker & Property employs multiple workers; worker serves multiple properties. \\[3pt]
+Tenant & 1:N & Booking & One tenant creates multiple booking requests. \\[3pt]
+Property & 1:N & Booking & One property has multiple bookings over time. \\[3pt]
+Owner & 1:N & Booking & Owner's properties generate many bookings. \\[3pt]
+Tenant & 1:1 & RentalHistory & One tenant has one rental history record (append-only). \\[3pt]
+Tenant & 1:N & Payment & One tenant makes multiple rent payments. \\[3pt]
+Property & 1:N & Payment & One property receives multiple payments. \\[3pt]
+Booking & 1:N & Payment & One booking may generate multiple payment records. \\[3pt]
+Worker & 1:N & WorkerPayment & One worker receives multiple payment records. \\[3pt]
+Tenant & 1:N & MaintenanceReq & One tenant submits multiple maintenance requests. \\[3pt]
+Property & 1:N & MaintenanceReq & One property has multiple maintenance issues. \\[3pt]
+Tenant & 1:N & Complaint & One tenant files multiple complaints. \\[3pt]
+Tenant & 1:N & WorkerBooking & One tenant books multiple workers. \\[3pt]
+Worker & 1:N & WorkerBooking & One worker receives multiple service requests. \\[3pt]
+Tenant & N:M & Worker & Tenant hires multiple workers; worker serves multiple tenants. \\[3pt]
+Tenant & 1:1 & Verification & One tenant has one verification record (polymorphic). \\[3pt]
+Owner & 1:1 & Verification & One owner has one verification record (polymorphic). \\[3pt]
+Worker & 1:1 & Verification & One worker has one verification record (polymorphic). \\[3pt]
+Admin & 1:N & Verification & One admin reviews multiple verification records. \\[3pt]
+Tenant & 1:N & Notification & One tenant receives multiple notifications (polymorphic). \\[3pt]
+Owner & 1:N & Notification & One owner receives multiple notifications (polymorphic). \\[3pt]
+Tenant & 1:N & Rating & One tenant writes multiple ratings. \\[3pt]
+Property & 1:N & Rating & One property receives multiple ratings. \\[3pt]
+Worker & 1:N & Rating & One worker receives multiple ratings. \\[3pt]
+Property & 1:N & UnrentRequest & One property can have multiple unrent requests over time. \\[3pt]
+Tenant & 1:N & UnrentRequest & One tenant can request unrent from multiple properties. \\[3pt]
+Owner & 1:N & Agreement & One owner creates multiple lease agreements. \\[3pt]
+--- & 1:1 & Settings & One global platform settings record (singleton). \\[3pt]
+\end{longtable}
+
+\subsubsection*{Key Implementation Notes}
+
+\begin{enumerate}
+  \item \textbf{Polymorphic References:} Verification uses \texttt{user} + \texttt{userModel} enum; Notification uses \texttt{recipient} + \texttt{recipientType} enum.
+  \item \textbf{Many-to-Many:} Stored as arrays of ObjectIds: \texttt{owner.propertyIds}, \texttt{tenant.savedListings}, \texttt{property.activeWorkers}.
+  \item \textbf{Constraints in Code:} 1:0..1 Tenancy via \texttt{property.isRented} boolean; 1:1 Verification per user; 1:1 RentalHistory per tenant (append-only).
+  \item \textbf{Referential Integrity:} MongoDB has no cascade deletes. Soft deletes (\texttt{isDeleted} flag) recommended to prevent orphaned records.
+\end{enumerate}
+
+\newpage
+
+%%─────────────────────────────────────────────────────────────
+\subsection{Aggregates}
+%%─────────────────────────────────────────────────────────────
+
+An \textbf{Aggregate} is a cluster of domain objects (entities and value objects) treated as a single unit for data changes. Each aggregate has exactly one \textbf{Aggregate Root} — the only object through which external actors interact with the cluster. All invariants within the aggregate are enforced by the root. RentEase has \textbf{16 Aggregates} across its 14 bounded contexts.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{aggregates_diagram.png}
+  \caption{Aggregate Diagram — All 16 Aggregate Roots with Value Objects}
+\end{figure}
+
+\subsubsection{AG-1: Property Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Property}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Property & \textbf{Aggregate Root} & Represents a property listing \\
+Location & Value Object & \{address, lat, lng\} — geographic coordinates \\
+Images[] & Value Object & Array of \{url, publicId\} — Cloudinary references \\
+Amenities[] & Value Object & List of amenity strings \\
+PricingInfo & Value Object & price, securityDeposit, maintenance \\
+\end{tabular}
+
+\textbf{Invariants:} Must have valid ownerId; cannot be rented without admin verification (\texttt{isVerified=true}). Lifecycle: Pending $\rightarrow$ Available $\rightarrow$ Rented / Delisted.
+\end{infobox}
+
+\subsubsection{AG-2: Owner Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Owner}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Owner & \textbf{Aggregate Root} & Property owner account \\
+BankDetails & Value Object & \{accountNo, upiid\} \\
+NotificationPrefs & Value Object & Embedded notification settings \\
+\end{tabular}
+
+\textbf{Invariants:} Status changes require verification approval. Lifecycle: Active $\leftrightarrow$ Suspended.
+\end{infobox}
+
+\subsubsection{AG-3: Tenant Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Tenant}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Tenant & \textbf{Aggregate Root} & Tenant user account \\
+TenantProfile & Value Object & Contact info and preferences \\
+NotificationPrefs & Value Object & Embedded notification settings \\
+\end{tabular}
+
+\textbf{Invariants:} Must be verified before booking. Lifecycle: Active $\leftrightarrow$ Suspended.
+\end{infobox}
+
+\subsubsection{AG-4: Booking Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Booking}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Booking & \textbf{Aggregate Root} & Rental request/contract \\
+BookingDates & Value Object & \{bookingDate, startDate, endDate\} \\
+BookingStatus & Value Object & State machine enum \\
+\end{tabular}
+
+\textbf{Invariants:} Only one Active booking per property. State machine: Pending $\rightarrow$ Approved / Rejected $\rightarrow$ Active $\rightarrow$ Terminated.
+\end{infobox}
+
+\subsubsection{AG-5: Payment Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Payment}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Payment & \textbf{Aggregate Root} & Rent payment record \\
+RazorpayDetails & Value Object & orderId, paymentId, signature \\
+RefundInfo & Value Object & refundId, amount, date, reason \\
+\end{tabular}
+
+\textbf{Invariants:} Commission immutable after payment; refund $\leq$ original amount. Status: Pending, Paid, Overdue, Refunded, Failed, Cancelled.
+\end{infobox}
+
+\subsubsection{AG-6: Worker Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Worker}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Worker & \textbf{Aggregate Root} & Domestic worker profile \\
+ServiceInfo & Value Object & serviceType, experience, price, rateUnit \\
+WorkerImage & Value Object & \{url, publicId\} — Cloudinary reference \\
+\end{tabular}
+
+\textbf{Invariants:} Must be verified before accepting bookings; price $>$ 0. ServiceStatus: Available, Busy, OnLeave.
+\end{infobox}
+
+\subsubsection{AG-7: WorkerBooking Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{WorkerBooking}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+WorkerBooking & \textbf{Aggregate Root} & Service booking request \\
+ServiceRequest & Value Object & serviceType, preferredDate, description \\
+BookingStatus & Value Object & Enum: Pending, Approved, Declined, Completed \\
+\end{tabular}
+
+\textbf{Invariants:} Only Completed bookings can trigger a rating.
+\end{infobox}
+
+\subsubsection{AG-8: WorkerPayment Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{WorkerPayment}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+WorkerPayment & \textbf{Aggregate Root} & Worker payment ledger \\
+WorkerEarnings & Value Object & workingDays, dailyRate, totalAmount \\
+CommissionSnapshot & Value Object & \{percent, amount\} — immutable at payment time \\
+\end{tabular}
+
+\textbf{Invariants:} workingDays $>$ 0; commission immutable; independent ledger from tenant payments.
+\end{infobox}
+
+\subsubsection{AG-9: Verification Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Verification} (Polymorphic)}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Verification & \textbf{Aggregate Root} & KYC record; uses refPath for user polymorphism \\
+DocumentCollection & Value Object & Array of \{url, public\_id, type, skillType\} \\
+UserReference & Value Object & user + userModel (tenant/owner/worker) \\
+\end{tabular}
+
+\textbf{Invariants:} Documents must be non-empty; approved verifications are immutable. Status: pending, approved, rejected (terminal).
+\end{infobox}
+
+\subsubsection{AG-10: MaintenanceRequest Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{MaintenanceRequest}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+MaintenanceRequest & \textbf{Aggregate Root} & Property issue report \\
+IssueDescription & Value Object & issueType, description, location \\
+TenantConfirmation & Value Object & Enum: Pending, Confirmed, Rejected \\
+\end{tabular}
+
+\textbf{Invariants:} Cannot mark Completed without \texttt{tenantConfirmation = Confirmed}.
+\end{infobox}
+
+\subsubsection{AG-11: Complaint Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Complaint}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Complaint & \textbf{Aggregate Root} & Tenant complaint \\
+ComplaintContent & Value Object & category, subject, description \\
+Resolution & Value Object & response, responseDate \\
+\end{tabular}
+
+\textbf{Invariants:} If Resolved, response must be non-empty. Status: Open, In Progress, Resolved.
+\end{infobox}
+
+\subsubsection{AG-12: Rating Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Rating}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Rating & \textbf{Aggregate Root} & Feedback record \\
+RatingScore & Value Object & Integer 1--5 \\
+ReviewContent & Value Object & review text, date \\
+\end{tabular}
+
+\textbf{Invariants:} One rating per tenant per target; immutable after creation. Lifecycle: Created $\rightarrow$ Immutable.
+\end{infobox}
+
+\subsubsection{AG-13: UnrentRequest Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{UnrentRequest}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+UnrentRequest & \textbf{Aggregate Root} & Early exit request \\
+TerminationRequest & Value Object & reason, createdDate, completedDate \\
+PaymentInfo & Value Object & rentPaid boolean \\
+\end{tabular}
+
+\textbf{Invariants:} Cannot approve if \texttt{rentPaid=false}; approval triggers Booking Terminated. Status: Pending, Approved, Rejected.
+\end{infobox}
+
+\subsubsection{AG-14: RentalHistory Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{RentalHistory}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+RentalHistory & \textbf{Aggregate Root} & Tenant rental history \\
+PropertyRentalRecord[] & Value Object & Array of \{property, startDate, endDate, rent, status, reasonForMoving\} \\
+\end{tabular}
+
+\textbf{Invariants:} 1:1 with Tenant (one record per tenant). Records are append-only and immutable.
+\end{infobox}
+
+\subsubsection{AG-15: Notification Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Notification} (Polymorphic)}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Notification & \textbf{Aggregate Root} & System alert; polymorphic recipient via refPath \\
+NotificationContent & Value Object & type, message, priority \\
+RecipientReference & Value Object & recipient + recipientType (Owner/Tenant/Worker) \\
+\end{tabular}
+
+\textbf{Invariants:} Immutable after creation (status-only updates allowed). RecipientType: Owner, Tenant, Worker.
+\end{infobox}
+
+\subsubsection{AG-16: Agreement Aggregate}
+
+\begin{infobox}{Aggregate Root: \texttt{Agreement}}
+\begin{tabular}{@{}p{3cm}p{2.8cm}p{7.8cm}@{}}
+\textbf{Component} & \textbf{Type} & \textbf{Notes} \\
+\hline
+Agreement & \textbf{Aggregate Root} & Rental lease agreement \\
+AgreementTerms & Value Object & monthlyRent, securityDeposit \\
+AgreementStatus & Value Object & Enum: Active, Inactive \\
+\end{tabular}
+
+\textbf{Invariants:} endDate $\geq$ startDate; monthlyRent $>$ 0.
+\end{infobox}
+
+\vspace{1em}
+
+\begin{tcolorbox}[enhanced, colback=ctxBlue!20!white, colframe=primary,
+  arc=4pt, boxrule=0.8pt, title={\textbf{Aggregate Design Summary — All 16 Aggregates}}]
+\begin{tabular}{@{}p{2.8cm}p{3cm}p{3.5cm}p{4.2cm}@{}}
+\toprule
+\textbf{Aggregate Root} & \textbf{Bounded Context} & \textbf{Consistency Gate} & \textbf{Key Value Objects} \\
+\midrule
+Property & Property Mgmt & isVerified, isRented & Location, Images, PricingInfo \\
+Owner & Property Mgmt & Status, Verification & BankDetails, NotificationPrefs \\
+Tenant & Tenant Mgmt & Verification status & TenantProfile, NotificationPrefs \\
+Booking & Booking / Rental & State machine & BookingDates, BookingStatus \\
+Payment & Payment Processing & Commission immutable & RazorpayDetails, RefundInfo \\
+Worker & Worker Services & Verification required & ServiceInfo, WorkerImage \\
+WorkerBooking & Worker Booking \& Pay & Status state machine & ServiceRequest, BookingStatus \\
+WorkerPayment & Worker Booking \& Pay & Commission immutable & WorkerEarnings, CommissionSnapshot \\
+Verification & Verification / KYC & Polymorphic user type & DocumentCollection, UserRef \\
+MaintenanceReq & Maintenance \& Support & Tenant confirmation & IssueDescription, Confirmation \\
+Complaint & Maintenance \& Support & Response required & ComplaintContent, Resolution \\
+Rating & Rating \& Review & Immutable after creation & RatingScore, ReviewContent \\
+UnrentRequest & Unrent Request & rentPaid gate & TerminationRequest, PaymentInfo \\
+RentalHistory & Tenant Mgmt & Append-only & PropertyRentalRecord[] \\
+Notification & Notification & Recipient polymorphism & NotificationContent, RecipientRef \\
+Agreement & Property Mgmt & endDate $\geq$ startDate & AgreementTerms, Status \\
+\bottomrule
+\end{tabular}
+\end{tcolorbox}
+
+\vspace{1em}
+
+\subsubsection*{Aggregate Design Patterns}
+
+\begin{enumerate}
+  \item \textbf{Polymorphic Aggregates} — Verification and Notification use a \texttt{refPath} discriminator to serve multiple user types.
+  \item \textbf{Immutable Value Objects} — RazorpaySignature and commission percentage are captured at payment time and never changed.
+  \item \textbf{State Machines} — Booking, WorkerBooking, and Verification follow strict state transition rules.
+  \item \textbf{Verification Gates} — Tenant, Owner, and Worker must have an approved Verification before accessing key features.
+  \item \textbf{Denormalisation} — Arrays of ObjectIds for query optimisation, trading consistency for read performance.
+\end{enumerate}
+
+\subsubsection*{Cross-Aggregate Consistency}
+
+\begin{center}
+\begin{tabular}{@{}p{2.5cm}p{2.5cm}p{1.5cm}p{3.5cm}p{3.5cm}@{}}
+\toprule
+\textbf{From} & \textbf{To} & \textbf{Type} & \textbf{Synchronisation} & \textbf{Consistency Risk} \\
+\midrule
+Booking & Payment & 1:N ref & Booking.status triggers Payment creation & Payment orphaned if Booking deleted \\
+UnrentRequest & Booking & 1:1 ref & Approval updates Booking.status & Stale Booking state if async \\
+WorkerBooking & WorkerPayment & 1:1 ref & Completion triggers WorkerPayment & Amount inconsistency if booking modified \\
+Verification & Tenant/Owner/Worker & Poly & Approval gates user access & Access denied if Verification deleted \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.5em}
+
+\textbf{Recommendation:} Use domain events for cross-aggregate consistency: \texttt{BookingApproved} $\rightarrow$ \texttt{PaymentCreated}, \texttt{UnrentApproved} $\rightarrow$ \texttt{BookingTerminated}, \texttt{WorkerBookingCompleted} $\rightarrow$ \texttt{WorkerPaymentCreated}.
+
+\end{document}
