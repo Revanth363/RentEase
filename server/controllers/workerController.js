@@ -106,7 +106,7 @@ const Notification = require("../models/notification");
 const cloudinary = require("../config/cloudinary");
 const workerBooking = require("../models/workerBooking");
 const { buildWorkerDashboardPipeline } = require("../utils/aggregationPipelines");
-const { cachedQuery } = require("../utils/cacheWrapper");
+const { cachedQuery, invalidateCache } = require("../utils/cacheWrapper");
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {
@@ -573,6 +573,9 @@ exports.registerWorker = async (req, res) => {
     }
 
     await worker.save();
+    
+    // PHASE 3: Invalidate dashboard cache
+    await invalidateCache(`dashboard:worker:${req.user.id}`);
 
     // Stateless JWT: do not update session; front-end will read updated data from API
 
@@ -732,6 +735,10 @@ exports.toggleWorkerAvailability = async (req, res) => {
     worker.serviceStatus =
       worker.serviceStatus === "Available" ? "Unavailable" : "Available";
     await worker.save();
+
+    // PHASE 3: Invalidate dashboard cache
+    await invalidateCache(`dashboard:worker:${req.user.id}`);
+
     // Stateless JWT: do not update session
     res.json({ success: true, serviceStatus: worker.serviceStatus });
   } catch (error) {
@@ -784,10 +791,13 @@ exports.deleteWorkerService = async (req, res) => {
     worker.rateUnit = null;
     worker.description = null;
     worker.availability = null;
-    worker.serviceStatus = "Unavailable";
     worker.image = null;
 
     await worker.save();
+
+    // PHASE 3: Invalidate dashboard cache
+    await invalidateCache(`dashboard:worker:${req.user.id}`);
+
     res.json({
       success: true,
       message: "Service details deleted successfully",
@@ -920,6 +930,9 @@ exports.bookWorkerCorrected = async (req, res) => {
     worker.isBooked = true;
     await worker.save();
 
+    // PHASE 3: Invalidate worker's dashboard cache so they see the new booking request
+    await invalidateCache(`dashboard:worker:${workerId}`);
+
     const newBooking = new WorkerBooking({
       tenantId,
       workerId,
@@ -1029,6 +1042,9 @@ exports.updateWorkerBookingStatus = async (req, res) => {
         type: "Booking Update",
         status: status === "Approved" ? "Approved" : "Rejected",
       });
+
+      // PHASE 3: Invalidate worker's dashboard cache to reflect approved/declined status
+      await invalidateCache(`dashboard:worker:${workerId}`);
     }
 
     res.status(200).json({
@@ -1077,6 +1093,11 @@ const sendNotification = async (recipientId, recipientType, data) => {
       { $push: { notificationIds: savedNotification._id } },
       { new: true }
     );
+
+    // PHASE 3: Invalidate cache for workers to update notification indicators
+    if (recipientType === "Worker") {
+      await invalidateCache(`dashboard:worker:${recipientId}`);
+    }
 
     return savedNotification;
   } catch (error) {
@@ -1261,6 +1282,9 @@ exports.updateWorkerSettings = async (req, res) => {
 
     await worker.save();
 
+    // PHASE 3: Invalidate worker's dashboard cache
+    await invalidateCache(`dashboard:worker:${userId}`);
+
     // Stateless JWT: do not update session; front-end will fetch updated profile
 
     res.json({ success: true, message: "Settings updated successfully" });
@@ -1346,6 +1370,9 @@ exports.debookWorker = async (req, res) => {
     // Update worker's isBooked status based on remaining clients
     worker.isBooked = worker.clientIds && worker.clientIds.length > 0;
     await worker.save();
+
+    // PHASE 3: Invalidate worker's dashboard cache
+    await invalidateCache(`dashboard:worker:${workerId}`);
 
     // Remove worker from tenant's domesticWorkerId array
     if (tenant.domesticWorkerId && Array.isArray(tenant.domesticWorkerId)) {
@@ -1619,6 +1646,9 @@ exports.markNotificationAsRead = async (req, res) => {
     if (!notification) {
       return res.status(404).json({ error: "Notification not found" });
     }
+
+    // PHASE 3: Invalidate worker's dashboard cache to update notification badge
+    await invalidateCache(`dashboard:worker:${userId}`);
 
     res.json({ success: true, notification });
   } catch (error) {
