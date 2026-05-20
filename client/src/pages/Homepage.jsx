@@ -679,7 +679,7 @@ const HomePage = () => {
                 without breaking the bank.
               </p>
                <a
-                href="https://e-rockwell.com/top-10-renting-tips-for-tenants/"
+                href="https://timesproperty.com/news/post/once-abandoned-and-almost-forgotten-blid9331?offset=1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles['read-more']}
@@ -700,7 +700,7 @@ const HomePage = () => {
                 agreement.
               </p>
               <a
-                 href="https://timesproperty.com/news/post/once-abandoned-and-almost-forgotten-blid9331?offset=1"
+                 href="https://taylors.com.au/articles/5-must-have-features-in-a-rental-property"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles['read-more']}
