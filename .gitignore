@@ -13,3 +13,4 @@ test_results.txt
 
 *.md
 .env
+!README.md
